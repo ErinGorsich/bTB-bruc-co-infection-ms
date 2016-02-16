@@ -1,6 +1,7 @@
 ######################################
 ######################################
 # Prep cross sectional data
+# this script differes from the previous in that I added different bTB statuses
 ######################################
 ######################################
 
@@ -103,6 +104,9 @@ data$incid<-bTB$TB.Incidenc[match(data$capid, bTB$capture.ID)]
 data$tb_beforeafter<-data$incid  # filled in as 0 before incidence, 1 after. pfc and nc
 # assumed if positive, that final capture btb status same as previous.  
 # Exclude these with by removing final capture. 
+### testerror results were rechecked and added !!!  
+###they largely match those in my cross-sectional patterns thesis chapter. 
+### But are different than the final_data_with_dz_Feb2016 file. 
 
 # immune data
 data$ifngpokeconc<-bTB$IFNg.poke_ng.ml[match(data$capid, bTB$capture.ID)]
@@ -114,52 +118,60 @@ data$bka_killed_ecoli<-bTB$BKA.Ecoli.Control.Experimental[match(data$capid, bTB$
 data$hapto<-bTB$Haptoglobin.ng.ml[match(data$capid, bTB$capture.ID)]
 data$hapto_plate<-bTB$Haptoglobin.Plate[match(data$capid, bTB$capture.ID)]
 
-write.csv(data, "~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/cross_sectional_data_withdz_Feb2016.csv")
+write.csv(data, "~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/cross_sectional_data_withdz_Feb2016_mine.csv")
 
 
 ###################################################
 # final groom for analysis
-data<-read.csv("cross_sectional_data_withdz_Feb2016.csv")
-cross<-data[data$final=="0",]
-length(data[,1])-length(cross[,1]) # 88 excluded
-length(unique(data$id))-length(unique(cross$id))  # one animal excluded from final cull info
+setwd("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder")
+data<-read.csv("cross_sectional_data_withdz_Feb2016_mine.csv")
+cross <-data[data$missing_bruc_problem==0,]  # 
+length(data[,1])-length(cross[,1]) # 11 excluded for missing brucellosis data at culls
+length(unique(data$id))-length(unique(cross$id))  # but 0 animals
+cross<-cross[cross$bruc!="",]  # removed 4 NA bruc results, as expected (92 total excluded)
 
-# should be able to remove testerrors (for bTB) and 
-# remove final capture results, and four NA brucellosis results and get a groomed dataset
-cross<-cross[cross$bruc!="",]  # removed 4, as expected (92 total excluded)
-table(cross$tb_beforeafter)   # 78 test errors; 4 confused.
-cross2<-cross[cross$checktb!="testerror", ]
-cross3<-cross2[!is.na(cross2$tb),]
+# should be able to remove testerrors (for bTB)
+table(cross$tb_beforeafter)   # 30 test errors to remove, all with NA bruc statuses
+cross2<-cross[cross$tb_beforeafter!="testerror", ]    
+length(cross[,1])-length(cross2[,1])     # 29 removed.
+length(unique(cross$id))-length(unique(cross2$id))   # from 5 individuals with flip flop statuses. 
+
+cross3<-cross2[!is.na(cross2$tb),]   # removes cull animals without data
+length(cross2[,1])-length(cross3[,1])    # 7 removed- this is primarily removing the uncertain final captures. 
+length(unique(cross2$id))-length(unique(cross3$id))  # from 0 animal
+cross3$incid[is.na(cross3$incid)]<-0
+cross3$convert[is.na(cross3$convert)]<-0
 
 
-length(cross[,1])-length(cross3[,1]) # 89 sample times removed from bTB test errors
-length(unique(cross$id))-length(unique(cross3$id))  #150-138= 12 individuals lost from excluding tb errors
+length(cross[,1])-length(cross3[,1]) # 36 (89 previously) sample times removed from bTB test errors
+length(unique(cross$id))-length(unique(cross3$id))  #5 (12 previously) indiv lost from excluding tb errors
 # missing conversions assumed to occur at the time of first positive test;
 # if missing test result at begining before first positive capture, called pfc at first known test result. 
 
-length(cross3[,1]); length(unique(cross3$id))
-write.csv(cross3, "cross_sectional_data_withdz_cleandisease_Feb2016.csv")
+summary(as.data.frame(table(cross3$id)))
+length(cross3[,1]); length(unique(cross3$id))   # 145 animals sampled a total of 834 times, with a median of 6 recaptures (range from 1-9 recaptures).
+
 write.csv(cross3, "cross_sectional_data_withdz_cleandisease_withfinal_Feb2016.csv")
 
 ###################################################
 # final groom for incidence analysis
-data<-read.csv("cross_sectional_data_withdz_cleandisease_Feb2016.csv")
+data<-read.csv("cross_sectional_data_withdz_cleandisease_withfinal_Feb2016.csv")
 brconverters<-data[!(data$bruc_beforeafter=="nc"),]
 brconverters<-brconverters[!(brconverters$bruc_beforeafter=="pfc"),]
-length(brconverters$id)
-length(unique(brconverters$id))  # 31 animals became seropositive for brucellosis; 189 time points 
+length(brconverters$id)  
+length(unique(brconverters$id))  # 33 animals became seropositive for brucellosis; 226 time points 
 
 tbconverters<-data[!(data$tb_beforeafter=="nc"),]
 tbconverters<-tbconverters[!(tbconverters$tb_beforeafter=="pfc"),]
 length(tbconverters$id)
-length(unique(tbconverters$id))  # 39 animals became seropositive for bBT; 235 time points. 
+length(unique(tbconverters$id))  # 44 animals became seropositive for bBT; 291 time points. 
 
 incidtb<-tbconverters[tbconverters$incid=="1",]
-summary(incidtb$age_sel)  # 5.0
-quantile(incidtb$age_sel, c(0.05, 0.95)) 
+summary(incidtb$age_sel)  # median=58.5= 4.87; mean=61.28= 5.1
+quantile(incidtb$age_sel, c(0.05, 0.95)) 41.75 to 90.05
 incidbr<-brconverters[brconverters$bruc_incid=="1",] # 3.4 to 7.5 yrs old by percentile
-summary(incidbr$age_sel)  # 5.16
-quantile(incidbr$age_sel, c(0.05, 0.95)) # 3.6 to 7.2 yrs old by the 5th and 95th percentile. 
+summary(incidbr$age_sel)  # med=58, mean=61.1
+quantile(incidbr$age_sel, c(0.05, 0.95)) # 43.35= 3.6 to 86.55=7.2 yrs old by the 5th and 95th percentile. 
 
 # season/month- when are they converting
 incidbr$capid<-as.character(incidbr$capid)
@@ -176,8 +188,8 @@ hist(as.numeric(incidtb$month), breaks=seq(1,12,1), xlab="Month", ylab="Number o
 
 # Make converters only dataset
 bothconvert<-tbconverters[tbconverters$brucconvert=="1",]
-length(bothconvert$id); length(unique(bothconvert$id))
-write.csv(bothconvert, "convertersonly_Feb2016.csv")
+length(bothconvert$id); length(unique(bothconvert$id))  # still 102, 13
+write.csv(bothconvert, "convertersonly_Feb2016_mine.csv")
 
 ######################################
 ######################################
@@ -191,10 +203,21 @@ library(lme4)
 data$age_sel<-as.numeric(data$age_sel)
 data$age_sel_sq<-data$age_sel^2
 data$age_sel_sd<-NA
+data$age_yrsel<-data$age_sel/12; data_yrsel_sd<-NA
+data$agecat<-NA
 for (i in 1:length(data[,1])){
 	data$age_sel_sd[i]<-(data$age_sel[i]-mean(data$age_sel))/sd(data$age_sel)
 	data$age_sel_sq_sd[i]<-(data$age_sel_sq[i]-mean(data$age_sel_sq))/sd(data$age_sel_sq)
-}
+	data$age_yrsel_sd[i]<- (data$age_yrsel[i]- mean(data$age_yrsel))/sd(data$age_yrsel)
+	if(data$age_yrsel[i]<4){
+		data$agecat[i]<-"aayoungadult"}
+		else if(data$age_yrsel[i]>=4 & data$age_yrsel[i]<7){
+			data$agecat[i]<-"primeadult"}
+		else if (data$age_yrsel[i]>=7 & data$age_yrsel[i]<10){
+			data$agecat[i]<-"adult" }
+			else if (data$age_yrsel[i]>=10) {data$agecat[i]<-"old"}
+	}
+
 
 full.mod<-glmer(bruc~age_sel_sd+ herdorig+ tb+ (1|id), family=binomial(link="logit"), data=data)
 data$yr<-as.factor(data$yr)
@@ -202,26 +225,32 @@ full.mod<-glmer(bruc~age_sel_sd+ age_sel_sq_sd+ herdorig+ tb+ (1|yr/id), family=
 red.mod<-glmer(bruc~age_sel_sd+ age_sel_sq_sd+ tb+ (1|yr/id), family=binomial(link="logit"), data=data)
 
 table(data$bruc, data$tb)
-# final capture excluded
+# final capture included
+188/(188+397)  # 32.1  # in bTB negatives
+106/(106+143)  # 42.5  # in bTB positives
+
+
+# with initial dataset
 155/(351+155)  # prevalence in bTB negatives = 30%   # this is 50 less data points for bTB negatives. 
 77/(77+121)  # prevalence in bTB positives= 39%
-
 # final capture included
 160/(358+160)  # 41.4
 94/(133+94)  # 30.8
 
-red.mod<-glmer(bruc~ tb+ (1|yr/id), family=binomial(link="logit"), data=data)
 
-x=c(155, 351); y=c(77, 121)
-chisq.test(x, y)
+test<-read.csv("~/Documents/phd research/co-infection paper/cross-sectional patterns/Demogall_Jan2013dbupdate_annaages_TBaddedMay2013_noredartscull_suspos_control.csv")
+red.mod<-glmer(Status_sm_conservative ~ TB+age_yrsel+ (1|Animal.ID), family=binomial(link="logit"), data=test)
+# 33.7% vs. 46.8%
+red.mod<-glmer(bruc~age_yrsel+ tb+ (1|id), family=binomial(link="logit"), data=data)
+red.mod<-glmer(bruc~agecat+ tb+ (1|id), family=binomial(link="logit"), data=data)
 
-
-tb*age_sel_sd+tb*I(age_sel_sd)^2+tb*herdorig+ I(age_sel_sd)^2
-
-calc_prev= function(input, cov, val){
-	length(input[cov=="val"])/length(input) 
-}
-calc_prev(input=data$prev[data$prev=="positive"], cov=data$tb, 0)
+data2<-data[data$final_capture =="0",]
+red.mod<-glmer(bruc~agecat+ tb+ (1|id), family=binomial(link="logit"), data=data2)
 
 
+table(data$bruc, data$tb, data$agecat)
+# in <4: TB+= 6/19= 32%; TB-= 30/190= 15.8% 
+# in 4-10: TB+= 95/(128+95)= 42.6; TB- = 135/(135+220)= 38%
+
+table(data2$bruc, data2$tb, data2$agecat)
 
