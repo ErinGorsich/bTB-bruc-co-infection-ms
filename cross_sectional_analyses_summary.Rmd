@@ -8,54 +8,170 @@ output: html_document
 ```{r, data_readin, include=FALSE}
 # packages used 
 library(gplots)
+library(lme4)
 setwd("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder")
 source('~/GitHub/bTB-bruc-co-infection-ms/make_age_prev_plots.r')
+source('~/GitHub/bTB-bruc-co-infection-ms/summary_stats.r')
 
 # read in data prepared in cross_sectional_dataprep, groomed for my bTB statuses
 data<-read.csv("cross_sectional_data_withdz_cleandisease_withfinal_Feb2016.csv")
 data_nofinal<-data[data$final_capture=="0",]  # excludes 834-766 rows. 
 
-# read in data prepared for Courtney's bTB statuses
-
+# read in data prepared for dissertation bTB statuses
+dataold<-read.csv("Demogall_Jan2013dbupdate_annaages_TBaddedMay2013_noredartscull_suspos_control.csv")
 
 ```
 
 
 Plot of prevalence in bTB+ and bTB- by agebin without final capture, Courtney's bTB
 ```{r, plot_ageprev_compare_c, echo=FALSE}
-d<-data.frame(btb=data_nofinal$tbold , bruc=as.character(data_nofinal$bruc), age=data_nofinal$age_sel/12)
+d<-data.frame(btb=data_nofinal$tbold , bruc=as.character(data_nofinal$bruc),
+              age=data_nofinal$age_sel/12, id=data_nofinal$id)
 d2<-d[!is.na(d$btb),]
 make_age_prev_plot(d2$btb, d2$bruc, d2$age, binsize=2)
-
+summary_stats(d2$btb, d2$bruc, d2$age, d2$id, ok=FALSE)
+table(d2$btb, d2$bruc)
 
 ```
 
-Plot of prevalence in bTB+ and bTB- by agebin without final capture, My bTB
+Plot of prevalence in bTB+ and bTB- by agebin without final capture, My bTB.
+Note prevlanece is not linear with age... (check odds below)
 ```{r, plot_ageprev_compare_m, echo=FALSE}
-
-d<-data.frame(btb=data_nofinal$tb , bruc=as.character(data_nofinal$bruc), age=data_nofinal$age_sel/12)
+d<-data.frame(btb=data_nofinal$tb , bruc=as.character(data_nofinal$bruc), age=data_nofinal$age_sel/12, 
+              id=data_nofinal$id)
 make_age_prev_plot(d$btb, d$bruc, d$age, binsize=2)
+make_age_odds_plot(d$btb, d$bruc, d$age, binsize=2)
+make_age_odds_plot(d$btb, d$bruc, log(d$age), binsize=0.3)
+summary_stats(d$btb, d$bruc, d$age, d$id, ok=FALSE)
+table(d$btb, d$bruc)
+```
+
+Age prevalence in Lower Sabie, and then Crocodile Bridge
+```{r, plot_ageprev_byherd, echo=FALSE}
+# LS
+dLS<-data.frame(btb=data_nofinal$tb[data_nofinal$herdorig=="LS"], 
+                bruc=as.character(data_nofinal$bruc[data_nofinal$herdorig=="LS"]), 
+                age=(data_nofinal$age_sel[data_nofinal$herdorig=="LS"])/12,
+                id=data_nofinal$id[data_nofinal$herdorig=="LS"])
+make_age_prev_plot(dLS$btb, dLS$bruc, dLS$age, binsize=2)
+
+dCB<-data.frame(btb=data_nofinal$tb[data_nofinal$herdorig=="CB"], 
+                bruc=as.character(data_nofinal$bruc[data_nofinal$herdorig=="CB"]), 
+                age=(data_nofinal$age_sel[data_nofinal$herdorig=="CB"])/12,
+                id=data_nofinal$id[data_nofinal$herdorig=="CB"])
+make_age_prev_plot(dCB$btb, dCB$bruc, dCB$age, binsize=2)
 
 
 ```
 
-Plot of prevalence in bTB+ and bTB- by agebin with final capture, Courtney's bTB
-```{r, plot_ageprev_compare_cfinal, echo=FALSE}
-
-
-
-
-```
-
-
-Plot of prevalence in bTB+ and bTB- by agebin with final capture, My bTB
-```{r, plot_ageprev_compare_mfinal, echo=FALSE}
-
-
-
+Plot of prevalence in bTB+ and bTB- from thesis data
+```{r, plot_ageprev_compare_old, echo=FALSE}
+d<-data.frame(btb1=dataold$TB , bruc=as.character(dataold$Status_sm_conservative), age=dataold$age_yrsel, id=dataold$Animal.ID)
+d$btb<-ifelse(d$btb1=="Positive", d$btb<-1, d$btb<-0)
+make_age_prev_plot(d$btb, d$bruc, d$age, binsize=2)
+summary_stats(d$btb, d$bruc, d$age, d$id, ok=TRUE)
+table(d$btb, d$bruc)
 
 ```
 
+Plots of log odds by age and then log(age) to test if linear assumption are being met. 
+```{r, analysis, echo=FALSE}
+data_nofinal$age_yr<-data_nofinal$age_sel/12
+data_nofinal$age_yr_sq<-data_nofinal$age_yr^2
+
+#test.mod<-glmer(data_nofinal$bruc~ log(data_nofinal$age_yr)+ data_nofinal$tb+ (1|data_nofinal$id), family=binomial)
+
+d<-data.frame(btb=data_nofinal$tb , bruc=as.character(data_nofinal$bruc), 
+              age=data_nofinal$age_sel/12, id=data_nofinal$id)
+make_age_odds_plot(d$btb, d$bruc, d$age, binsize=1)
+
+#full.mod<-glmer(data_nofinal$bruc~ log(data_nofinal$age_yr)*data_nofinal$tb+ data_nofinal$tb*data_nofinal$herdorig+ (1|data_nofinal$id), family=binomial)  # AIC= 324.7; terrible convergence
+
+#lwm1<-glmer(data_nofinal$bruc~ log(data_nofinal$age_yr)*data_nofinal$tb+ data_nofinal$herdorig+ (1|data_nofinal$id), family=binomial)  #AIC= 316.6
+#### lwm2.1<-glmer(data_nofinal$bruc~ log(data_nofinal$age_yr)*data_nofinal$tb+
+#                (1|data_nofinal$id), family=binomial) # AIC= 318.5
+#lwm2.2<-glmer(data_nofinal$bruc~ log(data_nofinal$age_yr)+data_nofinal$tb+ data_nofinal$herdorig+ (1|data_nofinal$id), family=binomial) # terrible convergence. # AIC= 320.8 
+#lwm3 <- glmer(data_nofinal$bruc~ log(data_nofinal$age_yr)+ data_nofinal$tb+
+ #               (1|data_nofinal$id), family=binomial) # AIC= 319.7
+#lwm4.1 <- glmer(data_nofinal$bruc~ log(data_nofinal$age_yr)+ 
+#                  (1|data_nofinal$id), family=binomial) #318.3
+#lwm4.2 <- glmer(data_nofinal$bruc~ data_nofinal$tb+ (1|data_nofinal$id), family=binomial)  # 496.2
+
+
+###Non log
+#lwm1.1<-glmer(bruc~ age_yr+ (1|id), data=temp, family=binomial) # AIC=324.3
+#lwm1.2<-glmer(bruc~ log(age_yr)+ (1|id), data=temp, family=binomial) # convergence
+#lwm1.3<-glmer(bruc~ age_yr+ I(age_yr^2)+ (1|id), data=temp, family=binomial) # convergence
+
+#lwm2.1<-glmer(bruc~ age_yr*tb+ (1|id), data=temp, family=binomial)  # lovely and significant (AIC=321)
+#lwm3<-glmer(bruc~ log(age_yr)*tb+ (1|id), data=temp, family=binomial) # AIC=318.4; same sig
+#lwm3<-glmer(bruc~ age_yr*tb+I(age_yr^2)+ (1|id), data=temp, family=binomial) # does not converge
+#lwm3<-glmer(bruc~ age_yr*tb+tb*I(age_yr^2)+ (1|id), data=temp, family=binomial) 
+
+# other term model selection:
+#lwm<-glmer(bruc~ age_yr*tb+ herdorig+ (1|id), data=temp,family=binomial)#AIC=319.5 herd & tb sig
+#lwm<-glmer(bruc~ age_yr*tb+ herdorig*tb+ (1|id), data=temp,family=binomial) #not converge
+#lwm<-glmer(bruc~ log(age_yr)*tb+ herdorig+ (1|id), data=temp,family=binomial) #not converge
+#lwm<-glmer(bruc~ log(age_yr)*tb+ herdorig*tb+ (1|id), data=temp,family=binomial) # not converge
+
+rescale= function(col){
+  new=NA
+  for (i in 1:length(col)){
+    new[i]<-(col[i]-mean(col))/sd(col)
+  }
+  return(new)
+}
+# try to rescale to get model lwm2.2 to converge
+temp$herd<-NA
+temp$tb2<-rescale(temp$tb)
+temp$age_yr2<-rescale(temp$age_yr)
+temp$age_yr_2sq<-rescale(temp$age_yr*temp$age_yr)
+temp$herd[temp$herdorig=="LS"] <-1
+temp$herd[temp$herdorig=="CB"]<-0
+temp$herd2<-rescale(temp$herd)
+#lwm3<-glmer(bruc~ age_yr2*tb2+tb2*age_yr_2sq+ (1|id), data=temp, family=binomial)
+
+# First need to test 1) does model with age alone fit best with a lienar; quadraticl or log term?
+#t1<-glmer(bruc~ age_yr2+ (1|id), data=temp, family=binomial); summary(t1) # AIC= 324.7
+#t1.5<-glmer(bruc~ age_yr+ (1|id), data=temp, family=binomial); summary(t1.5) # AIC= 324.3
+#t2<-glmer(bruc~ log(age_yr)+ (1|id), data=temp, family=binomial); summary(t2)  # AIC= 318.2
+t3<-glmer(bruc~ age_yr2+ age_yr_2sq+ (1|id), data=temp, family=binomial); summary(t3) #error
+
+#lwm<-glmer(bruc~ age_yr2*tb2+ (1|id), data=temp, family=binomial); summary(t1) # AIC= 324.7
+#lwm<-glmer(bruc~ age_yr2*tb2+ herd2+ (1|id), data=temp, family=binomial); summary(t1) # not converge
+
+
+
+# Use herd as a random effect
+t0<-glmer(bruc~ tb+ (1|herdorig/id), data=temp, family=binomial); summary(t0) # 495.1
+t1<-glmer(bruc~ age_yr+ (1|herdorig/id), data=temp, family=binomial); summary(t1) # 326.3
+t2<-glmer(bruc~ log(age_yr)+ (1|herdorig/id), data=temp, family=binomial); summary(t2) # 320.2
+t3<-glmer(bruc~ log(age_yr)*tb+ (1|herdorig/id), data=temp, family=binomial); summary(t3) # 319.8 fit error!
+t4<-glmer(bruc~ age_yr*tb+ (1|herdorig/id), data=temp, family=binomial); summary(t4) # 322.9 # fit error!
+t5<-glmer(bruc~ log(age_yr)+tb+ (1|herdorig/id), data=temp, family=binomial); summary(t5) # 321.7 n.s.
+t6<-glmer(bruc~ age_yr+tb+ (1|herdorig/id), data=temp, family=binomial); summary(t6) # 328.4 n.s.
+a<-sd(temp$age_yr)
+t3<-glmer(bruc~ log(age_yr)*tb+ herdorig+ (1|id), data=temp, family=binomial); summary(t3) # 319.8 fit error!
+
+temp$herd3<-relevel(temp$herdorig, "LS")
+t4<-glmer(bruc~ log(age_yr)*tb+ herd3 (1|id),data=temp, family=binomial(link="logit")); summary(t4) # 316.6-fit error!
+t4<-glmer(bruc~ log(age_yr)+tb+ herd3+ (1|id), data=temp, family=binomial); summary(t4) # 322.9 # fit error!
+
+
+# at LS only
+t4<-glmer(bruc~ log(age_yr)*tb+ (1|id),data=temp[temp$herd3=="LS",], family=binomial(link="logit")); summary(t4) # 182.3 (n.s. main effect of tb, but reduces slope)
+t4<-glmer(bruc~ log(age_yr)+tb+ (1|id),data=temp[temp$herd3=="LS",], family=binomial(link="logit")) # 183.2
+t4<-glmer(bruc~ age_yr+tb+ (1|id),data=temp[temp$herd3=="LS",], family=binomial(link="logit")) # 181.2
+t4<-glmer(bruc~ tb+ (1|id),data=temp[temp$herd3=="LS",], family=binomial(link="logit")) # 295, pos overall
+
+
+# CB only
+t4<-glmer(bruc~ log(age_yr)*tb+ (1|id),data=temp[temp$herd3=="CB",], family=binomial(link="logit")); summary(t4) # na, 154.0
+t4<-glmer(bruc~ log(age_yr)+tb+ (1|id),data=temp[temp$herd3=="CB",], family=binomial(link="logit")) #na
+t4<-glmer(bruc~ age_yr+tb+ (1|id),data=temp[temp$herd3=="CB",], family=binomial(link="logit")) # 140.9
+t4<-glmer(bruc~ tb+ (1|id),data=temp[temp$herd3=="CB",], family=binomial(link="logit")) #AIC 200.6; ns p=0.115
+
+```
 
 
 

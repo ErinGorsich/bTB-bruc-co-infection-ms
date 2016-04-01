@@ -156,15 +156,20 @@ write.csv(cross3, "cross_sectional_data_withdz_cleandisease_withfinal_Feb2016.cs
 ###################################################
 # final groom for incidence analysis
 data<-read.csv("cross_sectional_data_withdz_cleandisease_withfinal_Feb2016.csv")
+data<-data[data$final_capture=="0",]
+write.csv(data, "cross_sectional_data_withdz_cleandisease_nofinal_Feb2016.csv")
+
 brconverters<-data[!(data$bruc_beforeafter=="nc"),]
 brconverters<-brconverters[!(brconverters$bruc_beforeafter=="pfc"),]
 length(brconverters$id)  
 length(unique(brconverters$id))  # 33 animals became seropositive for brucellosis; 226 time points 
+write.csv(brconverters, "brucconverters_nofinal_Feb2016.csv")
 
 tbconverters<-data[!(data$tb_beforeafter=="nc"),]
 tbconverters<-tbconverters[!(tbconverters$tb_beforeafter=="pfc"),]
 length(tbconverters$id)
 length(unique(tbconverters$id))  # 44 animals became seropositive for bBT; 291 time points. 
+write.csv(tbconverters, "tbconverters_nofinal_Feb2016.csv")
 
 incidtb<-tbconverters[tbconverters$incid=="1",]
 summary(incidtb$age_sel)  # median=58.5= 4.87; mean=61.28= 5.1
@@ -188,7 +193,7 @@ hist(as.numeric(incidtb$month), breaks=seq(1,12,1), xlab="Month", ylab="Number o
 
 # Make converters only dataset
 bothconvert<-tbconverters[tbconverters$brucconvert=="1",]
-length(bothconvert$id); length(unique(bothconvert$id))  # still 102, 13
+length(bothconvert$id); length(unique(bothconvert$id))  # still 90, 13
 write.csv(bothconvert, "convertersonly_Feb2016_mine.csv")
 
 ######################################
@@ -196,6 +201,7 @@ write.csv(bothconvert, "convertersonly_Feb2016_mine.csv")
 # Run GLMM
 ######################################
 ######################################
+# OLD
 setwd("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/")
 #data<-read.csv("cross_sectional_data_withdz_cleandisease_Feb2016.csv")
 data<-read.csv("cross_sectional_data_withdz_cleandisease_withfinal_Feb2016.csv")
