@@ -6,8 +6,9 @@
 setwd("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder")
 library(ggplot2)
 library('grid')
+library('gridExtra') # specifies layout
 # read in data prepared in cross_sectional_dataprep, groomed for my bTB statuses
-data<-read.csv("cross_sectional_data_withdz_cleandisease_withfinal_Feb2016.csv")
+data<-read.csv("cross_sectional_data_withdz_cleandisease_nofinal_Feb2016.csv")
 data_nofinal<-data[data$final_capture=="0",] 
 d<-data.frame(btb=data_nofinal$tb , bruc=as.character(data_nofinal$bruc), age=data_nofinal$age_sel/12, 
               id=data_nofinal$id)
@@ -25,7 +26,7 @@ get_prev<-function(dat) {
 }
 
 binsize=2
-agebins=c(seq(0, max(age), binsize), max(age+1))
+agebins=c(seq(0, max(d$age), binsize), max(d$age+1))
 agebins<- c(agebins[c(1:6)], 16.5)
 d$bruc2<-NA
 newdf<-data.frame(agebin=c(agebins, agebins), Brucprev=NA, 
@@ -94,6 +95,99 @@ vp<- viewport(width=0.4, height=0.4, x=0.34, y=0.75)
 print(p2)
 print(p3, vp=vp)
 
+#############################################
+Summary information, from cross sectional data
+#############################################
+length(data_nofinal[,1])
+length(unique(data_nofinal$id))
+length(data_nofinal$id[data_nofinal$tb=="1"])
+
+# number concverting
+brconverters<-data_nofinal[!(data_nofinal$bruc_beforeafter=="nc"),]
+brconverters<-brconverters[!(brconverters$bruc_beforeafter=="pfc"),]
+length(brconverters$id); length(unique(brconverters$id))  # 29 buffalo became infected with brucellosis. 
+    
+tbconverters<-data_nofinal[!(data_nofinal$tb_beforeafter=="nc"),]
+tbconverters<-tbconverters[!(tbconverters$tb_beforeafter=="pfc"),]
+length(tbconverters$id); length(unique(tbconverters$id)) # 44 with bTB
+
+bothconvert<-tbconverters[tbconverters$brucconvert=="1",]
+length(bothconvert$id); length(unique(bothconvert$id))
+
+# average age and month of first infection
+incidtb<-tbconverters[tbconverters$incid=="1",]
+summary(incidtb$age_sel)  # 31.00   50.00   56.00   59.62   71.00   91.00 
+quantile(incidtb$age_sel, c(0.05, 0.95))  # 41  86 
+incidbr<-brconverters[brconverters$incidbr =="1",] # 3.4 to 7.5 yrs old by percentile
+summary(incidbr$age_sel)  # 60.56
+quantile(incidbr$age_sel, c(0.05, 0.95)) #42.9 85.8 
+
+# season/month- when are they converting (note incidbr added by hand.)
+incidbr$capid<-as.character(incidbr$capid)
+for (i in 1:length(incidbr[,1])){
+	incidbr$month[i]<-substr(strsplit(incidbr$capid[i], "-")[[1]][2], 1, 2)
+}
+
+tiff(filename="Bruc_conversion_month.tiff", width=480, height=480, units="px")
+hist(as.numeric(incidbr$month), breaks=seq(1,12,1), xlab="Month", ylab="Number of brucellosis seroconversions", main="", col="light gray")
+dev.off()
+
+incidtb$capid<-as.character(incidtb$capid)
+for (i in 1:length(incidtb[,1])){
+	incidtb$month[i]<-substr(strsplit(as.character(incidtb$capid)[i], "-")[[1]][2], 1, 2)
+}
+tiff(filename="bTB_conversion_month.tiff", width=480, height=480, units="px")
+hist(as.numeric(incidtb$month), breaks=seq(1,12,1), xlab="Month", ylab="Number of bTB seroconversions", main="", col="light gray")
+dev.off()
+
+
+#######################################################
+#######################################################
+# Figure 2
+#######################################################
+#######################################################
+immunecross<- read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/cross_sectional_data_withdz_cleandisease_nofinal_Feb2016.csv")
+gcross<-immunecross[!is.na(immunecross$ifng),]
+immuneba<- read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/convertersonly_Feb2016.csv")
+g1<-immuneba[!is.na(immuneba$ifng),]
+
+g<-data.frame(ifng=g1$ifng, infection=paste(g1$bruc, g1$tb, sep="_"), herd=g1$herdorig)
+gc<-data.frame(ifng=gcross$ifng, infection=paste(gcross$bruc, gcross$tb, sep="_"), herd=gcross$herdorig)
+
+par(mfrow=c(2,2))
+p<- ggplot(g, aes(x=infection, y=ifng, fill=infection))+ geom_boxplot()+ 
+	scale_fill_discrete(labels=c("bTB-, Br-", "bTB+, Br-", "bTB-, Br+", "bTB+, Br-"))+
+	ylab("IFN gamma concentration (converters only)")+ theme(legend.position="top", 
+	legend.title=element_blank())
+p1<- ggplot(g[g$herd=="LS",], aes(x=infection, y=ifng, fill=infection))+ geom_boxplot()+
+	scale_fill_discrete(labels=c("bTB-, Br-", "bTB+, Br-", "bTB-, Br+", "bTB+, Br-"))+
+	ylab("IFN gamma concentration (LS converters only)")+ theme(legend.position="top", 
+	legend.title=element_blank())
+p2<- ggplot(g[g$herd=="CB",], aes(x=infection, y=ifng, fill=infection))+ geom_boxplot()+
+	scale_fill_discrete(labels=c("bTB-, Br-", "bTB+, Br-", "bTB-, Br+", "bTB+, Br-"))+
+	ylab("IFN gamma concentration (CB converters only)")+ theme(legend.position="top", 
+	legend.title=element_blank())+scale_y_continuous(limits=c(0,2))
+grid.arrange(p, p1, p2, ncol=3)
+
+p3<- ggplot(gc, aes(x=infection, y=ifng, fill=infection))+ geom_boxplot()+ 
+	scale_fill_discrete(labels=c("bTB-, Br-", "bTB+, Br-", "bTB-, Br+", "bTB+, Br-"))+
+	ylab("IFN gamma concentration (all)")+ theme(legend.position="top", 
+	legend.title=element_blank())
+p4<- ggplot(gc[gc$herd=="LS",], aes(x=infection, y=ifng, fill=infection))+ geom_boxplot()+ 
+	scale_fill_discrete(labels=c("bTB-, Br-", "bTB+, Br-", "bTB-, Br+", "bTB+, Br-"))+
+	ylab("IFN gamma concentration (all LS)")+ theme(legend.position="top", 
+	legend.title=element_blank())
+p5<- ggplot(gc[gc$herd=="CB",], aes(x=infection, y=ifng, fill=infection))+ geom_boxplot()+ 
+	scale_fill_discrete(labels=c("bTB-, Br-", "bTB+, Br-", "bTB-, Br+", "bTB+, Br-"))+
+	ylab("IFN gamma concentration (all CB)")+ theme(legend.position="top", 
+	legend.title=element_blank())
+grid.arrange(p3, p4, p5, ncol=3)
+	
+#######################################################
+#######################################################
+# Figure 3- Survival and incidence plots
+#######################################################
+#######################################################
 
 
 #############################################
@@ -101,8 +195,7 @@ print(p3, vp=vp)
 # Notes of GLMM
 #############################################
 #############################################
-data<-read.csv("cross_sectional_data_withdz_cleandisease_withfinal_Feb2016.csv")
-data_nofinal<-data[data$final_capture=="0",] 
+data_nofinal<-read.csv("cross_sectional_data_withdz_cleandisease_nofinal_Feb2016.csv")
 temp<-data_nofinal[data_nofinal$age_yr<14,]
 rescale= function(col){
   new=NA
