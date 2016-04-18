@@ -96,7 +96,87 @@ print(p2)
 print(p3, vp=vp)
 
 #############################################
+# By heard: 
+d<-data.frame(btb=data_nofinal$tb , bruc=as.character(data_nofinal$bruc), age=data_nofinal$age_sel/12, 
+              id=data_nofinal$id, herd=data_nofinal$herdorig)
+d<-d[d$age<14,]
+binsize=2
+agebins=c(seq(0, max(d$age), binsize), max(d$age+1))
+agebins<- c(agebins[c(1:6)], 16.5)
+d$bruc2<-NA
+
+# LS
+d<-d[d$herd=="LS",]
+newdf<-data.frame(agebin=c(agebins, agebins), Brucprev=NA, 
+                  TB=c(rep("bTB-", length(agebins)),rep("bTB+", length(agebins)) ),
+                  N=NA)  
+for (i in 1:length(d$bruc)){
+  ifelse(d$bruc[i]=="negative", d$bruc2[i]<-0, d$bruc2[i]<-1)
+}
+d$bruc<-as.numeric(d$bruc2)
+for (i in 1:(length(agebins)-1)){
+  neg<-d[d$btb==0,]
+  pos<-d[d$btb==1,]
+  d_neg<-d[d$age>=agebins[i] & d$age<agebins[i+1] & d$btb=="0",]
+  d_pos<-d[d$age>=agebins[i] & d$age<agebins[i+1] & d$btb=="1",]
+  newdf$Brucprev[i]<-get_prev(d_neg$bruc)
+  newdf$Brucprev[i+length(agebins)]<-get_prev(d_pos$bruc)
+  newdf$N[i]<- length(d_neg$bruc)
+  newdf$N[i+length(agebins)]<- length(d_pos$bruc)
+}
+newdf<-newdf[newdf$agebin<16,]
+newdf$se<-sqrt(newdf$Brucprev*(1-newdf$Brucprev)/newdf$N)
+newdf$se[is.na(newdf$se)]<-0
+
+# remove 0-2 bin because no TB+
+newdf2<-newdf[newdf$N>0,]; newdf<-newdf2
+
+# plot 1: 
+p4<- ggplot(newdf, aes(x=agebin, y=Brucprev, group=TB, colour=TB)) + 
+  geom_line()+
+  geom_point(size=3, shape=19) + # colour="darkred", fill="darkred" +
+  scale_colour_manual(values=c("steelblue", "orangered4"))
+p5<- p4+ 
+  geom_errorbar(limits=aes(ymin= newdf$Brucprev-newdf$se, ymax=newdf$Brucprev+newdf$se ), width=0.3) + 
+  xlab("Age (years)") + ylab("Brucellosis prevalence") +
+  theme_bw() + # removes ugly gray.
+  scale_x_discrete(breaks=c("0", "2", "4", "6", "8", "10"), limits=seq(0, 10, 1), 
+                   labels=c("0-2", "2-4", "4-6", "6-8", "8-10", "10+")) +
+  scale_y_continuous(limits=c(0,1)) + 
+  theme(axis.title.x = element_text(size=16, vjust=-0.15),
+        axis.title.y = element_text(size=16, vjust= 0.8),
+        axis.text.x = element_text(size=14, vjust=-0.05),
+        axis.text.y = element_text(size=14),
+        panel.border = element_blank(), 
+        axis.line = element_line(colour= "black"),
+        # legend information
+        legend.position=c(0.82, 0.9),  
+        legend.background= element_rect(fill="white", colour="white"),
+        legend.key= element_blank(),
+        legend.title= element_blank(),
+        legend.text = element_text(size=15)   )
+
+# inset plot
+d$btb2<-as.factor(d$btb)
+p6<-ggplot(d, aes(x=age)) + 
+  geom_histogram(data=subset(d, btb2=="0"), fill= "steelblue", alpha=0.3, stat="bin", binwidth= 1) + 
+  geom_histogram(data=subset(d, btb2=="1"), fill= "orangered", alpha=0.3, stat="bin", binwidth= 1) + 
+  theme_bw()+ xlab("Age (years)")+ ylab("Count")+
+  theme(panel.border = element_blank(), 
+        panel.margin = element_blank(),
+        panel.grid.major= element_blank(),
+        panel.grid.minor= element_blank(),
+        axis.line = element_line(colour= "black"))
+
+vp<- viewport(width=0.4, height=0.4, x=0.34, y=0.75)
+print(p5)
+print(p6, vp=vp)
+
+
+#############################################
+#############################################
 Summary information, from cross sectional data
+#############################################
 #############################################
 length(data_nofinal[,1])
 length(unique(data_nofinal$id))
@@ -146,48 +226,158 @@ dev.off()
 # Figure 2
 #######################################################
 #######################################################
-immunecross<- read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/cross_sectional_data_withdz_cleandisease_nofinal_Feb2016.csv")
+immunecross<- read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/cross_sectional_data_withdz_cleandisease_nofinal_Feb2016_capturetime_forsurv.csv")
 gcross<-immunecross[!is.na(immunecross$ifng),]
+gcross<-gcross[gcross$ifng_CV<14,]
 immuneba<- read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/convertersonly_Feb2016.csv")
 g1<-immuneba[!is.na(immuneba$ifng),]
+g1<-g1[g1$ifng_CV<14,]
 
 g<-data.frame(ifng=g1$ifng, infection=paste(g1$bruc, g1$tb, sep="_"), herd=g1$herdorig)
 gc<-data.frame(ifng=gcross$ifng, infection=paste(gcross$bruc, gcross$tb, sep="_"), herd=gcross$herdorig)
 
-par(mfrow=c(2,2))
-p<- ggplot(g, aes(x=infection, y=ifng, fill=infection))+ geom_boxplot()+ 
-	scale_fill_discrete(labels=c("bTB-, Br-", "bTB+, Br-", "bTB-, Br+", "bTB+, Br-"))+
-	ylab("IFN gamma concentration (converters only)")+ theme(legend.position="top", 
+p<- ggplot(g, aes(x=infection, y=log(ifng), fill=infection))+ geom_boxplot()+ 
+	scale_fill_discrete(labels=c("Neg", "bTB+", "Br+", "Co"))+
+	ylab("L(IFNg) concentration (converters only)")+ theme(legend.position="top", 
 	legend.title=element_blank())
-p1<- ggplot(g[g$herd=="LS",], aes(x=infection, y=ifng, fill=infection))+ geom_boxplot()+
-	scale_fill_discrete(labels=c("bTB-, Br-", "bTB+, Br-", "bTB-, Br+", "bTB+, Br-"))+
-	ylab("IFN gamma concentration (LS converters only)")+ theme(legend.position="top", 
+p1<- ggplot(g[g$herd=="LS",], aes(x=infection, y=log(ifng), fill=infection))+ geom_boxplot()+
+	scale_fill_discrete(labels=c("Neg", "bTB+", "Br+", "Co"))+
+	ylab("L(IFNg) concentration (LS converters only)")+ theme(legend.position="top", 
 	legend.title=element_blank())
-p2<- ggplot(g[g$herd=="CB",], aes(x=infection, y=ifng, fill=infection))+ geom_boxplot()+
-	scale_fill_discrete(labels=c("bTB-, Br-", "bTB+, Br-", "bTB-, Br+", "bTB+, Br-"))+
-	ylab("IFN gamma concentration (CB converters only)")+ theme(legend.position="top", 
+p2<- ggplot(g[g$herd=="CB",], aes(x=infection, y=log(ifng), fill=infection))+ geom_boxplot()+
+	scale_fill_discrete(labels=c("Neg", "bTB+", "Br+", "Co"))+
+	ylab("L(IFNg) concentration (CB converters only)")+ theme(legend.position="top", 
 	legend.title=element_blank())+scale_y_continuous(limits=c(0,2))
 grid.arrange(p, p1, p2, ncol=3)
 
-p3<- ggplot(gc, aes(x=infection, y=ifng, fill=infection))+ geom_boxplot()+ 
-	scale_fill_discrete(labels=c("bTB-, Br-", "bTB+, Br-", "bTB-, Br+", "bTB+, Br-"))+
-	ylab("IFN gamma concentration (all)")+ theme(legend.position="top", 
+p3<- ggplot(gc, aes(x=infection, y=log(ifng), fill=infection))+ geom_boxplot()+ 
+	scale_fill_discrete(labels=c("Neg", "bTB+", "Br+", "Co"))+
+	ylab("L(IFN) gamma concentration (all)")+ theme(legend.position="top", 
 	legend.title=element_blank())
-p4<- ggplot(gc[gc$herd=="LS",], aes(x=infection, y=ifng, fill=infection))+ geom_boxplot()+ 
-	scale_fill_discrete(labels=c("bTB-, Br-", "bTB+, Br-", "bTB-, Br+", "bTB+, Br-"))+
-	ylab("IFN gamma concentration (all LS)")+ theme(legend.position="top", 
+p4<- ggplot(gc[gc$herd=="LS",], aes(x=infection, y=log(ifng), fill=infection))+ geom_boxplot()+ 
+	scale_fill_discrete(labels=c("Neg", "bTB+", "Br+", "Co"))+
+	ylab("L(IFN) gamma concentration (all LS)")+ theme(legend.position="top", 
 	legend.title=element_blank())
-p5<- ggplot(gc[gc$herd=="CB",], aes(x=infection, y=ifng, fill=infection))+ geom_boxplot()+ 
-	scale_fill_discrete(labels=c("bTB-, Br-", "bTB+, Br-", "bTB-, Br+", "bTB+, Br-"))+
-	ylab("IFN gamma concentration (all CB)")+ theme(legend.position="top", 
+p5<- ggplot(gc[gc$herd=="CB",], aes(x=infection, y=log(ifng), fill=infection))+ geom_boxplot()+ 
+	scale_fill_discrete(labels=c("Neg", "bTB+", "Br+", "Co"))+
+	ylab("L(IFN) gamma concentration (all CB)")+ theme(legend.position="top", 
 	legend.title=element_blank())
 grid.arrange(p3, p4, p5, ncol=3)
+
+# with age
+g<-data.frame(ifng=g1$ifng, infection=paste(g1$bruc, g1$tb, sep="_"), herd=g1$herdorig, age= g1$age_yr)
+gc<-data.frame(ifng=gcross$ifng, infection=paste(gcross$bruc, gcross$tb, sep="_"), 
+	herd=gcross$herdorig, age=gcross$age_yr)
 	
+a<-ggplot(g, aes(x=age, y=log(ifng), colour=infection))+ geom_point() +guides(fill=FALSE, colour=FALSE)+ ylab("IFN gamma (converters only)") + scale_colour_discrete(labels=c("Neg", "TB", "Bruc", "Coinfected")) 
+b<-ggplot(gc, aes(x=age, y=log(ifng), colour=infection))+ geom_point()+ 	ylab("IFN gamma (all data)")+ scale_colour_discrete(labels=c("Neg", "TB", "Bruc", "Co"))+ theme(legend.position=c(0.8,0.8))
+grid.arrange(a, b, ncol=2)
+
+
+# Plasma BKA: 
+gcross<-immunecross[!is.na(immunecross$bka_killed),]
+g1<-immuneba[!is.na(immuneba$bka_killed),]
+g<-data.frame(bka=g1$bka_killed/g1$bka_control, infection=paste(g1$bruc, g1$tb, sep="_"), herd=g1$herdorig)
+gc<-data.frame(bka=gcross$bka_killed/gcross$bka_control, infection=paste(gcross$bruc, gcross$tb, sep="_"), herd=gcross$herdorig)
+p<- ggplot(g, aes(x=infection, y= bka, fill=infection))+ geom_boxplot()+ 
+	scale_fill_discrete(labels=c("bTB-, Br-", "bTB+, Br-", "bTB-, Br+", "bTB+, Br-"))+
+	ylab("Proportion killed (converters only)")+ theme(legend.position="top", 
+	legend.title=element_blank())
+p1<- ggplot(g[g$herd=="LS",], aes(x=infection, y= bka, fill=infection))+ geom_boxplot()+
+	scale_fill_discrete(labels=c("bTB-, Br-", "bTB+, Br-", "bTB-, Br+", "bTB+, Br-"))+
+	ylab("Proportion killed (LS converters only)")+ theme(legend.position="top", 
+	legend.title=element_blank())
+p2<- ggplot(g[g$herd=="CB",], aes(x=infection, y= bka, fill=infection))+ geom_boxplot()+
+	scale_fill_discrete(labels=c("bTB-, Br-", "bTB+, Br-", "bTB-, Br+", "bTB+, Br-"))+
+	ylab("Proportion killed (CB converters only)")+ theme(legend.position="top", 
+	legend.title=element_blank())+scale_y_continuous(limits=c(0,2))
+grid.arrange(p, p1, p2, ncol=3)
+
+p3<- ggplot(gc, aes(x=infection, y=bka, fill=infection))+ geom_boxplot()+ 
+	scale_fill_discrete(labels=c("bTB-, Br-", "bTB+, Br-", "bTB-, Br+", "bTB+, Br-"))+
+	ylab("Proportion killed (all)")+ theme(legend.position="top", 
+	legend.title=element_blank())
+p4<- ggplot(gc[gc$herd=="LS",], aes(x=infection, y=bka, fill=infection))+ geom_boxplot()+ 
+	scale_fill_discrete(labels=c("bTB-, Br-", "bTB+, Br-", "bTB-, Br+", "bTB+, Br-"))+
+	ylab("Proportion killed (all LS)")+ theme(legend.position="top", 
+	legend.title=element_blank())
+p5<- ggplot(gc[gc$herd=="CB",], aes(x=infection, y=bka, fill=infection))+ geom_boxplot()+ 
+	scale_fill_discrete(labels=c("bTB-, Br-", "bTB+, Br-", "bTB-, Br+", "bTB+, Br-"))+
+	ylab("Proportion killed (all CB)")+ theme(legend.position="top", 
+	legend.title=element_blank())
+grid.arrange(p3, p4, p5, ncol=3)
+
+# Whole Blood BKA: 
+gcross<-immunecross[!is.na(immunecross$bka_wb_killed),]
+gc<-data.frame(bka=gcross$bka_wb_killed/gcross$bka_wb_control, infection=paste(gcross$bruc, gcross$tb, sep="_"), herd=gcross$herdorig)
+p3<- ggplot(gc, aes(x=infection, y=bka, fill=infection))+ geom_boxplot()+ 
+	scale_fill_discrete(labels=c("bTB-, Br-", "bTB+, Br-", "bTB-, Br+", "bTB+, Br-"))+
+	ylab("Proportion killed, whole blood (all)")+ theme(legend.position="top", 
+	legend.title=element_blank())
+p4<- ggplot(gc[gc$herd=="LS",], aes(x=infection, y=bka, fill=infection))+ geom_boxplot()+ 
+	scale_fill_discrete(labels=c("bTB-, Br-", "bTB+, Br-", "bTB-, Br+", "bTB+, Br-"))+
+	ylab("Proportion killed, whole blood (all LS)")+ theme(legend.position="top", 
+	legend.title=element_blank())
+p5<- ggplot(gc[gc$herd=="CB",], aes(x=infection, y=bka, fill=infection))+ geom_boxplot()+ 
+	scale_fill_discrete(labels=c("bTB-, Br-", "bTB+, Br-", "bTB-, Br+", "bTB+, Br-"))+
+	ylab("Proportion killed, whole blood (all CB)")+ theme(legend.position="top", 
+	legend.title=element_blank())
+grid.arrange(p3, p4, p5, ncol=3)
+
+# xyplots
+gcross<-immunecross[!is.na(immunecross$ifng),]
+PBC.samp <- subset(gcross, id %in% c("B1",   "B10",  "B11",  "B13",  "B13b", "B14",
+	"B14b", "B16",  "B19", "B2",   "B20",  "B22",  "B22b", "B25",  "B26",  "B26b") )
+	#"B28",  "B28b", "B29",  "B2b",  "B30",  "B31",  "B32",  "B33"))
+
+xyplot(ifng ~ yr | id, data = PBC.samp,
+    type = c("p", "smooth"), lwd = 2, layout = c(4, 4),
+    as.table = TRUE, ylab = "log IFNgamma",
+    xlab = "Time (years)")
+xyplot(log(ifng) ~ yr | id, data = PBC.samp,
+    type = c("p", "smooth"), lwd = 2, layout = c(4, 4),
+    as.table = TRUE, ylab = "log IFNgamma",
+    xlab = "Time (years)")
+
+
+# Haptoglobin: 
+gcross<-immunecross[!is.na(immunecross$hapto),]
+gc<-data.frame(hapto=log(gcross$hapto), infection=paste(gcross$bruc, gcross$tb, sep="_"), herd=gcross$herdorig)
+p3<- ggplot(gc, aes(x=infection, y=hapto, fill=infection))+ geom_boxplot()+ 
+	scale_fill_discrete(labels=c("Neg", "bTB+", "Br+", "Co"))+
+	ylab("Log(Haptoglobin) (all)")+ theme(legend.position="top", 
+	legend.title=element_blank())
+p4<- ggplot(gc[gc$herd=="LS",], aes(x=infection, y=hapto, fill=infection))+ geom_boxplot()+ 
+	scale_fill_discrete(labels=c("Neg", "bTB+", "Br+", "Co"))+
+	ylab("Log(Haptoglobin) (all LS)")+ theme(legend.position="top", 
+	legend.title=element_blank())
+p5<- ggplot(gc[gc$herd=="CB",], aes(x=infection, y=hapto, fill=infection))+ geom_boxplot()+ 
+	scale_fill_discrete(labels=c("Neg", "bTB+", "Br+", "Co"))+
+	ylab("Log(Haptoglobin) (all CB)")+ theme(legend.position="top", 
+	legend.title=element_blank())
+grid.arrange(p3, p4, p5, ncol=3)
+
+
+
+
+
+
+
+
 #######################################################
 #######################################################
 # Figure 3- Survival and incidence plots
 #######################################################
 #######################################################
+# From book code: 
+#AIDS.samp <- subset(aids, patient %in% c(82,152,213,236,332,
+     335,353,407,410,452))
+#KM <- survfit(Surv(Time, death) ~ 1, data = aids.id)
+
+#par(mfrow = c(1, 2))
+#plot(KM, mark.time = FALSE, ylab = "Survival Probability",
+    xlab = "Time (months)")
+
 
 
 #############################################
