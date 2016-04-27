@@ -8,7 +8,7 @@ library(ggplot2)
 library('grid')
 library('gridExtra') # specifies layout
 # read in data prepared in cross_sectional_dataprep, groomed for my bTB statuses
-data<-read.csv("cross_sectional_data_withdz_cleandisease_nofinal_Feb2016.csv")
+data<-read.csv("cross_sectional_data_withdz_cleandisease_nofinal_Feb2016_capturetime_forsurv.csv")
 data_nofinal<-data[data$final_capture=="0",] 
 d<-data.frame(btb=data_nofinal$tb , bruc=as.character(data_nofinal$bruc), age=data_nofinal$age_sel/12, 
               id=data_nofinal$id)
@@ -178,9 +178,21 @@ print(p6, vp=vp)
 Summary information, from cross sectional data
 #############################################
 #############################################
+###############################################
+data2<-read.csv("cross_sectional_data_withdz_cleandisease_nofinal_Feb2016_capturetime_forsurv.csv")
+data_nofinal<-data2[data2$final_capture=="0",] 
+
 length(data_nofinal[,1])
 length(unique(data_nofinal$id))
 length(data_nofinal$id[data_nofinal$tb=="1"])
+length(data_nofinal$id[data_nofinal$bruc=="positive"])
+
+# brucellosis prevalence in TB+, TB-
+TBneg<- data_nofinal[data_nofinal$tb=="0",]
+TBpos<- data_nofinal[data_nofinal$tb=="1",]
+length(TBneg$bruc[TBneg$bruc=="positive"])/length(TBneg$bruc)
+length(TBpos$bruc[TBpos$bruc=="positive"])/length(TBpos$bruc)
+
 
 # number concverting
 brconverters<-data_nofinal[!(data_nofinal$bruc_beforeafter=="nc"),]
@@ -360,10 +372,6 @@ grid.arrange(p3, p4, p5, ncol=3)
 
 
 
-
-
-
-
 #######################################################
 #######################################################
 # Figure 3- Survival and incidence plots
@@ -377,6 +385,37 @@ grid.arrange(p3, p4, p5, ncol=3)
 #par(mfrow = c(1, 2))
 #plot(KM, mark.time = FALSE, ylab = "Survival Probability",
     xlab = "Time (months)")
+ # USE STANDARDIZED ESTIMATES!!!
+df<- data.frame(name=c("bruc", "bTB", "site", "age^2", "age"), est= c(3.0, 2.81, 1.99, 1.05,  0.51), 
+	lower= c(1.50, 1.43, 1.05, 1.01 , 0.34), upper= c(6.01, 5.51, 3.78, 1.07, 0.76),  #78.83 
+	order=c(1,2,3,4,5))
+df$name <- factor(df$name, levels= df$name[order(df$order, decreasing = TRUE)])
+	
+p2 <-ggplot(df, aes(x=df$name, y=df$est)) + 
+	geom_errorbar(aes(ymin=df$lower, ymax=df$upper, width=0)) +  				# for black error bars, add colour="black"
+	geom_point(df$estimate)+
+	theme_bw()+
+	#theme(panel.grid.major.y=element_blank(), 
+	#panel.border = element_blank(), 
+ 	#axis.line = element_line(colour= "black"),
+ 	#panel.grid.major.x=element_blank()) +  
+	coord_flip()
+	#ylim(-0.5, 0.5)+
+	#ylim(min(out$sdbeta-out$sdse), max(out$sdbeta[out$sdbeta<100]+out$sdse[out$sdbeta<100]))   # change to this
+	#theme(axis.text.x=element_text(size=14), axis.text.y=element_text(size=14))
+
+p3<- p2 + 
+	theme(axis.title.x=element_text(size=14), axis.title.y=element_blank()) +
+	ylab("Relative risk compared to uninfected animals")+
+	scale_colour_grey(start=0.6, end=0.7)+
+	geom_segment(aes(x=0, xend=5, y=1, yend=1), linetype=2)+ ylim(-0.01,6.2) 
+
+p3
+
+p3 + theme(axis.line = element_line(colour= "black"))
+
+
+
 
 
 
@@ -385,7 +424,7 @@ grid.arrange(p3, p4, p5, ncol=3)
 # Notes of GLMM
 #############################################
 #############################################
-data_nofinal<-read.csv("cross_sectional_data_withdz_cleandisease_nofinal_Feb2016.csv")
+# AICs hanshed out ran on previous dataset.  IN repot results are presented for the dataset with capture time that matches the survival times.
 temp<-data_nofinal[data_nofinal$age_yr<14,]
 rescale= function(col){
   new=NA
@@ -406,6 +445,52 @@ temp$herd2<-rescale(temp$herd)
 # NOTE: NOTE AGE AND TB ARE COLINEAR- NO BTB POSTIIVE BUFFALO LESS THAN 2.5 yrs... so remove three data points
 # AND OLDEST bTB positive buffalo is 10.5; so 
 temp2<- temp[temp$age_yr>2.5 & temp$age_yr<10.5,]
+temp3<- temp[temp$age_yr>2 & temp$age_yr<10,]
+#temp3<- temp2[!(temp2$id %in% c("B14", "B32", "O33")),]
+
+
+
+t<-glmer(bruc~ floor(age_yr)+ I(floor(age_yr^2))+(1|id), data=temp2, family=binomial(link="logit")); summary(t) #319.2
+t<-glmer(bruc~ floor(age_yr)+(1|id), data=temp2, family=binomial); summary(t)
+t<-glmer(bruc~ floor(age_yr)+ I(floor(age_yr)^2)+ tb+(1|id), data=temp2, family=binomial); summary(t) #349.4 # small error
+t<-glmer(bruc~ floor(age_yr)+ I(floor(age_yr)^2)*tb+(1|id), data=temp2, family=binomial); summary(t) #345.2
+t<-glmer(bruc~ floor(age_yr)*tb+ I(floor(age_yr)^2)+ herdorig+(1|id), data=temp2, family=binomial); summary(t) #351.2, small error
+t<-glmer(bruc~ floor(age_yr)+ I(floor(age_yr)^2)*tb+ herdorig+(1|id), data=temp2, family=binomial); summary(t) #346.5
+t<-glmer(bruc~ floor(age_yr)+ I(floor(age_yr)^2)*tb+tb*herdorig+(1|id), data=temp2, family=binomial); summary(t) # 354.9
+t<-glmer(bruc~ floor(age_yr)+ I(floor(age_yr)^2)*tb+floor(age_yr)*herdorig+(1|id), data=temp2, family=binomial); summary(t) # 354.9
+
+
+t<-glmer(bruc~age_yr2+ I(age_yr2^2)*tb2+(1|id), data=temp2, family=binomial); summary(t) # 354.9
+
+
+
+
+t<-glmer(bruc~ floor(age_yr)+ I(floor(age_yr^2))+(1|id), data=temp3, family=binomial(link="logit")); summary(t) #319.2
+t<-glmer(bruc~ floor(age_yr)+(1|id), data=temp3, family=binomial); summary(t)
+t<-glmer(bruc~ floor(age_yr)+ I(floor(age_yr)^2)+ tb+(1|id), data=temp3, family=binomial); summary(t) #349.4 # small error
+t<-glmer(bruc~ floor(age_yr)+ I(floor(age_yr)^2)*tb+(1|id), data=temp3, family=binomial); summary(t) #345.2
+t<-glmer(bruc~ floor(age_yr)*tb+ I(floor(age_yr)^2)+ herdorig+(1|id), data=temp3, family=binomial); summary(t) #351.2, small error
+t<-glmer(bruc~ floor(age_yr)+ I(floor(age_yr)^2)*tb+ herdorig+(1|id), data=temp3, family=binomial); summary(t) #346.5
+t<-glmer(bruc~ floor(age_yr)+ I(floor(age_yr)^2)*tb+ herd+(1|id), data=temp3, family=binomial); summary(t) #346.5
+
+t<-glmer(bruc~ floor(age_yr)+ I(floor(age_yr)^2)*tb+tb*herd+(1|id), data=temp3, family=binomial); summary(t) # 354.9
+t<-glmer(bruc~ floor(age_yr)+ I(floor(age_yr)^2)*tb+floor(age_yr)*herdorig+(1|id), data=temp3, family=binomial); summary(t) # 354.9
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Extra play when choosing random effects
 
 # Use herd as a random effect
 # not fitting
@@ -435,7 +520,7 @@ t5.5<-glmer(bruc~ log(age_yr)+tb+herdorig+ (1|id), data=temp2, family=binomial);
 t6<-glmer(bruc~ age_yr+tb+ (1|id), data=temp2, family=binomial); summary(t6) #319.0
 t6.5<-glmer(bruc~ age_yr+tb+ herdorig+(1|id), data=temp2, family=binomial); summary(t6.5) #316.8
 
-
+t7<-glmer(bruc~ tb+(1|id), data=temp2, family=binomial); summary(t7) #480.8
 t7<-glmer(bruc~ tb+ herdorig+(1|id), data=temp2, family=binomial); summary(t7) #480.8
 t8<-glmer(bruc~ tb*herdorig+(1|id), data=temp2, family=binomial); summary(t8) # 481.3
 t9<-glmer(bruc~ age_yr+ herdorig+(1|id), data=temp2, family=binomial); summary(t9) #314.8
@@ -474,14 +559,19 @@ t<-glmer(bruc~ floor(age_yr)*tb+ I(floor(age_yr)^2)*tb+tb*herdorig+(1|id), data=
 
 
 
+
+
+
+
 # NOPE: 
 t<-glmer(bruc~ floor(age_yr)+ I(floor(age_yr)^2)+ tb+(1|herdorig/id), data=temp2, family=binomial); summary(t) #351.4 
 t<-glmer(bruc~ floor(age_yr)+ I(floor(age_yr)^2)*tb+(1|herdorig/id), data=temp2, family=binomial); summary(t) #345.2
 t<-glmer(bruc~ floor(age_yr)*tb+ I(floor(age_yr)^2)*tb+(1|herdorig/id), data=temp2, family=binomial); summary(t) #345.2
 
 a<-seq(1, 20, 0.1)
-val=function(a, btb){16.6487*a-0.48*(a^2)-0.48*(a^2)*btb}
+val=function(a, btb){14.954*a-0.5144*(a^2)-0.2772*(a^2)*btb + 9.592*btb }
 
+par(mfrow= c(1,2))
 plot(x=a, y=val(a, 1))
 plot(x=a, y=val(a, 0))
 
@@ -497,5 +587,7 @@ d<-data.frame(btb=temp2$tb , bruc=as.character(temp2$bruc), age=temp2$age_yr,
 make_age_odds_plot(d$btb, d$bruc, d$age, binsize=2)
 make_age_odds_plot(d$btb[d$herd=="LS"], d$bruc[d$herd=="LS"], d$age[d$herd=="LS"], binsize=2)
 make_age_odds_plot(d$btb[d$herd=="CB"], d$bruc[d$herd=="CB"], d$age[d$herd=="CB"], binsize=2)
+
+
 
 

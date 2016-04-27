@@ -6,7 +6,7 @@
 ############################################
 # Outline
 ############################################
-
+# Part 0: summary statistics
 # Part 1: Fit CPH models to the different datasets
 # Part II: Fit best (no bolus, add data) with Bayesain model
 # Part III: Joint models
@@ -22,7 +22,7 @@ setwd("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_co
 data<-read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/survival/brucsurvival_TB3controls_longresidnomissing_noerrors_season2.csv")
 data$age_yr2<-floor(data$age_yr)
 
-data2<-read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/survival/brucsurvival_TB3controls_longresidnomissing_noerrors_season2_final.csv")
+data2<-read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/survival/brucsurvival_TB3controls_longresidnomissing_noerrors_season2_final_fixed.csv")
 data2$age_yr2<-floor(data2$age_yr)
 
 bolus <- c("R22", "R24", "R27", "R35", "R45", "R45b", "R50", "R6", "Y20", "Y31c", "Y31d", "Y39", "Y43", "Y44")
@@ -38,9 +38,6 @@ data3<- data3[data3$animal!= "O10",]
 ############################################
 ############################################
 
-
-
-
 ############################################
 # initial plots & descriptive statistics
 ############################################
@@ -52,19 +49,83 @@ hist(d$stop2[d$TB_3==1 & d$brucella==0], ylab="Number of TB+ buffalo")
 hist(d$stop2[d$TB_3==0 & d$brucella==1], ylab="Number of Bruc+ buffalo")
 hist(d$stop2[d$TB_3==1 & d$brucella==1], ylab="Number of Coinfected buffalo")
 
+data<- data3
 # want a plot from time bruc+ to death in TB+ and TB- buffalo. 
 mort<-data[data$death.time==1,]
 mort2<-data2[data2$death.time==1,]
-length(mort[,1])  # 42 total deaths
-length(mort[mort$TB_3==1,1])  # 14 with bTB
-length(mort[mort$brucella==1,1])  # 20 with brucellosis
-length(mort[mort$brucella==1& mort$TB_3==1,1]) # 8 of which are co-infected
+length(mort[,1])  # 38 total deaths
+length(mort[mort$TB_3==1,1])  # 15 with bTB (6 bTB only)
+length(mort[mort$brucella==1,1])  # 21 with brucellosis (12)
+length(mort[mort$brucella==1& mort$TB_3==1,1]) # 9 of which are co-infected
+length(mort[mort$brucella==0& mort$TB_3==0,1]) # 11 uninfected
+
 
 hist(mort$start2, xlab="Months (from June 2008)", col="light gray", main="")
 hist(mort2$start2, xlab="Months (from June 2008)", col="light gray", main="")
 length(unique(mort$animal)); length(unique(mort2$animal)) # 42 vs. 49
 
-mort<-data[data$death.time==1 & data$herd=="LS",]  # 18 total; 3 TB only, 4 BR only; 6 co.  
+mort<-data[data$death.time==1 & data$herd=="LS",]  # 18 total; 9 TB totoal (3 TB only), 10 BR only (4 Br only); 6 co.  
+
+
+
+# Need a sum of time observing uninfected, TB+, Bruc+, Coinfected animals
+id<-as.character(unique(data3$animal))
+data3$animal<-as.character(data3$animal)
+
+timedf<-data.frame(id=id, min_neg=NA, max_neg=NA, min_TB=NA, 
+	max_TB=NA, min_B=NA, max_B=NA, min_C=NA, max_C=NA)
+for (i in 1:length(id)){
+	newdf<- data3[data3$animal==id[i],]
+	# need if statments added in case of NA vlaues
+	if(length(newdf$animal[newdf$TB_3==0 & newdf$brucella==0])>0){
+	timedf$min_neg[i]<-min(newdf$start2[newdf$TB_3==0 & newdf$brucella==0])
+	timedf$max_neg[i]<-max(newdf$stop2[newdf$TB_3==0 & newdf$brucella==0])
+	} else {
+		timedf$min_neg[i]<-0
+		timedf$max_neg[i]<-0
+	}
+	
+	if(length(newdf$animal[newdf$TB_3==1 & newdf$brucella==0]>0)){
+		timedf$min_TB[i]<-min(newdf$start2[newdf$TB_3==1 & newdf$brucella==0])
+		timedf$max_TB[i]<-max(newdf$stop2[newdf$TB_3==1 & newdf$brucella==0])
+	} else {
+		timedf$min_TB[i]<-0
+		timedf$max_TB[i]<-0
+	}
+
+	if(length(newdf$animal[newdf$TB_3==0 & newdf$brucella==1]>0)){
+		timedf$min_B[i]<-min(newdf$start2[newdf$TB_3==0 & newdf$brucella==1])
+		timedf$max_B[i]<-max(newdf$stop2[newdf$TB_3==0 & newdf$brucella==1])
+	} else {
+		timedf$min_B[i]<-0
+		timedf$max_B[i]<-0
+	}
+
+	if(length(newdf$animal[newdf$TB_3==1 & newdf$brucella==1]>0)){
+	timedf$min_C[i]<-min(newdf$start2[newdf$TB_3==1 & newdf$brucella==1])
+	timedf$max_C[i]<-max(newdf$stop2[newdf$TB_3==1 & newdf$brucella==1])
+	} else {
+		timedf$min_C[i]<-0
+		timedf$max_C[i]<-0
+	}
+}
+timeneg<-timedf$max_neg-timedf$min_neg; sum(timeneg) # 2031 all; 
+timeTB<-timedf$max_TB-timedf$min_TB #600; 
+timeB<-timedf$max_B-timedf$min_B; sum(timeB) # 1164; 
+timeC<-timedf$max_C-timedf$min_C # 579; 
+sum(timeB)+sum(timeneg)+sum(timeTB)+sum(timeC) # 4386 total months
+6/600
+12/1182
+8/546
+# mortality rates
+10/(2109/12) #neg 
+6/(666/12) # TB
+13/(1086/12) # Bruc
+9/(525/12) # co
+
+length(mort$TB_3[mort$brucella==1& mort$TB_3==1])
+length(mort$TB_3[mort$TB_3==1])
+length(mort$TB_3[mort$brucella==1])
 ############################################
 # run cph model
 ############################################
@@ -142,51 +203,69 @@ test.mod<-coxph(Surv(start, stop, death.time)~brucella*herd2+ TB_3*herd2+age_yr2
 # Part 3: New data, no bolus
 ############################
 # just brucellosis
-test.mod<-coxph(Surv(start, stop, death.time)~brucella, data=data3) # 0.0119
-test.mod<-coxph(Surv(start, stop, death.time)~brucella+herd2, data=data3); summary(test.mod) #0.0134 
-test.mod<-coxph(Surv(start, stop, death.time)~brucella+herd2+age_yr2, data=data3); summary(test.mod) #0.00457
-test.mod<-coxph(Surv(start, stop, death.time)~brucella+herd2+age_yr2+ I(age_yr2^2), data=data3); summary(test.mod) # 0.00533
-test.mod<-coxph(Surv(start, stop, death.time)~brucella*herd2+age_yr2+ I(age_yr2^2), data=data3); summary(test.mod) # 0.01, int n.s. 
+test.mod<-coxph(Surv(start, stop, death.time)~brucella+ cluster(animal), data=data3) # 0.0119
+test.mod<-coxph(Surv(start, stop, death.time)~brucella+herd2+ cluster(animal), data=data3); summary(test.mod) #0.0134 
+test.mod<-coxph(Surv(start, stop, death.time)~brucella+herd2+age_yr2+ cluster(animal), data=data3); summary(test.mod) #0.00457
+test.mod<-coxph(Surv(start, stop, death.time)~brucella+herd2+age_yr2+ I(age_yr2^2)+ cluster(animal), data=data3); summary(test.mod) # 0.00533
+test.mod<-coxph(Surv(start, stop, death.time)~brucella*herd2+age_yr2+ I(age_yr2^2)+ cluster(animal), data=data3); summary(test.mod) # 0.01, int n.s. 
 
 # just tb
-test.mod<-coxph(Surv(start, stop, death.time)~ TB_3, data=data3) ; summary(test.mod) #0.0172 
-test.mod<-coxph(Surv(start, stop, death.time)~ TB_3 +herd2, data=data3); summary(test.mod)  # 0.0125
-test.mod<-coxph(Surv(start, stop, death.time)~ TB_3 +herd2+age_yr2, data=data3) ; summary(test.mod) #0.00934
-test.mod<-coxph(Surv(start, stop, death.time)~ TB_3 +herd2+age_yr2+ I(age_yr2^2), data=data3); # 0.00216 summary(test.mod)
-test.mod<-coxph(Surv(start, stop, death.time)~ TB_3*herd2+age_yr2+ I(age_yr2^2), data=data3); summary(test.mod)
+test.mod<-coxph(Surv(start, stop, death.time)~ TB_3+ cluster(animal), data=data3) ; summary(test.mod) #0.0172 
+test.mod<-coxph(Surv(start, stop, death.time)~ TB_3 +herd2+ cluster(animal), data=data3); summary(test.mod)  # 0.0125
+test.mod<-coxph(Surv(start, stop, death.time)~ TB_3 +herd2+age_yr2+ cluster(animal), data=data3) ; summary(test.mod) #0.00934
+test.mod<-coxph(Surv(start, stop, death.time)~ TB_3 +herd2+age_yr2+ I(age_yr2^2)+ cluster(animal), data=data3); # 0.00216 summary(test.mod)
+test.mod<-coxph(Surv(start, stop, death.time)~ TB_3*herd2+age_yr2+ I(age_yr2^2)+ cluster(animal), data=data3); summary(test.mod)
 #0.00110  
 
 # both
-test.mod<-coxph(Surv(start, stop, death.time)~brucella+ TB_3, data=data3); summary(test.mod) # Br- 0.01,TB-0.02
-test.mod<-coxph(Surv(start, stop, death.time)~brucella*TB_3, data=data3); summary(test.mod) #ns
-test.mod<-coxph(Surv(start, stop, death.time)~brucella+ TB_3+herd2, data=data3); summary(test.mod)#.01,0.01
-*******test.mod<-coxph(Surv(start, stop, death.time)~brucella+TB_3+herd2 + age_yr2 +I(age_yr2^2), data=data3); summary(test.mod)
+test.mod<-coxph(Surv(start, stop, death.time)~brucella+ TB_3+ cluster(animal), data=data3); summary(test.mod) # Br- 0.01,TB-0.02
+test.mod<-coxph(Surv(start, stop, death.time)~brucella*TB_3+ cluster(animal), data=data3); summary(test.mod) #ns
+test.mod<-coxph(Surv(start, stop, death.time)~brucella+ TB_3+herd2+ cluster(animal), data=data3); summary(test.mod)#.01,0.01
+*******test.mod<-coxph(Surv(start, stop, death.time)~brucella+TB_3+herd2 + age_yr2 +I(age_yr2^2)+ cluster(animal), data=data3); summary(test.mod)
 
 
-test.mod<-coxph(Surv(start, stop, death.time)~brucella*herd2+TB_3*herd2 + age_yr2 +I(age_yr2^2), data=data3); summary(test.mod)
+test.mod<-coxph(Surv(start, stop, death.time)~brucella*herd2+TB_3*herd2 + age_yr2 +I(age_yr2^2)+ cluster(animal), data=data3); summary(test.mod)
 
-test.mod<-coxph(Surv(start, stop, death.time)~brucella+TB_3*herd2 + age_yr2 +I(age_yr2^2), data=data3); summary(test.mod)
+final.mod<-coxph(Surv(start, stop, death.time)~brucella+TB_3+herd2 + age_yr2 +I(age_yr2^2)+ cluster(animal), data=data3); summary(final.mod)
 
+standardize = function(datavec){
+	temp<- NA
+	for (i in 1:length(datavec)){
+		temp[i]<- (datavec[i]-mean(datavec)) / (2*sd(datavec))
+	}
+	return(temp)
+}
+data3$age_yrsd<- NA; data3$age_yrsq<- NA; data3$herdsd<-NA; data3$tbsd<- NA; data3$brucsd<-NA
+data3$age_yrsd<-standardize(data3$age_yr)
+t<- data3$age_yr*data3$age_yr
+data3$age_yrsq<-standardize(t)
+data3$therd<-NA
+data3$therd[data3$herd=="CB"]<- 1
+data3$therd[data3$herd=="LS"]<- 0
+data3$herdsd<- standardize(data3$therd)
+data3$tbsd<- standardize(data3$TB_3)
+data3$brucsd<- standardize(data3$brucella)
+
+
+# standardized output
+test.mod<-coxph(Surv(start2, stop2, death.time)~brucsd+tbsd+ herdsd + age_yrsd +I(age_yrsd^2)+ cluster(animal), data=data3)  
+                coef exp(coef) se(coef) robust se      z Pr(>|z|)   
+brucsd         0.8826    2.4172   0.3365    0.3427  2.576  0.01001 * 
+tbsd           0.8983    2.4555   0.3251    0.3058  2.937  0.00331 **
+herdsd         0.7981    2.2214   0.3628    0.3466  2.303  0.02129 * 
+age_yrsd      -1.5095    0.2210   0.5051    0.5078 -2.973  0.00295 **
+I(age_yrsd^2)  0.8707    2.3887   0.3199    0.2981  2.921  0.00349 **
+              exp(coef) exp(-coef) lower .95 upper .95
+brucsd            2.417     0.4137    1.2348    4.7316
+tbsd              2.456     0.4072    1.3484    4.4716
+herdsd            2.221     0.4502    1.1261    4.3818
+age_yrsd          0.221     4.5243    0.0817    0.5979
+I(age_yrsd^2)     2.389     0.4186    1.3316    4.2849
 
 # CPH model diagnostics
 # no change with start/stop designations: exact same covariates
 # model with tb*herd prefered by AIC; but parameter value= 0.1
-test.mod<-coxph(Surv(start2, stop2, death.time)~brucella+TB_3+herd2 + age_yr2 +I(age_yr2^2),, data=data3)  
-#  n= 1469, number of events= 38 
-#
-#                 coef exp(coef) se(coef)      z Pr(>|z|)   
-#brucella      0.88957   2.43409  0.34442  2.583  0.00980 **
-#TB_3          1.05339   2.86737  0.36799  2.863  0.00420 **
-#herd2CB       0.70560   2.02506  0.35540  1.985  0.04710 * 
-#age_yr2      -0.69818   0.49749  0.22273 -3.135  0.00172 **
-#I(age_yr2^2)  0.04650   1.04759  0.01627  2.857  0.00427 **
-
-#             exp(coef) exp(-coef) lower .95 upper .95
-#brucella        2.4341     0.4108    1.2393    4.7809
-#TB_3            2.8674     0.3488    1.3940    5.8982
-#herd2CB         2.0251     0.4938    1.0091    4.0640
-#age_yr2         0.4975     2.0101    0.3215    0.7698
-#I(age_yr2^2)    1.0476     0.9546    1.0147    1.0815
+test.mod<-coxph(Surv(start2, stop2, death.time)~brucella+TB_3+herd2 + age_yr2 +I(age_yr2^2)+ cluster(animal), data=data3)  
 
 # test proportional hazards assumption
 temp<-cox.zph(test.mod)
@@ -208,7 +287,6 @@ with(Shat2, head(data.frame(time, surv), n=4))
 #2    6          0.9006887          0.8003969          0.7969077          0.5878509
 #3   12          0.8948555          0.7898502          0.7858978          0.5697411
 #4   15          0.8628729          0.7341025          0.7272129          0.4796214
-
 
 # predicted proportional increase at average buffalo (herd in between the LS & CB)
 #data$herd2<-NA
@@ -241,14 +319,18 @@ lines(mco, lty=c(3,3), conf.int= FALSE, col="dark red")
 legend("bottomleft", legend=c("Uninfected", "bTB+", "Brucellosis +", "Coinfected"),
 	lty=c(1 ,5, 4, 3), inset=0.02, bty="n", col=c("dark blue", "dark green", "purple", "dark red"))
 
+
+
+
+
 ############################################
 ############################################
 # Part II: Fit best (no bolus, add data) with Bayesain model
 ############################################
 ############################################
 #!!!!!!!!!!!!!!
-library("spBayesSurv")
-# survregbayes
+#library("spBayesSurv") nope
+# survregbayes nope
 #https://cran.r-project.org/web/packages/spBayesSurv/spBayesSurv.pdf
 
 
@@ -270,7 +352,10 @@ coxph(Surv(start2, stop2, death.time)~brucella+TB_3+herd2 + age_yr2 +I(age_yr2^2
 # Part III: Joint models
 ############################################
 ############################################
+final.mod<-coxph(Surv(start, stop, death.time)~brucella+TB_3+herd2 + age_yr2 +I(age_yr2^2), data=data3); summary(final.mod)
+
 library("nlme")
+library("lme4")
 immune<-read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/cross_sectional_data_withdz_cleandisease_nofinal_Feb2016_capturetime_forsurv.csv")  # 5 animals added from last time
 # added these five to cross_sectional_data_withdz_cleandisease_nofinal_Feb2016_capturetime.csv because in survival analyses.
 immune2<-immune[!is.na(immune$ifng),]
@@ -284,11 +369,13 @@ immuneg<-immune3
 # datasets need same numbers of individuals
 im_id<-unique(immuneg$id); mort_id<-unique(data3$animal)
 exclude_from_surv<- mort_id[!(mort_id %in% im_id)] # All buffs in the mort dataset are in immune data!
-exclude_from_immune<- im_id[!(im_id %in% mort_id)] # 23 removed from gamma dataset!
+exclude_from_immune<- im_id[!(im_id %in% mort_id)] # 24 removed from gamma dataset!
 immuneg2<-immuneg[!(immuneg$id %in% exclude_from_immune),]
+immuneg2$id<-as.factor(as.character(immuneg2$id))
+data3$animal<-as.factor(as.character(data3$animal))
 unique(immuneg2$id)
-unique(immuneg$id)
-#check subject(s): O1b, O26b, O30, O31, O42, O47b, R20, R28, R34b, R38, R39b, R43, R46b, R7b, Y10b, Y16b, Y33b, Y36, Y38b, Y4, Y40, Y42, Y46b, Y47
+unique(data3$animal)
+
 
 # is there an association with current gamma levels and mortality: 
 ############################################
@@ -304,7 +391,7 @@ for (i in 1:length(sub)){
 	df$maxtime[i] <- max(temp$capturetime)
 	######
 }
-df$id[df$maxtime > df$maxstart]  # only O10, typeo in gamma dat... no an animal censored early when it went missing
+df$id[df$maxtime > df$maxstart+4]  # only O10, typeo in gamma dat... no an animal censored early when it went missing
 
 immuneg2$problem<-NA
 #for (i in 1:length(df[,1])){
@@ -317,27 +404,93 @@ immuneg2$problem<-NA
 #immuneg2$problem[is.na(immuneg2$problem)]<-0
 #immuneg3<- immuneg2[immuneg2$problem==0,]
 
-immuneg3<- immuneg2[immuneg2$id != "O10",]
+#immuneg3<- immuneg2[immuneg2$id != "O10",]
 
-im_id<-unique(immuneg3$id); mort_id<-unique(data3$animal)
-exclude_from_surv<- mort_id[!(mort_id %in% im_id)] # All buffs in the mort dataset are in immune data!
-exclude_from_immune<- im_id[!(im_id %in% mort_id)]
+#im_id<-unique(immuneg3$id); mort_id<-unique(data3$animal)
+#exclude_from_surv<- mort_id[!(mort_id %in% im_id)] # All buffs in the mort dataset are in immune data!
+#exclude_from_immune<- im_id[!(im_id %in% mort_id)]
 
 
 #sub<- c("O1b", "O26b", "O30", "O31", "O42", "O47b", "R20", "R28", "R34b", "R38", "R39b", "R43", "R46b", "R7b", "Y10b", "Y16b", "Y33b", "Y36", "Y38b", "Y4", "Y40", "Y42", "Y46b", "Y47")
 #immune4<- immune3[!(immune3$id %in% sub),]
 #data4<- data3[!(data3$animal %in% sub),]
 
+data3$start3<-data3$start2+3
+data3$stop3<-data3$stop2+3
+mort.fit = coxph(Surv(start3, stop3, death.time)~brucella+TB_3+herd2 + age_yr2 
+	+I(age_yr2^2) + cluster(animal), data=data3, model=TRUE, x=TRUE)
+#gamma.fit0 = lmer(log(ifng)~tb+ bruc+ herd+ bruc:herd+ (capturetime|id) + (1| ifng_plate), data=immuneg2)
+#immuneg2$gamma<- log(immuneg2$ifng)
+#gamma.fit = lme(log(ifng) ~ tb+ bruc+ herd+ bruc:herd+ capturetime, random=~capturetime|id, data=immuneg2)
+immuneg2$time<- immuneg2$capturetime+3.1
+gamma.fit = lme(log(ifng) ~ tb + bruc+ herd+ bruc:herd+ time, random= ~1|id, data=immuneg2)
+
+test<-jointModelBayes(gamma.fit, mort.fit, timeVar="time", method="spline-PH-aGH")
+
+
+
+
+
+
+# remove those with 0 event times: B42, O29, O32, O47, R46, 
+rm<-c("B42", "O29", "O32", "O47", "R46")
+im<-immuneg2[!(immuneg2$id %in% rm), ]
+mort<- data3[!(data3$animal %in% rm),]
+
+gamma.fit <- lme(log(ifng) ~ tb+ bruc+ herd+ bruc:herd+ time, random=~1|id, data=im)
+mort.fit <- coxph(Surv(start3, stop3, death.time)~brucella+TB_3+herd2 + age_yr2 
+                  +I(age_yr2^2) + cluster(animal), data=mort, model=TRUE, x=TRUE)
+test<-jointModelBayes(gamma.fit, mort.fit, timeVar="time", method="spline-PH-aGH")
+
+
+
+###########################################
+# Hapto
+###########################################
+immune<-read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/cross_sectional_data_withdz_cleandisease_nofinal_Feb2016_capturetime_forsurv.csv")  # 5 animals added from last time
+# added these five to cross_sectional_data_withdz_cleandisease_nofinal_Feb2016_capturetime.csv because in survival analyses.
+immune2<-immune[!is.na(immune$hapto),]
+immune3<-immune2[!is.na(immune2$hapto_plate),]  # 1 NA plate value!
+immune3$hapto_plate<-as.factor(immune3$hapto_plate)
+immuneg<-immune3
+
+# datasets need same numbers of individuals
+im_id<-unique(immuneg$id); mort_id<-unique(data3$animal)
+exclude_from_surv<- mort_id[!(mort_id %in% im_id)] # 12 buffs in the mort dataset are not in immune data
+exclude_from_immune<- im_id[!(im_id %in% mort_id)] # 16 removed from gamma dataset!
+immuneg2<-immuneg[!(immuneg$id %in% exclude_from_immune),]
+immuneg<-immuneg2
+data<- data3[!(data3$animal %in% exclude_from_surv),]
+length(unique(immuneg$id)); length(unique(data$animal)) # should be 115 each
+table(immuneg$id); table(data$animal)
+immuneg$id<-as.factor(as.character(immuneg$id))
+data$animal<-as.factor(as.character(data$animal))
+colnames(data)[3]<-"start2"
+
+
+# remove animals that died in the first capture period, none. 
+# remove animals that have only one measurement. 
+table(data$animal)
+rm<-c("R15c", "B13", "B2", "O23", "O51", "O8", "R44", "R31", "R5", "Y1", "Y26")
+data<-data[!(data$animal %in% rm),]
+data$animal<- as.factor(as.character(data$animal))
+immuneg<- immuneg[!(immuneg$id %in% rm),]
+immuneg$id<-as.factor(as.character(immuneg$id))
+unique(immuneg$id)
+unique(data$animal)
+
+maxtime<-tapply(data$stop2, data$animal, max)
+maxitime<-tapply(immuneg$capturetime, immuneg$id, max)
+df<-NA
+for (i in 1:length(maxtime)){
+     df[i]<-maxtime[[1]]>maxitime[[1]]
+ }
+immuneg$capturetime2<- immuneg$capturetime+
+hapto.fit<-lme(log(hapto)~tb+age_yr+capturetime2, random = ~capturetime2|id, data=immuneg)
 mort.fit = coxph(Surv(start2, stop2, death.time)~brucella+TB_3+herd2 + age_yr2 
-	+I(age_yr2^2) + cluster(animal), data=data3, model=TRUE)
-gamma.fit0 = lmer(log(ifng)~tb+ bruc+ herd+ bruc:herd+ (capturetime|id) + (1| ifng_plate), data=immuneg3)
-gamma.fit = lme(log(ifng) ~ tb+ bruc+ herd+ bruc:herd, random=~1|id, data=immuneg3)
-test<-jointModelBayes(gamma.fit, mort.fit, timeVar="capturetime")
+                 +I(age_yr2^2) + cluster(animal), data=data,  x=TRUE, model=TRUE)
+test<-jointModel(hapto.fit, mort.fit, timeVar='capturetime2')
 
-
-im_id<-unique(immune4$id); mort_id<-unique(data4$animal)
-exclude_from_surv<- mort_id[!(mort_id %in% im_id)] # All buffs in the mort dataset are in immune data!
-exclude_from_immune<- im_id[!(im_id %in% mort_id)] 
 
 # Does the association betwee current gamma levels and mortality vary by infection status
 ############################################
@@ -349,68 +502,16 @@ exclude_from_immune<- im_id[!(im_id %in% mort_id)]
 ############################################
 
 
+############################################
+############################################
+############################################
 
-# Need a sum of time observing uninfected, TB+, Bruc+, Coinfected animals
-id<-as.character(unique(data$animal))
-data$animal<-as.character(data$animal)
 
-timedf<-data.frame(id=id, min_neg=NA, max_neg=NA, min_TB=NA, 
-	max_TB=NA, min_B=NA, max_B=NA, min_C=NA, max_C=NA)
-for (i in 1:length(id)){
-	newdf<- data[data$animal==id[i],]
-	# need if statments added in case of NA vlaues
-	if(length(newdf$animal[newdf$TB_3==0 & newdf$brucella==0])>0){
-	timedf$min_neg[i]<-min(newdf$start2[newdf$TB_3==0 & newdf$brucella==0])
-	timedf$max_neg[i]<-max(newdf$stop2[newdf$TB_3==0 & newdf$brucella==0])
-	} else {
-		timedf$min_neg[i]<-0
-		timedf$max_neg[i]<-0
-	}
-	
-	if(length(newdf$animal[newdf$TB_3==1 & newdf$brucella==0]>0)){
-		timedf$min_TB[i]<-min(newdf$start2[newdf$TB_3==1 & newdf$brucella==0])
-		timedf$max_TB[i]<-max(newdf$stop2[newdf$TB_3==1 & newdf$brucella==0])
-	} else {
-		timedf$min_TB[i]<-0
-		timedf$max_TB[i]<-0
-	}
 
-	if(length(newdf$animal[newdf$TB_3==0 & newdf$brucella==1]>0)){
-		timedf$min_B[i]<-min(newdf$start2[newdf$TB_3==0 & newdf$brucella==1])
-		timedf$max_B[i]<-max(newdf$stop2[newdf$TB_3==0 & newdf$brucella==1])
-	} else {
-		timedf$min_B[i]<-0
-		timedf$max_B[i]<-0
-	}
+############################################
+############################################
+############################################
 
-	if(length(newdf$animal[newdf$TB_3==1 & newdf$brucella==1]>0)){
-	timedf$min_C[i]<-min(newdf$start2[newdf$TB_3==1 & newdf$brucella==1])
-	timedf$max_C[i]<-max(newdf$stop2[newdf$TB_3==1 & newdf$brucella==1])
-	} else {
-		timedf$min_C[i]<-0
-		timedf$max_C[i]<-0
-	}
-}
-timeneg<-timedf$max_neg-timedf$min_neg; sum(timeneg) # 1986 all; 1062 in LS
-timeTB<-timedf$max_TB-timedf$min_TB #600; 348 in LS
-timeB<-timedf$max_B-timedf$min_B; sum(timeB) # 1182; 636 in LS
-timeC<-timedf$max_C-timedf$min_C # 546; 300 in LS
-sum(timeB)+sum(timeneg)+sum(timeTB)+sum(timeC) $ 4314 total months
-6/600
-12/1182
-8/546
-# mortality rates
-16/(1986/12) #neg 0.097
-6/(600/12) # TB 0.12
-12/(1182/12) # Bruc 0.122
-8/(546/12) # co = 0.176
-
-# mortality rates in LS
-#deaths= 18 total; 3 TB only, 4 BR only; 6 co. 
-5/(1062/12)
-3/(348/12)
-4/(636/12)
-6/(300/12)
 
 ############################################
 ############################################

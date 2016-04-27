@@ -1,0 +1,229 @@
+immune<-read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/cross_sectional_data_withdz_cleandisease_nofinal_Feb2016_capturetime_forsurv.csv")
+summary(immune)
+summary(immmune[immune$convert==1,])
+summary(immune[immune$convert==1,])
+tbconvert<- immune[immune$convert == 1,]#
+write.csv(tbconvert, "~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/tbconverters_Feb2016.csv")
+length(unique(tbconvert$id))
+brconvert<- immune[immune$brucconvert == 1,]
+length(unique(brconvert$id)) # good, 47 converters.
+write.csv(brconvert, "~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/brucconverters_Feb2016.csv")
+both<- brconvert[brconvert$convert==1,]
+length(unique(both$id)) # good, 29 converters.
+write.csv(both, "~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/convertersonly_Feb2016.csv")
+###############################################
+data<- read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/cross_sectional_data_withdz_cleandisease_nofinal_Feb2016_capturetime_forsurv.csv")#
+library(lme4)#
+library(arm)#
+library(ggplot2)#
+#
+#######################################################
+# 1 Proportion of pregnant buffalo in LS or with <=2mo calves #
+#   During October-January, the capture right before the birthing season#
+#######################################################
+data2<- data[data$herdorig=="LS",]#
+table(data2$capturetime)#
+# 0  6  9 12 15 18 24 30 33 36 39 42 48 #
+# 50 49  2 52  1 50 51 52  1 51  1 47  1 #
+# October -January cooresponds to capturetime= #
+pregtime <- c(6, 18, 30, 42)#
+data3<- data2[data2$capturetime %in% pregtime,]#
+#
+table(data3$preg, data3$calf)#
+#
+# fecundity==1 if mid, late mid/late pregnant. #
+# two early pregnancies, both not counted because early... will be for next year. #
+data3$fec<- NA#
+data3$fec[data3$preg == "late" || data3$preg=="mid"|| data3$preg=="mid/late"]<- 1#
+data3$fec[data3$preg == "early" || data3$preg == "unknown"] <- 0#
+data3$fec[data3$preg == "no" & data3$calf %in% c(0, 1, 2)] <- 1#
+data3$fec[data3$preg == "no" & data3$calf %in% c(8, 10, 11, 12, "no", "yes", "unknown")] <- 0
+d <- data3[data3$age_yr >= 3,]#
+d$age_yr2 <- d$age_yr- 3  # puts zero point on buffalo that are age 3#
+#
+final.mod<-glmer(fec ~ age_yr2*tb+ I(age_yr2^2) + tb *bruc+ (capturetime|id), data=d, family=binomial(link="logit")); summary(final.mod)
+d <- data3[data3$age_yr >= 3,]#
+d$age_yr2 <- d$age_yr- 3  # puts zero point on buffalo that are age 3#
+#
+final.mod<-glmer(fec ~ age_yr2+tb+ I(age_yr2^2) + tb *bruc+ (capturetime|id), data=d, family=binomial(link="logit")); summary(final.mod)
+d<- data3[data3$age_yr >= 3 & data3$age_yr <= 8,]#
+d$age_yr2<- d$age_yr - 4#
+final.mod<-glmer(fec ~ age_yr2*tb+ I(age_yr2^2) + tb *bruc+ (capturetime|id), data=d, family=binomial(link="logit")); summary(final.mod)#
+final.mod<-glmer(fec ~ age_yr2+ I(age_yr2^2) + tb *bruc+ (capturetime|id), data=d, family=binomial(link="logit")); summary(final.mod)
+get_model_statistics= function(data, age){#
+	data$age_yr2 <- data$age_yr - age#
+	#temp.mod<- glmer(fec ~ age_yr*tb+ I(age_yr^2) + tb *bruc+ (capturetime|id), data=data, family=binomial(link="logit"))#
+	temp.mod<- glmer(fec ~ age_yr2 + I(age_yr2^2) + tb *bruc+ (capturetime|id), data=data, family=binomial(link="logit"))#
+	Coef <- temp.mod@beta[1]#
+	SE <- se.fixef(temp.mod)[[1]]#
+	LB <- Coef - 1.96*SE#
+	UB <- Coef + 1.96*SE #
+	Z <- coef(summary(temp.mod))[1,3]#
+	p <- coef(summary(temp.mod))[1,4]#
+	rowvals <- c(Coef, SE, LB, UB, Z, p)#
+	return(rowvals)#
+	rm(temp.mod, Coef, SE, LB, UB, Z, p)#
+}#
+#
+for (i in 1:length(ages)){#
+	# TB-, Bruc - #
+	d$tb<- relevel(d$tb, "negative")#
+	d$bruc<- relevel(d$bruc, "negative")#
+	fitsummary[i,2:7] <- get_model_statistics(d, ages[i])#
+	fitsummary$TB[i] <- "negative"#
+	fitsummary$Bruc[i] <- "negative"#
+#
+	# TB + Bruc -#
+	d$tb<- relevel(d$tb, "positive")#
+	d$bruc<- relevel(d$bruc, "negative")#
+	fitsummary[i+length(ages),2:7] <- get_model_statistics(d, ages[i])#
+	fitsummary$TB[i+length(ages)] <- "positive"#
+	fitsummary$Bruc[i+length(ages)] <- "negative"#
+#
+	# TB + Bruc -#
+	d$tb<- relevel(d$tb, "negative")#
+	d$bruc<- relevel(d$bruc, "positive")#
+	fitsummary[i+2*length(ages),2:7] <- get_model_statistics(d, ages[i])#
+	fitsummary$TB[i+2*length(ages)] <- "negative"#
+	fitsummary$Bruc[i+2*length(ages)] <- "positive"#
+#
+	# TB + Bruc +#
+	d$tb<- relevel(d$tb, "positive")#
+	d$bruc<- relevel(d$bruc, "positive")#
+	fitsummary[i+3*length(ages),2:7] <- get_model_statistics(d, ages[i])#
+	fitsummary$TB[i+3*length(ages)] <- "positive"#
+	fitsummary$Bruc[i+3*length(ages)] <- "positive"#
+}#
+# plot predicted values#
+fitsummary$prob<- NA; fitsummary$plb<- NA; fitsummary$pub <- NA#
+fitsummary$prob<-exp(fitsummary$Coef)/ (1+ exp(fitsummary$Coef))#
+fitsummary$plb<-exp(fitsummary$LB)/ (1+ exp(fitsummary$LB))#
+fitsummary$pub<-exp(fitsummary$UB)/ (1+ exp(fitsummary$UB))
+# refit at other ages... #
+ages <- seq(3, 8, 1)#
+fitsummary <- data.frame(Age.ind=rep(ages, 4), Coef= NA, SE= NA, LB=NA, UB=NA, Z= NA, p= NA, TB= NA, Bruc= NA)#
+#d <- data3[data3$age_yr >= 3,]#
+#
+d<- data3[data3$age_yr >= 3 & data3$age_yr <= 8,]
+get_model_statistics= function(data, age){#
+	data$age_yr2 <- data$age_yr - age#
+	#temp.mod<- glmer(fec ~ age_yr*tb+ I(age_yr^2) + tb *bruc+ (capturetime|id), data=data, family=binomial(link="logit"))#
+	temp.mod<- glmer(fec ~ age_yr2 + I(age_yr2^2) + tb *bruc+ (capturetime|id), data=data, family=binomial(link="logit"))#
+	Coef <- temp.mod@beta[1]#
+	SE <- se.fixef(temp.mod)[[1]]#
+	LB <- Coef - 1.96*SE#
+	UB <- Coef + 1.96*SE #
+	Z <- coef(summary(temp.mod))[1,3]#
+	p <- coef(summary(temp.mod))[1,4]#
+	rowvals <- c(Coef, SE, LB, UB, Z, p)#
+	return(rowvals)#
+	rm(temp.mod, Coef, SE, LB, UB, Z, p)#
+}#
+#
+for (i in 1:length(ages)){#
+	# TB-, Bruc - #
+	d$tb<- relevel(d$tb, "negative")#
+	d$bruc<- relevel(d$bruc, "negative")#
+	fitsummary[i,2:7] <- get_model_statistics(d, ages[i])#
+	fitsummary$TB[i] <- "negative"#
+	fitsummary$Bruc[i] <- "negative"#
+#
+	# TB + Bruc -#
+	d$tb<- relevel(d$tb, "positive")#
+	d$bruc<- relevel(d$bruc, "negative")#
+	fitsummary[i+length(ages),2:7] <- get_model_statistics(d, ages[i])#
+	fitsummary$TB[i+length(ages)] <- "positive"#
+	fitsummary$Bruc[i+length(ages)] <- "negative"#
+#
+	# TB + Bruc -#
+	d$tb<- relevel(d$tb, "negative")#
+	d$bruc<- relevel(d$bruc, "positive")#
+	fitsummary[i+2*length(ages),2:7] <- get_model_statistics(d, ages[i])#
+	fitsummary$TB[i+2*length(ages)] <- "negative"#
+	fitsummary$Bruc[i+2*length(ages)] <- "positive"#
+#
+	# TB + Bruc +#
+	d$tb<- relevel(d$tb, "positive")#
+	d$bruc<- relevel(d$bruc, "positive")#
+	fitsummary[i+3*length(ages),2:7] <- get_model_statistics(d, ages[i])#
+	fitsummary$TB[i+3*length(ages)] <- "positive"#
+	fitsummary$Bruc[i+3*length(ages)] <- "positive"#
+}#
+# plot predicted values#
+fitsummary$prob<- NA; fitsummary$plb<- NA; fitsummary$pub <- NA#
+fitsummary$prob<-exp(fitsummary$Coef)/ (1+ exp(fitsummary$Coef))#
+fitsummary$plb<-exp(fitsummary$LB)/ (1+ exp(fitsummary$LB))#
+fitsummary$pub<-exp(fitsummary$UB)/ (1+ exp(fitsummary$UB))
+d$tb<- as.factor(d$tb)
+d<- data3[data3$age_yr >= 3 & data3$age_yr <= 8,]#
+d$age_yr2<- d$age_yr - 4#
+#final.mod<-glmer(fec ~ age_yr2*tb+ I(age_yr2^2) + tb *bruc+ (capturetime|id), data=d, family=binomial(link="logit")); summary(final.mod)#
+#final.mod<-glmer(fec ~ age_yr2+ I(age_yr2^2) + tb *bruc+ (capturetime|id), data=d, family=binomial(link="logit")); summary(final.mod)#
+#
+# this is why: #
+#table(d$fec, d$tb, d$age_yr)#
+d$tb[d$tb==0] <- "negative"#
+d$tb[d$tb==1] <- "positive"#
+d$tb <- as.factor(d$tb)#
+#
+get_model_statistics= function(data, age){#
+	data$age_yr2 <- data$age_yr - age#
+	#temp.mod<- glmer(fec ~ age_yr*tb+ I(age_yr^2) + tb *bruc+ (capturetime|id), data=data, family=binomial(link="logit"))#
+	temp.mod<- glmer(fec ~ age_yr2 + I(age_yr2^2) + tb *bruc+ (capturetime|id), data=data, family=binomial(link="logit"))#
+	Coef <- temp.mod@beta[1]#
+	SE <- se.fixef(temp.mod)[[1]]#
+	LB <- Coef - 1.96*SE#
+	UB <- Coef + 1.96*SE #
+	Z <- coef(summary(temp.mod))[1,3]#
+	p <- coef(summary(temp.mod))[1,4]#
+	rowvals <- c(Coef, SE, LB, UB, Z, p)#
+	return(rowvals)#
+	rm(temp.mod, Coef, SE, LB, UB, Z, p)#
+}#
+#
+for (i in 1:length(ages)){#
+	# TB-, Bruc - #
+	d$tb<- relevel(d$tb, "negative")#
+	d$bruc<- relevel(d$bruc, "negative")#
+	fitsummary[i,2:7] <- get_model_statistics(d, ages[i])#
+	fitsummary$TB[i] <- "negative"#
+	fitsummary$Bruc[i] <- "negative"#
+#
+	# TB + Bruc -#
+	d$tb<- relevel(d$tb, "positive")#
+	d$bruc<- relevel(d$bruc, "negative")#
+	fitsummary[i+length(ages),2:7] <- get_model_statistics(d, ages[i])#
+	fitsummary$TB[i+length(ages)] <- "positive"#
+	fitsummary$Bruc[i+length(ages)] <- "negative"#
+#
+	# TB + Bruc -#
+	d$tb<- relevel(d$tb, "negative")#
+	d$bruc<- relevel(d$bruc, "positive")#
+	fitsummary[i+2*length(ages),2:7] <- get_model_statistics(d, ages[i])#
+	fitsummary$TB[i+2*length(ages)] <- "negative"#
+	fitsummary$Bruc[i+2*length(ages)] <- "positive"#
+#
+	# TB + Bruc +#
+	d$tb<- relevel(d$tb, "positive")#
+	d$bruc<- relevel(d$bruc, "positive")#
+	fitsummary[i+3*length(ages),2:7] <- get_model_statistics(d, ages[i])#
+	fitsummary$TB[i+3*length(ages)] <- "positive"#
+	fitsummary$Bruc[i+3*length(ages)] <- "positive"#
+}#
+# plot predicted values#
+fitsummary$prob<- NA; fitsummary$plb<- NA; fitsummary$pub <- NA#
+fitsummary$prob<-exp(fitsummary$Coef)/ (1+ exp(fitsummary$Coef))#
+fitsummary$plb<-exp(fitsummary$LB)/ (1+ exp(fitsummary$LB))#
+fitsummary$pub<-exp(fitsummary$UB)/ (1+ exp(fitsummary$UB))
+fitsummary$dz<- NA#
+fitsummary$dz[fitsummary$TB=="negative" & fitsummary$Bruc=="negative"] <- "Uninfected"#
+fitsummary$dz[fitsummary$TB=="negative" & fitsummary$Bruc=="positive"] <- "Brucellosis"#
+fitsummary$dz[fitsummary$TB=="positive" & fitsummary$Bruc=="negative"] <- "TB"#
+fitsummary$dz[fitsummary$TB=="positive" & fitsummary$Bruc=="positive"] <- "Co-infected"
+ggplot(fitsummary, aes(x= fitsummary$Age.ind, y= fitsummary$Coef, colour = fitsummary$dz)) + geom_point()
+ggplot(fitsummary, aes(x= fitsummary$Age.ind, y= fitsummary$Coef, colour = fitsummary$dz)) + geom_point() + geom_line()
+fs <- fitsummary#
+ggplot(fs, aes(x= fs$Age.ind, y= fs$prob, colour = fs$dz)) + geom_line()#
+ggplot(fs, aes(x= fs$Age.ind, y= fs$prob, colour = fs$dz)) + geom_point() + geom_line()+ geom_errorbar(aes(ymin= fs$plb, ymax=fs$pub, width=0.1))
+ggplot(fs, aes(x= fs$Age.ind, y= fs$prob, colour = fs$dz)) + geom_line()#
+ggplot(fs, aes(x= fs$Age.ind, y= fs$prob, colour = fs$dz)) + geom_point() + geom_line()

@@ -16,8 +16,33 @@ library("lattice")
 ############################################################
 ############################################################
 ############################################################
+# read in
 immune<-read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/cross_sectional_data_withdz_cleandisease_nofinal_Feb2016_capturetime_forsurv.csv")  # 5 animals added from last time
 # added these five to cross_sectional_data_withdz_cleandisease_nofinal_Feb2016_capturetime.csv because in survival analyses.
+
+### make converter datasets ###
+# only those that became infected with bTB (N= 47)
+tbconvert<- immune[immune$convert == 1,]
+write.csv(tbconvert, "~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/tbconverters_Feb2016.csv")
+
+# bTB converters
+tbconvert<- immune[immune$convert == 1,]
+length(unique(tbconvert$id)) # good, 47 converters.
+write.csv(tbconvert, "~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/tbconverters_Feb2016.csv")
+
+# brucellosis converters
+brconvert<- immune[immune$brucconvert == 1,]
+length(unique(brconvert$id)) # good, 29 converters.
+write.csv(brconvert, "~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/brucconverters_Feb2016.csv")
+
+# bothconvert
+both<- brconvert[brconvert$convert==1,]
+length(unique(both$id)) # good, 14 converters.
+write.csv(both, "~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/convertersonly_Feb2016.csv")
+
+
+
+# Prep for gamma analyses. 
 immune2<-immune[!is.na(immune$ifng),]
 immune3<-immune2[!is.na(immune2$ifng_plate),]  # 1 NA plate value!
 immune3<-immune3[!is.na(immune3$ifng_delay),]
@@ -25,9 +50,10 @@ immune3<-immune3[immune3$ifng_CV<15,]
 immune3$ifng_plate<-as.factor(immune3$ifng_plate)
 
 # who is missing in the gamma data and why?
-surv<-read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/survival/brucsurvival_TB3controls_longresidnomissing_noerrors_season2.csv")
-unique(surv$animal[!(surv$animal %in% immune2$id)]) # 14 bolused animals in survival anlayses that need sorted. 
-
+surv<-read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/survival/brucsurvival_TB3controls_longresidnomissing_noerrors_season2_final.csv")
+unique(surv$animal[!(surv$animal %in% immune2$id)])  # the bolused animals that get excluded before analyses
+###R22  R24  R27  R35  R45  R45b R50  R6   Y20  Y31c Y31d Y39  Y43  Y44 
+unique(immune3$animal[!(immune3$id %in% surv$animal)]) # none- gamma data has all in survival analyses now. 
 
 # Step 1- decide on random effects
 #########################################
@@ -88,23 +114,22 @@ lwm<-update(full.mod, .~. -tb:bruc); anova(full.mod, lwm)
 
 full.mod<-update(full.mod, .~. -bruc:I(age_yr^2))
 lwm<-update(full.mod, .~. -bruc:herdorig); anova(full.mod, lwm)
-lwm<-update(full.mod, .~. -bruc:age_yr); anova(full.mod, lwm)
+lwm<-update(full.mod, .~. -bruc:age_yr); anova(full.mod, lwm) #
 lwm<-update(full.mod, .~. -tb:bruc); anova(full.mod, lwm)
 
 full.mod<-update(full.mod, .~. -bruc:age_yr)
 lwm<-update(full.mod, .~. -bruc:herdorig); anova(full.mod, lwm)
 lwm<-update(full.mod, .~. -tb:bruc); anova(full.mod, lwm)
 
-
 full.mod<-update(full.mod, .~. -tb:bruc)
 lwm<-update(full.mod, .~. -age_yr); anova(full.mod, lwm)
 lwm<-update(full.mod, .~. -I(age_yr^2)); anova(full.mod, lwm)
-lwm<-update(full.mod, .~. -ifng_delay); anova(full.mod, lwm)
+lwm<-update(full.mod, .~. -ifng_delay); anova(full.mod, lwm) # 
 lwm<-update(full.mod, .~. -tb); anova(full.mod, lwm)
 
 full.mod<-update(full.mod, .~. -ifng_delay)
 lwm<-update(full.mod, .~. -age_yr); anova(full.mod, lwm)
-lwm<-update(full.mod, .~. -I(age_yr^2)); anova(full.mod, lwm)
+lwm<-update(full.mod, .~. -I(age_yr^2)); anova(full.mod, lwm) # 
 lwm<-update(full.mod, .~. -bruc:herdorig); anova(full.mod, lwm)
 lwm<-update(full.mod, .~. -tb); anova(full.mod, lwm)
 
@@ -118,59 +143,10 @@ final.mod<-lmer(log(ifng) ~ bruc + herd + tb + bruc:herd + (1 | ifng_plate) + (c
 # 3. Use the Kenward-Roger approximation to get approximate degrees of freedom and the t-distribution to get p-values, which is implemented in the pbkrtest package.
 #http://mindingthebrain.blogspot.com/2014/02/three-ways-to-get-parameter-specific-p.html
 # get p-values from the t-distribution using the t-values and approximated degrees of freedom
-coefs <- data.frame(coef(summary(full.mod)))
-df.KR <- get_ddf_Lb(full.mod, fixef(full.mod))
-coefs$p.KR <- 2 * (1 - pt(abs(coefs$t.value), df.KR))
-coefs
-
-
-#Scaled residuals: 
-    Min      1Q  Median      3Q     Max 
--5.5140 -0.5496  0.0918  0.5930  2.5391 
-
-#Random effects:
-# Groups   Name        Variance  Std.Dev. Corr 
-# id       (Intercept) 2.038e-01 0.45145       
-#          capturetime 5.084e-05 0.00713  -0.54
-# plate    (Intercept) 5.134e-02 0.22659       
-# Residual             3.129e-01 0.55938       
-#Number of obs: 744, groups:  id, 146; plate, 42
-
-#Fixed effects:
-#                    Estimate Std. Error t value
-#(Intercept)         -0.67489    0.08304  -8.128
-#brucpositive         0.14937    0.09470   1.577
-#herdCB               0.18303    0.11004   1.663
-#tb                   0.19961    0.06995   2.853
-#brucpositive:herdCB -0.39426    0.14011  -2.814
-
-#Correlation of Fixed Effects:
-#            (Intr) brcpst herdCB tb    
-#brucpositiv -0.406                     
-#herdCB      -0.682  0.327              
-#tb          -0.208 -0.079  0.001       
-#brcpstv:hCB  0.283 -0.670 -0.438 -0.001
-
-# p-values
 coefs <- data.frame(coef(summary(final.mod)))
-df.KR <- get_ddf_Lb(lwm, fixef(final.mod))
+df.KR <- get_ddf_Lb(full.mod, fixef(final.mod))
 coefs$p.KR <- 2 * (1 - pt(abs(coefs$t.value), df.KR))
 coefs
-#                      Estimate Std..Error   t.value         p.KR
-#(Intercept)         -0.6667788 0.08281638 -8.051291 2.771117e-13
-#brucpositive         0.1640323 0.09337660  1.756675 8.109329e-02
-#herdCB               0.1679881 0.10868023  1.545710 1.243637e-01
-#tb                   0.1795050 0.06709383  2.675432 8.325425e-03
-#brucpositive:herdCB -0.4081314 0.13545922 -3.012947 3.056206e-03
-
-
-#coefs
-#                          Estimate Std..Error   t.value         p.KR
-#(Intercept)             -0.4987900 0.07922996 -6.295472 3.467603e-09
-#brucpositive            -0.2441006 0.09909454 -2.463310 1.494133e-02
-#herdorigLS              -0.1679882 0.10868074 -1.545704 1.243653e-01
-#tb                       0.1795036 0.06709389  2.675408 8.325984e-03
-#brucpositive:herdorigLS  0.4081334 0.13545962  3.012952 3.056152e-03
 
 
 immune3$TBcol[immune3$convert==1]<- "red"
@@ -255,6 +231,9 @@ immune<-read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_
 immune2<-immune[!is.na(immune$hapto),]
 immune3<-immune2[!is.na(immune2$hapto_plate),]  # 1 NA plate value!
 immune3$hapto_plate<-as.factor(immune3$hapto_plate)
+
+length(immune3$id); length(unique(immune3$id))
+
 
 table(immune3$id, immune3$hapto_plate)
 
@@ -593,3 +572,28 @@ ggplot(data=all2, aes(x=floor(tsi_tb), y=log(hapto), group=id, colour=bruc))+ ge
     legend.text = element_text(size=15) ) + guides(fill=guide_legend(title="Brucellosis"))
 
 
+############################################################
+############################################################
+############################################################
+# Plasma BKA- Cross sectional full data
+############################################################
+############################################################
+############################################################
+immune<-read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/cross_sectional_data_withdz_cleandisease_nofinal_Feb2016_capturetime_forsurv.csv")  # 5 animals added from last time
+immune2<-immune[!is.na(immune$bka_killed),]
+immune3<-immune2
+
+full.mod<-lmer(bka_killed~bruc+herdorig+tb+age_yr+I(age_yr^2)+ 
+ 	tb*age_yr+ tb*I(age_yr^2)+ tb*herdorig+ bruc*age_yr+ bruc*I(age_yr^2)+ 
+ 	bruc*herdorig+ tb*bruc+bka_delay + (capturetime|id), offset= bka_control, data=immune3)
+plot(immune3$capturetime, resid(full.mod))
+
+test.mod<-lmer(bka_killed~bruc+herdorig+
+	bka_delay + (capturetime|id), offset= bka_control, data=immune3)
+	
+coefs <- data.frame(coef(summary(test.mod)))
+df.KR <- get_ddf_Lb(test.mod, fixef(test.mod))
+coefs$p.KR <- 2 * (1 - pt(abs(coefs$t.value), df.KR))
+coefs
+	
+	

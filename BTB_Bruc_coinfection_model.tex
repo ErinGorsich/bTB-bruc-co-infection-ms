@@ -1,0 +1,173 @@
+\documentclass[letterpaper,12pt]{article}
+\usepackage{booktabs,graphicx,amssymb,lineno,amsmath,multirow,rotating,verbatim,setspace,float,subfigure, fixltx2e}
+\usepackage[margin=1in]{geometry}
+\usepackage{gensymb}
+\usepackage[table]{xcolor}
+
+%*******************************************************************************************************
+% verbatim lets you do \begin{} and \end {} comment
+%amsymb & amssymb useful for math.  
+% check out the wiki page 
+%/cite  or citep (with natbib package?)
+%/textit or 
+
+%added fixlt2e 
+
+% Latex once to get the file
+% Then bibtex (Put in the same WD)
+% then typeset LaTex again by pushing typeset twice to get the citations in 
+
+\begin{document}
+
+\linenumbers
+%\renewcommand{\thesubfigure}{\Alph{subfigure}}
+%\bibpunct{[}{]}{,}{n}{,}{,}
+
+\title{Summary of BTB-brucellosis coinfection model and assumptions}
+\date{23-April-2016}
+
+\maketitle
+%\singlespace
+\doublespacing
+
+\section*{Overview}
+Bovine tuberculosis (bTB) and brucellosis are positively associated at the population level.   Age prevalence curves show a shift in the peak age of brucellosis infection in co-infected animals (Figure 1).  We want to know why, so we investigate the costs of co-infection on three parameters relevant for disease dynamics. \\
+1. \textit{Host mortality rates}: bTB was associated with a 2.81 ($95\% CI 1.47-6.82$) fold increase in mortality hazard and infection with brucellosis was associated with an 3.00 ($95\% CI 1.50-6.01$) fold increase in mortality hazard compared to uninfected buffalo.  We did not find support for an interaction between bTB and brucellosis on mortality, indicating that the mortality effects of both infections are additive in co-infected buffalo.   \\
+2. \textit{Incidence rates}:  bTB was associated with a 1.37 fold increase in the rate at which animals acquire brucellosis.   This pattern occurred in one site but not the second.  I think this is because the higher baseline mortality in the second site means we do not catch and diagnose infected individuals before they die and hope to test this with the model.\\
+3. \textit{Pregnancy rates}:  These analyses are still in prep- in general we see declines with infection \\
+The model then asks, (1) are changes in these rates sufficient to generate the age prevalence patterns observed and (2) what is the consequence of co-infection for disease invasion?
+
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=5in]{Figure1_ageprev}
+\end{center}
+\caption{Age, brucellosis-prevalence curves in buffalo simultaneously uninfected (blue) or infected (red) with bTB.  The inset figure shows the distribution of ages in our sample, which best cover buffalo between two and eight years old and include 796 samples from 151 repeatedly captured individuals.  Ages are binned for visualization and animals that test positive are assumed to remain positive for the duration of the study.  Sample sizes for TB- are: 10, 182, 209, 103, 27, 35 buffalo.  Sample sizes for TB+ animals are: 0, 21, 108, 75, 21, 1 for ages 0-2, 2-4, 4-6, 6-8, 8-10, and 10+ respectively.}
+\label{fig1}
+\end{figure}
+
+
+
+\pagebreak
+\section*{Model Structure and Assumptions}
+
+\indent
+	We developed a continuous time differential equation model to evaluate the disease dynamic consequence of bTB invasion on brucellosis dynamics and vice versa.  
+Our model structure reflects the costs of co-infection identified for each parameter: host mortality rate, host birth rate, and disease transmission rates (Figure 2- model structure diagram).
+Animals are represented with six groups: susceptible to both infections($S$), infected with brucellosis ($I_B$), recovered from brucellosis ($R_B$), infected with bTB ($I_T$), co-infected with both pathogens ($I_C$), or recovered from brucellosis and infected with bTB ($R_C$).
+% Why called recovered with recrudescence vs. Latent? 
+% Maybe need to highlight the framework more- We incorporate uncertainty associated with the effects of infection and co-infection on host survival and disease transmission by simulating infection dynamics directly from posterior estimates from our statistical models.   
+
+We model the transmission of brucellosis by assuming the time course of infection in African buffalo is comparable with infection in cattle and U.S. bison and by following model structures developed in those systems (Treanor et al. 2010, Vaccine, Ebinger et al. 2011, Hobbs et al. 2015).  
+Transmission of brucellosis to susceptible bison or cattle occurs primarily through contact with the bacteria shed in association with an aborted fetus or live births.  
+Based on the ranging behavior and size of buffalo herds (Ryan et al. 2007), we assume contact patterns are constant across a range of host densities and model transmission as frequency dependent.
+Animals remain infected and infectious with brucellosis for two years following seroconversion (Rhyan et al. 2009).  
+During this time, they suffer decreased birth and survival rates. 
+Recovered animals are associated with similar pregnancy rates as uninfected buffalo and do not contribute to transmission. %?survival and pregnancy
+A small percentage of recovered buffalo, $\eta$, can recrudesce and actively transmit the infection. (Note: this assumptions about time course of infection are why I am redoing my pregnancy analyses so is subject to change) \\
+
+% to discussion- incidence moth didn't look too pulsed... so the continuous time assumption is maybe more ok than in more temperate climates with a more protracted birthing season.
+We also represent the possibility of vertical transmission of brucellosis because bacteria have been detected in the placenta, fetal fluid, and colostrum of infected cattle and bison (cattle: Alexander et al. 1981; Emminger and Schalm 1943, bison: Davis et al. 1990, Xavier et al. 2009).
+However, experimental evidence from cattle suggests vertical transmission is infrequent (Ray et al., 1988).  
+Similarly, maternal immunity in bison calves wanes after 5-6 months and is no difference in the rate that calves borne to seronegative and seropositive mothers become infected (Fuller et al. 2007, Ryan et al. 2009).
+Serological evidence suggests that vertical transmission is also rare in African buffalo (Gorsich et al. 2015).
+Thus, we allow a small proportion of African buffalo calves, $\rho$, to acquire the infection. \\%but note that the importance of vertical transmission on the persistence of brucellosis in wildlife populations remains unclear.
+
+bTB infection in African buffalo is a lifelong infection (Bengis 1999) so we do not include a recovered class or clearance of the infection for bTB.  
+Our assumptions about how bTB infection and co-infection with brucellosis effect survival, fecundity and transmission rates are detailed in the analyses section.  
+% Something here about how we extrapolate the effect outside the age structures we sampled in our analyses. 
+Together, the statistical results identified in this paper and these assumptions generate the following model: 
+\begin{align*}%[hb]
+N=& S+I_T+I_B+ I_C+ R_B + R_C \\
+N_b=& S+b_1I_T+ b_2 I_B+ b_3 I_C + R_B + b_1 R_C
+\end{align*}
+
+\begin{align}
+\frac{dS}{dt}&= b N_b \left(1-\frac{r}{b}\frac{N}{K}\right)  - \beta_T S \frac{(I_T+I_C+ R_C)}{N} - \beta_B S \frac{(I_B+I_C)}{N} - \mu S\\
+\frac{dI_T}{dt}&= \beta_T S \frac{(I_T+I_C+ R_C)}{N}  %- \beta_{T_A} I_T (I_A+I_{T_A}) - (\mu+\alpha_T) I_T  \\
+\frac{dI_B}{dt}&=  \beta_B S \frac{(I_B+I_C)}{N} %- \gamma_A I_A - (\mu+\alpha_A) I_A \\
+\frac{dI_C}{dt}&=  \beta_{T_A} I_T (I_A+I_{T_A}) - \gamma_{T_A} I_{T_A} -  (\mu+\alpha_{T_A}) I_{T_A} \\
+\frac{dR_B}{dt}&=  \gamma_A I_A  - \beta_T R_A(I_T+I_{T_A}+ R_{T_A}) - \mu R_A\\
+\frac{dR_C}{dt}&= \gamma_{T_A} I_{T_A}+ \beta_T R_A(I_T+I_{T_A}+ R_{T_A}) -  (\mu+\alpha_T) R_{T_A} 
+\end{align} 
+where $N$ is the total host population and $r=b-\mu$ is the natural growth rate without density dependence.
+
+
+%TB: "We found a significant regional variation in age structure, particularly in the 1-3 yr class, which may suggest a reduction in calf survival caused by a decrease in body condition of adult females and a subsequent decrease in milk production (Markusfeld et al. 1997, Hernandez and Baca 1998), Caron et al. 2003"
+
+
+
+\pagebreak
+
+\textbf{Parameter table}
+\begin{table}[hb]
+\newcommand{\head}[1]{\textnormal{\textbf{#1}}}
+\small
+\begin{tabular}{lccp{12cm}}
+\hline
+\head{ } & \head{Value} & \head{Unit} & \head{Meaning}\\
+\hline
+b & $ figure $ & 1/d &  natural birth rate for uninfected animals \\
+b1 & $?$ & 1/d & proportional reduction in birth rate for animals with bTB \\
+b4 & $? $ & 1/d &proportional reduction in birth rate for animals with brucellosis.  \\
+b5& $? $ & 1/d & proportional reduction in birth rate for co-infected animals.  \\
+
+$\mu$& $0.067/365.25$& 1/d& natural death rate for uninfected animals.\\
+K& $1000$& indiv & carrying capacity \\
+ $\beta_T$& $0.0001/365.25$& 1/d& transmission rate for bTB \\
+ $\beta_A$& $0.01/365.25$& 1/d& transmission rate for the acute infection \\
+ $\beta_{T_A}$& $0.02/365.25$& 1/d& transmission rate for the acute infection for animals with bTB \\
+ $\gamma_A$& $1/3$& 1/d& 1/duration of infection for acute pathogens \\
+ $\gamma_{T_A}$& $1/3$& 1/d& 1/duration of infection for acute pathogens for individuals with bTB \\
+ $\alpha_T$& $0.001/365.25$& 1/d& increase in the mortality rate due to bTB infection \\
+  $\alpha_T$& $0.001/365.25$& 1/d& increase in the mortality rate due to bTB infection \\ 
+ $\alpha_T$& $0.001/365.25$ & 1/d& increase in the mortality rate due to bTB infection \\
+ r & b$-\mu$ & 1/d & population growth rate at small population sizes \\
+\hline 
+\end{tabular}
+\end{table}
+\\
+\pagebreak
+
+
+
+
+
+
+Let's consider first the TB-only model:
+\begin{align}
+\frac{dS}{dt}&=b N_b\left(1-\frac{r}{b}\frac{N}{K}\right) -\beta_T S I_T - \mu S\\
+\frac{dI_T}{dt}&=\beta_T S I_T - \alpha_T I_T - \mu I_T
+\end{align}
+
+Then the disease free equilibrium is $E^0=(K,0)$ where the population is $x=(S,I_T)$. The basic reproduction number is $\mathcal{R}_0=\frac{\beta_T K}{\alpha_T + \mu}$. The endemic equilibrium is $E^*=(S^*,I_T^*)$ where $S^*=K\frac{1}{\mathcal{R}_0}$ and 
+\begin{equation*}
+I^*=K\left( \frac{r-\alpha_T}{2r}-\frac{1}{\mathcal{R}_0} + \frac{1}{2r}\sqrt{(r-\alpha_T)^2 + \frac{4r\alpha_T}{\mathcal{R}_0}}\right).
+\end{equation*}
+When $\alpha_T=0$, then $I^*=K(1-1/\mathcal{R}_0)$. We fix other parameters and vary $\beta_T$ to get endemic levels such that $I^*/N=10\%$, etc.
+\pagebreak
+
+
+
+\section*{Citations}
+Alexander, B., Schnurrenberger, P.R., Brown, R.R. 1981. Numbers of Brucella abortus in the placenta, umbilicus and fetal fluid of two naturally infected cows. Veterinary Record. 108, 500. 
+
+Begon et al. 2002. A clarification of transmission terms in host-microparasite models: numbers, densities and areas. Epidemiol. Infect. 129, 147-153.
+
+Davis et al. 1990. Brucella abortus in captive bison. I. Serology, bacteriology, pathogenesis, and transmission to cattle. 360-371.
+
+Dolan, L.A. 1980. Latent carriers of brucellosis. 106, 241-243. 
+
+Emminger, A.C., Schalm, O.W. 1943. The effect of Brucella abortus on the bovine udder and its secretion. Am.J. Vet. Res. 4, 100-109, 
+
+Fuller et al. 2007. Reproduction and survival of Yellowstone bison. JWD. 71, 2365-2372.
+
+McCallum et al. 2001. How should pathogen transmission be modeled. Trends Ecol. Evol. 16, 295-300.
+
+Ray, W.C., Brown, R.R., Stringfellow, D.A., Schnurrenberger, P.R., Scanlan, C.M., Swann, A.I. 1988. Bovine brucellosis: an investigation of latency in progeny of culture positive cows. JAVMA. 192, 182-186.
+
+Rhyan, J.C. et al. 2009. Pathogenesis and epidemiology of Brucellosis in Yellowstone bison: Serologic and culture results from adult females and their progeny. J.WD. 45, 729-478.
+
+Xavier et al. 2009. Pathological, Immunohistochemical, and Bacteriological study of tissues and milk of cows and fetuses experimentally infected with Brucella abortus. J. Comp. Path. 140, 149-157. 
+
+\end{document}
