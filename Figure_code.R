@@ -8,7 +8,9 @@ library(ggplot2)
 library('grid')
 library('gridExtra') # specifies layout
 # read in data prepared in cross_sectional_dataprep, groomed for my bTB statuses
-data<-read.csv("cross_sectional_data_withdz_cleandisease_nofinal_Feb2016_capturetime_forsurv.csv")
+#data<-read.csv("cross_sectional_data_withdz_cleandisease_nofinal_Feb2016_capturetime_forsurv.csv")
+data<-read.csv("cross_sectional_data_withdz_cleandisease_nofinal_Feb2016_capturetime.csv")
+
 data_nofinal<-data[data$final_capture=="0",] 
 d<-data.frame(btb=data_nofinal$tb , bruc=as.character(data_nofinal$bruc), age=data_nofinal$age_sel/12, 
               id=data_nofinal$id)
@@ -53,7 +55,7 @@ newdf$se<-sqrt(newdf$Brucprev*(1-newdf$Brucprev)/newdf$N)
 newdf$se[is.na(newdf$se)]<-0
 
 # remove 0-2 bin because no TB+
-newdf2<-newdf[newdf$N>0,]; newdf<-newdf2
+newdf2<-newdf[newdf$N>1,]; newdf<-newdf2
 
 # plot 1: 
 p<- ggplot(newdf, aes(x=agebin, y=Brucprev, group=TB, colour=TB)) + 
@@ -66,12 +68,13 @@ p2<- p+ geom_errorbar(aes(ymin= newdf$Brucprev-newdf$se, ymax=newdf$Brucprev+new
   scale_x_discrete(breaks=c("0", "2", "4", "6", "8", "10"), limits=seq(0, 10, 1), 
                    labels=c("0-2", "2-4", "4-6", "6-8", "8-10", "10+")) +
   scale_y_continuous(limits=c(0,1)) + 
-  theme(axis.title.x = element_text(size=16, vjust=-0.15),
+  theme(axis.line.x = element_line(colour= "black"),
+  		axis.line.y = element_line(colour= "black"),
+  		axis.title.x = element_text(size=16, vjust=-0.15),
         axis.title.y = element_text(size=16, vjust= 0.8),
         axis.text.x = element_text(size=14, vjust=-0.05),
         axis.text.y = element_text(size=14),
         panel.border = element_blank(), 
-        axis.line = element_line(colour= "black"),
         # legend information
         legend.position=c(0.82, 0.9),  
         legend.background= element_rect(fill="white", colour="white"),
@@ -84,16 +87,119 @@ d$btb2<-as.factor(d$btb)
 p3<-ggplot(d, aes(x=age)) + 
   geom_histogram(data=subset(d, btb2=="0"), fill= "steelblue", alpha=0.3, stat="bin", binwidth= 1) + 
   geom_histogram(data=subset(d, btb2=="1"), fill= "orangered", alpha=0.3, stat="bin", binwidth= 1) + 
-  theme_bw()+ xlab("Age (years)")+ ylab("Count")+
+  theme_bw()+ 
+  xlab("Age (years)")+ ylab("Count")+
   theme(panel.border = element_blank(), 
         panel.margin = element_blank(),
         panel.grid.major= element_blank(),
-        panel.grid.minor= element_blank(),
-        axis.line = element_line(colour= "black"))
+        panel.grid.minor= element_blank()) + 
+  theme(axis.line.x = element_line(colour= "black"), 
+		axis.line.y = element_line(colour= "black")  )
 
 vp<- viewport(width=0.4, height=0.4, x=0.34, y=0.75)
 print(p2)
 print(p3, vp=vp)
+
+#######################################################
+#######################################################
+# Figure S1
+#######################################################
+#######################################################
+###### SAME FIGURE BUT WITH Capture period effects
+newdf<-data.frame(captbin=c(seq(0.9,7.9,1), seq(1.1,8.1,1)),
+	prev=c(0.32, 0.284, 0.247, 0.2660, 0.34, 0.3696, 0.4300, 0.442, 
+			0.118, 0.1300, 0.3, 0.2980, 0.300, 0.3695, 0.387, 0.4155), 
+	dz = c(rep("Brucellosis", 8), rep("Tuberculosis", 8)),
+	N = c(59, 80, 93, 94, 50, 92, 92, 77, 59, 80, 93, 94, 50, 92, 92, 77), 
+	param = c(-0.7261, 0.10051 , 0.01135 , -0.231094, -1.9331 ,-0.87186 ,-1.1061 , -0.959), 
+	sep = c(0.689, 0.484 , 0.326 , 0.354, 0.81 , 0.455 ,0.485 , 0.424))  
+newdf$se<- sqrt(newdf$prev * (1 - newdf$prev) / newdf$N)
+
+p3<- ggplot(newdf, aes(x=captbin, y=prev, group=dz, colour=dz)) + 
+  geom_line()+
+  geom_point(size=3, shape=19) + # colour="darkred", fill="darkred" +
+  geom_errorbar(aes(ymin= newdf$prev-newdf$se, ymax=newdf$prev+newdf$se), width=0.2) + 
+  scale_colour_manual(values=c("darkslategray", "darkseagreen3"))
+p4<- p3 +
+  theme_bw() + # removes ugly gray.
+  xlab("Capture period (6 months)") + ylab("Sero-prevalence") +
+  scale_x_discrete(breaks=c("1", "2", "3", "4", "5", "6", "7", "8"), limits=seq(1, 8, 1), 
+                   labels=c("1", "2", "3", "4", "5", "6", "7", "8")) +
+  scale_y_continuous(limits=c(0,0.6)) + 
+  theme(axis.line.x = element_line(colour= "black"),
+  		axis.line.y = element_line(colour= "black"),
+  		axis.title.x = element_text(size=16, vjust=-0.15),
+        axis.title.y = element_text(size=16, vjust= 0.8),
+        axis.text.x = element_text(size=14, vjust=-0.05),
+        axis.text.y = element_text(size=14),
+        panel.border = element_blank(), 
+        # legend information
+        legend.position=c(0.82, 0.9),  
+        legend.background= element_rect(fill="white", colour="white"),
+        legend.key= element_blank(),
+        legend.title= element_blank(),
+        legend.text = element_text(size=15)   )
+
+
+newdf2<- newdf[newdf$dz=="Brucellosis",]
+p5<- ggplot(newdf2, aes(x=captbin, y= param, colour= dz, fill=dz)) + 
+  	xlab("Capture period (6 months)") + ylab("Effect size (TB by age interaction)") +
+	geom_bar(stat="identity", fill="darkseagreen3") + 
+	geom_errorbar(aes(ymin= newdf2$param - newdf2$sep, ymax = newdf2$param + newdf2$sep), 
+	width=0.2) + 
+	scale_colour_manual(values=c("darkslategray")) + 
+	scale_x_discrete(breaks=c("1", "2", "3", "4", "5", "6", "7", "8"), limits=seq(1, 8, 1), 
+                   labels=c("1", "2", "3", "4", "5", "6", "7", "8")) +
+    theme_bw() +
+    guides(fill=FALSE, colour= FALSE) +
+  	theme(axis.line.x = element_line(colour= "black"),
+  		axis.line.y = element_line(colour= "black"),
+  		axis.title.x = element_text(size=16, vjust=-0.15),
+        axis.title.y = element_text(size=16, vjust= 0.8),
+        axis.text.x = element_text(size=14, vjust=-0.05),
+        axis.text.y = element_text(size=14),
+        panel.border = element_blank() )
+
+multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
+  library(grid)
+
+  # Make a list from the ... arguments and plotlist
+  plots <- c(list(...), plotlist)
+
+  numPlots = length(plots)
+
+  # If layout is NULL, then use 'cols' to determine layout
+  if (is.null(layout)) {
+    # Make the panel
+    # ncol: Number of columns of plots
+    # nrow: Number of rows needed, calculated from # of cols
+    layout <- matrix(seq(1, cols * ceiling(numPlots/cols)),
+                    ncol = cols, nrow = ceiling(numPlots/cols))
+  }
+
+ if (numPlots==1) {
+    print(plots[[1]])
+
+  } else {
+    # Set up the page
+    grid.newpage()
+    pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
+
+    # Make each plot, in the correct location
+    for (i in 1:numPlots) {
+      # Get the i,j matrix positions of the regions that contain this subplot
+      matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
+
+      print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
+                                      layout.pos.col = matchidx$col))
+    }
+  }
+}
+
+multiplot(p4, p5, cols=2)
+
+
+
 
 #############################################
 # By heard: 
@@ -143,12 +249,12 @@ p5<- p4+
   scale_x_discrete(breaks=c("0", "2", "4", "6", "8", "10"), limits=seq(0, 10, 1), 
                    labels=c("0-2", "2-4", "4-6", "6-8", "8-10", "10+")) +
   scale_y_continuous(limits=c(0,1)) + 
-  theme(axis.title.x = element_text(size=16, vjust=-0.15),
+  theme(axis.line = element_line(colour= "black"),
+  		axis.title.x = element_text(size=16, vjust=-0.15),
         axis.title.y = element_text(size=16, vjust= 0.8),
         axis.text.x = element_text(size=14, vjust=-0.05),
         axis.text.y = element_text(size=14),
         panel.border = element_blank(), 
-        axis.line = element_line(colour= "black"),
         # legend information
         legend.position=c(0.82, 0.9),  
         legend.background= element_rect(fill="white", colour="white"),
@@ -171,7 +277,6 @@ p6<-ggplot(d, aes(x=age)) +
 vp<- viewport(width=0.4, height=0.4, x=0.34, y=0.75)
 print(p5)
 print(p6, vp=vp)
-
 
 #############################################
 #############################################
@@ -233,148 +338,10 @@ hist(as.numeric(incidtb$month), breaks=seq(1,12,1), xlab="Month", ylab="Number o
 dev.off()
 
 
-#######################################################
-#######################################################
-# Figure 2
-#######################################################
-#######################################################
-immunecross<- read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/cross_sectional_data_withdz_cleandisease_nofinal_Feb2016_capturetime_forsurv.csv")
-gcross<-immunecross[!is.na(immunecross$ifng),]
-gcross<-gcross[gcross$ifng_CV<14,]
-immuneba<- read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/convertersonly_Feb2016.csv")
-g1<-immuneba[!is.na(immuneba$ifng),]
-g1<-g1[g1$ifng_CV<14,]
-
-g<-data.frame(ifng=g1$ifng, infection=paste(g1$bruc, g1$tb, sep="_"), herd=g1$herdorig)
-gc<-data.frame(ifng=gcross$ifng, infection=paste(gcross$bruc, gcross$tb, sep="_"), herd=gcross$herdorig)
-
-p<- ggplot(g, aes(x=infection, y=log(ifng), fill=infection))+ geom_boxplot()+ 
-	scale_fill_discrete(labels=c("Neg", "bTB+", "Br+", "Co"))+
-	ylab("L(IFNg) concentration (converters only)")+ theme(legend.position="top", 
-	legend.title=element_blank())
-p1<- ggplot(g[g$herd=="LS",], aes(x=infection, y=log(ifng), fill=infection))+ geom_boxplot()+
-	scale_fill_discrete(labels=c("Neg", "bTB+", "Br+", "Co"))+
-	ylab("L(IFNg) concentration (LS converters only)")+ theme(legend.position="top", 
-	legend.title=element_blank())
-p2<- ggplot(g[g$herd=="CB",], aes(x=infection, y=log(ifng), fill=infection))+ geom_boxplot()+
-	scale_fill_discrete(labels=c("Neg", "bTB+", "Br+", "Co"))+
-	ylab("L(IFNg) concentration (CB converters only)")+ theme(legend.position="top", 
-	legend.title=element_blank())+scale_y_continuous(limits=c(0,2))
-grid.arrange(p, p1, p2, ncol=3)
-
-p3<- ggplot(gc, aes(x=infection, y=log(ifng), fill=infection))+ geom_boxplot()+ 
-	scale_fill_discrete(labels=c("Neg", "bTB+", "Br+", "Co"))+
-	ylab("L(IFN) gamma concentration (all)")+ theme(legend.position="top", 
-	legend.title=element_blank())
-p4<- ggplot(gc[gc$herd=="LS",], aes(x=infection, y=log(ifng), fill=infection))+ geom_boxplot()+ 
-	scale_fill_discrete(labels=c("Neg", "bTB+", "Br+", "Co"))+
-	ylab("L(IFN) gamma concentration (all LS)")+ theme(legend.position="top", 
-	legend.title=element_blank())
-p5<- ggplot(gc[gc$herd=="CB",], aes(x=infection, y=log(ifng), fill=infection))+ geom_boxplot()+ 
-	scale_fill_discrete(labels=c("Neg", "bTB+", "Br+", "Co"))+
-	ylab("L(IFN) gamma concentration (all CB)")+ theme(legend.position="top", 
-	legend.title=element_blank())
-grid.arrange(p3, p4, p5, ncol=3)
-
-# with age
-g<-data.frame(ifng=g1$ifng, infection=paste(g1$bruc, g1$tb, sep="_"), herd=g1$herdorig, age= g1$age_yr)
-gc<-data.frame(ifng=gcross$ifng, infection=paste(gcross$bruc, gcross$tb, sep="_"), 
-	herd=gcross$herdorig, age=gcross$age_yr)
-	
-a<-ggplot(g, aes(x=age, y=log(ifng), colour=infection))+ geom_point() +guides(fill=FALSE, colour=FALSE)+ ylab("IFN gamma (converters only)") + scale_colour_discrete(labels=c("Neg", "TB", "Bruc", "Coinfected")) 
-b<-ggplot(gc, aes(x=age, y=log(ifng), colour=infection))+ geom_point()+ 	ylab("IFN gamma (all data)")+ scale_colour_discrete(labels=c("Neg", "TB", "Bruc", "Co"))+ theme(legend.position=c(0.8,0.8))
-grid.arrange(a, b, ncol=2)
-
-
-# Plasma BKA: 
-gcross<-immunecross[!is.na(immunecross$bka_killed),]
-g1<-immuneba[!is.na(immuneba$bka_killed),]
-g<-data.frame(bka=g1$bka_killed/g1$bka_control, infection=paste(g1$bruc, g1$tb, sep="_"), herd=g1$herdorig)
-gc<-data.frame(bka=gcross$bka_killed/gcross$bka_control, infection=paste(gcross$bruc, gcross$tb, sep="_"), herd=gcross$herdorig)
-p<- ggplot(g, aes(x=infection, y= bka, fill=infection))+ geom_boxplot()+ 
-	scale_fill_discrete(labels=c("bTB-, Br-", "bTB+, Br-", "bTB-, Br+", "bTB+, Br-"))+
-	ylab("Proportion killed (converters only)")+ theme(legend.position="top", 
-	legend.title=element_blank())
-p1<- ggplot(g[g$herd=="LS",], aes(x=infection, y= bka, fill=infection))+ geom_boxplot()+
-	scale_fill_discrete(labels=c("bTB-, Br-", "bTB+, Br-", "bTB-, Br+", "bTB+, Br-"))+
-	ylab("Proportion killed (LS converters only)")+ theme(legend.position="top", 
-	legend.title=element_blank())
-p2<- ggplot(g[g$herd=="CB",], aes(x=infection, y= bka, fill=infection))+ geom_boxplot()+
-	scale_fill_discrete(labels=c("bTB-, Br-", "bTB+, Br-", "bTB-, Br+", "bTB+, Br-"))+
-	ylab("Proportion killed (CB converters only)")+ theme(legend.position="top", 
-	legend.title=element_blank())+scale_y_continuous(limits=c(0,2))
-grid.arrange(p, p1, p2, ncol=3)
-
-p3<- ggplot(gc, aes(x=infection, y=bka, fill=infection))+ geom_boxplot()+ 
-	scale_fill_discrete(labels=c("bTB-, Br-", "bTB+, Br-", "bTB-, Br+", "bTB+, Br-"))+
-	ylab("Proportion killed (all)")+ theme(legend.position="top", 
-	legend.title=element_blank())
-p4<- ggplot(gc[gc$herd=="LS",], aes(x=infection, y=bka, fill=infection))+ geom_boxplot()+ 
-	scale_fill_discrete(labels=c("bTB-, Br-", "bTB+, Br-", "bTB-, Br+", "bTB+, Br-"))+
-	ylab("Proportion killed (all LS)")+ theme(legend.position="top", 
-	legend.title=element_blank())
-p5<- ggplot(gc[gc$herd=="CB",], aes(x=infection, y=bka, fill=infection))+ geom_boxplot()+ 
-	scale_fill_discrete(labels=c("bTB-, Br-", "bTB+, Br-", "bTB-, Br+", "bTB+, Br-"))+
-	ylab("Proportion killed (all CB)")+ theme(legend.position="top", 
-	legend.title=element_blank())
-grid.arrange(p3, p4, p5, ncol=3)
-
-# Whole Blood BKA: 
-gcross<-immunecross[!is.na(immunecross$bka_wb_killed),]
-gc<-data.frame(bka=gcross$bka_wb_killed/gcross$bka_wb_control, infection=paste(gcross$bruc, gcross$tb, sep="_"), herd=gcross$herdorig)
-p3<- ggplot(gc, aes(x=infection, y=bka, fill=infection))+ geom_boxplot()+ 
-	scale_fill_discrete(labels=c("bTB-, Br-", "bTB+, Br-", "bTB-, Br+", "bTB+, Br-"))+
-	ylab("Proportion killed, whole blood (all)")+ theme(legend.position="top", 
-	legend.title=element_blank())
-p4<- ggplot(gc[gc$herd=="LS",], aes(x=infection, y=bka, fill=infection))+ geom_boxplot()+ 
-	scale_fill_discrete(labels=c("bTB-, Br-", "bTB+, Br-", "bTB-, Br+", "bTB+, Br-"))+
-	ylab("Proportion killed, whole blood (all LS)")+ theme(legend.position="top", 
-	legend.title=element_blank())
-p5<- ggplot(gc[gc$herd=="CB",], aes(x=infection, y=bka, fill=infection))+ geom_boxplot()+ 
-	scale_fill_discrete(labels=c("bTB-, Br-", "bTB+, Br-", "bTB-, Br+", "bTB+, Br-"))+
-	ylab("Proportion killed, whole blood (all CB)")+ theme(legend.position="top", 
-	legend.title=element_blank())
-grid.arrange(p3, p4, p5, ncol=3)
-
-# xyplots
-gcross<-immunecross[!is.na(immunecross$ifng),]
-PBC.samp <- subset(gcross, id %in% c("B1",   "B10",  "B11",  "B13",  "B13b", "B14",
-	"B14b", "B16",  "B19", "B2",   "B20",  "B22",  "B22b", "B25",  "B26",  "B26b") )
-	#"B28",  "B28b", "B29",  "B2b",  "B30",  "B31",  "B32",  "B33"))
-
-xyplot(ifng ~ yr | id, data = PBC.samp,
-    type = c("p", "smooth"), lwd = 2, layout = c(4, 4),
-    as.table = TRUE, ylab = "log IFNgamma",
-    xlab = "Time (years)")
-xyplot(log(ifng) ~ yr | id, data = PBC.samp,
-    type = c("p", "smooth"), lwd = 2, layout = c(4, 4),
-    as.table = TRUE, ylab = "log IFNgamma",
-    xlab = "Time (years)")
-
-
-# Haptoglobin: 
-gcross<-immunecross[!is.na(immunecross$hapto),]
-gc<-data.frame(hapto=log(gcross$hapto), infection=paste(gcross$bruc, gcross$tb, sep="_"), herd=gcross$herdorig)
-p3<- ggplot(gc, aes(x=infection, y=hapto, fill=infection))+ geom_boxplot()+ 
-	scale_fill_discrete(labels=c("Neg", "bTB+", "Br+", "Co"))+
-	ylab("Log(Haptoglobin) (all)")+ theme(legend.position="top", 
-	legend.title=element_blank())
-p4<- ggplot(gc[gc$herd=="LS",], aes(x=infection, y=hapto, fill=infection))+ geom_boxplot()+ 
-	scale_fill_discrete(labels=c("Neg", "bTB+", "Br+", "Co"))+
-	ylab("Log(Haptoglobin) (all LS)")+ theme(legend.position="top", 
-	legend.title=element_blank())
-p5<- ggplot(gc[gc$herd=="CB",], aes(x=infection, y=hapto, fill=infection))+ geom_boxplot()+ 
-	scale_fill_discrete(labels=c("Neg", "bTB+", "Br+", "Co"))+
-	ylab("Log(Haptoglobin) (all CB)")+ theme(legend.position="top", 
-	legend.title=element_blank())
-grid.arrange(p3, p4, p5, ncol=3)
-
-
-
 
 #######################################################
 #######################################################
-# Figure 3- Survival and incidence plots
+# Figure 2- Survival and incidence plots
 #######################################################
 #######################################################
 # From book code: 
@@ -425,11 +392,13 @@ p3 + theme(axis.line = element_line(colour= "black"))
 #############################################
 #############################################
 # AICs hanshed out ran on previous dataset.  IN repot results are presented for the dataset with capture time that matches the survival times.
+data <- read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/cross_sectional_data_withdz_cleandisease_nofinal_Feb2016_capturetime.csv")
+data_nofinal<-data[data$final_capture=="0",] 
 temp<-data_nofinal[data_nofinal$age_yr<14,]
 rescale= function(col){
   new=NA
   for (i in 1:length(col)){
-    new[i]<-(col[i]-mean(col))/sd(col)
+    new[i]<-(col[i]-mean(col))/ 2*sd(col)  
   }
   return(new)
 }
@@ -447,9 +416,68 @@ temp$herd2<-rescale(temp$herd)
 temp2<- temp[temp$age_yr>2.5 & temp$age_yr<10.5,]
 temp3<- temp[temp$age_yr>2 & temp$age_yr<10,]
 #temp3<- temp2[!(temp2$id %in% c("B14", "B32", "O33")),]
+temp4<- temp2[!(temp2$capturetime %in% c(0,3,6,9,12,15, 18, 21)),]
+temp5<- temp3[!(temp3$capturetime %in% c(0,3,6,9,12,15, 18, 21)),]
+temp6<- temp[!(temp$capturetime %in% c(0,3,6,9,12,15, 18, 21)),]
+temp6<- temp3[!(temp3$capturetime %in% c(0,3,6,9,12,15)),]
+
+# Final in paper now:
+ t1<-glmmPQL(bruc~ age_yr2*tb + I(age_yr2^2), correlation= corAR1(form=~capturetime2|id), random= ~ 1|id, data=temp2, family=binomial); summary(t1)
+
+ t1<-glmmPQL(bruc~ age_yr2*tb + I(age_yr2^2), correlation= corAR1(form=~capturetime2|id), random= ~ 1|id, data=temp4, family=binomial); summary(t1)
+ 
+t1<-glmmPQL(bruc~ age_yr2*tb, correlation= corAR1(form=~capturetime2|id), random= ~ 1|id, data=temp5, family=binomial); summary(t1)
+
+#****** In legend t1<-glmmPQL(bruc~ age_yr2*tb+I(age_yr2^2) , correlation= corAR1(form=~capturetime2|id), random= ~ 1|id, data=temp6, family=binomial); summary(t1)
 
 
 
+# For each capture separately. 
+head(temp2)
+t<- temp3[temp3$capturetime %in% c(0, 3),]
+t1<- temp3[temp3$capturetime %in% c(6, 9),]
+t2<- temp3[temp3$capturetime %in% c(12, 15),]
+t3<- temp3[temp3$capturetime %in% c(18, 21),]
+t4<- temp3[temp3$capturetime %in% c(24, 28),]
+t5<- temp3[temp3$capturetime %in% c(30, 33),]
+t6<- temp3[temp3$capturetime %in% c(36, 39),]
+t7<- temp3[temp3$capturetime %in% c(42, 45),]
+
+t<- temp[temp $capturetime %in% c(0, 3),]
+t1<- temp[temp $capturetime %in% c(6, 9),]
+t2<- temp[temp $capturetime %in% c(12, 15),]
+t3<- temp[temp $capturetime %in% c(18, 21),]
+t4<- temp[temp $capturetime %in% c(24, 28),]
+t5<- temp[temp $capturetime %in% c(30, 33),]
+t6<- temp[temp $capturetime %in% c(36, 39),]
+t7<- temp[temp $capturetime %in% c(42, 45),]
+
+
+test<-glmer(bruc~ age_yr*tb + (1|id), data=t, family=binomial); summary(test) 
+test<-glmer(bruc~ age_yr2*tb+ I(age_yr2^2)+(1|id), data=t, family=binomial); summary(test) 
+test<-glmer(bruc~ age_yr2*tb+ I(age_yr2^2)+(1|id), data=t1, family=binomial); summary(test) 
+test<-glmer(bruc~ age_yr2*tb+ I(age_yr2^2)+(1|id), data=t2, family=binomial); summary(test) 
+test<-glmer(bruc~ age_yr2*tb+ I(age_yr2^2)+(1|id), data=t3, family=binomial); summary(test) 
+# age interaction starts to be significant
+test<-glmer(bruc~ age_yr2*tb+ I(age_yr2^2)+(1|id), data=t4, family=binomial); summary(test) 
+test<-glmer(bruc~ age_yr2*tb+ I(age_yr2^2)+(1|id), data=t5, family=binomial); summary(test) 
+test<-glmer(bruc~ age_yr2*tb+ I(age_yr2^2)+(1|id), data=t6, family=binomial); summary(test) 
+test<-glmer(bruc~ age_yr2*tb+ I(age_yr2^2)+(1|id), data=t7, family=binomial); summary(test) 
+
+
+test<-glmer(bruc~ age_yr2+tb+(1|id), data=t3, family=binomial); summary(test) 
+
+get_prev = function(data){
+	temp <- as.data.frame(table(data$tb))
+	prev1 <- temp$Freq[temp$Var1 == "1"]/sum(temp$Freq)
+	temp <- as.data.frame(table(data$bruc))
+	prev2 <- temp$Freq[temp$Var1 == "positive"]/sum(temp$Freq)
+	prev<- c(prev1, prev2)
+	return(prev)
+	}
+
+
+# AICs need changed
 t<-glmer(bruc~ floor(age_yr)+ I(floor(age_yr^2))+(1|id), data=temp2, family=binomial(link="logit")); summary(t) #319.2
 t<-glmer(bruc~ floor(age_yr)+(1|id), data=temp2, family=binomial); summary(t)
 t<-glmer(bruc~ floor(age_yr)+ I(floor(age_yr)^2)+ tb+(1|id), data=temp2, family=binomial); summary(t) #349.4 # small error
@@ -458,17 +486,142 @@ t<-glmer(bruc~ floor(age_yr)*tb+ I(floor(age_yr)^2)+ herdorig+(1|id), data=temp2
 t<-glmer(bruc~ floor(age_yr)+ I(floor(age_yr)^2)*tb+ herdorig+(1|id), data=temp2, family=binomial); summary(t) #346.5
 t<-glmer(bruc~ floor(age_yr)+ I(floor(age_yr)^2)*tb+tb*herdorig+(1|id), data=temp2, family=binomial); summary(t) # 354.9
 t<-glmer(bruc~ floor(age_yr)+ I(floor(age_yr)^2)*tb+floor(age_yr)*herdorig+(1|id), data=temp2, family=binomial); summary(t) # 354.9
-
-
 t<-glmer(bruc~age_yr2+ I(age_yr2^2)*tb2+(1|id), data=temp2, family=binomial); summary(t) # 354.9
 
+# USE MODEL WITH STANDARDIZED AGE & TB*age+ TB*age^2 interaction!!!!!!
+t<-glmer(bruc~ age_yr2+ I(age_yr2^2)+(1|id), data=temp2, family=binomial); summary(t) # 351.1
+t<-glmer(bruc~ age_yr2+ I(age_yr2^2)*tb+(1|id), data=temp2, family=binomial); summary(t) # 355.1
+t<-glmer(bruc~ age_yr2*tb+ I(age_yr2^2)+(1|id), data=temp2, family=binomial); summary(t) # AIC = 351.7
+t<-glmer(bruc~ age_yr2*tb+ I(age_yr2^2)*tb+(1|id), data=temp2, family=binomial); summary(t) # AIC = 351.6
+
+t2<-glmer(bruc~ yr+(1|yr/id), data=temp4, family=binomial); summary(t2) # AIC = 351.7
+t2<-glmer(bruc~ yr+(capturetime|id), data=temp4, family=binomial); summary(t2) # AIC = 351.7
+t2<-glmer(bruc~ yr+(yr|herd2/id), data=temp2, family=binomial); summary(t2) # AIC = 351.7
+
+#http://rpsychologist.com/r-guide-longitudinal-lme-lmer
+# need glmmPQL for binomial data
+library(MASS)
+t<- glmmPQL(bruc~ yr, random = ~1|id, family=binomial, data= temp4); summary(t)
+t<- glmmPQL(bruc~ capturetime, random = ~capturetime|id, family=binomial, data= temp4); summary(t)
+t<- glmmPQL(bruc~ yr, random = ~1+yr|id, family=binomial, data= temp4); summary(t)
+t<- glmmPQL(bruc~ yr, random = ~0+yr|id, family=binomial, data= temp4); summary(t) # works!
+
+
+t<- glmmPQL(bruc~ tb+ yr, random = ~0+yr|id, family=binomial, data= temp2); summary(t)
+t<- glmmPQL(bruc~ tb*age_yr2+ I(age_yr2^2)+ yr, random = ~0+yr|id, family=binomial, data= temp2); summary(t)
+#ns = t<- glmmPQL(bruc~ tb*age_yr2+ tb*I(age_yr2^2)+ yr, random = ~0+yr|id, family=binomial, data= temp2); summary(t)
+
+# Can nest herd even 
+t<- glmmPQL(bruc~ tb+ yr, random = ~0+yr|herd2/id, family=binomial, data= temp2); summary(t)
+t<- glmmPQL(bruc~ tb*age_yr2+ I(age_yr2^2)+ yr, random = ~0+yr|herd2/id, family=binomial, data= temp2); summary(t)
+
+# AR1 -> NO- autocorrelaiton does not decrease to 0 as time lags. 
+t<- glmmPQL(bruc~ yr, random = ~1|id, family=binomial, data= temp2); summary(t)
+E<- residuals(t, type="normalized")
+acf(E)
+t<- glmmPQL(bruc~ capturetime, random = ~1|id, family=binomial, data= temp2); summary(t)
+E<- residuals(t, type="normalized")
+acf(E)
+
+t<- glmmPQL(bruc~ capturetime, random = ~1|id, correlation= corAR1(), family=binomial, data= temp4); summary(t)
+t<- glmmPQL(bruc~ capturetime, random = ~0+capturetime|id, correlation= corAR1(), family=binomial, data= temp2); summary(t)
+t<- glmmPQL(bruc~ 1, random = ~capturetime|id, correlation= corAR1(), family=binomial, data= temp4); summary(t)
+
+t<- glmmPQL(bruc~ capturetime + tb, random = ~capturetime, family=binomial, data= temp2); summary(t)
+t<- glmmPQL(bruc~age_yr2 * tb, random = ~ capturetime |id, family=binomial, data= temp4); summary(t)
+
+
+t<-glmer(bruc~ age_yr2*tb+ I(age_yr2^2)*tb+(capturetime|herd2), data=temp2, family=binomial); summary(t) # AIC = 351.6
+
+
+t<-glmer(bruc~ age_yr2*tb + I(age_yr2^2)+ (capturetime|id), data=temp4, family=binomial); summary(t) 
+t<-glmer(bruc~ age_yr2*tb + I(age_yr2^2)+ (1|capturetime/id), data=temp4, family=binomial); summary(t) 
+
+######################################################################
+######################################################################
+######################################################################
+######################################################################
+t0<-glmmPQL(bruc~ age_yr2*tb + I(age_yr2^2), random= ~ 1|id, data=temp4, family=binomial); summary(t) 
+library(car)
+t1<-glmmPQL(bruc~ age_yr2*tb + I(age_yr2^2), correlation= corAR1(), random= ~ 1|id, data=temp4, family=binomial); summary(t) 
+
+t2<-glmmPQL(bruc~ age_yr2*tb + I(age_yr2^2), correlation= corARMA(c(0.2, 0.2, 0.2), form=~capturetime|id, p=1, q=2), random= ~ 1|id, data=temp4, family=binomial); summary(t) 
+
+t1<-glmmPQL(bruc~ age_yr2*tb + I(age_yr2^2), correlation= corAR1(form=~capturetime2|id), random= ~ 1|id, data=temp4, family=binomial); summary(t) 
+
+t<-glmmPQL(bruc~ age_yr2*tb + I(age_yr2^2), random= ~ 1|id, data=temp4, family=binomial); summary(t) 
+E<- residuals(t, type="normalized")
+par(mfrow=c(1,2))
+acf(E)
+pacf(E)
+
+durbinWatsonTest(glm(bruc~ age_yr2*tb + I(age_yr2^2), data=temp4, family=binomial ))
+
+
+###############
+#However, with 4 time points you probably won't be able to fit the autocorrelation. So I would first fit a mixed effects model without autocorrelation structure (probably using package lme4, but you can also use lme) and test autocorrelation of the residuals using the Durbin-Watson test,
+#http://stats.stackexchange.com/questions/71087/analysis-of-a-time-series-with-a-fixed-and-random-factor-in-r
+######################################################################
+######################################################################
+######################################################################
+######################################################################
+
+# a 3 year old has age_yr2 of -1.07
+# a 9 year old has age_yr2 of 1.68
+# a 10 year old has age_yr2 of 2.144
+temp2$age_yr3<- temp2$age_yr - 3  # 3 year olds
+temp2$age_yr2 <- rescale(temp2$age_yr3)
+
+
+temp2$age_yr4<- temp2$age_yr2 + 1.07
+t<-glmer(bruc~ age_yr3*tb+ I(age_yr2^2)+(1|id), data=temp2, family=binomial); summary(t)
+t<-glmer(bruc~ age_yr4*tb+ I(age_yr2^2)+(1|id), data=temp2, family=binomial); summary(t)
 
 
 
-t<-glmer(bruc~ floor(age_yr)+ I(floor(age_yr^2))+(1|id), data=temp3, family=binomial(link="logit")); summary(t) #319.2
+get_tb_increase = function(ageyrval){
+	logodds = 15.562 - ageyrval * 0.4134
+	odds = exp(logodds)
+	prop = odds / (1 + odds)
+	return(list(odds, prop))	
+}
+
+tage<- seq(-2, 4, 0.1)
+get_odds = function(age, tb){
+	logodds = -25.19 + age * 9.54 + tb * 3.51 + -4.255 * tb * age - 0.538 * age * age 
+	odds = exp(logodds)
+	return(logodds)
+}
+
+age2<- tage* 2* sd(temp2$age_yr) + mean(temp2$age_yr)
+
+plot(x= age2, y= get_odds(tage, 0))
+points(x= age2, y= get_odds(tage, 1), pch=19, ylab= "log odds Br+")
+
+tage<- seq(-1, 2, 0.1)
+age2<- tage* 2* sd(temp2$age_yr) + mean(temp2$age_yr)
+
+plot(x= age2, y= exp(get_odds(tage, 0)), ylab = "odds Br+")
+points(x= age2, y= exp(get_odds(tage, 1)), pch=19)
+
+
+
+
+
+##############################################################################
+
+# All play with random effects... 
+t <- glmer(bruc~ floor(age_yr)+ I(floor(age_yr^2))+(1|id), data=temp3, family=binomial(link="logit")); summary(t) #319.2
 t<-glmer(bruc~ floor(age_yr)+(1|id), data=temp3, family=binomial); summary(t)
 t<-glmer(bruc~ floor(age_yr)+ I(floor(age_yr)^2)+ tb+(1|id), data=temp3, family=binomial); summary(t) #349.4 # small error
-t<-glmer(bruc~ floor(age_yr)+ I(floor(age_yr)^2)*tb+(1|id), data=temp3, family=binomial); summary(t) #345.2
+t<-glmer(bruc~ floor(age_yr)+ I(floor(age_yr)^2)*tb+(1|id), data=temp3, family=binomial); summary(t) #
+t<-glmer(bruc~age_yr2+ I(age_yr2^2)*tb+(1|id), data=temp3, family=binomial); summary(t) #
+
+t<-glmer(bruc~ age_yr2*tb+ I(age_yr2^2)*tb+(1|id), data=temp3, family=binomial); summary(t) #
+
+t<-glmer(bruc~ floor(age_yr)*tb+ I(floor(age_yr)^2)*tb+(1|id), data=temp3, family=binomial); summary(t) #
+t<-glmer(bruc~ floor(age_yr)*tb+ I(floor(age_yr)^2)+(1|id), data=temp3, family=binomial); summary(t) #
+
 t<-glmer(bruc~ floor(age_yr)*tb+ I(floor(age_yr)^2)+ herdorig+(1|id), data=temp3, family=binomial); summary(t) #351.2, small error
 t<-glmer(bruc~ floor(age_yr)+ I(floor(age_yr)^2)*tb+ herdorig+(1|id), data=temp3, family=binomial); summary(t) #346.5
 t<-glmer(bruc~ floor(age_yr)+ I(floor(age_yr)^2)*tb+ herd+(1|id), data=temp3, family=binomial); summary(t) #346.5
@@ -476,117 +629,52 @@ t<-glmer(bruc~ floor(age_yr)+ I(floor(age_yr)^2)*tb+ herd+(1|id), data=temp3, fa
 t<-glmer(bruc~ floor(age_yr)+ I(floor(age_yr)^2)*tb+tb*herd+(1|id), data=temp3, family=binomial); summary(t) # 354.9
 t<-glmer(bruc~ floor(age_yr)+ I(floor(age_yr)^2)*tb+floor(age_yr)*herdorig+(1|id), data=temp3, family=binomial); summary(t) # 354.9
 
+t<-glmer(bruc~ floor(age_yr2)+ I(floor(age_yr2)^2)*tb+(1|id), data=temp3, family=binomial); summary(t) 
+t<-glmer(bruc~ floor(age_yr2)+ I(floor(age_yr2)^2)+tb+(1|id), data=temp3, family=binomial); summary(t) 
+t<-glmer(bruc~ floor(age_yr2)*tb+ I(floor(age_yr2)^2)*tb+(1|id), data=temp3, family=binomial); summary(t)
+t<-glmer(bruc~ floor(age_yr2)*tb+ herd+ I(floor(age_yr2)^2)*tb+(1|id), data=temp3, family=binomial); summary(t) 
+t<-glmer(bruc~ floor(age_yr2)*tb+ herd+ I(floor(age_yr2)^2)+(1|id), data=temp3, family=binomial); summary(t) 
+
+temp3$time<- NA
+temp3$time[temp3$capturetime %in% c(0, 3, 6, 9)]<- 0
+temp3$time[temp3$capturetime %in% c(12, 15, 18, 21)]<- 1
+temp3$time[temp3$capturetime %in% c(24, 27, 30, 33)]<- 2
+temp3$time[temp3$capturetime %in% c(36, 39, 42, 45, 48)]<- 3
+
+# convergence issues
+t<-glmer(bruc~ floor(age_yr2)+ I(floor(age_yr2)^2)+(time|id), data=temp3, family=binomial); summary(t) 
+t<-glmer(bruc~ floor(age_yr2)+ I(floor(age_yr2)^2)*tb+(time|id), data=temp3, family=binomial); summary(t) 
+t<-glmer(bruc~ floor(age_yr2)+ I(floor(age_yr2)^2)+tb+(time|id), data=temp3, family=binomial); summary(t) 
+t<-glmer(bruc~ floor(age_yr2)*tb+ I(floor(age_yr2)^2)*tb+(time|id), data=temp3, family=binomial); summary(t) # conv error
+t<-glmer(bruc~ floor(age_yr2)*tb+ herd+ I(floor(age_yr2)^2)*tb+(time|id), data=temp3, family=binomial); summary(t) 
+t<-glmer(bruc~ floor(age_yr2)*tb+ herd+ I(floor(age_yr2)^2)+(time|id), data=temp3, family=binomial); summary(t) 
+
+t<-glmer(bruc~ floor(age_yr2)+time*tb+ I(floor(age_yr2)^2)+(time|id), data=temp3, family=binomial); summary(t) 
+t<-glmer(bruc~ floor(age_yr2)*time+ tb+ I(floor(age_yr2)^2)*time+(time|id), data=temp3, family=binomial); summary(t) 
+
+t<-glmer(bruc~ floor(age_yr2)*time+ tb*time + floor(age_yr2)*tb + (time|id), data=temp3, family=binomial); summary(t) 
+#t<-glmer(bruc~ floor(age_yr2)*capturetime+ tb*capturetime + floor(age_yr2)*tb + (capturetime |id), data=temp3, family=binomial); summary(t) 
+t<-glmer(bruc~ floor(age_yr2)+ tb*time + floor(age_yr2)*tb + (time|id), data=temp3, family=binomial); summary(t) 
+t<-glmer(bruc~ floor(age_yr2)+ tb*time + floor(age_yr2)*tb + (time|id), data=temp3, family=binomial); summary(t) 
 
 
+t<-glmer(bruc~ floor(age_yr2)*time+ tb+ I(floor(age_yr2)^2)*time+(time|id), data=temp3, family=binomial); summary(t) 
 
 
+# same here
+t<-glmer(bruc~ floor(age_yr2)+ I(floor(age_yr2)^2)*tb+(capturetime|herd/id), data=temp3, family=binomial); summary(t) 
+t<-glmer(bruc~ floor(age_yr2)+ I(floor(age_yr2)^2)+tb+(capturetime |herd/id), data=temp3, family=binomial); summary(t) 
+t<-glmer(bruc~ floor(age_yr2)*tb+ I(floor(age_yr2)^2)*tb+(capturetime |herd/id), data=temp3, family=binomial); summary(t)
+
+t<-glmer(bruc~ floor(age_yr2)+ I(floor(age_yr2)^2)*tb+(1|herd/id), data=temp3, family=binomial); summary(t) 
+t<-glmer(bruc~ floor(age_yr2)*tb+ I(floor(age_yr2)^2)+(1|herd/id), data=temp3, family=binomial); summary(t) 
+t<-glmer(bruc~ floor(age_yr2)+ I(floor(age_yr2)^2)+tb+(1 |herd/id), data=temp3, family=binomial); summary(t) 
+t<-glmer(bruc~ floor(age_yr2)*tb+ I(floor(age_yr2)^2)*tb+(1 |herd/id), data=temp3, family=binomial); summary(t)
 
 
+t<-glmer(bruc~ 1+(capturetime|herd/id), data=temp3, family=binomial); summary(t) 
+t<-glmer(bruc~ 1+(capturetime|capturetime*herd/id), data=temp3, family=binomial); summary(t) 
 
-
-
-
-
-
-
-
-# Extra play when choosing random effects
-
-# Use herd as a random effect
-# not fitting
-t0<-glmer(bruc~ tb+ (1|herdorig/id), data=temp2, family=binomial); summary(t0) # 481.0
-t1<-glmer(bruc~ age_yr+ (1|herdorig/id), data=temp2, family=binomial); summary(t1) # 317.3 error?
-t2<-glmer(bruc~ log(age_yr)+ (1|herdorig/id), data=temp2, family=binomial); summary(t2) # 320.2
-t3<-glmer(bruc~ log(age_yr)*tb+ (1|herdorig/id), data=temp2, family=binomial); summary(t3) # 319.8 fit error!
-t4<-glmer(bruc~ age_yr*tb+ (1|herdorig/id), data=temp2, family=binomial); summary(t4) # 322.9 # fit error!
-t5<-glmer(bruc~ log(age_yr)+tb+ (1|herdorig/id), data=temp2, family=binomial); summary(t5) # 321.7 n.s.
-t6<-glmer(bruc~ age_yr+tb+ (1|herdorig/id), data=temp2, family=binomial); summary(t6) # 328.4 n.s.
-a<-sd(temp$age_yr)
-t3<-glmer(bruc~ log(age_yr)*tb+ herdorig+ (1|id), data=temp2, family=binomial); summary(t3) 
-
-# with herd as a main effect
-t0<-glmer(bruc~ tb+ (1|id), data=temp2, family=binomial); summary(t0) # 479.0
-t0.5<-glmer(bruc~ tb+ herdorig+ (1|id), data=temp2, family=binomial); summary(t0.5) # 480.8
-t1<-glmer(bruc~ age_yr+ (1|id), data=temp2, family=binomial); summary(t1) # 317.6
-t1.5<-glmer(bruc~ age_yr+ herdorig+ (1|id), data=temp2, family=binomial); summary(t1.5) #314.8
-t2<-glmer(bruc~ log(age_yr)+ (1|id), data=temp2, family=binomial); summary(t2) # 310.0
-t2.5<-glmer(bruc~ log(age_yr)+ herdorig+(1|id), data=temp2, family=binomial); summary(t2.5) # 311.7
-t3<-glmer(bruc~ log(age_yr)*tb+ (1|id), data=temp2, family=binomial); summary(t3) # 309.7 !!!!!!!
-t3.5<-glmer(bruc~ log(age_yr)*tb+herdorig+ (1|id), data=temp2, family=binomial); summary(t3.5) # fit error!
-t4<-glmer(bruc~ age_yr*tb+ (1|id), data=temp2, family=binomial); summary(t4) # 314.3
-t4.5<-glmer(bruc~ age_yr*tb+herdorig+(1|id), data=temp2, family=binomial); summary(t4.5) # fit error!
-t5<-glmer(bruc~ log(age_yr)+tb+ (1|id), data=temp2, family=binomial); summary(t5) # 311.3
-t5.5<-glmer(bruc~ log(age_yr)+tb+herdorig+ (1|id), data=temp2, family=binomial); summary(t5.5) # 312.6
-t6<-glmer(bruc~ age_yr+tb+ (1|id), data=temp2, family=binomial); summary(t6) #319.0
-t6.5<-glmer(bruc~ age_yr+tb+ herdorig+(1|id), data=temp2, family=binomial); summary(t6.5) #316.8
-
-t7<-glmer(bruc~ tb+(1|id), data=temp2, family=binomial); summary(t7) #480.8
-t7<-glmer(bruc~ tb+ herdorig+(1|id), data=temp2, family=binomial); summary(t7) #480.8
-t8<-glmer(bruc~ tb*herdorig+(1|id), data=temp2, family=binomial); summary(t8) # 481.3
-t9<-glmer(bruc~ age_yr+ herdorig+(1|id), data=temp2, family=binomial); summary(t9) #314.8
-t10<-glmer(bruc~ age_yr*herdorig+(1|id), data=temp2, family=binomial); summary(t10) #313.2
-t11<-glmer(bruc~ log(age_yr)+ herdorig+(1|id), data=temp2, family=binomial); summary(t11) #311.7
-t12<-glmer(bruc~ log(age_yr)*herdorig+(1|id), data=temp2, family=binomial); summary(t12) # 313.2convergence error
-
-
-t13<-glmer(bruc~ log(age_yr)*tb+herdorig*log(age_yr)+ 
-             (1|id), data=temp2, family=binomial, REML=TRUE); summary(t13) # 309.5, fit error!
-t14<-glmer(bruc~ age_yr*tb+herdorig*age_yr+ (1|id), data=temp2, family=binomial); summary(t14) # fit error!
-
-
-t<-glmer(bruc~ age_yr*tb+tb*I(age_yr^2)+herdorig+(1|id), data=temp2, family=binomial); summary(t) 
-t<-glmer(bruc~ age_yr*tb+I(age_yr^2)+herdorig+(1|id), data=temp2, family=binomial); summary(t) 
-t<-glmer(bruc~ age_yr+tb+I(age_yr^2)+herdorig+(1|id), data=temp2, family=binomial); summary(t) 
-
-# compare age curves
-t<-glmer(bruc~ age_yr+ I(age_yr^2)+(1|id), data=temp2, family=binomial(link="logit")); summary(t) #298.5, error
-t<-glmer(bruc~ age_yr+(1|id), data=temp2, family=binomial); summary(t) #305.8
-t<-glmer(bruc~ log(age_yr)+(1|id), data=temp2, family=binomial); summary(t) #300.4
-
-t<-glmer(bruc~ floor(age_yr)+ I(floor(age_yr^2))+(1|id), data=temp2, family=binomial(link="logit")); summary(t) #319.2
-t<-glmer(bruc~ floor(age_yr)+(1|id), data=temp2, family=binomial); summary(t) # 357.7
-t<-glmer(bruc~ log(floor(age_yr))+(1|id), data=temp2, family=binomial); summary(t) #350.6
-
-t<-glmer(bruc~ floor(age_yr)+ I(floor(age_yr)^2)+ tb+(1|id), data=temp2, family=binomial); summary(t) #349.4 # small error
-t<-glmer(bruc~ floor(age_yr)+ I(floor(age_yr)^2)*tb+(1|id), data=temp2, family=binomial); summary(t) #345.2
-
-t<-glmer(bruc~ floor(age_yr)*tb+ I(floor(age_yr)^2)+ herdorig+(1|id), data=temp2, family=binomial); summary(t) #351.2, small error
-t<-glmer(bruc~ floor(age_yr)+ I(floor(age_yr)^2)*tb+ herdorig+(1|id), data=temp2, family=binomial); summary(t) #346.5
-t<-glmer(bruc~ floor(age_yr)+ I(floor(age_yr)^2)*tb+tb*herdorig+(1|id), data=temp2, family=binomial); summary(t) # 354.9
-t<-glmer(bruc~ floor(age_yr)+ I(floor(age_yr)^2)*tb+tb*herdorig+(1|id), data=temp2, family=binomial); summary(t) #354.9
-t<-glmer(bruc~ floor(age_yr)*tb+ I(floor(age_yr)^2)*tb+tb*herdorig+(1|id), data=temp2, family=binomial); summary(t) #377.4
-
-
-
-
-
-
-
-
-# NOPE: 
-t<-glmer(bruc~ floor(age_yr)+ I(floor(age_yr)^2)+ tb+(1|herdorig/id), data=temp2, family=binomial); summary(t) #351.4 
-t<-glmer(bruc~ floor(age_yr)+ I(floor(age_yr)^2)*tb+(1|herdorig/id), data=temp2, family=binomial); summary(t) #345.2
-t<-glmer(bruc~ floor(age_yr)*tb+ I(floor(age_yr)^2)*tb+(1|herdorig/id), data=temp2, family=binomial); summary(t) #345.2
-
-a<-seq(1, 20, 0.1)
-val=function(a, btb){14.954*a-0.5144*(a^2)-0.2772*(a^2)*btb + 9.592*btb }
-
-par(mfrow= c(1,2))
-plot(x=a, y=val(a, 1))
-plot(x=a, y=val(a, 0))
-
-
-# max at y[78]
-a[78] = 8.7 in TB+
-
-
-
-
-d<-data.frame(btb=temp2$tb , bruc=as.character(temp2$bruc), age=temp2$age_yr, 
-              herd=temp2$herdorig, id=temp2$id)
-make_age_odds_plot(d$btb, d$bruc, d$age, binsize=2)
-make_age_odds_plot(d$btb[d$herd=="LS"], d$bruc[d$herd=="LS"], d$age[d$herd=="LS"], binsize=2)
-make_age_odds_plot(d$btb[d$herd=="CB"], d$bruc[d$herd=="CB"], d$age[d$herd=="CB"], binsize=2)
 
 
 

@@ -66,8 +66,6 @@ length(unique(mort$animal)); length(unique(mort2$animal)) # 42 vs. 49
 
 mort<-data[data$death.time==1 & data$herd=="LS",]  # 18 total; 9 TB totoal (3 TB only), 10 BR only (4 Br only); 6 co.  
 
-
-
 # Need a sum of time observing uninfected, TB+, Bruc+, Coinfected animals
 id<-as.character(unique(data3$animal))
 data3$animal<-as.character(data3$animal)
@@ -126,6 +124,18 @@ sum(timeB)+sum(timeneg)+sum(timeTB)+sum(timeC) # 4386 total months
 length(mort$TB_3[mort$brucella==1& mort$TB_3==1])
 length(mort$TB_3[mort$TB_3==1])
 length(mort$TB_3[mort$brucella==1])
+
+###############
+# plot of when animals died
+par(mfrow=c(2,2))
+hist(d$start2); hist(d$stop2) # spread throughout study period, maybe more in beginning/younger?
+hist((d$start2 %% 12)/3); hist((d$stop2 %% 12)/3)
+
+a<- hist((d$start2 %% 12)/3)
+
+
+
+
 ############################################
 # run cph model
 ############################################
@@ -321,11 +331,112 @@ legend("bottomleft", legend=c("Uninfected", "bTB+", "Brucellosis +", "Coinfected
 
 
 
+############################################
+############################################
+# Repeat above with age category
+############################################
+############################################
+# 0-2, 2-4, 4-8, 8+
+# juveniles (0-2) and subadults (2-4) both have higher mortality than adults (4-8); subadults not significantly different than juveniles (p=0.11)
+test.mod<-coxph(Surv(start, stop, death.time)~brucella+TB_3+herd2+ age1+ cluster(animal), data=data3); summary(test.mod) 
+# AIC = 320.9481; LogLike =  -167.0254 -154.4741
+test.mod<-coxph(Surv(start, stop, death.time)~age1+ cluster(animal), data=data3); test.mod$loglik 
+
+
+# 0-3, 3-5, 5-8, 8+
+test.mod<-coxph(Surv(start, stop, death.time)~brucella+TB_3+herd2+ age2+ cluster(animal), data=data3); summary(test.mod) 
+# AIC = 314.7509; LogLike =  -167.0254 -151.3755
+
+# 0-2, 2-4, 4+ -> 0-2 yr olds have highest mortality. 2-4 vs 4+ similar 
+test.mod<-coxph(Surv(start, stop, death.time)~brucella+TB_3+herd2+ age3+ cluster(animal), data=data3); summary(test.mod)
+# AIC = 319.3569; LogLike = -167.0254  -154.6784
+
+# 0-3, 3-5, 5+ -> 0-3 yr olds have highest mortality. 3-5 vs 5+ similar
+test.mod<-coxph(Surv(start, stop, death.time)~brucella+TB_3+herd2+ age4+ cluster(animal), data=data3); summary(test.mod)
+# AIC = 313.242; LogLike = -167.0254 -151.6210
+
+# 0-2, 2+
+test.mod<-coxph(Surv(start, stop, death.time)~brucella+TB_3+herd2+ age5+ cluster(animal), data=data3); summary(test.mod)
+test.mod<-coxph(Surv(start, stop, death.time)~ age5+ cluster(animal), data=data3); summary(test.mod)
+# AIC = 323.0442; LogLike = -167.0254 -157.5221
+
+#0-3, 3+
+final.mod<-coxph(Surv(start, stop, death.time)~brucella+TB_3+herd2+ age6+ cluster(animal), data=data3); summary(final.mod)
+# AIC = 312.7035; LogLike = -167.0254 -152.3518
+#coxph(formula = Surv(start, stop, death.time) ~ brucella + TB_3 + 
+#    herd2 + age6 + cluster(animal), data = data3)
+# n= 1462, number of events= 38 
+
+#               coef exp(coef) se(coef) robust se     z Pr(>|z|)    
+#brucella     1.1060    3.0224   0.3365    0.3505 3.155 0.001602 ** 
+#TB_3         1.0370    2.8207   0.3609    0.3483 2.977 0.002907 ** 
+#herd2CB      0.7351    2.0858   0.3426    0.3236 2.272 0.023087 *  
+#age6juvenile 1.1825    3.2625   0.3408    0.3342 3.539 0.000402 ***
+#---
+#Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+#
+#             exp(coef) exp(-coef) lower .95 upper .95
+#brucella         3.022     0.3309     1.521     6.008
+#TB_3             2.821     0.3545     1.425     5.582
+#herd2CB          2.086     0.4794     1.106     3.933
+#age6juvenile     3.263     0.3065     1.695     6.280
+
+#Concordance= 0.717  (se = 0.049 )
+#Rsquare= 0.02   (max possible= 0.204 )
+#Likelihood ratio test= 29.35  on 4 df,   p=6.645e-06
+#Wald test            = 34.51  on 4 df,   p=5.86e-07
+#Score (logrank) test = 32.82  on 4 df,   p=1.298e-06,   Robust = 15.46  p=0.00383
+
+
+
+
+
+
+
+
+# age as a continuous predictor: 
+test.mod<-coxph(Surv(start2, stop2, death.time)~brucella+TB_3+ herd2 + age_yrsd +I(age_yrsd^2)+ cluster(animal), data=data3)  
+# AIC = 317.2427, LogLike = -167.0254 -153.6213
+
+
+# still no herd effects
+test.mod<-coxph(Surv(start, stop, death.time)~brucella+TB_3*herd2+ age4+ cluster(animal), data=data3); summary(test.mod)
+test.mod<-coxph(Surv(start, stop, death.time)~brucella*herd2+TB_3*herd2+ age4+ cluster(animal), data=data3); summary(test.mod)
+test.mod<-coxph(Surv(start, stop, death.time)~brucella*herd2+TB_3+herd2+ age4+ cluster(animal), data=data3); summary(test.mod)
+
+# nor age... but worry about age*bruc colinearity
+test.mod<-coxph(Surv(start, stop, death.time)~brucella*age4+TB_3+herd2+ age4+ cluster(animal), data=data3); summary(test.mod)
+test.mod<-coxph(Surv(start, stop, death.time)~brucella+age4*TB_3+herd2+ age4+ cluster(animal), data=data3); summary(test.mod)
+
+# nor co-infection
+test.mod<-coxph(Surv(start, stop, death.time)~brucella*TB_3+herd2+ age4+ cluster(animal), data=data3); summary(test.mod)
+
+
+
+
+# test proportional hazards assumption
+temp<-cox.zph(final.mod)
+print(temp);
+par(mfrow=c(2,3))
+ plot(temp)
+#P. Grambsch and T. Therneau (1994), Proportional hazards tests and diagnostics based on weighted residuals. Biometrika, 81, 515-26.
+
+# residuals
+res<-resid(test.mod)
+
+# get predicted
+predRes <- predict(final.mod, type="risk")
+head(predRes, n=10)
+Shat2 <- survexp(~ age6 + TB_3+ brucella, ratetable=final.mod, data=data3)
+with(Shat2, head(data.frame(time, surv), n=4))
+
+
+
 
 
 ############################################
 ############################################
-# Part II: Fit best (no bolus, add data) with Bayesain model
+# Part II: Fit best (no bolus, add data) with Bayesain model.... no luck!
 ############################################
 ############################################
 #!!!!!!!!!!!!!!

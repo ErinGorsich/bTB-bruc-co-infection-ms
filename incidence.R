@@ -54,6 +54,26 @@ quantile(c, c(0.5, 0.95))/12
 
 
 # month and year histograms for suppliment
+incidbr<- data[data$incid_bruc_jo ==1,c(2:5,9)]
+incidtb<- data[data$incid==1, c(2:5,9)]
+incidbr$month<- NA; incidtb$month<- NA
+get_month = function(c){
+	val <- as.character(c)
+	t<- strsplit(val, '-')[[1]][2]
+	ifelse (as.numeric((strsplit(t, "")[[1]][1])) > 0, 
+		new <- paste(strsplit(t, "")[[1]][1], strsplit(t, "")[[1]][2], sep=""), 
+		new <- strsplit(t, "")[[1]][2] )
+	r <- as.numeric(new)
+	return(r)
+}
+for (i in 1:length(incidbr$capid)){
+	incidbr$month[i] <- get_month(incidbr$capid[i])
+}
+for (i in 1:length(incidtb$capid)){
+	incidtb$month[i] <- get_month(incidtb$capid[i])
+}
+table(incidtb$month, incidtb$herdorig)
+table(incidbr$month, incidbr$herdorig)
 
 
 

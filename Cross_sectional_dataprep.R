@@ -260,3 +260,32 @@ table(data$bruc, data$tb, data$agecat)
 
 table(data2$bruc, data2$tb, data2$agecat)
 
+
+######################################
+######################################
+# GLMM 2
+######################################
+######################################
+setwd("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/")
+data<- read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/cross_sectional_data_withdz_cleandisease_nofinal_Feb2016_capturetime_forsurv.csv")
+data2<- read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/cross_sectional_data_withdz_cleandisease_nofinal_Feb2016_capturetime.csv")
+# no final captures, subset by ages of overlap
+data<- data[data$age_sel/12 > 2.5 & data$age_sel/12 < 10.5,]
+data2<- data2[data2$age_sel/12 > 2.5 & data2$age_sel/12 < 10.5,]
+data$herd <- relevel(data$herdorig, "LS")
+data2$herd <- relevel(data2$herdorig, "LS")
+
+# With random intercept
+test.mod <- glmer(bruc~ herd + age_yr + I(age_yr^2)+ tb+ tb*age_yr + tb*I(age_yr^2) + tb*herd + (1|id), family= binomial, data=data)
+test.mod <- glmer(bruc~ herd + age_yr + I(age_yr^2)+ tb+ tb*age_yr + tb*I(age_yr^2) + tb*herd + (1|id), family= binomial, data=data2)
+
+test.mod <- glmer(bruc~ herd + age_yr + I(age_yr^2)+ tb+ tb*age_yr + tb*I(age_yr^2) + (1|id), family= binomial, data=data)
+test.mod <- glmer(bruc~ herd + age_yr + I(age_yr^2)+ tb+ tb*age_yr + tb*I(age_yr^2) + (1|id), family= binomial, data=data2) # not converge
+
+test.mod <- glmer(bruc~ herd + age_yr + I(age_yr^2)+ tb+ tb*I(age_yr^2) + (1|id), family= binomial, data=data)
+test.mod1 <- glmer(bruc~ herd + age_yr + I(age_yr^2)+ tb + tb*I(age_yr^2) + (1|id), family= binomial, data=data2)
+
+test.mod <- glmer(bruc~ age_yr + I(age_yr^2)+ tb+ tb*I(age_yr^2) + (1|id), family= binomial, data=data); summary(test.mod)
+test.mod1 <- glmer(bruc~ age_yr + I(age_yr^2)+ tb + tb*I(age_yr^2) + (1|id), family= binomial, data=data2); summary(test.mod1)
+
+

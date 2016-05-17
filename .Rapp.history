@@ -227,3 +227,33 @@ ggplot(fs, aes(x= fs$Age.ind, y= fs$prob, colour = fs$dz)) + geom_line()#
 ggplot(fs, aes(x= fs$Age.ind, y= fs$prob, colour = fs$dz)) + geom_point() + geom_line()+ geom_errorbar(aes(ymin= fs$plb, ymax=fs$pub, width=0.1))
 ggplot(fs, aes(x= fs$Age.ind, y= fs$prob, colour = fs$dz)) + geom_line()#
 ggplot(fs, aes(x= fs$Age.ind, y= fs$prob, colour = fs$dz)) + geom_point() + geom_line()
+#par(mfrow = c(1, 2))#
+#plot(KM, mark.time = FALSE, ylab = "Survival Probability",#
+    xlab = "Time (months)")#
+ # USE STANDARDIZED ESTIMATES!!!#
+df<- data.frame(name=c("bruc", "bTB", "site", "age^2", "age"), est= c(3.0, 2.81, 1.99, 1.05,  0.51), #
+	lower= c(1.50, 1.43, 1.05, 1.01 , 0.34), upper= c(6.01, 5.51, 3.78, 1.07, 0.76),  #78.83 #
+	order=c(1,2,3,4,5))#
+df$name <- factor(df$name, levels= df$name[order(df$order, decreasing = TRUE)])#
+p2 <-ggplot(df, aes(x=df$name, y=df$est)) + #
+	geom_errorbar(aes(ymin=df$lower, ymax=df$upper, width=0)) +  				# for black error bars, add colour="black"#
+	geom_point(df$estimate)+#
+	theme_bw()+#
+	#theme(panel.grid.major.y=element_blank(), #
+	#panel.border = element_blank(), #
+ 	#axis.line = element_line(colour= "black"),#
+ 	#panel.grid.major.x=element_blank()) +  #
+	coord_flip()#
+	#ylim(-0.5, 0.5)+#
+	#ylim(min(out$sdbeta-out$sdse), max(out$sdbeta[out$sdbeta<100]+out$sdse[out$sdbeta<100]))   # change to this#
+	#theme(axis.text.x=element_text(size=14), axis.text.y=element_text(size=14))#
+#
+p3<- p2 + #
+	theme(axis.title.x=element_text(size=14), axis.title.y=element_blank()) +#
+	ylab("Relative risk compared to uninfected animals")+#
+	scale_colour_grey(start=0.6, end=0.7)+#
+	geom_segment(aes(x=0, xend=5, y=1, yend=1), linetype=2)+ ylim(-0.01,6.2) #
+#
+p3#
+#
+p3 + theme(axis.line = element_line(colour= "black"))

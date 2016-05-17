@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2014) (preloaded format=pdflatex 2014.5.25)  27 APR 2016 10:35
+This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2014) (preloaded format=pdflatex 2014.5.25)  9 MAY 2016 21:20
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -423,31 +423,51 @@ Package pdftex.def Info: Figure1_ageprev.pdf used on input line 43.
  [1
 
 {/usr/local/texlive/2014/texmf-var/fonts/map/pdftex/updmap/pdftex.map}] [2 <./F
-igure1_ageprev.pdf>]
-Underfull \hbox (badness 10000) in paragraph at lines 61--68
+igure1_ageprev.pdf>] [3]
+Underfull \hbox (badness 10000) in paragraph at lines 84--96
 
  []
 
+[4] <Figure2_modelstructure.pdf, id=36, 775.89874pt x 636.3775pt>
+File: Figure2_modelstructure.pdf Graphic file (type pdf)
 
-Underfull \hbox (badness 10000) in paragraph at lines 70--75
-
+<use Figure2_modelstructure.pdf>
+Package pdftex.def Info: Figure2_modelstructure.pdf used on input line 100.
+(pdftex.def)             Requested size: 325.215pt x 266.74266pt.
+ [5 <./Figure2_modelstructure.pdf>]
+Overfull \hbox (4.5443pt too wide) in paragraph at lines 122--122
+[] 
  []
 
-[3] [4]
-Overfull \hbox (28.75153pt too wide) in paragraph at lines 106--128
+[6] <Figure3_parametersummary.pdf, id=56, 556.0775pt x 597.23125pt>
+File: Figure3_parametersummary.pdf Graphic file (type pdf)
+
+<use Figure3_parametersummary.pdf>
+Package pdftex.def Info: Figure3_parametersummary.pdf used on input line 143.
+(pdftex.def)             Requested size: 397.48499pt x 426.90775pt.
+
+<Bruc_conversion_month.pdf, id=57, 614.295pt x 794.97pt>
+File: Bruc_conversion_month.pdf Graphic file (type pdf)
+
+<use Bruc_conversion_month.pdf>
+Package pdftex.def Info: Bruc_conversion_month.pdf used on input line 151.
+(pdftex.def)             Requested size: 397.48499pt x 514.39537pt.
+ [7] [8 <./Figure3_parametersummary.pdf>]
+[9 <./Bruc_conversion_month.pdf>]
+Overfull \hbox (28.75153pt too wide) in paragraph at lines 171--193
 [][] 
  []
 
-[5] [6] [7] (./BTB_Bruc_coinfection_model.aux)
+[10] [11] [12] [13] (./BTB_Bruc_coinfection_model.aux)
 
 LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
 
  ) 
 Here is how much of TeX's memory you used:
- 4166 strings out of 493117
- 56186 string characters out of 6135433
- 131855 words of memory out of 5000000
- 7535 multiletter control sequences out of 15000+600000
+ 4184 strings out of 493117
+ 56656 string characters out of 6135433
+ 133855 words of memory out of 5000000
+ 7550 multiletter control sequences out of 15000+600000
  14599 words of font info for 56 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  41i,12n,35p,724b,277s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -467,10 +487,10 @@ ive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/local/texlive
 014/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/20
 14/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/texlive/2014
 /texmf-dist/fonts/type1/public/amsfonts/cm/cmti12.pfb>
-Output written on BTB_Bruc_coinfection_model.pdf (7 pages, 210175 bytes).
+Output written on BTB_Bruc_coinfection_model.pdf (13 pages, 476553 bytes).
 PDF statistics:
- 105 PDF objects out of 1000 (max. 8388607)
- 75 compressed objects within 1 object stream
+ 171 PDF objects out of 1000 (max. 8388607)
+ 120 compressed objects within 2 object streams
  0 named destinations out of 1000 (max. 500000)
- 6 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 21 words of extra memory for PDF output out of 10000 (max. 10000000)
 
