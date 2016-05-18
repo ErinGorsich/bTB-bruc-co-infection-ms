@@ -344,42 +344,66 @@ dev.off()
 # Figure 2- Survival and incidence plots
 #######################################################
 #######################################################
-# From book code: 
-#AIDS.samp <- subset(aids, patient %in% c(82,152,213,236,332,
-     335,353,407,410,452))
-#KM <- survfit(Surv(Time, death) ~ 1, data = aids.id)
+library(survival)
+data2<-read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/survival/brucsurvival_TB3controls_longresidnomissing_noerrors_season2_final_fixed.csv")
+bolus <- c("R22", "R24", "R27", "R35", "R45", "R45b", "R50", "R6", "Y20", "Y31c", "Y31d", "Y39", "Y43", "Y44")
+#"W1" is ok.
+data3<- data2[!(data2$animal %in% bolus),]
+data3<- data3[data3$animal!= "O10",]
 
-#par(mfrow = c(1, 2))
-#plot(KM, mark.time = FALSE, ylab = "Survival Probability",
-    xlab = "Time (months)")
- # USE STANDARDIZED ESTIMATES!!!
-df<- data.frame(name=c("bruc", "bTB", "site", "age^2", "age"), est= c(3.0, 2.81, 1.99, 1.05,  0.51), 
-	lower= c(1.50, 1.43, 1.05, 1.01 , 0.34), upper= c(6.01, 5.51, 3.78, 1.07, 0.76),  #78.83 
-	order=c(1,2,3,4,5))
+final.mod<-coxph(Surv(start, stop, death.time)~brucella+TB_3+herd2+ age6+ cluster(animal), data=data3); summary(final.mod)
+full.mod<-test.mod
+
+# plot predicted survival time (same as before but good): 
+df<-data.frame(start=data3$start2, stop=data3$stop2, death.time=data3$death.time, TB=data3$TB_3, Br=data3$brucella, age=data3$age6, herd=data3$herd)
+# set at average herd value (0.53) so not LS or CB. 
+mort<-with(df, data.frame(TB=0, Br=0, age=rep(mean(age=="adult"), 2), herd=rep(mean(herd=="LS"), 2)))
+mortTB<-with(df, data.frame(TB=1, Br=0, age=rep(mean(age=="adult"),2), herd=rep(mean(herd=="LS"), 2)))
+mortBr<-with(df, data.frame(Br=1, TB=0, age=rep(mean(age=="adult"),2), herd=rep(mean(herd=="LS"), 2)))
+mortco<-with(df, data.frame(Br=1, TB=1, age=rep(mean(age=="adult"),2), herd=rep(mean(herd=="LS"), 2)))
+mort<-with(df, data.frame(TB=0, Br=0, age=0, herd=0))
+mortTB<-with(df, data.frame(TB=1, Br=0, age=0, herd=0))
+mortBr<-with(df, data.frame(Br=1, TB=0, age=0, herd=0))
+mortco<-with(df, data.frame(Br=1, TB=1, age=0, herd=0))
+
+plot_add.mod<-coxph(Surv(start, stop, death.time)~Br+herd+TB+herd+age, data=df)
+m<-survfit(plot_add.mod, newdata=mort)
+mt<-survfit(plot_add.mod, newdata=mortTB)
+mb<-survfit(plot_add.mod, newdata=mortBr)
+mco<-survfit(plot_add.mod, newdata=mortco)
+
+
+plot(m, conf.int=FALSE, ylab="Survival", xlab="Time (months)", lty=c(1, 2),
+	ylim=c(0.1, 1), cex.lab=1.4, col="dark blue", bty="n")
+lines(mt, lty=c(5, 5), conf.int= FALSE, col="dark green")
+lines(mb, lty=c(4, 4), conf.int= FALSE, col="purple")
+lines(mco, lty=c(3,3), conf.int= FALSE, col="dark red")
+legend("bottomleft", legend=c("Uninfected", "Tuberculosis+", "Brucellosis +", "Co-infected"),
+	lty=c(1 ,5, 4, 3), inset=0.02, bty="n", col=c("dark blue", "dark green", "purple", "dark red"))
+
+
+df<- data.frame(name=c("bruc", "bTB", "site", "age (< 3 yr)"), 
+	est= c(3.0, 2.81, 2.08, 3.26), 
+	lower= c(1.52, 1.43, 1.1, 1.70), 
+	upper= c(6.0, 5.58, 3.93, 6.28), 
+	order=c(1,2,3,4))
 df$name <- factor(df$name, levels= df$name[order(df$order, decreasing = TRUE)])
-	
+
 p2 <-ggplot(df, aes(x=df$name, y=df$est)) + 
-	geom_errorbar(aes(ymin=df$lower, ymax=df$upper, width=0)) +  				# for black error bars, add colour="black"
-	geom_point(df$estimate)+
-	theme_bw()+
-	#theme(panel.grid.major.y=element_blank(), 
-	#panel.border = element_blank(), 
- 	#axis.line = element_line(colour= "black"),
- 	#panel.grid.major.x=element_blank()) +  
-	coord_flip()
-	#ylim(-0.5, 0.5)+
-	#ylim(min(out$sdbeta-out$sdse), max(out$sdbeta[out$sdbeta<100]+out$sdse[out$sdbeta<100]))   # change to this
-	#theme(axis.text.x=element_text(size=14), axis.text.y=element_text(size=14))
+	geom_point(df$estimate)+ 
+	geom_errorbar(aes(ymin=df$lower, ymax=df$upper, width=0.1)) +  				
+	theme_bw() +
+	theme(panel.border= element_blank(), 
+	axis.title.x=element_text(size=14), axis.title.y=element_blank() ) + 
+	theme(axis.line.x = element_line(color="black"), 
+	axis.line.y = element_line(color="black")) + 
+	coord_flip() + 
+	ylab("Relative risk of mortality") +
+	geom_segment(aes(x=0, xend=4.3, y=1, yend=1), linetype=2, colour = "dark red")+ ylim(-0.01,6.5) + 
+	coord_flip() 
+p2
 
-p3<- p2 + 
-	theme(axis.title.x=element_text(size=14), axis.title.y=element_blank()) +
-	ylab("Relative risk compared to uninfected animals")+
-	scale_colour_grey(start=0.6, end=0.7)+
-	geom_segment(aes(x=0, xend=5, y=1, yend=1), linetype=2)+ ylim(-0.01,6.2) 
 
-p3
-
-p3 + theme(axis.line = element_line(colour= "black"))
 
 
 

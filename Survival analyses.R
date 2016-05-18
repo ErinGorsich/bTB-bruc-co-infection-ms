@@ -125,6 +125,33 @@ length(mort$TB_3[mort$brucella==1& mort$TB_3==1])
 length(mort$TB_3[mort$TB_3==1])
 length(mort$TB_3[mort$brucella==1])
 
+##############
+# how many animals did we observe Br+ for > 2years
+length(timeB[timeB/12 >2])
+length(timeB[timeB/12 >2])
+for (i in 1:length(timedf[,1])){
+	timedf$maxBC[i] <- max(timedf$max_B[i], timedf$max_C[i])
+	temp <- c(timedf$min_B[i], timedf$min_C[i])
+	Bruc <- c(timedf$min_B[i], timedf$max_B[i])
+	Co <- c(timedf$min_C[i], timedf$max_C[i])
+	if(sum(Bruc)>0 & sum(Co)>0){
+		timedf$minBC[i] <- min(temp)
+	}
+	if(sum(Bruc)>0 & sum(Co)==0){
+		timedf$minBC[i] <- timedf$min_B[i]
+	} 
+	if(sum(Bruc)==0 & sum(Co)<0){
+		timedf$minBC[i] <- timedf$min_C[i]
+	} 
+	if (sum(Bruc) == 0 & sum(Co)==0){
+		timedf$minBC[i] <- 0
+	}
+	rm(temp, Bruc, Co)
+	timedf$t[i] <- timedf$maxBC[i] - timedf$minBC[i]
+}
+length(timedf$t[timedf$t/12 >2])	
+length(timedf$t[timedf$t/12 >1])	
+	
 ###############
 # plot of when animals died
 par(mfrow=c(2,2))
@@ -132,7 +159,6 @@ hist(d$start2); hist(d$stop2) # spread throughout study period, maybe more in be
 hist((d$start2 %% 12)/3); hist((d$stop2 %% 12)/3)
 
 a<- hist((d$start2 %% 12)/3)
-
 
 
 
@@ -272,63 +298,6 @@ herdsd            2.221     0.4502    1.1261    4.3818
 age_yrsd          0.221     4.5243    0.0817    0.5979
 I(age_yrsd^2)     2.389     0.4186    1.3316    4.2849
 
-# CPH model diagnostics
-# no change with start/stop designations: exact same covariates
-# model with tb*herd prefered by AIC; but parameter value= 0.1
-test.mod<-coxph(Surv(start2, stop2, death.time)~brucella+TB_3+herd2 + age_yr2 +I(age_yr2^2)+ cluster(animal), data=data3)  
-
-# test proportional hazards assumption
-temp<-cox.zph(test.mod)
-print(temp);
-par(mfrow=c(2,3))
- plot(temp)
-#P. Grambsch and T. Therneau (1994), Proportional hazards tests and diagnostics based on weighted residuals. Biometrika, 81, 515-26.
-
-# residuals
-res<-resid(test.mod)
-
-# get predicted
-predRes <- predict(test.mod, type="risk")
-head(predRes, n=10)
-Shat2 <- survexp(~ TB_3+ brucella, ratetable=test.mod, data=data)
-with(Shat2, head(data.frame(time, surv), n=4))
-#time TB_3.0..brucella.0 TB_3.0..brucella.1 TB_3.1..brucella.0 TB_3.1..brucella.1
-#1    3          0.9156157          0.8279407          0.8255238          0.6367819
-#2    6          0.9006887          0.8003969          0.7969077          0.5878509
-#3   12          0.8948555          0.7898502          0.7858978          0.5697411
-#4   15          0.8628729          0.7341025          0.7272129          0.4796214
-
-# predicted proportional increase at average buffalo (herd in between the LS & CB)
-#data$herd2<-NA
-#for(i in 1:length(data$herd)){
-#ifelse(data$herd[i]=="LS", data$herd2[i]<-1, data$herd2[i]<-0)
-#}
-#summary(data$herd2) #0.5438
-#data$herd3<-data$herd2-0.5438
-#full.mod<-coxph(Surv(start, stop, death.time)~brucella*herd3+ TB_3*herd3+age_yr2+ I(age_yr2^2), data=data)
-full.mod<-test.mod
-
-# plot predicted survival time (same as before but good): 
-df<-data.frame(start=data3$start2, stop=data3$stop2, death.time=data3$death.time, TB=data3$TB_3, Br=data3$brucella, age=data3$age_yr2, herd=data3$herd)
-# set at average herd value (0.53) so not LS or CB. 
-mort<-with(df, data.frame(TB=0, Br=0, age=rep(mean(age),2), herd=rep(mean(herd=="LS"), 2)))
-mortTB<-with(df, data.frame(TB=1, Br=0, age=rep(mean(age),2), herd=rep(mean(herd=="LS"), 2)))
-mortBr<-with(df, data.frame(Br=1, TB=0, age=rep(mean(age),2), herd=rep(mean(herd=="LS"), 2)))
-mortco<-with(df, data.frame(Br=1, TB=1, age=rep(mean(age),2), herd=rep(mean(herd=="LS"), 2)))
-plot_add.mod<-coxph(Surv(start, stop, death.time)~Br+herd+TB+herd+age+I(age^2), data=df)
-m<-survfit(plot_add.mod, newdata=mort)
-mt<-survfit(plot_add.mod, newdata=mortTB)
-mb<-survfit(plot_add.mod, newdata=mortBr)
-mco<-survfit(plot_add.mod, newdata=mortco)
-
-plot(m, conf.int=FALSE, ylab="Survival", xlab="Time (months)", lty=c(1, 2),
-	ylim=c(0.1, 1), cex.lab=1.4, col="dark blue")
-lines(mt, lty=c(5, 5), conf.int= FALSE, col="dark green")
-lines(mb, lty=c(4, 4), conf.int= FALSE, col="purple")
-lines(mco, lty=c(3,3), conf.int= FALSE, col="dark red")
-legend("bottomleft", legend=c("Uninfected", "bTB+", "Brucellosis +", "Coinfected"),
-	lty=c(1 ,5, 4, 3), inset=0.02, bty="n", col=c("dark blue", "dark green", "purple", "dark red"))
-
 
 
 ############################################
@@ -388,30 +357,41 @@ final.mod<-coxph(Surv(start, stop, death.time)~brucella+TB_3+herd2+ age6+ cluste
 #Score (logrank) test = 32.82  on 4 df,   p=1.298e-06,   Robust = 15.46  p=0.00383
 
 
+########################################################
+# CPH model diagnostics
+# no change with start/stop designations: exact same covariates
+# model with tb*herd prefered by AIC; but parameter value= 0.1
+test.mod<- final.mod
 
+# test proportional hazards assumption
+temp<-cox.zph(test.mod)
+print(temp);
+par(mfrow=c(2,3))
+ plot(temp)
+#P. Grambsch and T. Therneau (1994), Proportional hazards tests and diagnostics based on weighted residuals. Biometrika, 81, 515-26.
 
+# residuals
+res<-resid(test.mod)
 
+# get predicted
+predRes <- predict(test.mod, type="risk")
+head(predRes, n=10)
+Shat2 <- survexp(~ TB_3+ brucella, ratetable=test.mod, data=data)
+with(Shat2, head(data.frame(time, surv), n=4))
+#time TB_3.0..brucella.0 TB_3.0..brucella.1 TB_3.1..brucella.0 TB_3.1..brucella.1
+#1    3          0.9156157          0.8279407          0.8255238          0.6367819
+#2    6          0.9006887          0.8003969          0.7969077          0.5878509
+#3   12          0.8948555          0.7898502          0.7858978          0.5697411
+#4   15          0.8628729          0.7341025          0.7272129          0.4796214
 
-
-
-# age as a continuous predictor: 
-test.mod<-coxph(Surv(start2, stop2, death.time)~brucella+TB_3+ herd2 + age_yrsd +I(age_yrsd^2)+ cluster(animal), data=data3)  
-# AIC = 317.2427, LogLike = -167.0254 -153.6213
-
-
-# still no herd effects
-test.mod<-coxph(Surv(start, stop, death.time)~brucella+TB_3*herd2+ age4+ cluster(animal), data=data3); summary(test.mod)
-test.mod<-coxph(Surv(start, stop, death.time)~brucella*herd2+TB_3*herd2+ age4+ cluster(animal), data=data3); summary(test.mod)
-test.mod<-coxph(Surv(start, stop, death.time)~brucella*herd2+TB_3+herd2+ age4+ cluster(animal), data=data3); summary(test.mod)
-
-# nor age... but worry about age*bruc colinearity
-test.mod<-coxph(Surv(start, stop, death.time)~brucella*age4+TB_3+herd2+ age4+ cluster(animal), data=data3); summary(test.mod)
-test.mod<-coxph(Surv(start, stop, death.time)~brucella+age4*TB_3+herd2+ age4+ cluster(animal), data=data3); summary(test.mod)
-
-# nor co-infection
-test.mod<-coxph(Surv(start, stop, death.time)~brucella*TB_3+herd2+ age4+ cluster(animal), data=data3); summary(test.mod)
-
-
+# predicted proportional increase at average buffalo (herd in between the LS & CB)
+#data$herd2<-NA
+#for(i in 1:length(data$herd)){
+#ifelse(data$herd[i]=="LS", data$herd2[i]<-1, data$herd2[i]<-0)
+#}
+#summary(data$herd2) #0.5438
+#data$herd3<-data$herd2-0.5438
+#full.mod<-coxph(Surv(start, stop, death.time)~brucella*herd3+ TB_3*herd3+age_yr2+ I(age_yr2^2), data=data)
 
 
 # test proportional hazards assumption
@@ -431,12 +411,75 @@ Shat2 <- survexp(~ age6 + TB_3+ brucella, ratetable=final.mod, data=data3)
 with(Shat2, head(data.frame(time, surv), n=4))
 
 
+############################################
+############################################
+# Part II: Fit CHP models to different durations 
+# of brucellosis infection
+############################################
+############################################
+data2<- read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/survival/brucsurvival_TB3controls_longresidnomissing_noerrors_season2_final_fixed_nopfc.csv")
+data2$age_yr2<-floor(data2$age_yr)
+bolus <- c("R22", "R24", "R27", "R35", "R45", "R45b", "R50", "R6", "Y20", "Y31c", "Y31d", "Y39", "Y43", "Y44")
+#"W1" is ok.
+data3<- data2[!(data2$animal %in% bolus),]
+length(unique(data2$animal)); length(unique(data3$animal))  # 93
+
+data3<- data3[data3$animal!= "O10",]
+
+pfc <- c("B10", "B2", "B22", "B33", "B42", "B43", "B47b", 
+	"B5", "B7", "O13", "O26b", "O30", "O32c", "O40", "O41", "O42", 
+	"O51", "R11", "R20", "R21c", "R22", "R31", "R31b", "R32", "R43", 
+	"R46", "R5", "R50", "R8", "R8b", "Y10b", "Y30", "Y30b", "Y31c", "Y32", 
+	"Y38", "Y38b", "Y39","Y44")
+mort <- data3[data3$death.time==1,]   # 24 animals
+
+
+life.mod<-coxph(Surv(start, stop, death.time)~
+	brucella+TB_3+herd2+ age6+ cluster(animal), data=data3)
+	summary(life.mod); extractAIC(life.mod) 4.0000 194.1011; Rsquare= 0.011
+	# life.mod$loglik -93.0506
+	
+one.mod <- coxph(Surv(start, stop, death.time)~
+	brucella_1yr+TB_3+herd2+ age6+ cluster(animal), data=data3)
+	summary(one.mod); extractAIC(one.mod)  #4.0000 194.4902, Rsquare= 0.011
+	one.mod$loglik # -93.24511
+
+two.mod <- coxph(Surv(start, stop, death.time)~
+	brucella_2yr+TB_3+herd2+ age6+ cluster(animal), data=data3)
+	summary(two.mod); extractAIC(two.mod) #4.0000 193.0876, Rsquare= 0.012
+	two.mod$loglik  # -92.5435
+# only 7 buffalo observed with duration > 2 years, 
+# 2 of which were 1 capture chunk... so almost identical to the lifelong one
+
+
+two.mod <- coxph(Surv(start, stop, death.time)~
+	brucella_1.5yr+TB_3+herd2+ age6+ cluster(animal), data=data3)
+	summary(one.5.mod); extractAIC(one.5.mod)
+# 7  individuals with Br+ longer than 2 years, so can back-convert
+	
+onetwo.mod<-coxph(Surv(start, stop, death.time)~
+	as.factor(brucella_1yr_2) +TB_3+herd2+ age6+ cluster(animal), data=data3)
+	summary(onetwo.mod); extractAIC(onetwo.mod)  #5.0000 195.8106. Rsquare= 0.011
+	onetwo.mod$loglik # -92.90531
+
+one.5.two.mod<-coxph(Surv(start, stop, death.time)~
+	as.factor(brucella_1.5yr_2) +TB_3+herd2+ age6+ cluster(animal), data=data3)
+	summary(one.5.two.mod); extractAIC(one.5.two.mod) 5.0000 195.6564, Rsquare= 0.012
+	one.5.two.mod$loglik -92.82819
+
+# recall for loglik, maximum values are better (so smallest negative values)
+table(data3$animal, data3$brucella_1.5yr_2)  # 12 animals with observations > 1.5 yrs 2-8 rows
+
+
+
+
+
 
 
 
 ############################################
 ############################################
-# Part II: Fit best (no bolus, add data) with Bayesain model.... no luck!
+# Part III: Fit best (no bolus, add data) with Bayesain model.... no luck!
 ############################################
 ############################################
 #!!!!!!!!!!!!!!
@@ -460,7 +503,7 @@ coxph(Surv(start2, stop2, death.time)~brucella+TB_3+herd2 + age_yr2 +I(age_yr2^2
 
 ############################################
 ############################################
-# Part III: Joint models
+# Part IV: Joint models
 ############################################
 ############################################
 final.mod<-coxph(Surv(start, stop, death.time)~brucella+TB_3+herd2 + age_yr2 +I(age_yr2^2), data=data3); summary(final.mod)
