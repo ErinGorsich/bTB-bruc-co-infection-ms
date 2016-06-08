@@ -354,6 +354,149 @@ data3<- data3[data3$animal!= "O10",]
 final.mod<-coxph(Surv(start, stop, death.time)~brucella+TB_3+herd2+ age6+ cluster(animal), data=data3); summary(final.mod)
 full.mod<-test.mod
 
+#######################################################
+# Age and infection specific survival rates relative to estimated elsewhere
+#######################################################
+#  Age-Infection specific survival estimates for our population
+df<-data.frame(start=data3$start2, stop=data3$stop2, death.time=data3$death.time, 
+	age=data3$age6, herd=data3$herd, bruc= data3$brucella, tb = data3$TB_3, animal = data3$animal)
+mort<-with(df, data.frame(
+	age=c("adult", "adult", "adult", "adult", "adult", "adult", "adult", "adult", 
+		"juvenile", "juvenile", "juvenile", "juvenile", "juvenile", "juvenile", "juvenile", "juvenile"),
+	herd = c("LS", "CB", "LS", "CB", "LS", "CB", "LS", "CB"),
+	tb = c(0, 0, 1, 1, 0, 0, 1, 1), 
+	bruc = c(0, 0, 0, 0, 1, 1, 1, 1)))
+plot_add.mod<-coxph(Surv(start, stop, death.time)~herd+age+ tb+ bruc + cluster(animal), data=df)
+m<-survfit(plot_add.mod, newdata=mort)
+m<-survfit(plot_add.mod, newdata=mort[mort$herd=="LS" & mort$age=="adult",]); summary(m)
+m<-survfit(plot_add.mod, newdata=mort[mort$herd=="CB" & mort$age=="adult",]); summary(m)
+summary(m)
+
+plot_add.mod<-coxph(Surv(start, stop, death.time)~age, data=df)
+m<-survfit(plot_add.mod, newdata=mort)
+summary(m)
+
+
+# Compile estimates above into a df with other age specific estimate: 
+library(tidyr)
+survivaldf <- data.frame(age = seq(1, 15, 1), 
+	Cross2009female = c(0.9, 0.9, rep(0.95, 5), rep(0.85, 5), rep(0.9, 3)),
+	Cross2009male = c(0.82, 0.82, rep(0.77, 2), rep(0.97, 3), rep(0.65, 5), rep(0.1, 3)), 
+	CrossGetz2006male = c(NA, rep(0.84, 7), rep(0.59, 7)),
+	CrossGetz2006female = c(NA, rep(0.95, 7), rep(0.86, 7)),
+	Jolles2005TBneg = c(rep(0.85, 4), rep(0.97, 11)),
+	Jolles2005TBpos = c(rep(0.85, 4), rep(0.86, 11)),
+	FunstonMills = c(0.87, rep(0.92, 14)), 
+	SurvUn = c(NA, 0.884, 0.884, rep(0.963, 9), NA, NA, NA),
+	SurvTB = c(NA, rep(0.689, 2), rep(0.892, 9), NA, NA, NA), 
+	SurvBR =  c(NA, rep(0.706, 2), rep(0.899, 9), NA, NA, NA),
+	SurvCo = c(NA, rep(0.349, 2), rep(0.724, 9), NA, NA, NA)
+)
+	
+survlong <- gather(survivaldf, key = dataset, value = estimate, Cross2009female:SurvCo)
+survlong$colour <- "Estimates from African buffalo in southern Africa"
+survlong$colour[survlong$dataset %in% c("SurvUn")] <- "Uninfected"
+survlong$colour[survlong$dataset %in% c("SurvTB")] <- "Tuberculosis"
+survlong$colour[survlong$dataset %in% c("SurvBR")] <- "Brucellosis"
+survlong$colour[survlong$dataset %in% c("SurvCo")] <- "Co-infected"
+survlong$order <- seq(1, length(survlong[,1]))
+survlong$colour <- as.factor(survlong$colour)
+survlong$colour <- factor(survlong$colour, levels = survlong$colour[order(unique(survlong$order))])
+
+
+#survlong$order <- 0
+#survlong$order[survlong$dataset %in% c("SurvUn")] <- 1
+#survlong$order[survlong$dataset %in% c("SurvTB")] <- 3
+#survlong$order[survlong$dataset %in% c("SurvBR")] <- 2
+#survlong$order[survlong$dataset %in% c("SurvCo")] <- 4
+#survlong$order <- as.factor(survlong$order)
+#library(gdata)
+#survlong$colour <- reorder.factor(survlong$colour,  c(3,5,1,4,2))
+#survlong$colour <- reorder(survlong$colour, new.order = c("Estimates from African buffalo in southern Africa", "Uninfected", "Brucellosis", "Tuberculosis", "Co-infected")[3,5,1,4,2])
+
+#print(levels(survlong$order))
+# have to reorder and relevel the color factors: 
+
+
+p6 <- ggplot(survlong, aes(x = age, y = estimate, colour = colour, size = colour, shape = colour, group = dataset)) + 
+	xlab("Age (years)") + ylab("Annual Survival") +
+	geom_point(aes(size = colour)) +  #shape = sex
+	geom_line(aes(linetype = colour)) + 
+	scale_x_continuous(breaks=seq(1, 15, 2)) + 
+	theme_bw() + 
+	scale_colour_manual(values = c("gray80","goldenrod1", "slateblue3", "chartreuse4","tomato3")) +# Br, Co, Other, TB, Uninfected
+	scale_size_manual(values = c(1.2, 2, 2, 2, 2)) +
+	scale_shape_manual(values = c(15, 18, 17, 17, 19)) +
+	scale_linetype_manual(values = c('dotted', 'longdash', 'dotdash', 'dashed', 'twodash')) +  # shape = sex,
+	theme(panel.border = element_blank(), 
+		axis.title.x = element_text(size=16, vjust=-0.15),
+        axis.title.y = element_text(size=16, vjust= 0.8),
+        axis.text.x = element_text(size=14, vjust=-0.05),
+        axis.text.y = element_text(size=14)) + 
+        theme(axis.line.x = element_line(colour= "black"),
+  			axis.line.y = element_line(colour= "black"),   
+			#legend information
+        	legend.position=c(0.65, 0.18),  
+        	legend.background= element_rect(fill="white", colour="white"),
+        	legend.key= element_blank(),
+        	legend.title= element_blank(),
+        	legend.text = element_text(size=10))
+
+# 2b
+df<- data.frame(name=c("Brucellosis", "Tuberculosis", "Site (LS)", "Age (< 3 yr)"), 
+	est= c(3.0, 2.81, 2.08, 3.26), 
+	lower= c(1.52, 1.43, 1.1, 1.70), 
+	upper= c(6.0, 5.58, 3.93, 6.28), 
+	order=c(1,2,3,4))
+df$name <- factor(df$name, levels= df$name[order(df$order, decreasing = TRUE)])
+
+p7 <- ggplot(df, aes(x=df$name, y=df$est)) + 
+	geom_point(df$estimate, size = 3, shape = 19)+ 
+	geom_errorbar(aes(ymin=df$lower, ymax=df$upper, width=0.1)) +  				
+    theme_bw() +
+    theme(panel.border= element_blank(), 
+          axis.title.x=element_text(size=14), axis.title.y=element_blank() ) + 
+    theme(axis.line.x = element_line(color="black"), 
+          axis.line.y = element_line(color="black")) + 
+	coord_flip() + 
+	ylab("Relative risk of mortality") +
+	geom_segment(aes(x=0, xend=4.3, y=1, yend=1), linetype=2, colour = "dark red")+ ylim(-0.01,6.5) + 
+	theme(
+		axis.title.x = element_text(size=16, vjust=-0.15),
+        axis.title.y = element_blank(), #element_text(size=16, vjust= 0.8),
+        axis.text.x = element_text(size=14, vjust=-0.05),
+        axis.text.y = element_text(size=14))
+
+multiplot(p7, p6, cols=2)
+
+
+
+p4<- p3 +
+  theme_bw() + # removes ugly gray.
+  xlab("Capture period (6 months)") + ylab("Sero-prevalence") +
+  scale_x_discrete(breaks=c("1", "2", "3", "4", "5", "6", "7", "8"), limits=seq(1, 8, 1), 
+                   labels=c("1", "2", "3", "4", "5", "6", "7", "8")) +
+  scale_y_continuous(limits=c(0,0.6)) + 
+  theme(axis.line.x = element_line(colour= "black"),
+  		axis.line.y = element_line(colour= "black"),
+  		axis.title.x = element_text(size=16, vjust=-0.15),
+        axis.title.y = element_text(size=16, vjust= 0.8),
+        axis.text.x = element_text(size=14, vjust=-0.05),
+        axis.text.y = element_text(size=14),
+        panel.border = element_blank(), 
+        # legend information
+        legend.position=c(0.82, 0.9),  
+        legend.background= element_rect(fill="white", colour="white"),
+        legend.key= element_blank(),
+        legend.title= element_blank(),
+        legend.text = element_text(size=15)   )
+
+
+
+
+#######################################################
+# Survival curves- not used but informative
+#######################################################
 # plot predicted survival time (same as before but good): 
 df<-data.frame(start=data3$start2, stop=data3$stop2, death.time=data3$death.time, TB=data3$TB_3, Br=data3$brucella, age=data3$age6, herd=data3$herd)
 # set at average herd value (0.53) so not LS or CB. 
@@ -404,9 +547,16 @@ p2 <-ggplot(df, aes(x=df$name, y=df$est)) +
 p2
 
 
+########  OVERALL SURVIVAL ESTIMATES FOR OUR POPULATION
+df<-data.frame(start=data3$start2, stop=data3$stop2, death.time=data3$death.time, age=data3$age6, herd=data3$herd)
+mort<-with(df, data.frame(age=c("adult", "adult", "juvenile", "juvenile"), herd=c("LS", "CB", "LS", "CB")))
+plot_add.mod<-coxph(Surv(start, stop, death.time)~herd+age, data=df)
+m<-survfit(plot_add.mod, newdata=mort)
+summary(m)
 
-
-
+plot_add.mod<-coxph(Surv(start, stop, death.time)~age, data=df)
+m<-survfit(plot_add.mod, newdata=mort)
+summary(m)
 
 
 

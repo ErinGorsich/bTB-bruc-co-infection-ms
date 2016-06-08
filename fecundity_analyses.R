@@ -47,6 +47,9 @@ table(data3$fec, data3$tb, data3$bruc)
 # BR+ TB +
 5/(5+19)    # 0.208
 
+table(data3$fec[data3$age_yr>=4])
+91/(73+91)
+
 # NEED TO ACCOUNT FOR AGE!
 par(mfrow=c(2,2))
 hist(as.numeric(data3$age_yr[data3$tb==0 & data3$bruc=="negative"]), main="Uninfected", xlab= "Age")
@@ -398,5 +401,62 @@ for (age in ages){
 	make_stacked_barplot(age)
 }
 
+#################################
+#################################
+d<- data4[data4$age_yr >= 3 & data4$age_yr <= 9,]
+d$age1 <- "adult"; d$age3 <- "adult"; 
+d$age1[d$age_sel/12 < 4] <- "subadult"
+d$age3[d$age_sel/12 < 5] <- "subadult"
+d$age4<- "adult"
+d$age4[d$age_sel/12 < 5] <- "subadult"
+d$age4[d$age_sel/12 > 7] <- "mature"
+
+d$time 
+final.mod<-glmer(fec ~ age3 + tb *bruc+ (1|id), data=d, family=binomial(link="logit")); summary(final.mod)
+
+d<- data4[data4$age_sel/12 >3,]
+final.mod<-glmer(fec ~ age3 + tb *bruc+ (1|id), data=d, family=binomial(link="logit")); summary(final.mod)
 
 
+final.mod<-glmer(fec ~ age3*tb+ bruc*age3+ tb*bruc+ (1|id), data=d, family=binomial(link="logit")); summary(final.mod)
+final.mod<-glmer(fec ~ age3*tb+bruc+ (1|id), data=d, family=binomial(link="logit")); summary(final.mod)
+
+#correlation= corAR1(form=~capturetime2|id),
+t1<-glmmPQL(fec~ age3*tb + bruc,  random= ~ 1|id, data=d, family=binomial); summary(t1)
+
+E<- residuals(t1, type="normalized")
+acf(E)
+
+t1<-glmmPQL(fec~ age3*tb + bruc, correlation= corAR1(form=~ capturetime |id), random= ~ 1|id, data=d, family=binomial); summary(t1)
+#t1<-glmmPQL(fec~ age3*tb + age3*bruc, correlation= corAR1(form=~ capturetime |id), random= ~ 1|id, data=d, family=binomial); summary(t1)
+t1<-glmmPQL(fec~ age3*tb + bruc*tb, correlation= corAR1(form=~ capturetime |id), random= ~ 1|id, data=d, family=binomial); summary(t1)
+#                    Value Std.Error  DF   t-value p-value
+#(Intercept)      0.801002 0.5063390 103  1.581948  0.1167
+#age3subadult    -3.744569 0.6841735 103 -5.473128  0.0000
+#tb              -1.721871 0.6860373 103 -2.509880  0.0136
+#brucpositive    -1.842057 0.6526318 103 -2.822506  0.0057
+#age3subadult:tb  3.015401 0.9580790 103  3.147341  0.0022
+#tb:brucpositive  2.095676 0.8861697 103  2.364870  0.0199
+
+#Fixed effects: fec ~ age3 * tb + bruc * tb + age3 * bruc 
+#                              Value Std.Error  DF   t-value p-value
+#(Intercept)                0.810760 0.5751327 102  1.409692  0.1617
+#age3subadult              -3.776053 0.7547791 102 -5.002858  0.0000
+#tb                        -2.273345 0.7860890 102 -2.891969  0.0047
+#brucpositive              -1.960780 0.7521570 102 -2.606876  0.0105
+#age3subadult:tb            4.510160 1.1598932 102  3.888427  0.0002
+#tb:brucpositive            3.002665 1.0355932 102  2.899464  0.0046
+#age3subadult:brucpositive -2.975439 1.4164087 102 -2.100693  0.0381
+
+table(d$age3, d$fec)
+#            0  1
+#  adult    49 36   #0.7346939
+#  subadult 81  6   #0.06896552
+
+table(d$fec[d$age_yr >=4])  
+42/(101+42)  %0.29
+
+table(d$fec[d$age_yr >=4 & d$age_yr <= 5])
+14/(66+14) #18%
+ 
+table(d$fec[d$age_yr > 5])  # 44%

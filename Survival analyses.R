@@ -330,7 +330,7 @@ test.mod<-coxph(Surv(start, stop, death.time)~ age5+ cluster(animal), data=data3
 # AIC = 323.0442; LogLike = -167.0254 -157.5221
 
 #0-3, 3+
-final.mod<-coxph(Surv(start, stop, death.time)~brucella+TB_3+herd2+ age6+ cluster(animal), data=data3); summary(final.mod)
+final.mod<-coxph(Surv(start2, stop2, death.time)~brucella+TB_3+herd2+ age6+ cluster(animal), data=data3); summary(final.mod)
 # AIC = 312.7035; LogLike = -167.0254 -152.3518
 #coxph(formula = Surv(start, stop, death.time) ~ brucella + TB_3 + 
 #    herd2 + age6 + cluster(animal), data = data3)
@@ -376,13 +376,25 @@ res<-resid(test.mod)
 # get predicted
 predRes <- predict(test.mod, type="risk")
 head(predRes, n=10)
-Shat2 <- survexp(~ TB_3+ brucella, ratetable=test.mod, data=data)
+Shat2 <- survexp(~ TB_3+ brucella, ratetable=test.mod, data=data3)
 with(Shat2, head(data.frame(time, surv), n=4))
-#time TB_3.0..brucella.0 TB_3.0..brucella.1 TB_3.1..brucella.0 TB_3.1..brucella.1
-#1    3          0.9156157          0.8279407          0.8255238          0.6367819
-#2    6          0.9006887          0.8003969          0.7969077          0.5878509
-#3   12          0.8948555          0.7898502          0.7858978          0.5697411
-#4   15          0.8628729          0.7341025          0.7272129          0.4796214
+
+test.mod<- final.mod
+predRes <- predict(test.mod, type="risk")
+head(predRes, n=10)
+Shat2 <- survexp(~ age6 + herd, ratetable=test.mod, data=data3)
+with(Shat2, head(data.frame(time, surv), n=4))
+
+test.mod<- final.mod
+predRes <- predict(test.mod, type="risk")
+head(predRes, n=10)
+Shat2 <- survexp(~ age6, ratetable=test.mod, data=data3)
+with(Shat2, head(data.frame(time, surv), n=8))
+
+plot(survfit(Surv(start, stop, death.time)~herd2+ age6+ cluster(animal), data=data3), conf.int=FALSE)
+
+plot(survfit(Surv(start, stop, death.time)~herd2+ age6+ cluster(animal), data=data3), mark.time=FALSE)
+lines(survexp(~ age6 + herd, ratetable=test.mod, data=data3), col='purple')
 
 # predicted proportional increase at average buffalo (herd in between the LS & CB)
 #data$herd2<-NA
