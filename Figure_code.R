@@ -404,20 +404,6 @@ survlong$colour <- as.factor(survlong$colour)
 survlong$colour <- factor(survlong$colour, levels = survlong$colour[order(unique(survlong$order))])
 
 
-#survlong$order <- 0
-#survlong$order[survlong$dataset %in% c("SurvUn")] <- 1
-#survlong$order[survlong$dataset %in% c("SurvTB")] <- 3
-#survlong$order[survlong$dataset %in% c("SurvBR")] <- 2
-#survlong$order[survlong$dataset %in% c("SurvCo")] <- 4
-#survlong$order <- as.factor(survlong$order)
-#library(gdata)
-#survlong$colour <- reorder.factor(survlong$colour,  c(3,5,1,4,2))
-#survlong$colour <- reorder(survlong$colour, new.order = c("Estimates from African buffalo in southern Africa", "Uninfected", "Brucellosis", "Tuberculosis", "Co-infected")[3,5,1,4,2])
-
-#print(levels(survlong$order))
-# have to reorder and relevel the color factors: 
-
-
 p6 <- ggplot(survlong, aes(x = age, y = estimate, colour = colour, size = colour, shape = colour, group = dataset)) + 
 	xlab("Age (years)") + ylab("Annual Survival") +
 	geom_point(aes(size = colour)) +  #shape = sex
@@ -557,6 +543,49 @@ summary(m)
 plot_add.mod<-coxph(Surv(start, stop, death.time)~age, data=df)
 m<-survfit(plot_add.mod, newdata=mort)
 summary(m)
+
+
+
+
+########################################################################
+########################################################################
+# Fecundity Figure
+########################################################################
+########################################################################
+newdf<-data.frame(
+	Calf=c(14/25, 10/33, 7/23, 6/14, 2/26, 0/8, 2/7, 1/7), 
+	Agecategory = c(rep("Adult (age > 4)", 4), rep("Juvenile (age = 4)", 4)),
+	Infection = c("Uninfected", "Brucellosis", "Tuberculosis", "Co-infected", "Uninfected", "Brucellosis", "Tuberculosis", "Co-infected"),
+	N = c(25, 33, 23, 14, 26, 8, 7, 7))
+newdf$se<- sqrt(newdf$Calf * (1 - newdf$Calf) / newdf$N)
+newdf$order <- c(seq(1, 4), seq(1,4))
+newdf$Infection <- as.factor(newdf$Infection)
+newdf$Infection <- factor(newdf$Infection, levels = newdf$Infection[order(unique(newdf$order))])
+
+p9<- ggplot(newdf, aes(x=Infection, y=Calf, group=Agecategory, colour=Agecategory)) + 
+  geom_line()+
+  geom_point(size=3, shape=19) + # colour="darkred", fill="darkred" +
+  geom_errorbar(aes(ymin= newdf$Calf-newdf$se, ymax=newdf$Calf+newdf$se), width=0.2) + 
+  scale_colour_manual(values=c("darkslategray", "darkseagreen3"))
+p10<- p9 +
+  theme_bw() + # removes ugly gray.
+  ylab("Proportion of buffalo observed with a calf") +
+  scale_y_continuous(limits=c(0,0.8)) + 
+  theme(axis.line.x = element_line(colour= "black"),
+  		axis.line.y = element_line(colour= "black"),
+  		axis.title.x = element_text(size=16, vjust=-0.15),
+        axis.title.y = element_text(size=16, vjust= 0.8),
+        axis.text.x = element_text(size=14, vjust=-0.05),
+        axis.text.y = element_text(size=14),
+        panel.border = element_blank(), 
+        # legend information
+        legend.position=c(0.82, 0.9),  
+        legend.background= element_rect(fill="white", colour="white"),
+        legend.key= element_blank(),
+        legend.title= element_blank(),
+        legend.text = element_text(size=15)   )
+
+p10
 
 
 

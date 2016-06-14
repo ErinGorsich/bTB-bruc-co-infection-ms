@@ -107,19 +107,39 @@ bTB infection in African buffalo is a lifelong infection (Bengis 1999) so we do 
 Our assumptions about how bTB infection and co-infection with brucellosis effect survival, fecundity and transmission rates are detailed in the analyses section.  
 % Something here about how we extrapolate the effect outside the age structures we sampled in our analyses. 
 Together, the statistical results identified in this paper and these assumptions generate the following model: 
+
 \begin{align*}%[hb]
-N=& S+I_T+I_B+ I_C+ R_B + R_C \\
-N_b=& S+b_1I_T+ b_2 I_B+ b_3 I_C + R_B + b_1 R_C
+N=& \sum_{i=1} ^{4} S_i+I_{T_i}+I_{B_i}+ I_{C_i}+ C_{B_i} + C_{C_i} \\
+N_{b}=& \sum_{i=1} ^{4} S_i+b_{1_i} I_{T_i}+ b_{2_i} I_{B_i}+ b_{3_i} I_{C_i} + C_{B_i} + b_{1_i} C_{C_i} \\
+%b & = 222222222 \\
+\lambda_T &= \frac{ \beta_T \sum_{i=1}^{4} (I_{T_i} + I_{C_i} + C_{C_i})}{N} \\
+\lambda'_{T} &= \frac{ \beta'_T \sum_{i=1}{4} (I_{T_i} + I_{C_i} + C_{C_i})}{N} \\
+\lambda_B &= \frac{\beta_B \sum_{i=1}^{4} (I_B+I_C)}{N} \\
+\lambda'_{B} &= \frac{\beta'_{B} \sum_{i=1}{4} (I_B+I_C)}{N} 
 \end{align*}
 
 \begin{align}
-\frac{dS}{dt}&= b (1-\rho) N_b \left(1-\frac{r}{b}\frac{N}{K}\right)  - \beta_T S \frac{(I_T+I_C+ R_C)}{N} - \beta_B S \frac{(I_B+I_C)}{N} - \mu S\\
-\frac{dI_T}{dt}&= \beta_T S \frac{(I_T+I_C+ R_C)}{N} -  \beta'_B I_T \frac{(I_B+I_C)}{N}  - (\mu+ \alpha_1) I_T \\
-\frac{dI_B}{dt}&=  b \rho N_b \left(1-\frac{r}{b}\frac{N}{K}\right) + \beta_B S \frac{(I_B+I_C)}{N}  + \epsilon R_B - \gamma I_B - \beta'_T I_B \frac{(I_T+I_C+ R_C)}{N}- (\mu+ \alpha_2) I_B  \\
-\frac{dI_C}{dt}&=  \beta'_T I_B \frac{(I_T+I_C+ R_C)}{N} +  \beta'_B I_T \frac{(I_B+I_C)}{N} + \epsilon R_C - \gamma I_C - (\mu+ \alpha_1 + \alpha_2) I_C \\
-\frac{dR_B}{dt}&= \gamma I_B - \epsilon R_B - \mu R_B\\
-\frac{dR_C}{dt}&=  \beta'_T R_B \frac{(I_T+I_C+ R_C)}{N} + \gamma I_C - \epsilon R_C - (\mu+ \alpha_1) R_C
+\frac{dS_i}{dt} &= b_i (1-\rho) N_{b} \left(1-\frac{r}{b} \frac{N}{K}\right)  - \lambda_T S_i - \lambda_B S_i - \mu_{S_i} S_i - \nu_i S_i\\
+\frac{dI_{T_i}}{dt}&= \lambda_T S_i -  \lambda'_{B} I_{T_i} - \mu_{T_i} I_{T_i} - \nu_i I_{T_i} \\
+\frac{dI_{B_i}}{dt}&=  b_i \rho N_b \left(1-\frac{r}{b}\frac{N}{K}\right) + \lambda_B S_i + \epsilon C_{B_i} - \gamma I_{B_i} - \lambda'_T  I_{B_i} - \mu_{I_{B_i}} I_{B_i} - \nu_i I_{B_i}  \\
+\frac{dI_{C_i}}{dt}&=   \lambda'_T I_{B_i} + \lambda'_B I_{T_i}+ \epsilon C_{C_i} - \gamma I_{C_i} - \mu_{I_{C_i}} I_C - \nu_i I_{C_i} \\
+\frac{dC_{B_i}}{dt}&= \gamma I_{B_i} - \epsilon C_{B_i} - \mu_{C_{B_i}} C_{B_i} - \nu_i C_{B_i} \\
+\frac{dC_{C_i}}{dt}&= \lambda'_T C_{B_i} + \gamma I_{C_i} - \epsilon R_{C_i} - \mu_{C_{C_i}} C_{C_i} -  \nu_i C_{C_i}\\
 \end{align}
+
+% first try without age structure
+%\begin{align*}%[hb]
+%N=& S+I_T+I_B+ I_C+ R_B + R_C \\
+%N_b=& S+b_1I_T+ b_2 I_B+ b_3 I_C + R_B + b_1 R_C
+%\end{align*}
+%\begin{align}
+%\frac{dS}{dt}&= b (1-\rho) N_b \left(1-\frac{r}{b}\frac{N}{K}\right)  - \beta_T S \frac{(I_T+I_C+ R_C)}{N} - \beta_B S \frac{(I_B+I_C)}{N} - \mu S\\
+%\frac{dI_T}{dt}&= \beta_T S \frac{(I_T+I_C+ R_C)}{N} -  \beta'_B I_T \frac{(I_B+I_C)}{N}  - (\mu+ \alpha_1) I_T \\
+%\frac{dI_B}{dt}&=  b \rho N_b \left(1-\frac{r}{b}\frac{N}{K}\right) + \beta_B S \frac{(I_B+I_C)}{N}  + \epsilon R_B - \gamma I_B - \beta'_T I_B \frac{(I_T+I_C+ R_C)}{N}- (\mu+ \alpha_2) I_B  \\
+%\frac{dI_C}{dt}&=  \beta'_T I_B \frac{(I_T+I_C+ R_C)}{N} +  \beta'_B I_T \frac{(I_B+I_C)}{N} + \epsilon R_C - \gamma I_C - (\mu+ \alpha_1 + \alpha_2) I_C \\
+%\frac{dR_B}{dt}&= \gamma I_B - \epsilon R_B - \mu R_B\\
+%\frac{dR_C}{dt}&=  \beta'_T R_B \frac{(I_T+I_C+ R_C)}{N} + \gamma I_C - \epsilon R_C - (\mu+ \alpha_1) R_C
+%\end{align}
 where $N$ is the total host population and $r=b-\mu$ is the natural growth rate without density dependence.
 
 

@@ -257,3 +257,61 @@ p3<- p2 + #
 p3#
 #
 p3 + theme(axis.line = element_line(colour= "black"))
+muS[1] <- 1- 0.7 # mortality rate in calves age 0-1 (1/yr)#
+muS[2]<- 1- 0.884 # mortality rate in juveniles 1-3 (1/yr)#
+muS[3]<-  1- 0.963 # mortality rate in adults 4-5  (1/yr)#
+muS[4]<-  1- 0.963 # mortality rate in adults 5+  (1/yr)
+K = 1000 # carrying capacity#
+# Mortality, susceptible females#
+muS <- NA; muT <- NA; muB <- NA; muC <- NA#
+muS[1] <- 1- 0.7 # mortality rate in calves age 0-1 (1/yr)#
+muS[2]<- 1- 0.884 # mortality rate in juveniles 1-3 (1/yr)#
+muS[3]<-  1- 0.963 # mortality rate in adults 4-5  (1/yr)#
+muS[4]<-  1- 0.963 # mortality rate in adults 5+  (1/yr)#
+#
+# mortality, TB mad Brucellosis positive animals#
+muT[1] <- 1 - 0.7; , muT[2] <- 1- 0.689; muT[3] <- 0.892; muT[4] <- 0.892  #
+muB[1] <- 1 - 0.7; , muB[2] <- 1- 0.706; muB[3] <- 0.899; muB[4] <- 0.899  #
+muC[1] <- 1 - 0.7; , muC[2] <- 1- 0.35; muC[3] <- 0.724; muC[4] <- 0.724  #
+# Mortality in males is 2-8% higher than mortality in females. #
+mum<- mu + 0.05
+# Mortality, susceptible females#
+muS <- NA; muT <- NA; muB <- NA; muC <- NA#
+muS[1] <- 1- 0.7 # mortality rate in calves age 0-1 (1/yr)#
+muS[2]<- 1- 0.884 # mortality rate in juveniles 1-3 (1/yr)#
+muS[3]<-  1- 0.963 # mortality rate in adults 4-5  (1/yr)#
+muS[4]<-  1- 0.963 # mortality rate in adults 5+  (1/yr)#
+#
+# mortality, TB mad Brucellosis positive animals#
+muT[1] <- 1 - 0.7; muT[2] <- 1- 0.689; muT[3] <- 0.892; muT[4] <- 0.892  #
+muB[1] <- 1 - 0.7; muB[2] <- 1- 0.706; muB[3] <- 0.899; muB[4] <- 0.899  #
+muC[1] <- 1 - 0.7; muC[2] <- 1- 0.35; muC[3] <- 0.724; muC[4] <- 0.724
+b0 <- NA#
+b0[1] <- 0#
+b0[2] <- 0#
+b0[3] <- 0.2 #get_new_probability(-2.684, 0.56)#
+b0[4] <- 0.56  # Birth rate in uninifected buffalo #
+# without age structure r = b-mu; set b to get r=10% growth rate w/out density dependence, e.g. Cross et al. 2009.#
+#
+#b1 <- get_new_probability(-1.619, b0) # proportional reduction in births with TB. Convert OR to proportions ratio: exp(-1.619)/(1+ exp(-1.619))#
+#b2 <- get_new_probability(-1.50, b0) # proportional reduction in births with brucellosis#
+#b3 <- get_new_probability((-1.619 - 1.50 + 2.28), b0) # proportional reduction in births if co-infected#
+# initial run#
+b1 <- c(0, 0, 1, 30/56)#
+b2 <- c(0, 0, 1, 30/56)#
+b3 <- c(0, 0, 1, 43/56)
+b0
+b1
+b0*b1
+b0*b2
+b0*b3
+S0 = 800 * f
+# Age distribution information #
+npop = 1000#
+f = c(0.1, 0.25, 0.05, 0.7) # later make this the stable age distribution...#
+N = npop * f#
+nu = c(1, 1/2, 1, 0) # 1/duration of time spent in each age category
+f
+N
+S0 = N-20
+S0
