@@ -35,22 +35,16 @@ length(tbconvert$id); length(unique(tbconvert$id))  # 47 became infected with bT
 ############################################################
 # age of first infection
 ##TB
-quantile(data$age_sel[data$incid==1], c(0.5, 0.95))/12
+quantile(data$age_sel[data$incid==1], c(0.05, 0.95))/12
 
-brpos<- brconvert[brconvert$bruc_beforeafter==1,]
-b<- NA
-a<- tapply(brpos$age_sel, brpos$id, min)
-for (i in 1:length(a)){
-	if (!is.na(a[[i]])){
-		b[i] <- a[[i]]
-	}}
-
-b[is.na(b)]<-0
-c<- b[b>0]
-quantile(c, c(0.5, 0.95))/12
-
+## Bruc
+incidbr<- data[data$incid_bruc_jo ==1,c(2:5,9, 15, 30)]
+quantile(incidbr$age_sel, c(0.05, 0.95))/12
+summary(incidbr)
 
 # who first
+table(incidbr$tb)  # brucellosis convertes with and without bTB first
+table(data$bruc[data$incid==1])  # bTB converters with and without brucellosis
 
 
 # month and year histograms for suppliment
@@ -74,9 +68,6 @@ for (i in 1:length(incidtb$capid)){
 }
 table(incidtb$month, incidtb$herdorig)
 table(incidbr$month, incidbr$herdorig)
-
-
-
 
 
 ############################################################

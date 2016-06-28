@@ -549,7 +549,7 @@ summary(m)
 
 ########################################################################
 ########################################################################
-# Fecundity Figure
+# Fecundity Figure, 2d
 ########################################################################
 ########################################################################
 newdf<-data.frame(
@@ -563,7 +563,7 @@ newdf$Infection <- as.factor(newdf$Infection)
 newdf$Infection <- factor(newdf$Infection, levels = newdf$Infection[order(unique(newdf$order))])
 
 p9<- ggplot(newdf, aes(x=Infection, y=Calf, group=Agecategory, colour=Agecategory)) + 
-  geom_line()+
+  #geom_line()+
   geom_point(size=3, shape=19) + # colour="darkred", fill="darkred" +
   geom_errorbar(aes(ymin= newdf$Calf-newdf$se, ymax=newdf$Calf+newdf$se), width=0.2) + 
   scale_colour_manual(values=c("darkslategray", "darkseagreen3"))
@@ -586,6 +586,84 @@ p10<- p9 +
         legend.text = element_text(size=15)   )
 
 p10
+
+
+
+########################################################################
+########################################################################
+# Fecundity Figure for supplememt with pfc in it. 
+########################################################################
+########################################################################
+data<- read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/cross_sectional_data_withdz_cleandisease_nofinal_Feb2016_capturetime_forsurv.csv")
+data2<- data[data$herdorig=="LS",]
+calftime <- c(0, 12, 24, 36)
+data4<- data2[data2$capturetime %in% calftime,]
+data4$fec<- NA
+table(data4$milk , data4$calf)
+# With milk one 10 year old, two 12 year olds, no 9, 11, 0, or 1 yr olds (good)
+# one 11 year old without milk
+# called age <=10 yes
+# called 10 unknowns with milk yes; 3 unknowns with no/unknown milks no
+include = c( 10, 2, 3,4, 5, 6, 7, 8, 9, "yes")
+data4$fec[data4$calf %in% include] <- 1 
+data4$fec[data4$calf %in% c(11, 12, "no")] <- 0
+data4$fec[data4$calf=="unknown" & data4$milk=="yes"] <- 1
+data4$fec[data4$calf=="unknown" & data4$milk=="unknown"] <- 0
+data4$fec[data4$calf=="unknown" & data4$milk=="no"] <- 0
+d<- data4
+d<- data4[data4$age_yr > 3 & data4$age_yr <= 9,]
+
+# totals, denominator: 
+table(d$tb[d$age1 == "adult"], d$bruc_beforeafter[d$age1 == "adult"])
+table(d$tb[d$age1 == "juvenile"], d$bruc_beforeafter[d$age1 == "juvenile"])
+# numerator
+table(d$tb[d$age1 == "adult" & d$fec=="1"], d$bruc_beforeafter[d$age1 == "adult" & d$fec=="1"])
+table(d$tb[d$age1 == "juvenile" & d$fec=="1"], d$bruc_beforeafter[d$age1 == "juvenile" & d$fec=="1"])
+
+
+newdf<-data.frame(
+	Calf=c(14/25, 1/5, 9/28, 7/23, 1/8, 5/6,  # adults
+		 2/26, 0/3, 0/5, 2/7, 0/4, 1/3),  # juveniles
+	Agecategory = c(rep("Adult (age > 4)", 6), rep("Juvenile (age = 4)", 6)),
+	Infection = c("Uninfected", "BR Converter", "BR PFC", "bTB", "bTB & BR Converter", "bTB & BR PFC", "Uninfected", "BR Converter", "BR PFC", "bTB", "bTB & BR Converter", "bTB & BR PFC"),
+	N = c(25, 5, 28, 23, 8, 6, 26, 3, 5, 7, 4, 3))
+newdf$se<- sqrt(newdf$Calf * (1 - newdf$Calf) / newdf$N)
+newdf$order <- c(seq(1, 6), seq(1,6))
+newdf$Infection <- as.factor(newdf$Infection)
+newdf$Infection <- factor(newdf$Infection, levels = newdf$Infection[order(unique(newdf$order))])
+
+
+p11<- ggplot(newdf, aes(x=Infection, y=Calf, group=Agecategory, colour=Agecategory)) + 
+  #geom_line()+
+  geom_point(size=3, shape=19) + # colour="darkred", fill="darkred" +
+  geom_errorbar(aes(ymin= newdf$Calf-newdf$se, ymax=newdf$Calf+newdf$se), width=0.2) + 
+  scale_colour_manual(values=c("darkslategray", "darkseagreen3"))
+p12<- p11 +
+  theme_bw() + # removes ugly gray.
+  ylab("Proportion of buffalo observed with a calf") +
+  scale_y_continuous(limits=c(0,1.07)) + 
+  theme(axis.line.x = element_line(colour= "black"),
+  		axis.line.y = element_line(colour= "black"),
+  		axis.title.x = element_text(size=16, vjust=-0.15),
+        axis.title.y = element_text(size=16, vjust= 0.8),
+        axis.text.x = element_text(size=14, vjust=-0.05),
+        axis.text.y = element_text(size=14),
+        panel.border = element_blank(), 
+        # legend information
+        legend.position=c(0.7, 0.9),  
+        legend.background= element_rect(fill="white", colour="white"),
+        legend.key= element_blank(),
+        legend.title= element_blank(),
+        legend.text = element_text(size=15)   ) + 
+        annotate("text", x= "Uninfected", y = 0.77, label = "N = 25, 26") +
+        annotate("text", x= "BR Converter", y = 0.55, label = "N = 5, 3") + 
+        annotate("text", x= "BR PFC", y = 0.55, label = "N = 28, 5") + 
+        annotate("text", x= "bTB", y = 0.55, label = "N = 23, 7") + 
+        annotate("text", x= "bTB & BR Converter", y = 0.55, label = "N = 8, 4") + 
+        annotate("text", x= "bTB & BR PFC", y = 1.05, label = "N = 6, 3")
+p12
+
+
 
 
 
