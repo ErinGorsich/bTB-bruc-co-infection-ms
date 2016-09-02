@@ -31,6 +31,12 @@ data4$fec[data4$calf=="unknown" & data4$milk=="no"] <- 0
 # overall rates: 
 table(data4$fec, data4$tb, data4$bruc)
 
+
+pregdata<- data2[!(data2$capturetime %in% calftime),]
+pregdata$pregmilk <- paste(pregdata$preg, pregdata$milk)
+table(pregdata$pregmilk, pregdata$tb, pregdata$bruc)  
+(23+10+4)/(23+10+58) # four not pregnants had milk, so assume they just gave birth...  made yes 
+
 ########################################################################
 # NEED TO ACCOUNT FOR AGE- 
 # Figures show no calves in buffalo < 4yrs and no TB in buffalo 9+ years, so analyses subset to capture these age categories. 

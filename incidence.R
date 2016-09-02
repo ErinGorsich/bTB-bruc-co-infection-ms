@@ -69,7 +69,13 @@ for (i in 1:length(incidtb$capid)){
 table(incidtb$month, incidtb$herdorig)
 table(incidbr$month, incidbr$herdorig)
 
+# initial prevalence, bTB 
+table(data$tb[data$capturetime==0])
+table(data$tb[data$capturetime==3])
 
+# initial prevalence, brucellosis
+table(data$bruc[data$capturetime==0])
+table(data$bruc[data$capturetime==3])
 ############################################################
 # make incidence dataset
 surv<-read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/survival/brucsurvival_TB3controls_longresidnomissing_noerrors_season2_final.csv")
@@ -133,8 +139,6 @@ write.csv(dftoadd, "test.csv")
 #[46] "W6"   "Y10"  "Y16"  "Y16b" "Y17"  "Y2"   "Y21b" "Y24b" "Y26"  "Y2b"  "Y3"   "Y33b" "Y34"  "Y34b" "Y4"  
 # [61] "Y42"  "Y46b" "Y47" 
 # added to spreadsheet
-
-
 
 ############################################################
 ############################################################

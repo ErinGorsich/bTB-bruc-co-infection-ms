@@ -1,264 +1,1478 @@
-a$tb[a$tb==0] <- "negative"#
-a$tb[a$tb==1] <- "positive"
-a$Brucellosis[a$Brucellosis=="nc"] <- "negative"
-summary(a$Brucellosis)
-a<- data.frame(table(dsave$fec, dsave$tb, dsave$bruc_beforeafter,  dsave$age_yr)); colnames(a)<- c("Fec", "TB", "Brucellosis", "Age", "Freq")#
-a$Brucellosis[a$Brucellosis=="nc"] <- "negative"
-a<- data.frame(table(dsave$fec, dsave$tb, dsave$bruc_beforeafter,  dsave$age_yr)); colnames(a)<- c("Fec", "TB", "Brucellosis", "Age", "Freq")
-summary(a)
-str(a)
-a$Brucellosis<- as.character(a$Brucellosis)
-a$Brucellosis[a$Brucellosis=="nc"] <- "negative"
-a$Brucellosis[a$Brucellosis =="0"] <- "negative"
-a$Brucellosis[a$Brucellosis =="1"] <- "converter"
-temp<- a[a$Age %in% age,]#
-	temp$Brucellosis<- relevel(temp$Brucellosis, "negative")#
-	temp$TB<- relevel(temp$TB, "negative")
-a$Brucellosis<-as.factor(a$Brucellosis)
-temp<- a[a$Age %in% age,]#
-	temp$Brucellosis<- relevel(temp$Brucellosis, "negative")#
-	temp$TB<- relevel(temp$TB, "negative")#
-	a<- temp[with(temp, order(temp$Fec, temp$Brucellosis, temp$TB)),]
-a
-temp<- a[a$Age %in% age,]#
-	temp$Brucellosis<- relevel(temp$Brucellosis, "negative")
-str(temp)
-a<- temp[with(temp, order(temp$Fec, temp$Brucellosis, temp$TB)),]#
-	mat<- matrix(a$Freq, nrow=2, ncol=4, byrow=TRUE, #
-	dimnames=list(c("no calf", "calf"), c("Uninfected", "TB+", "Brucellosis+", "BrucellosisConverter", "Co-infected")))
-mat
-a
-head(a)
-mat<- matrix(a$Freq, nrow=2, ncol=5, byrow=TRUE, #
-	dimnames=list(c("no calf", "calf"), c("Uninfected", "TB+", "Brucellosis+", "BrucellosisConverter", "Co-infected")))
-prop <- prop.table(mat, margin=2)
-prop
-age
-head(a)
-length(temp[,1])
-?prop.table
-a<- data.frame(table(dsave$fec, dsave$tb, dsave$bruc_beforeafter,  dsave$age_yr)); colnames(a)<- c("Fec", "TB", "Brucellosis", "Age", "Freq")#
-a$Brucellosis<- as.character(a$Brucellosis)#
-a$Brucellosis[a$Brucellosis=="nc"] <- "negative"#
-a$Brucellosis[a$Brucellosis =="0"] <- "negative"#
-a$Brucellosis[a$Brucellosis =="1"] <- "converter"#
-a$Brucellosis<-as.factor(a$Brucellosis)
-temp<- a[a$Age %in% age,]#
-	temp$Brucellosis<- relevel(temp$Brucellosis, "negative")#
-	temp$TB<- relevel(temp$TB, "negative")#
-	a<- temp[with(temp, order(temp$Fec, temp$Brucellosis, temp$TB)),]#
-	mat<- matrix(a$Freq, nrow=2, ncol=6, byrow=TRUE) #,
-temp<- a[a$Age %in% age,]#
-	temp$Brucellosis<- relevel(temp$Brucellosis, "negative")#
-	temp$TB<- relevel(temp$TB, "negative")#
-	a<- temp[with(temp, order(temp$Fec, temp$Brucellosis, temp$TB)),]#
-	mat<- matrix(a$Freq, nrow=2, ncol=6, byrow=TRUE), #
-	dimnames=list(c("no calf", "calf"), c("Uninfected", "TB+", "Brucellosis+", "BrucellosisConverter", "Co-infected+", "Co-Converter)))
-mat<- matrix(a$Freq, nrow=2, ncol=6, byrow=TRUE), #
-	dimnames=list(c("no calf", "calf"), c("Uninfected", "TB+", "Brucellosis+", "BrucellosisConverter", "Co-infected+", "Co-Converter")))
-mat<- matrix(a$Freq, nrow=2, ncol=6, byrow=TRUE),dimnames=list(c("no calf", "calf"), c("Uninfected", "TB+", "Brucellosis+", "BrucellosisConverter", "Co-infected+", "Co-Converter")))
-a$Freq
-mat<- matrix(NA, nrow=2, ncol=6, byrow=TRUE),dimnames=list(c("no calf", "calf"), c("Uninfected", "TB+", "Brucellosis+", "BrucellosisConverter", "Co-infected+", "Co-Converter")))
-mat<- matrix(a$Freq, nrow=2, ncol=6, byrow=TRUE,dimnames=list(c("no calf", "calf"), c("Uninfected", "TB+", "Brucellosis+", "BrucellosisConverter", "Co-infected+", "Co-Converter")))
-mat
-mat<- matrix(NA, nrow=2, ncol=6, byrow=TRUE,dimnames=list(c("no calf", "calf"), c("Uninfected", "TB+", "Brucellosis+", "BrucellosisConverter", "Co-infected+", "Co-Converter")))
-mat<- matrix(a$Freq, nrow=2, ncol=6, byrow=TRUE,dimnames=list(c("no calf", "calf"), c("Uninfected", "TB+", "Brucellosis+", "BrucellosisConverter", "Co-infected+", "Co-Converter")))#
-	prop <- prop.table(mat, margin=2)
-prop
-a
-b<- a[a$age_yr >4,]#
-b <- a[,c(1:3)]
-b
-temp<- b#
-	temp$Brucellosis<- relevel(temp$Brucellosis, "negative")#
-	temp$TB<- relevel(temp$TB, "negative")#
-	a<- temp[with(temp, order(temp$Fec, temp$Brucellosis, temp$TB)),]
-a
-a<- data.frame(table(dsave$fec, dsave$tb, dsave$bruc_beforeafter,  dsave$age_yr)); colnames(a)<- c("Fec", "TB", "Brucellosis", "Age", "Freq")
-a$Brucellosis<- as.character(a$Brucellosis)#
-a$Brucellosis[a$Brucellosis=="nc"] <- "negative"#
-a$Brucellosis[a$Brucellosis =="0"] <- "negative"#
-a$Brucellosis[a$Brucellosis =="1"] <- "converter"#
-a$Brucellosis<-as.factor(a$Brucellosis)
-a
-b<- a[a$age_yr >4,]#
-b <- a[,c(1:3)]
-head(b)
-b <- a[,c(1:3, 5)]
-b<- a[a$age_yr >4,]#
-b <- b[,c(1:3, 5)]
-b
-b<- a[a$age_yr >4,]
-b
-a<- data.frame(table(dsave$fec, dsave$tb, dsave$bruc_beforeafter,  dsave$age_yr)); colnames(a)<- c("Fec", "TB", "Brucellosis", "Age", "Freq")#
-a$Brucellosis<- as.character(a$Brucellosis)#
-a$Brucellosis[a$Brucellosis=="nc"] <- "negative"#
-a$Brucellosis[a$Brucellosis =="0"] <- "negative"#
-a$Brucellosis[a$Brucellosis =="1"] <- "converter"#
-a$Brucellosis<-as.factor(a$Brucellosis)#
+plot_raw_numbers(sol)
+plot_raw_numbers(sol_recov)
+S0 = N-100#
+It0 = 0#
+Ib0 = 100#
+Ic0 = 0#
+R0 = 0#
+Rc0 = 0#
+x0 = c(S = S0, It = It0, Ib = Ib0, Ic = Ic0, R = R0, Rc = Rc0)#
+times <- seq(0, 100, 1)#
+sol <- as.data.frame(ode(x0, times, rhs, params))#
+sol<- groom_sol(sol)#
+plot_raw_numbers(sol)
+S0 = N-100#
+It0 = 0#
+Ib0 = 100#
+Ic0 = 0#
+R0 = 0#
+Rc0 = 0#
+x0 = c(S = S0, It = It0, Ib = Ib0, Ic = Ic0, R = R0, Rc = Rc0)#
+times <- seq(0, 100, 1)#
+sol <- as.data.frame(ode(x0, times, rhs, params))#
+sol_recov <- as.data.frame(ode(x0, times, rhs, params_recov))#
+sol<- groom_sol(sol)#
+par(mfrow = c(1,2))#
+plot_raw_numbers(sol)#
+plot_raw_numbers(sol_recov)
+params
+endprev<- c(NA)#
+endprev_recov <- c(NA)#
+beta_t <- seq(0.0001, 0.001, 0.00005)  # make more finely spaced#
+for (i in 1:length(beta_t)){#
+	params <- c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muR, muRC = muRC, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = beta_t[i], betaB = betaB, betapT = beta_t[i], betapB = 3.92 * betaB)	#
+	params_recov = c(b1= b1, b2 = b2, b3 = b3, b4= 1, b5 = b2, # assuming b4 =1, b5 = b2 #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muS, muRC = muT, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = beta_t[i], betaB = betaB, betapT = beta_t[i], betapB = 3.92 * betaB)#
+	sol <- as.data.frame(ode(x0, times, rhs, params))#
+	sol_recov <- as.data.frame(ode(x0, times, rhs, params))#
+	sol<- groom_sol(sol)#
+	sol_recov <- groom_sol(sol_recov)#
+	endprev[i] <- sol$TBprev[101]#
+	endprev_recov[i] <- sol_recov$TBprev[101]#
+}
+par(mfrow= c(1,2))#
+plot(x=beta_t, y=endprev, xlab = "Density dependent transmission rate for bTB", ylab = "bTB prevalence", type="l")#
+abline(h = 0.05, col = "red")#
+abline(h = 0.1, col = "red")#
+abline(h = 0.2, col = "red")
+want= c(0.05, 0.1, 0.2, 0.3)  # want beta_t values associated with each of these end prevalences
+approx(x = endprev, y = beta_t, xout = want)
+endprev<- c(NA)#
+endprev_recov <- c(NA)#
+beta_t <- seq(0.0001, 0.001, 0.00002)  # make more finely spaced#
+for (i in 1:length(beta_t)){#
+	params <- c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muR, muRC = muRC, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = beta_t[i], betaB = betaB, betapT = beta_t[i], betapB = 3.92 * betaB)	#
+	params_recov = c(b1= b1, b2 = b2, b3 = b3, b4= 1, b5 = b2, # assuming b4 =1, b5 = b2 #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muS, muRC = muT, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = beta_t[i], betaB = betaB, betapT = beta_t[i], betapB = 3.92 * betaB)#
+	sol <- as.data.frame(ode(x0, times, rhs, params))#
+	sol_recov <- as.data.frame(ode(x0, times, rhs, params))#
+	sol<- groom_sol(sol)#
+	sol_recov <- groom_sol(sol_recov)#
+	endprev[i] <- sol$TBprev[101]#
+	endprev_recov[i] <- sol_recov$TBprev[101]#
+}
+head(endprev)
+summary(endprev)
+summary(endprev_recov)
+head(sol)
+K = 1000; N= 1000#
+beta_t <- seq(0.0001, 0.001, 0.0003)#
+Ib0 = N - 100#
+It0 = 100#
+Ib0 = 0#
+Ic0 = 0#
+R0 = 0#
+Rc0 = 0#
+x0 = c(S = S0, It = It0, Ib = Ib0, Ic = Ic0, R = R0, Rc = Rc0)#
+times <- seq(0, 1000, 1)#
+out <- list(NA)#
 #
-b<- a[a$age_yr >4,]
-head(b)
-head(a)
-str(a)
-b<- a[a$age_yr !== 4,]
-b<- a[a$age_yr != 4,]
+plot(NULL, xlim = c(0, 100), xlab= "Time (in years)", ylim= c(0, 1000), ylab = "Number of animals")#
+legend("topright", title= "beta_t", legend=c("0.0001", "0.0004", "0.0007","0.001"), col = seq(1:length(beta_t)), lty = 1, bty = "n")#
+for(i in 1:length(beta_t)){#
+	params <- c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muR = muR, muRC = muRC, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = beta_t[i], betaB = betaB, betapT = betapT, betapB = betapB)	#
+	sol <- as.data.frame(ode(x0, times, rhs, params))#
+	sol<- groom_sol(sol)#
+	out[[i]] <- sol#
+	lines(y = out[[i]]$It, x = out[[i]]$times, col = i)#
+}
+K = 1000; N= 1000#
+beta_t <- seq(0.0001, 0.001, 0.0003)#
+Ib0 = N - 100#
+It0 = 100#
+Ib0 = 0#
+Ic0 = 0#
+R0 = 0#
+Rc0 = 0#
+x0 = c(S = S0, It = It0, Ib = Ib0, Ic = Ic0, R = R0, Rc = Rc0)#
+times <- seq(0, 1000, 1)#
+out <- list(NA)#
+#
+plot(NULL, xlim = c(0, 100), xlab= "Time (in years)", ylim= c(0, 1000), #
+	ylab = "Number of animals"), legend("topright", #
+	title= "beta_t", legend=c("0.0001", "0.0004", "0.0007","0.001"),#
+	col = seq(1:length(beta_t)), lty = 1, bty = "n")	#
+for(i in 1:length(beta_t)){#
+	params <- c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muR, muRC = muRC, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = beta_t[i], betaB = betaB, betapT = betapT, betapB = betapB)#
+	params_recov <- c(b1= b1, b2 = b2, b3 = b3, b4= 1, b5 = b2, # assuming b4 =1, b5 = b2 #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muS, muRC = muT, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = beta_t[i], betaB = betaB, betapT = beta_t[i], betapB = 3.92 * betaB)	#
+	sol <- as.data.frame(ode(x0, times, rhs, params))#
+	sol<- groom_sol(sol)#
+	sol_recov <- as.data.frame(ode(x0, times, rhs, params))#
+	sol_recov <- groom_sol(sol_recov)#
+	out[[i]] <- sol; outr[[i]] <- sol_recov#
+	lines(y = out[[i]]$It, x = out[[i]]$times, col = i)#
+}#
+plot(NULL, xlim = c(0, 100), xlab= "Time (in years)", ylim= c(0, 1000), ylab = "Number of animals")#
+legend("topright", title= "beta_t", legend=c("0.0001", "0.0004", "0.0007","0.001"), col = seq(1:length(beta_t)), lty = 1, bty = "n")#
+for(i in 1:lenght(beta_t)){#
+	lines(y = outr[[i]]$It, x = outr[[i]]$times, col = i)#
+}
+K = 1000; N= 1000#
+beta_t <- seq(0.0001, 0.001, 0.0003)#
+Ib0 = N - 100#
+It0 = 100#
+Ib0 = 0#
+Ic0 = 0#
+R0 = 0#
+Rc0 = 0#
+x0 = c(S = S0, It = It0, Ib = Ib0, Ic = Ic0, R = R0, Rc = Rc0)#
+times <- seq(0, 1000, 1)#
+out <- list(NA)#
+#
+par(mfrow=c(1, 2))#
+plot(NULL, xlim = c(0, 100), xlab= "Time (in years)", ylim= c(0, 1000), #
+	ylab = "Number of animals"), legend("topright", #
+	title= "beta_t", legend=c("0.0001", "0.0004", "0.0007","0.001"),#
+	col = seq(1:length(beta_t)), lty = 1, bty = "n")	#
+for(i in 1:length(beta_t)){#
+	params <- c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muR, muRC = muRC, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = beta_t[i], betaB = betaB, betapT = betapT, betapB = betapB)#
+	params_recov <- c(b1= b1, b2 = b2, b3 = b3, b4= 1, b5 = b2, # assuming b4 =1, b5 = b2 #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muS, muRC = muT, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = beta_t[i], betaB = betaB, betapT = beta_t[i], betapB = 3.92 * betaB)	#
+	sol <- as.data.frame(ode(x0, times, rhs, params))#
+	sol<- groom_sol(sol)#
+	sol_recov <- as.data.frame(ode(x0, times, rhs, params))#
+	sol_recov <- groom_sol(sol_recov)#
+	out[[i]] <- sol; outr[[i]] <- sol_recov#
+	lines(y = out[[i]]$It, x = out[[i]]$times, col = i)#
+}#
+plot(NULL, xlim = c(0, 100), xlab= "Time (in years)", ylim= c(0, 1000), ylab = "Number of animals")#
+legend("topright", title= "beta_t", legend=c("0.0001", "0.0004", "0.0007","0.001"), col = seq(1:length(beta_t)), lty = 1, bty = "n")#
+for(i in 1:lenght(beta_t)){#
+	lines(y = outr[[i]]$It, x = outr[[i]]$times, col = i)#
+}
+par(mfrow=c(1, 2))#
+plot(NULL, xlim = c(0, 100), xlab= "Time (in years)", ylim= c(0, 1000), #
+	ylab = "Number of animals", legend("topright", #
+	title= "beta_t", legend=c("0.0001", "0.0004", "0.0007","0.001"),#
+	col = seq(1:length(beta_t)), lty = 1, bty = "n")) 	#
+for(i in 1:length(beta_t)){#
+	params <- c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muR, muRC = muRC, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = beta_t[i], betaB = betaB, betapT = betapT, betapB = betapB)#
+	params_recov <- c(b1= b1, b2 = b2, b3 = b3, b4= 1, b5 = b2, # assuming b4 =1, b5 = b2 #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muS, muRC = muT, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = beta_t[i], betaB = betaB, betapT = beta_t[i], betapB = 3.92 * betaB)	#
+	sol <- as.data.frame(ode(x0, times, rhs, params))#
+	sol<- groom_sol(sol)#
+	sol_recov <- as.data.frame(ode(x0, times, rhs, params))#
+	sol_recov <- groom_sol(sol_recov)#
+	out[[i]] <- sol; outr[[i]] <- sol_recov#
+	lines(y = out[[i]]$It, x = out[[i]]$times, col = i)#
+}#
+plot(NULL, xlim = c(0, 100), xlab= "Time (in years)", ylim= c(0, 1000), ylab = "Number of animals")#
+legend("topright", title= "beta_t", legend=c("0.0001", "0.0004", "0.0007","0.001"), col = seq(1:length(beta_t)), lty = 1, bty = "n")#
+for(i in 1:lenght(beta_t)){#
+	lines(y = outr[[i]]$It, x = outr[[i]]$times, col = i)#
+}
+# TB only #
+##############################################################
+K = 1000; N= 1000#
+beta_t <- seq(0.0001, 0.001, 0.0003)#
+Ib0 = N - 100#
+It0 = 100#
+Ib0 = 0#
+Ic0 = 0#
+R0 = 0#
+Rc0 = 0#
+x0 = c(S = S0, It = It0, Ib = Ib0, Ic = Ic0, R = R0, Rc = Rc0)#
+times <- seq(0, 1000, 1)#
+out <- list(NA); outr <- list(NA)#
+#
+par(mfrow=c(1, 2))#
+plot(NULL, xlim = c(0, 100), xlab= "Time (in years)", ylim= c(0, 1000), #
+	ylab = "Number of animals", legend("topright", #
+	title= "beta_t", legend=c("0.0001", "0.0004", "0.0007","0.001"),#
+	col = seq(1:length(beta_t)), lty = 1, bty = "n")) 	#
+for(i in 1:length(beta_t)){#
+	params <- c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muR, muRC = muRC, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = beta_t[i], betaB = betaB, betapT = betapT, betapB = betapB)#
+	params_recov <- c(b1= b1, b2 = b2, b3 = b3, b4= 1, b5 = b2, # assuming b4 =1, b5 = b2 #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muS, muRC = muT, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = beta_t[i], betaB = betaB, betapT = beta_t[i], betapB = 3.92 * betaB)	#
+	sol <- as.data.frame(ode(x0, times, rhs, params))#
+	sol<- groom_sol(sol)#
+	sol_recov <- as.data.frame(ode(x0, times, rhs, params))#
+	sol_recov <- groom_sol(sol_recov)#
+	out[[i]] <- sol; outr[[i]] <- sol_recov#
+	lines(y = out[[i]]$It, x = out[[i]]$times, col = i)#
+}#
+plot(NULL, xlim = c(0, 100), xlab= "Time (in years)", ylim= c(0, 1000), ylab = "Number of animals")#
+legend("topright", title= "beta_t", legend=c("0.0001", "0.0004", "0.0007","0.001"), col = seq(1:length(beta_t)), lty = 1, bty = "n")#
+for(i in 1:lenght(beta_t)){#
+	lines(y = outr[[i]]$It, x = outr[[i]]$times, col = i)#
+}
+par(mfrow=c(1, 2))#
+plot(NULL, xlim = c(0, 100), xlab= "Time (in years)", ylim= c(0, 1300), #
+	ylab = "Number of animals", legend("topright", #
+	title= "beta_t", legend=c("0.0001", "0.0004", "0.0007","0.001"),#
+	col = seq(1:length(beta_t)), lty = 1, bty = "n"))
+plot(NULL, xlim = c(0, 100), xlab= "Time (in years)", ylim= c(0, 1300), #
+	ylab = "Number of animals") #
+legend("topright", 	title= "beta_t", legend=c("0.0001", "0.0004", "0.0007","0.001"),#
+	col = seq(1:length(beta_t)), lty = 1, bty = "n")
+for(i in 1:length(beta_t)){#
+	params <- c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muR, muRC = muRC, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = beta_t[i], betaB = betaB, betapT = betapT, betapB = betapB)#
+	params_recov <- c(b1= b1, b2 = b2, b3 = b3, b4= 1, b5 = b2, # assuming b4 =1, b5 = b2 #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muS, muRC = muT, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = beta_t[i], betaB = betaB, betapT = beta_t[i], betapB = 3.92 * betaB)	#
+	sol <- as.data.frame(ode(x0, times, rhs, params))#
+	sol<- groom_sol(sol)#
+	sol_recov <- as.data.frame(ode(x0, times, rhs, params))#
+	sol_recov <- groom_sol(sol_recov)#
+	out[[i]] <- sol; outr[[i]] <- sol_recov#
+	lines(y = out[[i]]$It, x = out[[i]]$times, col = i)#
+}
+plot(NULL, xlim = c(0, 100), xlab= "Time (in years)", ylim= c(0, 1000), ylab = "Number of animals")#
+legend("topright", title= "beta_t", legend=c("0.0001", "0.0004", "0.0007","0.001"), col = seq(1:length(beta_t)), lty = 1, bty = "n")#
+for(i in 1:length(beta_t)){#
+	lines(y = outr[[i]]$It, x = outr[[i]]$times, col = i)#
+}
+##############################################################
+##############################################################
+#
+# TB only #
+##############################################################
+K = 1000; N= 1000#
+beta_t <- seq(0.0001, 0.001, 0.0003)#
+Ib0 = N - 100#
+It0 = 100#
+Ib0 = 0#
+Ic0 = 0#
+R0 = 0#
+Rc0 = 0#
+x0 = c(S = S0, It = It0, Ib = Ib0, Ic = Ic0, R = R0, Rc = Rc0)#
+times <- seq(0, 1000, 1)#
+out <- list(NA); outr <- list(NA)#
+#
+par(mfrow=c(1, 2))#
+#
+plot(NULL, xlim = c(0, 100), xlab= "Time (in years)", ylim= c(0, 1300), #
+	ylab = "Number of animals", main = "Fitness effects in Brucellosis Recoverds") #
+legend("topright", 	title= "beta_t", legend=c("0.0001", "0.0004", "0.0007","0.001"),#
+	col = seq(1:length(beta_t)), lty = 1, bty = "n") 	#
+for(i in 1:length(beta_t)){#
+	params <- c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muR, muRC = muRC, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = beta_t[i], betaB = betaB, betapT = betapT, betapB = betapB)#
+	params_recov <- c(b1= b1, b2 = b2, b3 = b3, b4= 1, b5 = b2, # assuming b4 =1, b5 = b2 #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muS, muRC = muT, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = beta_t[i], betaB = betaB, betapT = beta_t[i], betapB = 3.92 * betaB)	#
+	sol <- as.data.frame(ode(x0, times, rhs, params))#
+	sol<- groom_sol(sol)#
+	sol_recov <- as.data.frame(ode(x0, times, rhs, params))#
+	sol_recov <- groom_sol(sol_recov)#
+	out[[i]] <- sol; outr[[i]] <- sol_recov#
+	lines(y = out[[i]]$It, x = out[[i]]$times, col = i)#
+}#
+plot(NULL, xlim = c(0, 100), xlab= "Time (in years)", ylim= c(0, 1000), #
+	ylab = "Number of animals", main = "No fitness effects in Brucellosis Recoverds")#
+legend("topright", title= "beta_t", legend=c("0.0001", "0.0004", "0.0007","0.001"), col = seq(1:length(beta_t)), lty = 1, bty = "n")#
+for(i in 1:length(beta_t)){#
+	lines(y = outr[[i]]$It, x = outr[[i]]$times, col = i)#
+}
+?cex
+?par
+?plot
+plot(NULL, xlim = c(0, 100), xlab= "Time (in years)", ylim= c(0, 1300), #
+	ylab = "Number of animals")#
+title("Fitness effects in Brucellosis Recoverds", cex = 0.7)
+plot(NULL, xlim = c(0, 100), xlab= "Time (in years)", ylim= c(0, 1300), #
+	ylab = "Number of animals")#
+title("Fitness effects in Brucellosis Recoverds", cex = 0.5)
+plot(NULL, xlim = c(0, 100), xlab= "Time (in years)", ylim= c(0, 1300), #
+	ylab = "Number of animals")#
+title(main = list("Fitness effects in Brucellosis Recoverds", cex = 0.7))
+par(mfrow=c(1, 2))#
+#
+plot(NULL, xlim = c(0, 100), xlab= "Time (in years)", ylim= c(0, 1300), #
+	ylab = "Number of animals")#
+title(main = list("Fitness effects in Brucellosis Recoverds", cex = 0.7)) #
+legend("topright", 	title= "beta_t", legend=c("0.0001", "0.0004", "0.0007","0.001"),#
+	col = seq(1:length(beta_t)), lty = 1, bty = "n") 	#
+for(i in 1:length(beta_t)){#
+	params <- c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muR, muRC = muRC, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = beta_t[i], betaB = betaB, betapT = betapT, betapB = betapB)#
+	params_recov <- c(b1= b1, b2 = b2, b3 = b3, b4= 1, b5 = b2, # assuming b4 =1, b5 = b2 #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muS, muRC = muT, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = beta_t[i], betaB = betaB, betapT = beta_t[i], betapB = 3.92 * betaB)	#
+	sol <- as.data.frame(ode(x0, times, rhs, params))#
+	sol<- groom_sol(sol)#
+	sol_recov <- as.data.frame(ode(x0, times, rhs, params))#
+	sol_recov <- groom_sol(sol_recov)#
+	out[[i]] <- sol; outr[[i]] <- sol_recov#
+	lines(y = out[[i]]$It, x = out[[i]]$times, col = i)#
+}#
+plot(NULL, xlim = c(0, 100), xlab= "Time (in years)", ylim= c(0, 1000), #
+	ylab = "Number of animals")#
+title(main = list("No fitness effects in Brucellosis Recoverds", cex = 0.7)) #
+legend("topright", title= "beta_t", legend=c("0.0001", "0.0004", "0.0007","0.001"), col = seq(1:length(beta_t)), lty = 1, bty = "n")#
+for(i in 1:length(beta_t)){#
+	lines(y = outr[[i]]$It, x = outr[[i]]$times, col = i)#
+}
+# For a given beta_t, find the endemic bTB prevalence#
+##############################################################
+endprev<- c(NA)#
+endprev_recov <- c(NA)#
+beta_t <- seq(0.0001, 0.001, 0.00002)  # make more finely spaced#
+for (i in 1:length(beta_t)){#
+	params <- c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muR, muRC = muRC, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = beta_t[i], betaB = betaB, betapT = beta_t[i], betapB = 3.92 * betaB)	#
+	params_recov = c(b1= b1, b2 = b2, b3 = b3, b4= 1, b5 = b2, # assuming b4 =1, b5 = b2 #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muS, muRC = muT, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = beta_t[i], betaB = betaB, betapT = beta_t[i], betapB = 3.92 * betaB)#
+	sol <- as.data.frame(ode(x0, times, rhs, params))#
+	sol_recov <- as.data.frame(ode(x0, times, rhs, params))#
+	sol<- groom_sol(sol)#
+	sol_recov <- groom_sol(sol_recov)#
+	endprev[i] <- sol$TBprev[101]#
+	endprev_recov[i] <- sol_recov$TBprev[101]#
+}
+par(mfrow= c(1,2))#
+plot(x=beta_t, y=endprev, xlab = "Density dependent transmission rate for bTB", ylab = "bTB prevalence", type="l")#
+abline(h = 0.05, col = "red")#
+abline(h = 0.1, col = "red")#
+abline(h = 0.2, col = "red")#
+want= c(0.05, 0.1, 0.2, 0.3)
+approx(x = endprev, y = beta_t, xout = want)
+approx(x = endprev_recov, y = beta_t, xout = want)
+head(sol_recov)
+# TB only #
+##############################################################
+K = 1000; N= 1000#
+beta_t <- seq(0.0001, 0.001, 0.0003)#
+Ib0 = N - 100#
+It0 = 100#
+Ib0 = 0#
+Ic0 = 0#
+R0 = 0#
+Rc0 = 0#
+x0 = c(S = S0, It = It0, Ib = Ib0, Ic = Ic0, R = R0, Rc = Rc0)#
+times <- seq(0, 1000, 1)#
+out <- list(NA);
+plot(NULL, xlim = c(0, 100), xlab= "Time (in years)", ylim= c(0, 1300), #
+	ylab = "Number of animals")
+legend("topright", 	title= "beta_t", legend=c("0.0001", "0.0004", "0.0007","0.001"),#
+	col = seq(1:length(beta_t)), lty = 1, bty = "n") 	#
+for(i in 1:length(beta_t)){#
+	params <- c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muR, muRC = muRC, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = beta_t[i], betaB = betaB, betapT = betapT, betapB = betapB)#
+	sol <- as.data.frame(ode(x0, times, rhs, params))#
+	sol<- groom_sol(sol)
+out[[i]] <- sol#
+	lines(y = out[[i]]$It, x = out[[i]]$times, col = i)#
+}
+par(mfrow = c(1, 2))#
+plot(NULL, xlim = c(0, 100), xlab= "Time (in years)", ylim= c(0, 1300), #
+	ylab = "Number of animals")#
+legend("topright", 	title= "beta_t", legend=c("0.0001", "0.0004", "0.0007","0.001"),#
+	col = seq(1:length(beta_t)), lty = 1, bty = "n") 	#
+for(i in 1:length(beta_t)){#
+	params <- c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muR, muRC = muRC, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = beta_t[i], betaB = betaB, betapT = betapT, betapB = betapB)#
+	sol <- as.data.frame(ode(x0, times, rhs, params))#
+	sol<- groom_sol(sol)#
+	out[[i]] <- sol#
+	lines(y = out[[i]]$It, x = out[[i]]$times, col = i)#
+}#
+plot(NULL, xlim = c(0, 100), xlab= "Time (in years)", ylim= c(0, 1000), #
+	ylab = "Number of animals")#
+title(main = list("No fitness effects in Brucellosis Recoverds", cex = 0.7)) #
+legend("topright", title= "beta_t", legend=c("0.0001", "0.0004", "0.0007","0.001"), col = seq(1:length(beta_t)), lty = 1, bty = "n")#
+for(i in 1:length(beta_t)){#
+	lines(y = outr[[i]]$It, x = outr[[i]]$times, col = i)#
+}
+K = 1000; N= 1000#
+beta_t <- seq(0.0001, 0.001, 0.0003)#
+Ib0 = N - 100#
+It0 = 100#
+Ib0 = 0#
+Ic0 = 0#
+R0 = 0#
+Rc0 = 0#
+x0 = c(S = S0, It = It0, Ib = Ib0, Ic = Ic0, R = R0, Rc = Rc0)#
+times <- seq(0, 1000, 1)#
+out <- list(NA); #
+#
+par(mfrow = c(1, 2))#
+plot(NULL, xlim = c(0, 100), xlab= "Time (in years)", ylim= c(0, 1300), #
+	ylab = "Number of animals")#
+legend("topright", 	title= "beta_t", legend=c("0.0001", "0.0004", "0.0007","0.001"),#
+	col = seq(1:length(beta_t)), lty = 1, bty = "n") 	#
+for(i in 1:length(beta_t)){#
+	params <- c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muR, muRC = muRC, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = beta_t[i], betaB = betaB, betapT = betapT, betapB = betapB)#
+	sol <- as.data.frame(ode(x0, times, rhs, params))#
+	sol<- groom_sol(sol)#
+	out[[i]] <- sol#
+	lines(y = out[[i]]$It, x = out[[i]]$times, col = i)#
+}
+# For a given beta_t, find the endemic bTB prevalence#
+##############################################################
+endprev<- c(NA)#
+beta_t <- seq(0.0001, 0.001, 0.00002)  # make more finely spaced#
+for (i in 1:length(beta_t)){#
+	params <- c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muR, muRC = muRC, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = beta_t[i], betaB = betaB, betapT = beta_t[i], betapB = 3.92 * betaB)	#
+	sol <- as.data.frame(ode(x0, times, rhs, params))#
+	sol<- groom_sol(sol)#
+	endprev[i] <- sol$TBprev[101]#
+}#
+par(mfrow= c(1,2))#
+plot(x=beta_t, y=endprev, xlab = "Density dependent transmission rate for bTB", ylab = "bTB prevalence", type="l")#
+abline(h = 0.05, col = "red"); abline(h = 0.1, col = "red")#
+abline(h = 0.2, col = "red"); abline(h = 0.3, col = "red")#
+want= c(0.05, 0.1, 0.2, 0.3)  # want beta_t values associated with each of these end prevalences#
+approx(x = endprev, y = beta_t, xout = want)
+##############################################################
+##############################################################
+#
+# TB only #
+##############################################################
+K = 1000; N= 1000#
+beta_t <- seq(0.0001, 0.001, 0.0003)#
+Ib0 = N - 100#
+It0 = 100#
+Ib0 = 0#
+Ic0 = 0#
+R0 = 0#
+Rc0 = 0#
+x0 = c(S = S0, It = It0, Ib = Ib0, Ic = Ic0, R = R0, Rc = Rc0)#
+times <- seq(0, 1000, 1)#
+out <- list(NA); #
+#
+par(mfrow = c(1, 2))#
+plot(NULL, xlim = c(0, 100), xlab= "Time (in years)", ylim= c(0, 1300), #
+	ylab = "Number of animals")#
+legend("topright", 	title= "beta_t", legend=c("0.0001", "0.0004", "0.0007","0.001"),#
+	col = seq(1:length(beta_t)), lty = 1, bty = "n") 	#
+for(i in 1:length(beta_t)){#
+	params <- c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muR, muRC = muRC, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = beta_t[i], betaB = betaB, betapT = betapT, betapB = betapB)#
+	sol <- as.data.frame(ode(x0, times, rhs, params))#
+	sol<- groom_sol(sol)#
+	out[[i]] <- sol#
+	lines(y = out[[i]]$It, x = out[[i]]$times, col = i)#
+}#
+# For a given beta_t, find the endemic bTB prevalence#
+##############################################################
+endprev<- c(NA)#
+beta_t <- seq(0.0001, 0.001, 0.00002)  # make more finely spaced#
+for (i in 1:length(beta_t)){#
+	params <- c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muR, muRC = muRC, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = beta_t[i], betaB = betaB, betapT = beta_t[i], betapB = 3.92 * betaB)	#
+	sol <- as.data.frame(ode(x0, times, rhs, params))#
+	sol<- groom_sol(sol)#
+	endprev[i] <- sol$TBprev[101]#
+}#
+plot(x=beta_t, y=endprev, xlab = "Density dependent transmission rate for bTB", ylab = "bTB prevalence", type="l")#
+abline(h = 0.05, col = "red"); abline(h = 0.1, col = "red")#
+abline(h = 0.2, col = "red"); abline(h = 0.3, col = "red")#
+want= c(0.05, 0.1, 0.2, 0.3)  # want beta_t values associated with each of these end prevalences#
+approx(x = endprev, y = beta_t, xout = want)
+legend("topleft", legend= c("0.000273", "0.0003", "0.00034", "0.00039"))
+betaT <- 0.0002909  # re-set just in case#
+beta_b <- c(0.0001, seq(0.001, 0.003, 0.001))#
+Ib0 = N - 100#
+It0 = 0#
+Ib0 = 100#
+Ic0 = 0#
+R0 = 0#
+Rc0 = 0#
+x0 = c(S = S0, It = It0, Ib = Ib0, Ic = Ic0, R = R0, Rc = Rc0)#
+times <- seq(0, 1000, 1)#
+out <- list(NA); outr <- list(NA)
+par(mfrow=c(1, 2))#
+plot(NULL, xlim = c(0, 100), xlab= "Time (in years)", ylim= c(0, 1000), #
+	ylab = "Number of animals")#
+legend("topright", title= "beta_b", legend=c("0.0001", "0.001", "0.002", "0.003"), #
+	col = seq(1:length(beta_b)), lty = 1, bty = "n")#
+title(main = list("Fitness effects in Brucellosis Recoverds", cex = 0.7)) #
+for(i in 1:length(beta_b)){#
+	params <- c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muR, muRC = muRC, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = betaT, betaB = beta_b[i], betapT = betapT, betapB = betapB)	#
+	params_recov <- c(b1= b1, b2 = b2, b3 = b3, b4= 1, b5 = b2, # assuming b4 =1, b5 = b2 #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muS, muRC = muT, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = beta_t[i], betaB = betaB, betapT = beta_t[i], betapB = 3.92 * betaB)	#
+	sol <- as.data.frame(ode(x0, times, rhs, params))#
+	sol<- groom_sol(sol)#
+	sol_recov <- as.data.frame(ode(x0, times, rhs, params))#
+	sol_recov <- groom_sol(sol_recov)#
+	out[[i]] <- sol; outr[[i]] <- sol_recov#
+	lines(y = out[[i]]$Ib, x = out[[i]]$times, col = i)#
+	lines(y = out[[i]]$R, x = out[[i]]$times, col = i, lty = 2)#
+}
+plot(NULL, xlim = c(0, 100), xlab= "Time (in years)", ylim= c(0, 1000), #
+	ylab = "Number of animals")#
+title(main = list("No fitness effects in Brucellosis Recoverds", cex = 0.7))
+for(i in 1:length(beta_t)){#
+	lines(y = outr[[i]]$Ib, x = outr[[i]]$times, col = i)#
+	lines(y = outr[[i]]$R, x = outr[[i]]$times, col = i, lty = 2)#
+}
+# Brucellosis only#
+##############################################################
+betaT <- 0.0002909  # re-set just in case#
+beta_b <- c(0.0001, seq(0.001, 0.003, 0.001))#
+Ib0 = N - 100#
+It0 = 0#
+Ib0 = 100#
+Ic0 = 0#
+R0 = 0#
+Rc0 = 0#
+x0 = c(S = S0, It = It0, Ib = Ib0, Ic = Ic0, R = R0, Rc = Rc0)#
+times <- seq(0, 1000, 1)#
+out <- list(NA); outr <- list(NA)#
+#
+par(mfrow=c(1, 2))#
+plot(NULL, xlim = c(0, 100), xlab= "Time (in years)", ylim= c(0, 1000), #
+	ylab = "Number of animals")#
+legend("topright", title= "beta_b", legend=c("0.0001", "0.001", "0.002", "0.003"), #
+	col = seq(1:length(beta_b)), lty = 1, bty = "n")#
+title(main = list("Fitness effects in Brucellosis Recoverds", cex = 0.7)) #
+for(i in 1:length(beta_b)){#
+	params <- c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muR, muRC = muRC, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = betaT, betaB = beta_b[i], betapT = betapT, betapB = betapB)	#
+	params_recov <- c(b1= b1, b2 = b2, b3 = b3, b4= 1, b5 = b2, # assuming b4 =1, b5 = b2 #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muS, muRC = muT, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = beta_t[i], betaB = betaB, betapT = beta_t[i], betapB = 3.92 * betaB)	#
+	sol <- as.data.frame(ode(x0, times, rhs, params))#
+	sol<- groom_sol(sol)#
+	sol_recov <- as.data.frame(ode(x0, times, rhs, params_recov))#
+	sol_recov <- groom_sol(sol_recov)#
+	out[[i]] <- sol; outr[[i]] <- sol_recov#
+	lines(y = out[[i]]$Ib, x = out[[i]]$times, col = i)#
+	lines(y = out[[i]]$R, x = out[[i]]$times, col = i, lty = 2)#
+}#
+#
+plot(NULL, xlim = c(0, 100), xlab= "Time (in years)", ylim= c(0, 1000), #
+	ylab = "Number of animals")#
+title(main = list("No fitness effects in Brucellosis Recoverds", cex = 0.7)) #
+for(i in 1:length(beta_t)){#
+	lines(y = outr[[i]]$Ib, x = outr[[i]]$times, col = i)#
+	lines(y = outr[[i]]$R, x = outr[[i]]$times, col = i, lty = 2)#
+}
+str(outr)
+tail(outr[[1]])
+tail(outr[[2]])
+length(beta_t)
+for(i in 1:length(beta_b)){#
+	lines(y = outr[[i]]$Ib, x = outr[[i]]$times, col = i)#
+	lines(y = outr[[i]]$R, x = outr[[i]]$times, col = i, lty = 2)#
+}
+# Brucellosis only#
+##############################################################
+betaT <- 0.0002909  # re-set just in case#
+beta_b <- c(0.0001, seq(0.001, 0.003, 0.001))#
+Ib0 = N - 100#
+It0 = 0#
+Ib0 = 100#
+Ic0 = 0#
+R0 = 0#
+Rc0 = 0#
+x0 = c(S = S0, It = It0, Ib = Ib0, Ic = Ic0, R = R0, Rc = Rc0)#
+times <- seq(0, 1000, 1)#
+out <- list(NA); outr <- list(NA)#
+#
+par(mfrow=c(1, 2))#
+plot(NULL, xlim = c(0, 100), xlab= "Time (in years)", ylim= c(0, 1000), #
+	ylab = "Number of animals")#
+legend("topright", title= "beta_b", legend=c("0.0001", "0.001", "0.002", "0.003"), #
+	col = seq(1:length(beta_b)), lty = 1, bty = "n")#
+title(main = list("Fitness effects in Brucellosis Recoverds", cex = 0.7)) #
+for(i in 1:length(beta_b)){#
+	params <- c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muR, muRC = muRC, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = betaT, betaB = beta_b[i], betapT = betapT, betapB = betapB)	#
+	params_recov <- c(b1= b1, b2 = b2, b3 = b3, b4= 1, b5 = b2, # assuming b4 =1, b5 = b2 #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muS, muRC = muT, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = betaT, betaB = beta_b[i], betapT = betapT, betapB = 3.92 * beta_b[i])	#
+	sol <- as.data.frame(ode(x0, times, rhs, params))#
+	sol<- groom_sol(sol)#
+	sol_recov <- as.data.frame(ode(x0, times, rhs, params_recov))#
+	sol_recov <- groom_sol(sol_recov)#
+	out[[i]] <- sol; outr[[i]] <- sol_recov#
+	lines(y = out[[i]]$Ib, x = out[[i]]$times, col = i)#
+	lines(y = out[[i]]$R, x = out[[i]]$times, col = i, lty = 2)#
+}#
+#
+plot(NULL, xlim = c(0, 100), xlab= "Time (in years)", ylim= c(0, 1000), #
+	ylab = "Number of animals")#
+title(main = list("No fitness effects in Brucellosis Recoverds", cex = 0.7)) #
+for(i in 1:length(beta_b)){#
+	lines(y = outr[[i]]$Ib, x = outr[[i]]$times, col = i)#
+	lines(y = outr[[i]]$R, x = outr[[i]]$times, col = i, lty = 2)#
+}
+tail(outr[[4]])
+tail(out[[4]])
+tail(out[[3]])
+tail(outr[[3]])
+endprev<- c(NA); endprev_recov <- c(NA)#
+beta_b <- seq(0.0001, 0.003, 0.0001)#
+for (i in 1:length(beta_b)){#
+	params <- c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muR = muR, muRC = muRC, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = betaT, betaB = beta_b[i], betapT = betapT, betapB = betapB)	#
+	params_recov = c(b1= b1, b2 = b2, b3 = b3, b4= 1, b5 = b2, # assuming b4 =1, b5 = b2 #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muS, muRC = muT, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = beta_t[i], betaB = betaB, betapT = beta_t[i], betapB = 3.92 * betaB)#
+	sol <- as.data.frame(ode(x0, times, rhs, params))#
+	sol<- groom_sol(sol)
+sol_recov <- as.data.frame(ode(x0, times, rhs, params_recov))#
+	sol_recov <- groom_sol(sol_recov)#
+	endprev[i] <- sol$Brucprev[101]#
+	endprev_recov[i] <- sol_recov$TBprev[101]#
+}
+plot(x=beta_b, y=endprev, xlab = "Density dependent transmission rate for brucellosis", ylab = "Brucellosis prevalence", type="l")#
+abline(h = 0.05, col = "red")#
+abline(h = 0.1, col = "red")#
+abline(h = 0.2, col = "red")#
+want= c(0.05, 0.1, 0.2, 0.3)
+abline(h = 0.2, col = "red"); abline(h = 0.3, col = "red")
+want= c(0.05, 0.1, 0.2, 0.3)  # want beta_t values associated with each of these end prevalences
+approx(x = endprev, y = beta_b, xout = want)
+approx(x = endprev_recov, y = beta_b, xout = want)
+endprev<- c(NA); endprev_recov <- c(NA)#
+beta_b <- seq(0.0001, 0.003, 0.0001)#
+for (i in 1:length(beta_b)){#
+	params <- c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muR = muR, muRC = muRC, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = betaT, betaB = beta_b[i], betapT = betapT, betapB = betapB)	#
+	params_recov = c(b1= b1, b2 = b2, b3 = b3, b4= 1, b5 = b2, # assuming b4 =1, b5 = b2 #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muS, muRC = muT, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = beta_t[i], betaB = betaB, betapT = beta_t[i], betapB = 3.92 * betaB)#
+	sol <- as.data.frame(ode(x0, times, rhs, params))#
+	sol<- groom_sol(sol)#
+	sol_recov <- as.data.frame(ode(x0, times, rhs, params_recov))#
+	sol_recov <- groom_sol(sol_recov)#
+	endprev[i] <- sol$Brucprev[101]#
+	endprev_recov[i] <- sol_recov$Brucprev[101]#
+}
+approx(x = endprev_recov, y = beta_b, xout = want)
+summary(endprev_recov)
+# Brucellosis only#
+##############################################################
+betaT <- 0.0002909  # re-set just in case#
+beta_b <- c(0.0001, seq(0.001, 0.003, 0.001))#
+Ib0 = N - 100#
+It0 = 0#
+Ib0 = 100#
+Ic0 = 0#
+R0 = 0#
+Rc0 = 0#
+x0 = c(S = S0, It = It0, Ib = Ib0, Ic = Ic0, R = R0, Rc = Rc0)#
+times <- seq(0, 1000, 1)#
+out <- list(NA); outr <- list(NA)#
+#
+par(mfrow=c(1, 2))#
+plot(NULL, xlim = c(0, 100), xlab= "Time (in years)", ylim= c(0, 1000), #
+	ylab = "Number of animals")#
+legend("topright", title= "beta_b", legend=c("0.0001", "0.001", "0.002", "0.003"), #
+	col = seq(1:length(beta_b)), lty = 1, bty = "n")#
+title(main = list("Fitness effects in Brucellosis Recoverds", cex = 0.7)) #
+for(i in 1:length(beta_b)){#
+	params <- c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muR, muRC = muRC, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = betaT, betaB = beta_b[i], betapT = betapT, betapB = 3.92 * beta_b[i])	#
+	params_recov <- c(b1= b1, b2 = b2, b3 = b3, b4= 1, b5 = b2, # assuming b4 =1, b5 = b2 #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muS, muRC = muT, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = betaT, betaB = beta_b[i], betapT = betapT, betapB = 3.92 * beta_b[i])	#
+	sol <- as.data.frame(ode(x0, times, rhs, params))#
+	sol<- groom_sol(sol)#
+	sol_recov <- as.data.frame(ode(x0, times, rhs, params_recov))#
+	sol_recov <- groom_sol(sol_recov)#
+	out[[i]] <- sol; outr[[i]] <- sol_recov#
+	lines(y = out[[i]]$Ib, x = out[[i]]$times, col = i)#
+	lines(y = out[[i]]$R, x = out[[i]]$times, col = i, lty = 2)#
+}#
+#
+plot(NULL, xlim = c(0, 100), xlab= "Time (in years)", ylim= c(0, 1000), #
+	ylab = "Number of animals")#
+title(main = list("No fitness effects in Brucellosis Recoverds", cex = 0.7)) #
+for(i in 1:length(beta_b)){#
+	lines(y = outr[[i]]$Ib, x = outr[[i]]$times, col = i)#
+	lines(y = outr[[i]]$R, x = outr[[i]]$times, col = i, lty = 2)#
+}
+tail(out[[2]])
+tail(outr[[2]])
+tail(out[[3]])
+tail(outr[[3]])
+endprev<- c(NA); endprev_recov <- c(NA)#
+beta_b <- seq(0.0001, 0.003, 0.0001)#
+for (i in 1:length(beta_b)){#
+	params <- c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muR, muRC = muRC, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = betaT, betaB = beta_b[i], betapT = betapT, betapB = 3.92 * beta_b[i])	#
+	params_recov = c(b1= b1, b2 = b2, b3 = b3, b4= 1, b5 = b2, # assuming b4 =1, b5 = b2 #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muS, muRC = muT, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = betaT, betaB = beta_b[i], betapT = betapT, betapB = 3.92 * beta_b[i])#
+	sol <- as.data.frame(ode(x0, times, rhs, params))#
+	sol<- groom_sol(sol)#
+	sol_recov <- as.data.frame(ode(x0, times, rhs, params_recov))#
+	sol_recov <- groom_sol(sol_recov)#
+	endprev[i] <- sol$Brucprev[101]#
+	endprev_recov[i] <- sol_recov$Brucprev[101]#
+}#
+plot(x=beta_b, y=endprev, xlab = "Density dependent transmission rate for brucellosis", ylab = "Brucellosis prevalence", type="l")#
+abline(h = 0.05, col = "red"); abline(h = 0.1, col = "red")#
+abline(h = 0.2, col = "red"); abline(h = 0.3, col = "red")#
+want= c(0.05, 0.1, 0.2, 0.3)  # want beta_t values associated with each of these end prevalences#
+approx(x = endprev, y = beta_b, xout = want)
+beta_b <- seq(0.0005, 0.002, 0.0001)#
+for (i in 1:length(beta_b)){#
+	params <- c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muR, muRC = muRC, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = betaT, betaB = beta_b[i], betapT = betapT, betapB = 3.92 * beta_b[i])	#
+	params_recov = c(b1= b1, b2 = b2, b3 = b3, b4= 1, b5 = b2, # assuming b4 =1, b5 = b2 #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muS, muRC = muT, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = betaT, betaB = beta_b[i], betapT = betapT, betapB = 3.92 * beta_b[i])#
+	sol <- as.data.frame(ode(x0, times, rhs, params))#
+	sol<- groom_sol(sol)#
+	sol_recov <- as.data.frame(ode(x0, times, rhs, params_recov))#
+	sol_recov <- groom_sol(sol_recov)#
+	endprev[i] <- sol$Brucprev[101]#
+	endprev_recov[i] <- sol_recov$Brucprev[101]#
+}#
+plot(x=beta_b, y=endprev, xlab = "Density dependent transmission rate for brucellosis", ylab = "Brucellosis prevalence", type="l")#
+abline(h = 0.05, col = "red"); abline(h = 0.1, col = "red")#
+abline(h = 0.2, col = "red"); abline(h = 0.3, col = "red")#
+want= c(0.05, 0.1, 0.2, 0.3)  # want beta_t values associated with each of these end prevalences#
+approx(x = endprev, y = beta_b, xout = want)
+endprev<- c(NA); endprev_recov <- c(NA)#
+beta_b <- seq(0.0005, 0.002, 0.0001)#
+for (i in 1:length(beta_b)){#
+	params <- c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muR, muRC = muRC, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = betaT, betaB = beta_b[i], betapT = betapT, betapB = 3.92 * beta_b[i])	#
+	params_recov = c(b1= b1, b2 = b2, b3 = b3, b4= 1, b5 = b2, # assuming b4 =1, b5 = b2 #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muS, muRC = muT, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = betaT, betaB = beta_b[i], betapT = betapT, betapB = 3.92 * beta_b[i])#
+	sol <- as.data.frame(ode(x0, times, rhs, params))#
+	sol<- groom_sol(sol)#
+	#sol_recov <- as.data.frame(ode(x0, times, rhs, params_recov))#
+	#sol_recov <- groom_sol(sol_recov)#
+	endprev[i] <- sol$Brucprev[101]#
+	#endprev_recov[i] <- sol_recov$Brucprev[101]#
+}
+plot(x = beta_b, y = endprev_recov)
+summary(endprev_recov)
+endprev<- c(NA); endprev_recov <- c(NA)
+b4
+r
 b
-str(a)
-b<- a[a$Age != 4,]
-head(b)
-head(b, 20)
-c<- b[b$Age == 5,]
-c
-c$Freq <- 0
-c
-for (i in 1:length(c$Freq)){#
-	tbval <- c$TB[i]#
-	brucval <- c$Brucellosis[i]#
-	ageval <- c$Age[i]#
-	fecval <- c$Fec[i]#
-	temp <- b[b$TB == tbval & b$Brucellosis == brucval & b$Age == ageval & b$Fec == fecval]	#
-	c$Freq[i] <- c$Freq[i] + temp$Freq#
-}
-head(b)
-head(brucval)
-c
-tbval <- c$TB[1]#
-	brucval <- c$Brucellosis[1]#
-	ageval <- c$Age[1]#
-	fecval <- c$Fec[1]
-tbval
-brucval
-ageval
-fecval
-b[b$TB == tbval & b$Brucellosis == brucval & b$Age == ageval & b$Fec == fecval]
-?&
-??&&
-??"&"
-temp <- b[b$TB == tbval && b$Brucellosis == brucval && b$Age == ageval && b$Fec == fecval]
-temp
-tbval
-tbval[[1]]
-tbval[1]
-b[b$TB == tbval]
-b[b$TB == tbval,]
-b[b$TB == tbval && b$bruc == brucval,]
-b[b$TB == tbval && b$Brucellosis == brucval,]
-b[b$TB == tbval AND b$Brucellosis == brucval,]
-b[b$TB == tbval & b$Brucellosis == brucval,]
-temp <- b[b$TB == tbval & b$Brucellosis == brucval & b$Age == ageval & b$Fec == fecval]
-c
-for (i in 1:length(c$Freq)){#
-	tbval <- c$TB[i]#
-	brucval <- c$Brucellosis[i]#
-	ageval <- c$Age[i]#
-	fecval <- c$Fec[i]#
-	temp <- b[b$TB == tbval & b$Brucellosis == brucval & b$Age == ageval & b$Fec == fecval,]	#
-	c$Freq[i] <- c$Freq[i] + temp$Freq#
-}
-c
-c$Freq <- 0#
-for (i in 1:length(c$Freq)){#
-	tbval <- c$TB[i]#
-	brucval <- c$Brucellosis[i]#
-	ageval <- c$Age[i]#
-	fecval <- c$Fec[i]#
-	temp <- b[b$TB == tbval & b$Brucellosis == brucval & b$Age == ageval & b$Fec == fecval,]	#
-	if (length(temp$Freq) >1) { print ("subset of length longer than 1")}#
-	else {#
-		c$Freq[i] <- c$Freq[i] + temp$Freq#
-	}#
-}
+muS
 b
-c$Freq <- 0#
-for (i in 1:length(c$Freq)){#
-	tbval <- c$TB[i]#
-	brucval <- c$Brucellosis[i]#
-	ageval <- c$Age[i]#
-	fecval <- c$Fec[i]#
-	temp <- b[b$TB == tbval & b$Brucellosis == brucval & b$Age == ageval & b$Fec == fecval,]	#
-	if (length(temp$Freq) >1) { #
-		print ("subset of length longer than 1, ")}#
-		print ( temp)#
-	else {#
-		c$Freq[i] <- c$Freq[i] + temp$Freq#
-	}#
+get_new_probability
+muS
+muS*50
+rhs
+50 + b1 * 0 + b2 * 10 + b3 * 0 + b4 * 10 + b5 *0
+b1
+b4
+exp(-1.5)
+##############################################################
+##############################################################
+##############################################################
+require("deSolve")#
+#
+get_new_probability = function(logOR, p1){#
+	OR <- exp(logOR)#
+	p2 <- p1 * OR / (1 - p1 + p1*OR)#
+	return(p2)#
+}#
+#
+##############################################################
+##############################################################
+# parameters- set values in analyses * age structure#
+##############################################################
+##############################################################
+relageall = c(0.137, rep(0.368/4, 4), rep(0.185/4, 4),  # Jolles 2005, set max age at 18#
+	rep(0.235/6, 6), rep(0.075/3, 3))					# Also in Caron et al. from 2001 KNP#
+relage = c(relageall[1], sum(relageall[2:3]), relageall[4],  #
+	relageall[5], sum(relageall[6:length(relageall)]) )  # sums to 1#
+N = 1000#
+K = 1000#
+##############################################################
+# Mortality, susceptible females#
+##############################################################
+muSa <- NA; muTa <- NA; muBa <- NA; muCa <- NA#
+muSa[1] <- 1- 0.7 # mortality rate in calves age [0-1) (1/yr)#
+muSa[2] <- 1- 0.884 # mortality rate in yearlings [1-3) (1/yr)#
+muSa[3] <- 1- 0.884 # mortality rate in juveniles [3-4) (1/yr)#
+muSa[4] <-  1- 0.963 # mortality rate in sub-adults [4-5)  (1/yr)#
+muSa[5] <-  1- 0.963 # mortality rate in adults 5+  (1/yr)#
+muS <- sum(muSa* relage) #
+#
+# mortality, TB, and Brucellosis positive animals#
+muT <- 2.82 * muS#
+muB <- 3.02 * muS#
+muC <- (2.82 + 3.02) * muS#
+muRC <- muC#
+muR <- muB#
+#
+##############################################################
+# Births#
+##############################################################
+r <- 1   # Gao & Hethcote; r = birth - death#
+b <- r + muS#
+# In interdrought periods, buffalo populations grew at rates from 5-15%. #
+# This is in populations with brucellosis but not bTB.#
+# set r = 1.1... in susceptible poulations.#
+b1 <- get_new_probability(-1.619, 1) # proportional reduction with bTB#
+b2 <- get_new_probability(-1.5, 1)   # proportional reduction with bruc#
+b3 <- b2 # ASSUME animals with chronic brucellosis have same fecundity as active brucellosis #
+b4 <- get_new_probability((-1.619 - 1.50 + 2.28), 1) # proportional reduction if co-infected#
+b5 <- b4 # #
+#
+##############################################################
+# transmission and recovery rates to vary later. #
+##############################################################
+# transmission parameters (constant with age)#
+betaT =  0.01           # 0.043 transmission rate of TB (with N = 250)#
+betapT <- betaT  		# transnmission rate of TB in brucellosis infected buffalo#
+betaB = 0.04      		# transmission rate of brucellosis#
+betapB = 3.92 * betaB	# tranmsission rate of bruceillosis in TB + buffalo#
+#
+gamma = 1/3  # recovery rate = 1/2 years#
+epsilon = 0.01#
+#rho <- 0.05  # rate of vertical transmission#
+# Jolles et al. 2009 modeled bTB as density dependent#
+# Cross & Getz 2008 model bTB as frequency dependent (but with a rel constat population size)#
+##############################################################
+##############################################################
+# Write ODEs, density dependence... no age structure#
+##############################################################
+##############################################################
+rhs = function(times, x, params){#
+	###########################
+	# Inputs: t = time sequence; x = initial conditions in one vector in order of variable orderd juv, adult for each category#
+	# params= list(#
+	# b1, b2, b3, b4, b5,  prop reduction in fecundity with TB, bruc, chronic bruc, co, coinfect/chronic #
+	# K #
+	# betaT, betapT, betaB, betapB, transmission rates, p indicates co-infected first#
+	# gamma, epsilon, ignore rho for now (proportion of buffalo born from infectious mothers that are infectious).#
+	# b = max birth rate (when N = 0) #
+	# muS, muT, muB, muC, muR, muRC mortality rates.  #
+	# NOW Assume chronic stages have mortality rates equal to acute stage!!!#
+	###########################
+	with(as.list(c(x, params)), {#
+		# Overall population size (N)#
+		N <- S + It + Ib + Ic + R + Rc#
+		# Population contributing to births (Nb); account for reduced births with infection#
+		Nb <- S + b1 * It + b2 * Ib + b3 * Ic + b4 * R + b5 * Rc#
+		# Frequency dependent force of infection is independent of age#
+		lambdaT <- betaT * (It + Ic + Rc) #
+		lambdaB <- betaB * (Ib + Ic) #
+		lambdapT <- betapT * (It + Ic + Rc)#
+		lambdapB <- betapB * (Ib + Ic) #
+		# differential equations, assume mortality in chronics is same as active infection#
+		dS <- b * Nb * (1 - (r/b) * (N/K) ) - (lambdaT + lambdaB) * S - muS * S #
+		dIt <- lambdaT * S - (lambdapB + muT) * It #
+		dIb <- lambdaB * S + epsilon * R - (gamma + lambdapT + muB) * Ib#
+		dIc <- lambdapT * Ib + lambdapB * It + epsilon * Rc - (gamma + muC) * Ic#
+		dR <-  gamma * Ib - (epsilon + muR + lambdapT) * R#
+		dRc <- lambdapT * R + gamma * Ic - (epsilon + muRC) * Rc#
+		out = list(c(dS, dIt, dIb, dIc, dR, dRc))#
+		return(out)#
+		}#
+	)#
+}#
+groom_sol = function(sol){#
+	colnames(sol) <- c("times", "S", "It", "Ib", "Ic", "R", "Rc") #
+	sol$N <- sol$S + sol$It + sol$Ib + sol$Ic + sol$R + sol$Rc#
+	sol$TBprev <- (sol$It + sol$Ic + sol$Rc) / sol$N#
+	sol$Brucprev <- (sol$Ib + sol$R + sol$Ic + sol$Rc) / sol$N#
+	sol$propTB_co <- (sol$Ic + sol$Rc) / (sol$It + sol$Ic + sol$Rc)#
+	sol$propBruc_co <- (sol$Ic + sol$Rc) / (sol$Ib + sol$R + sol$Ic + sol$Rc)#
+	return(sol)#
+}#
+#
+plot_raw_numbers = function(sol){#
+	plot(sol$time, sol$S, col= "black", type= 'l', ylim = c(0, 1200), ylab = "Number of animals", xlab = "Time (in years")#
+	lines(sol$time, sol$It, col= "red")#
+	lines(sol$time, sol$Ib, col= "blue")#
+	lines(sol$time, sol$Ic, col= "green")#
+	lines(sol$time, sol$R, col = "orange")#
+	lines(sol$time, sol$Rc, col = "pink")#
+	legend("topright", legend = c("S", "It", "Ib", "Ic", "R", "Rc"), col = c("black", "red", "blue", "green", "orange", "pink"), bty="n", lty = 1)#
+}#
+##############################################################
+##############################################################
+##############################################################
+# Test Run- #
+##############################################################
+##############################################################
+params = c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, #
+	b = b, r = r, K = K,#
+	muS = muS, muB = muB, muT = muT, muC = muC, muR = muR, muRC = muRC, #
+	gamma = gamma, epsilon = epsilon,#
+	betaT = betaT, betaB = betaB, betapT = betapT, betapB = betapB)#
+# params assuming fecundity/survival effects of brucellosis are limited to infected class#
+params_recov = c(b1= b1, b2 = b2, b3 = b3, b4= 1, b5 = b2, # assuming b4 =1, b5 = b2 #
+	b = b, r = r, K = K,#
+	muS = muS, muB = muB, muT = muT, muC = muC, muR = muS, muRC = muT, #
+	gamma = gamma, epsilon = epsilon,#
+	betaT = betaT, betaB = betaB, betapT = betapT, betapB = betapB)#
+#
+#Start no disease, make sure ends with none, pop goes to K#
+##############################################################
+S0 = 500#
+It0 = 0#
+Ib0 = 0#
+Ic0 = 0#
+R0 = 0#
+Rc0 = 0#
+x0 = c(S = S0, It = It0, Ib = Ib0, Ic = Ic0, R = R0, Rc = Rc0)#
+times <- seq(0, 100, 1)#
+sol <- as.data.frame(ode(x0, times, rhs, params))#
+sol_recov <- as.data.frame(ode(x0, times, rhs, params_recov))#
+plot_raw_numbers(sol)#
+plot_raw_numbers(sol_recov)
+dev.off()
+#Start with brucellosis only, make sure no bTB takes off#
+##############################################################
+S0 = N-100#
+It0 = 0#
+Ib0 = 100#
+Ic0 = 0#
+R0 = 0#
+Rc0 = 0#
+x0 = c(S = S0, It = It0, Ib = Ib0, Ic = Ic0, R = R0, Rc = Rc0)#
+times <- seq(0, 100, 1)#
+sol <- as.data.frame(ode(x0, times, rhs, params))#
+sol_recov <- as.data.frame(ode(x0, times, rhs, params_recov))#
+sol<- groom_sol(sol)#
+par(mfrow = c(1,2))#
+plot_raw_numbers(sol)#
+plot_raw_numbers(sol_recov)
+par(mfrow = c(1,2))
+plot_raw_numbers(sol)#
+plot_raw_numbers(sol_recov)
+#Start with bTB only, make sure no brucellosis takes off#
+##############################################################
+Ib0 = N - 100#
+It0 = 100#
+Ib0 = 0#
+Ic0 = 0#
+R0 = 0#
+Rc0 = 0#
+x0 = c(S = S0, It = It0, Ib = Ib0, Ic = Ic0, R = R0, Rc = Rc0)#
+sol <- as.data.frame(ode(x0, times, rhs, params))#
+sol<- groom_sol(sol)#
+plot_raw_numbers(sol)
+# TB only #
+##############################################################
+K = 1000; N= 1000#
+beta_t <- seq(0.0001, 0.001, 0.0003)#
+Ib0 = N - 100#
+It0 = 100#
+Ib0 = 0#
+Ic0 = 0#
+R0 = 0#
+Rc0 = 0#
+x0 = c(S = S0, It = It0, Ib = Ib0, Ic = Ic0, R = R0, Rc = Rc0)#
+times <- seq(0, 1000, 1)#
+out <- list(NA); #
+#
+par(mfrow = c(1, 2))#
+plot(NULL, xlim = c(0, 100), xlab= "Time (in years)", ylim= c(0, 1300), #
+	ylab = "Number of animals")#
+legend("topright", 	title= "beta_t", legend=c("0.0001", "0.0004", "0.0007","0.001"),#
+	col = seq(1:length(beta_t)), lty = 1, bty = "n") 	#
+for(i in 1:length(beta_t)){#
+	params <- c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muR, muRC = muRC, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = beta_t[i], betaB = betaB, betapT = betapT, betapB = betapB)#
+	sol <- as.data.frame(ode(x0, times, rhs, params))#
+	sol<- groom_sol(sol)#
+	out[[i]] <- sol#
+	lines(y = out[[i]]$It, x = out[[i]]$times, col = i)#
+}#
+# For a given beta_t, find the endemic bTB prevalence#
+##############################################################
+endprev<- c(NA)#
+beta_t <- seq(0.0001, 0.001, 0.00002)  # make more finely spaced#
+for (i in 1:length(beta_t)){#
+	params <- c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muR, muRC = muRC, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = beta_t[i], betaB = betaB, betapT = beta_t[i], betapB = 3.92 * betaB)	#
+	sol <- as.data.frame(ode(x0, times, rhs, params))#
+	sol<- groom_sol(sol)#
+	endprev[i] <- sol$TBprev[101]#
+}#
+plot(x=beta_t, y=endprev, xlab = "Density dependent transmission rate for bTB", ylab = "bTB prevalence", type="l")#
+abline(h = 0.05, col = "red"); abline(h = 0.1, col = "red")#
+abline(h = 0.2, col = "red"); abline(h = 0.3, col = "red")#
+want= c(0.05, 0.1, 0.2, 0.3)  # want beta_t values associated with each of these end prevalences#
+approx(x = endprev, y = beta_t, xout = want)#
+# 0.0002728621 0.0002998335 0.0003412031 0.0003923223#
+legend("topleft", legend= c("0.000273", "0.0003", "0.00034", "0.00039"))
+par(mfrow = c(1, 2))
+plot(NULL, xlim = c(0, 100), xlab= "Time (in years)", ylim= c(0, 1300), #
+	ylab = "Number of animals")#
+legend("topright", 	title= "beta_t", legend=c("0.0001", "0.0004", "0.0007","0.001"),#
+	col = seq(1:length(beta_t)), lty = 1, bty = "n") 	#
+for(i in 1:length(beta_t)){#
+	params <- c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muR, muRC = muRC, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = beta_t[i], betaB = betaB, betapT = betapT, betapB = betapB)#
+	sol <- as.data.frame(ode(x0, times, rhs, params))#
+	sol<- groom_sol(sol)#
+	out[[i]] <- sol#
+	lines(y = out[[i]]$It, x = out[[i]]$times, col = i)#
 }
-c<- b[b$Age == 5,]#
-c$Freq <- 0#
-for (i in 1:length(c$Freq)){#
-	tbval <- c$TB[i]#
-	brucval <- c$Brucellosis[i]#
-	ageval <- c$Age[i]#
-	fecval <- c$Fec[i]#
-	temp <- b[b$TB == tbval & b$Brucellosis == brucval & b$Age == ageval & b$Fec == fecval,]	#
-	if (length(temp$Freq) >1) { #
-		print ("subset of length longer than 1, ")#
-		print ( temp)}#
-	else {#
-		c$Freq[i] <- c$Freq[i] + temp$Freq#
-	}#
+K = 1000; N= 1000#
+beta_t <- seq(0.0001, 0.001, 0.0003)#
+Ib0 = N - 100#
+It0 = 100#
+Ib0 = 0#
+Ic0 = 0#
+R0 = 0#
+Rc0 = 0#
+x0 = c(S = S0, It = It0, Ib = Ib0, Ic = Ic0, R = R0, Rc = Rc0)#
+times <- seq(0, 1000, 1)#
+out <- list(NA); #
+#
+par(mfrow = c(1, 2))
+plot(NULL, xlim = c(0, 100), xlab= "Time (in years)", ylim= c(0, 1300), #
+	ylab = "Number of animals")#
+legend("topright", 	title= "beta_t", legend=c("0.0001", "0.0004", "0.0007","0.001"),#
+	col = seq(1:length(beta_t)), lty = 1, bty = "n") 	#
+for(i in 1:length(beta_t)){#
+	params <- c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muR, muRC = muRC, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = beta_t[i], betaB = betaB, betapT = betapT, betapB = betapB)#
+	sol <- as.data.frame(ode(x0, times, rhs, params))#
+	sol<- groom_sol(sol)#
+	out[[i]] <- sol#
+	lines(y = out[[i]]$It, x = out[[i]]$times, col = i)#
+}#
+# For a given beta_t, find the endemic bTB prevalence#
+##############################################################
+endprev<- c(NA)#
+beta_t <- seq(0.0001, 0.001, 0.00002)  # make more finely spaced#
+for (i in 1:length(beta_t)){#
+	params <- c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muR, muRC = muRC, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = beta_t[i], betaB = betaB, betapT = beta_t[i], betapB = 3.92 * betaB)	#
+	sol <- as.data.frame(ode(x0, times, rhs, params))#
+	sol<- groom_sol(sol)#
+	endprev[i] <- sol$TBprev[101]#
+}#
+plot(x=beta_t, y=endprev, xlab = "Density dependent transmission rate for bTB", ylab = "bTB prevalence", type="l")#
+abline(h = 0.05, col = "red"); abline(h = 0.1, col = "red")#
+abline(h = 0.2, col = "red"); abline(h = 0.3, col = "red")#
+want= c(0.05, 0.1, 0.2, 0.3)  # want beta_t values associated with each of these end prevalences#
+approx(x = endprev, y = beta_t, xout = want)#
+# 0.0002728621 0.0002998335 0.0003412031 0.0003923223#
+legend("topleft", legend= c("0.000273", "0.0003", "0.00034", "0.00039"), bty= "n")
+K = 1000; N= 1000#
+beta_t <- seq(0.0001, 0.001, 0.0003)#
+Ib0 = N - 100#
+It0 = 100#
+Ib0 = 0#
+Ic0 = 0#
+R0 = 0#
+Rc0 = 0#
+x0 = c(S = S0, It = It0, Ib = Ib0, Ic = Ic0, R = R0, Rc = Rc0)#
+times <- seq(0, 1000, 1)#
+out <- list(NA); #
+#
+par(mfrow = c(1, 2))#
+plot(NULL, xlim = c(0, 100), xlab= "Time (in years)", ylim= c(0, 1300), #
+	ylab = "Number of animals")#
+legend("topright", 	title= "beta_t", legend=c("0.0001", "0.0004", "0.0007","0.001"),#
+	col = seq(1:length(beta_t)), lty = 1, bty = "n") 	#
+for(i in 1:length(beta_t)){#
+	params <- c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muR, muRC = muRC, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = beta_t[i], betaB = betaB, betapT = betapT, betapB = betapB)#
+	sol <- as.data.frame(ode(x0, times, rhs, params))#
+	sol<- groom_sol(sol)#
+	out[[i]] <- sol#
+	lines(y = out[[i]]$It, x = out[[i]]$times, col = i)#
+}#
+# For a given beta_t, find the endemic bTB prevalence#
+##############################################################
+endprev<- c(NA)#
+beta_t <- seq(0.0001, 0.001, 0.00002)  # make more finely spaced#
+for (i in 1:length(beta_t)){#
+	params <- c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muR, muRC = muRC, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = beta_t[i], betaB = betaB, betapT = beta_t[i], betapB = 3.92 * betaB)	#
+	sol <- as.data.frame(ode(x0, times, rhs, params))#
+	sol<- groom_sol(sol)#
+	endprev[i] <- sol$TBprev[101]#
+}#
+plot(x=beta_t, y=endprev, xlab = "Density dependent transmission rate for bTB", ylab = "bTB prevalence", type="l")#
+abline(h = 0.05, col = "red"); abline(h = 0.1, col = "red")#
+abline(h = 0.2, col = "red"); abline(h = 0.3, col = "red")#
+want= c(0.05, 0.1, 0.2, 0.3)  # want beta_t values associated with each of these end prevalences#
+approx(x = endprev, y = beta_t, xout = want)#
+# 0.0002813752 0.0003023988 0.0003465031 0.0004030238#
+legend("topleft", legend= c("0.000281", "0.00030", "0.0003465", "0.00040"), bty= "n")
+betaT <- 0.0002909  # re-set just in case#
+beta_b <- c(0.0001, seq(0.001, 0.003, 0.001))#
+Ib0 = N - 100#
+It0 = 0#
+Ib0 = 100#
+Ic0 = 0#
+R0 = 0#
+Rc0 = 0#
+x0 = c(S = S0, It = It0, Ib = Ib0, Ic = Ic0, R = R0, Rc = Rc0)#
+times <- seq(0, 1000, 1)#
+out <- list(NA); outr <- list(NA)#
+#
+par(mfrow=c(1, 2))
+plot(NULL, xlim = c(0, 100), xlab= "Time (in years)", ylim= c(0, 1000), #
+	ylab = "Number of animals")#
+legend("topright", title= "beta_b", legend=c("0.0001", "0.001", "0.002", "0.003"), #
+	col = seq(1:length(beta_b)), lty = 1, bty = "n")#
+title(main = list("Fitness effects in Brucellosis Recoverds", cex = 0.7)) #
+for(i in 1:length(beta_b)){#
+	params <- c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muR, muRC = muRC, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = betaT, betaB = beta_b[i], betapT = betapT, betapB = 3.92 * beta_b[i])	#
+	params_recov <- c(b1= b1, b2 = b2, b3 = b3, b4= 1, b5 = b2, # assuming b4 =1, b5 = b2 #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muS, muRC = muT, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = betaT, betaB = beta_b[i], betapT = betapT, betapB = 3.92 * beta_b[i])	#
+	sol <- as.data.frame(ode(x0, times, rhs, params))#
+	sol<- groom_sol(sol)#
+	sol_recov <- as.data.frame(ode(x0, times, rhs, params_recov))#
+	sol_recov <- groom_sol(sol_recov)#
+	out[[i]] <- sol; outr[[i]] <- sol_recov#
+	lines(y = out[[i]]$Ib, x = out[[i]]$times, col = i)#
+	lines(y = out[[i]]$R, x = out[[i]]$times, col = i, lty = 2)#
+}#
+#
+plot(NULL, xlim = c(0, 100), xlab= "Time (in years)", ylim= c(0, 1000), #
+	ylab = "Number of animals")#
+title(main = list("No fitness effects in Brucellosis Recoverds", cex = 0.7)) #
+for(i in 1:length(beta_b)){#
+	lines(y = outr[[i]]$Ib, x = outr[[i]]$times, col = i)#
+	lines(y = outr[[i]]$R, x = outr[[i]]$times, col = i, lty = 2)#
 }
+endprev<- c(NA); endprev_recov <- c(NA)#
+beta_b <- seq(0.0005, 0.002, 0.0001)#
+for (i in 1:length(beta_b)){#
+	params <- c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muR, muRC = muRC, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = betaT, betaB = beta_b[i], betapT = betapT, betapB = 3.92 * beta_b[i])	#
+	params_recov = c(b1= b1, b2 = b2, b3 = b3, b4= 1, b5 = b2, # assuming b4 =1, b5 = b2 #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muS, muRC = muT, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = betaT, betaB = beta_b[i], betapT = betapT, betapB = 3.92 * beta_b[i])#
+	sol <- as.data.frame(ode(x0, times, rhs, params))#
+	sol<- groom_sol(sol)#
+	sol_recov <- as.data.frame(ode(x0, times, rhs, params_recov))#
+	sol_recov <- groom_sol(sol_recov)#
+	endprev[i] <- sol$Brucprev[101]#
+	endprev_recov[i] <- sol_recov$Brucprev[101]#
+}#
+par(mfrow = c(1,2))#
+plot(x=beta_b, y=endprev, xlab = "Density dependent transmission rate for brucellosis", ylab = "Brucellosis prevalence", type="l")#
+abline(h = 0.05, col = "red"); abline(h = 0.1, col = "red")#
+abline(h = 0.2, col = "red"); abline(h = 0.3, col = "red")#
+want= c(0.05, 0.1, 0.2, 0.3)  # want beta_t values associated with each of these end prevalences#
+approx(x = endprev, y = beta_b, xout = want)#
+#0.0006384635 0.0006850706 0.0007839580 0.0009060297#
+#
+plot(x = beta_b, y = endprev_recov)#
+approx(x = endprev_recov, y = beta_b, xout = want)
+data <- read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/cross_sectional_data_withdz_cleandisease_nofinal_Feb2016_capturetime_forsurv.csv")
+head(data)
+table(data$tb, data$bruc)
+96/(134+96)
+175/(175+391)
+hist(age_yr)
+hist(data$age_yr)
+175+391
+134+96
+134/(134+391)
+134+391
+96/(96+175)
+96+175
+require(plyr)
+overallbruc <- NA; overallbtb <- NA #
+brucintbneg <- NA; brucintbpos <- NA#
+tbinbrucneg <- NA; tbinbrucpos <- NA#
+for (i in 1:1000){#
+	# sample one time point for each individual id#
+	ssdata <- ddply(data, .(id), function(id) {id[sample(nrow(id), size = 1),]})#
+	# calculate prevalence overall and infection specific#
+	ovverallbruc[i] <- length(ssdata$bruc[ssdata$bruc=="positive"])/ length(ssdata$bruc))#
+	overallbtb[i] <- length(ssdata$tb[ssdata$tb==1])/ length(ssdata$tb)) #
+	brucintbneg[i] <- length(ssdata$tb[ssdata$bruc=="positive" & ssdata$tb == 0]) / #
+		length(ssdata$tb[ssdata$tb==0])#
+	brucintbpos[i] <- length(ssdata$tb[ssdata$bruc=="positive" & ssdata$tb == 1]) / #
+		length(ssdata$tb[ssdata$tb==1])#
+	tbinbrucneg[i] <- length(ssdata$tb[ssdata$bruc=="negative" & ssdata$tb == 1]) / #
+		length(ssdata$tb[ssdata$bruc=="negative"])#
+	tbinbrucpos[i] <- length(ssdata$tb[ssdata$bruc=="positive" & ssdata$tb == 1]) / #
+		length(ssdata$tb[ssdata$bruc=="positive"])#
+}
+head(data)
+ssdata <- ddply(data, .(id), function(id) {id[sample(nrow(id), size = 1),]})
+summary(ssdata)
+head(ssdata)
+length(ssdata)
+ssdata$id
+table(data$id)
+length(unique(data$id)
+)
+length(ssdata$id)
+overallbruc <- NA; overallbtb <- NA #
+brucintbneg <- NA; brucintbpos <- NA#
+tbinbrucneg <- NA; tbinbrucpos <- NA#
+for (i in 1:1000){#
+	# sample one time point for each individual id (should be 151)#
+	ssdata <- ddply(data, .(id), function(id) {id[sample(nrow(id), size = 1),]})#
+	# calculate prevalence overall and infection specific#
+	ovverallbruc[i] <- length(ssdata$bruc[ssdata$bruc=="positive"])/ length(ssdata$bruc)#
+	overallbtb[i] <- length(ssdata$tb[ssdata$tb==1])/ length(ssdata$tb)#
+	brucintbneg[i] <- length(ssdata$tb[ssdata$bruc=="positive" & ssdata$tb == 0]) / #
+		length(ssdata$tb[ssdata$tb==0])#
+	brucintbpos[i] <- length(ssdata$tb[ssdata$bruc=="positive" & ssdata$tb == 1]) / #
+		length(ssdata$tb[ssdata$tb==1])#
+	tbinbrucneg[i] <- length(ssdata$tb[ssdata$bruc=="negative" & ssdata$tb == 1]) / #
+		length(ssdata$tb[ssdata$bruc=="negative"])#
+	tbinbrucpos[i] <- length(ssdata$tb[ssdata$bruc=="positive" & ssdata$tb == 1]) / #
+		length(ssdata$tb[ssdata$bruc=="positive"])#
+}
+for (i in 1:1000){#
+	# sample one time point for each individual id (should be 151)#
+	ssdata <- ddply(data, .(id), function(id) {id[sample(nrow(id), size = 1),]})#
+	# calculate prevalence overall and infection specific#
+	overallbruc[i] <- length(ssdata$bruc[ssdata$bruc=="positive"])/ length(ssdata$bruc)#
+	overallbtb[i] <- length(ssdata$tb[ssdata$tb==1])/ length(ssdata$tb)#
+	brucintbneg[i] <- length(ssdata$tb[ssdata$bruc=="positive" & ssdata$tb == 0]) / #
+		length(ssdata$tb[ssdata$tb==0])#
+	brucintbpos[i] <- length(ssdata$tb[ssdata$bruc=="positive" & ssdata$tb == 1]) / #
+		length(ssdata$tb[ssdata$tb==1])#
+	tbinbrucneg[i] <- length(ssdata$tb[ssdata$bruc=="negative" & ssdata$tb == 1]) / #
+		length(ssdata$tb[ssdata$bruc=="negative"])#
+	tbinbrucpos[i] <- length(ssdata$tb[ssdata$bruc=="positive" & ssdata$tb == 1]) / #
+		length(ssdata$tb[ssdata$bruc=="positive"])#
+}
+hist(overallbruc)
+quantile(c(0.025, 0.975))
+quantile(overallbruc, c(0.025, 0.975))
+quantile(overallbruc, c(0.025, 0.5, 0.975))
+quantile(overallbruc, c(0.025, 0.25, 0.5, 0.75, 0.975))
+quantile(overallbruc, c(0.025, 0.25, 0.5, 0.75, 0.975))#
+quantile(overallbtb, c(0.025, 0.25, 0.5, 0.75, 0.975))#
+quantile(brucintbneg, c(0.025, 0.25, 0.5, 0.75, 0.975))#
+quantile(brucintbpos, c(0.025, 0.25, 0.5, 0.75, 0.975))#
+quantile(tbinbrucneg, c(0.025, 0.25, 0.5, 0.75, 0.975))#
+quantile(tbinbrucpos, c(0.025, 0.25, 0.5, 0.75, 0.975))
+b1
+b2
+b3
+b4
+b5
+##############################################################
+##############################################################
+# parameters- set values in analyses * age structure#
+##############################################################
+##############################################################
+relageall = c(0.137, rep(0.368/4, 4), rep(0.185/4, 4),  # Jolles 2005, set max age at 18#
+	rep(0.235/6, 6), rep(0.075/3, 3))					# Also in Caron et al. from 2001 KNP#
+relage = c(relageall[1], sum(relageall[2:3]), relageall[4],  #
+	relageall[5], sum(relageall[6:length(relageall)]) )  # sums to 1#
+N = 1000#
+K = 1000#
+##############################################################
+# Mortality, susceptible females#
+##############################################################
+muSa <- NA; muTa <- NA; muBa <- NA; muCa <- NA#
+muSa[1] <- 1- 0.7 # mortality rate in calves age [0-1) (1/yr)#
+muSa[2] <- 1- 0.884 # mortality rate in yearlings [1-3) (1/yr)#
+muSa[3] <- 1- 0.884 # mortality rate in juveniles [3-4) (1/yr)#
+muSa[4] <-  1- 0.963 # mortality rate in sub-adults [4-5)  (1/yr)#
+muSa[5] <-  1- 0.963 # mortality rate in adults 5+  (1/yr)#
+muS <- sum(muSa* relage) #
+#
+# mortality, TB, and Brucellosis positive animals#
+muT <- 2.82 * muS#
+muB <- 3.02 * muS#
+muC <- (2.82 + 3.02) * muS#
+muRC <- muC#
+muR <- muB#
+#
+##############################################################
+# Births#
+##############################################################
+r <- 1   # Gao & Hethcote; r = birth - death#
+b <- r + muS#
+# In interdrought periods, buffalo populations grew at rates from 5-15%. #
+# This is in populations with brucellosis but not bTB.#
+# set r = 1.1... in susceptible poulations.#
+b1 <- get_new_probability(-1.619, 1) # proportional reduction with bTB#
+b2 <- get_new_probability(-1.5, 1)   # proportional reduction with bruc#
+b3 <- b2 # ASSUME animals with chronic brucellosis have same fecundity as active brucellosis #
+b4 <- get_new_probability((-1.619 - 1.50 + 2.28), 1) # proportional reduction if co-infected#
+b5 <- b4
+b1
+b2
+b3
+b4
+b5
+get_new_probability
+exp(-1.5)
+get_new_probability(-1.51, 0.999999)
+get_new_probability(-1.51, 0.9)
+get_new_probability(-1.51, 0.99)
 b
-c
-tbval <- c$TB[1]#
-	brucval <- c$Brucellosis[1]#
-	ageval <- c$Age[1]#
-	fecval <- c$Fec[1]#
-	temp <- b[b$TB == tbval & b$Brucellosis == brucval & b$Age == ageval & b$Fec == fecval,]
-temp
-brucval
-b[b$Age==5,]
-c
-c[10,]
-c[=9:12]
-c[-9:12]
-c[,-9:12]
-c[,-c(9:12)]
-c[,-9:12]
-c[,-c(9, 10, 11, 12)]
-d <- c[, -c(9:12),]
-d
-c<- b[b$Age == 5,]
-c
-d <- c[, 1:8]
-d <- c[c(1:8),]
-d
-d <- c[c(1:8, 13:16),]
-d
-c <- c[c(1:8, 13:16),]
-c
-c$Freq <- 0#
-for (i in 1:length(c$Freq)){#
-	tbval <- c$TB[i]#
-	brucval <- c$Brucellosis[i]#
-	ageval <- c$Age[i]#
-	fecval <- c$Fec[i]#
-	temp <- b[b$TB == tbval & b$Brucellosis == brucval & b$Age == ageval & b$Fec == fecval,]	#
-	#if (length(temp$Freq) >1) { #
-	#	print ("subset of length longer than 1, ")#
-	#	print ( temp)}#
-	#else {#
-		c$Freq[i] <- c$Freq[i] + sum(temp$Freq)#
-	#}#
-}
-c
-b
-c
-t1<-glmmPQL(fec~ age1+bruc_beforeafter + tb*bruc_beforeafter + age1*tb, correlation= corAR1(form=~ capturetime |id), random= ~ 1|id, data=d, family=binomial); summary(t1)
-###############################################
-###############################################
-# Fecundity analyses- Calving#
-###############################################
-###############################################
-library(lme4)#
-library(arm)#
-library(ggplot2)#
-library(MASS) #glmmpql#
-library(MuMIn)#
-#########################################################################
-# Read in data, calculate approximation for calving, in calving period#
-#########################################################################
+get_new_probability(-1.51, 1.09)
+get_new_probability(-1.61, 1.09)
+get_new_probability(-1.61, 0.99)
 data<- read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/cross_sectional_data_withdz_cleandisease_nofinal_Feb2016_capturetime_forsurv.csv")#
 data2<- data[data$herdorig=="LS",]#
 calftime <- c(0, 12, 24, 36)#
@@ -277,886 +1491,1232 @@ data4$fec[data4$calf=="unknown" & data4$milk=="unknown"] <- 0#
 data4$fec[data4$calf=="unknown" & data4$milk=="no"] <- 0#
 #
 # overall rates: #
-table(data4$fec, data4$tb, data4$bruc)#
+table(data4$fec, data4$tb, data4$bruc)
+19/(19+79)
+pregdata<- data2[!(data2$capturetime %in% calftime),]
+head(pregdata)
+pregdata$date
+table(pregdata$pregdata, pregdata$tb, pregdata$bruc)
+table(pregdata$preg, pregdata$tb, pregdata$bruc)
+(23+10)/(23+10+58)
+head(pregdata, 10)
+pregdata$pregmilk <- paste(pregdata$preg, pregdata$milk)
+table(pregdata$pregmilk, pregdata$tb, pregdata$bruc)
+(23+10+4)/(23+10+58)
+b <- 0.41 # proportion in LS right before calving that were pregs (or had milk-> assume, can check this)#
+# In interdrought periods, buffalo populations grew at rates from 5-15%. #
+# This is in populations with brucellosis but not bTB.#
+# set r = 1.1... in susceptible poulations.#
+b1 <- get_new_probability(-1.619, b) # proportional reduction with bTB#
+b2 <- get_new_probability(-1.5, b)   # proportional reduction with bruc#
+b3 <- b2 # ASSUME animals with chronic brucellosis have same fecundity as active brucellosis #
+b4 <- get_new_probability((-1.619 - 1.50 + 2.28), b) # proportional reduction if co-infected#
+b5 <- b4 # #
+r <- b - muS   # Gao & Hethcote; r = birth - death
+b
+b1
+b2
+b3
+b4
+# transmission parameters (constant with age)#
+betaT =  0.01           # 0.043 transmission rate of TB (with N = 250)#
+betapT <- betaT  		# transnmission rate of TB in brucellosis infected buffalo#
+betaB = 0.04      		# transmission rate of brucellosis#
+betapB = 3.92 * betaB	# tranmsission rate of bruceillosis in TB + buffalo#
 #
-#########################################################################
-# NEED TO ACCOUNT FOR AGE- #
-# Figures show no calves in buffalo < 4yrs and no TB in buffalo 9+ years, so analyses subset to capture these age categories. #
-#########################################################################
-par(mfrow=c(2,2))#
-hist(as.numeric(data4$age_yr[data4$tb==0 & data4$bruc=="negative"]), main="Uninfected", xlab= "Age")#
-hist(data4$age_yr[data4$tb==0 & data4$bruc=="positive"], main = "Brucellosis + ", xlab= "Age")#
-hist(data4$age_yr[data4$tb==1 & data4$bruc=="negative"], main = "TB +", xlab= "Age")#
-hist(data4$age_yr[data4$tb==1 & data4$bruc=="positive"], main = "Coinfected", xlab= "Age")#
-#
-d<- data4#
-d$tb[d$tb==0] <- "negative"#
-d$tb[d$tb==1] <- "positive"#
-d$tb <- as.factor(d$tb)#
-a<- data.frame(table(d$fec, d$tb, d$bruc,  d$age_yr)); colnames(a)<- c("Fec", "TB", "Brucellosis", "Age", "Freq")#
-a$col <- c("blue4", "brown4", "dodgerblue", "brown1", "darkslategray3", "lightcoral", "lightskyblue", "mistyrose1")#
-# preg= red, not= blue#
-#
-# make a stacked barplot#
-make_stacked_barplot = function(age){#
-	temp<- a[a$Age==age,]#
-	temp$Brucellosis<- relevel(temp$Brucellosis, "negative")#
-	temp$TB<- relevel(temp$TB, "negative")#
-	a<- temp[with(temp, order(temp$Fec, temp$Brucellosis, temp$TB)),]#
-	mat<- matrix(a$Freq, nrow=2, ncol=4, byrow=TRUE, #
-	dimnames=list(c("no calf", "calf"), c("Uninfected", "TB+", "Brucellosis+", "Co-infected")))#
-	prop <- prop.table(mat, margin=2)#
-	par(mar=c(5.1, 4.1, 4.1, 7.1), xpd=TRUE)#
-	barplot(mat, col=heat.colors(length(rownames(mat))), width=2, main=paste("Age= ", age), las=1, #
-	ylab= "Number of buffalo")#
-	legend("topright", fill=heat.colors(length(rownames(mat))), legend=rownames(mat),bty="n")#
-}	#
-#
-#ages<- c(2, 3,4,5,6,7,8, 9, 10)#
-ages<- c(4,5,6,7,8, 9)#
-par(mfrow=c(2,3))#
-for (age in ages){#
-	make_stacked_barplot(age)#
+gamma = 1/3  # recovery rate = 1/2 years#
+epsilon = 0.01#
+#rho <- 0.05  # rate of vertical transmission#
+# Jolles et al. 2009 modeled bTB as density dependent#
+# Cross & Getz 2008 model bTB as frequency dependent (but with a rel constat population size)#
+##############################################################
+##############################################################
+# Write ODEs, density dependence... no age structure#
+##############################################################
+##############################################################
+rhs = function(times, x, params){#
+	###########################
+	# Inputs: t = time sequence; x = initial conditions in one vector in order of variable orderd juv, adult for each category#
+	# params= list(#
+	# b1, b2, b3, b4, b5,  prop reduction in fecundity with TB, bruc, chronic bruc, co, coinfect/chronic #
+	# K #
+	# betaT, betapT, betaB, betapB, transmission rates, p indicates co-infected first#
+	# gamma, epsilon, ignore rho for now (proportion of buffalo born from infectious mothers that are infectious).#
+	# b = max birth rate (when N = 0) #
+	# muS, muT, muB, muC, muR, muRC mortality rates.  #
+	# NOW Assume chronic stages have mortality rates equal to acute stage!!!#
+	###########################
+	with(as.list(c(x, params)), {#
+		# Overall population size (N)#
+		N <- S + It + Ib + Ic + R + Rc#
+		# Population contributing to births (Nb); account for reduced births with infection#
+		Nb <- S + b1 * It + b2 * Ib + b3 * Ic + b4 * R + b5 * Rc#
+		# Frequency dependent force of infection is independent of age#
+		lambdaT <- betaT * (It + Ic + Rc) #
+		lambdaB <- betaB * (Ib + Ic) #
+		lambdapT <- betapT * (It + Ic + Rc)#
+		lambdapB <- betapB * (Ib + Ic) #
+		# differential equations, assume mortality in chronics is same as active infection#
+		dS <- b * Nb * (1 - (r/b) * (N/K) ) - (lambdaT + lambdaB) * S - muS * S #
+		dIt <- lambdaT * S - (lambdapB + muT) * It #
+		dIb <- lambdaB * S + epsilon * R - (gamma + lambdapT + muB) * Ib#
+		dIc <- lambdapT * Ib + lambdapB * It + epsilon * Rc - (gamma + muC) * Ic#
+		dR <-  gamma * Ib - (epsilon + muR + lambdapT) * R#
+		dRc <- lambdapT * R + gamma * Ic - (epsilon + muRC) * Rc#
+		out = list(c(dS, dIt, dIb, dIc, dR, dRc))#
+		return(out)#
+		}#
+	)#
+}#
+groom_sol = function(sol){#
+	colnames(sol) <- c("times", "S", "It", "Ib", "Ic", "R", "Rc") #
+	sol$N <- sol$S + sol$It + sol$Ib + sol$Ic + sol$R + sol$Rc#
+	sol$TBprev <- (sol$It + sol$Ic + sol$Rc) / sol$N#
+	sol$Brucprev <- (sol$Ib + sol$R + sol$Ic + sol$Rc) / sol$N#
+	sol$propTB_co <- (sol$Ic + sol$Rc) / (sol$It + sol$Ic + sol$Rc)#
+	sol$propBruc_co <- (sol$Ic + sol$Rc) / (sol$Ib + sol$R + sol$Ic + sol$Rc)#
+	return(sol)#
 }#
 #
-#########################################################################
-#Choose age category that is most appropriate#
-#########################################################################
-d<- data4[data4$age_yr > 3 & data4$age_yr <= 9,]#
-d$age5 <- "adult"; #
-d$age5[d$age_yr %in% c(4) ] <- "juvenile"#
-d$age5[d$age_yr %in% c(8, 9) ] <- "mature"#
+plot_raw_numbers = function(sol){#
+	plot(sol$time, sol$S, col= "black", type= 'l', ylim = c(0, 1200), ylab = "Number of animals", xlab = "Time (in years")#
+	lines(sol$time, sol$It, col= "red")#
+	lines(sol$time, sol$Ib, col= "blue")#
+	lines(sol$time, sol$Ic, col= "green")#
+	lines(sol$time, sol$R, col = "orange")#
+	lines(sol$time, sol$Rc, col = "pink")#
+	legend("topright", legend = c("S", "It", "Ib", "Ic", "R", "Rc"), col = c("black", "red", "blue", "green", "orange", "pink"), bty="n", lty = 1)#
+}#
+##############################################################
+##############################################################
+##############################################################
+# Test Run- #
+##############################################################
+##############################################################
+params = c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, #
+	b = b, r = r, K = K,#
+	muS = muS, muB = muB, muT = muT, muC = muC, muR = muR, muRC = muRC, #
+	gamma = gamma, epsilon = epsilon,#
+	betaT = betaT, betaB = betaB, betapT = betapT, betapB = betapB)#
+# params assuming fecundity/survival effects of brucellosis are limited to infected class#
+params_recov = c(b1= b1, b2 = b2, b3 = b3, b4= 1, b5 = b2, # assuming b4 =1, b5 = b2 #
+	b = b, r = r, K = K,#
+	muS = muS, muB = muB, muT = muT, muC = muC, muR = muS, muRC = muT, #
+	gamma = gamma, epsilon = epsilon,#
+	betaT = betaT, betaB = betaB, betapT = betapT, betapB = betapB)#
 #
-d$age6 <- "adult"; #
-d$age6[d$age_yr %in% c(4, 5) ] <- "juvenile"#
-d$age6[d$age_yr %in% c(8, 9) ] <- "mature"#
+#Start no disease, make sure ends with none, pop goes to K#
+##############################################################
+S0 = 500#
+It0 = 0#
+Ib0 = 0#
+Ic0 = 0#
+R0 = 0#
+Rc0 = 0#
+x0 = c(S = S0, It = It0, Ib = Ib0, Ic = Ic0, R = R0, Rc = Rc0)#
+times <- seq(0, 100, 1)#
+sol <- as.data.frame(ode(x0, times, rhs, params))#
+sol_recov <- as.data.frame(ode(x0, times, rhs, params_recov))#
+plot_raw_numbers(sol)#
+plot_raw_numbers(sol_recov)
+#Start with brucellosis only, make sure no bTB takes off#
+##############################################################
+S0 = N-100#
+It0 = 0#
+Ib0 = 100#
+Ic0 = 0#
+R0 = 0#
+Rc0 = 0#
+x0 = c(S = S0, It = It0, Ib = Ib0, Ic = Ic0, R = R0, Rc = Rc0)#
+times <- seq(0, 100, 1)#
+sol <- as.data.frame(ode(x0, times, rhs, params))#
+sol_recov <- as.data.frame(ode(x0, times, rhs, params_recov))#
+sol<- groom_sol(sol)#
+par(mfrow = c(1,2))#
+plot_raw_numbers(sol)#
+plot_raw_numbers(sol_recov) # with lax in mortality effects in recovered, much more recoverds... #
+#Start with bTB only, make sure no brucellosis takes off#
+##############################################################
+Ib0 = N - 100#
+It0 = 100#
+Ib0 = 0#
+Ic0 = 0#
+R0 = 0#
+Rc0 = 0#
+x0 = c(S = S0, It = It0, Ib = Ib0, Ic = Ic0, R = R0, Rc = Rc0)#
+sol <- as.data.frame(ode(x0, times, rhs, params))#
+sol<- groom_sol(sol)#
+plot_raw_numbers(sol)
+#Start with brucellosis only, make sure no bTB takes off#
+##############################################################
+S0 = N-100#
+It0 = 0#
+Ib0 = 100#
+Ic0 = 0#
+R0 = 0#
+Rc0 = 0#
+x0 = c(S = S0, It = It0, Ib = Ib0, Ic = Ic0, R = R0, Rc = Rc0)#
+times <- seq(0, 100, 1)#
+sol <- as.data.frame(ode(x0, times, rhs, params))#
+sol_recov <- as.data.frame(ode(x0, times, rhs, params_recov))#
+sol<- groom_sol(sol)#
+par(mfrow = c(1,2))#
+plot_raw_numbers(sol)
+plot_raw_numbers(sol_recov) # with lax in mortality effects in recovered, much more recoverds...
+b <- 0.41 # proportion in LS right before calving that were pregs (or had milk-> assume, can check this)
+#Start with brucellosis only, make sure no bTB takes off#
+##############################################################
+S0 = N-100#
+It0 = 0#
+Ib0 = 100#
+Ic0 = 0#
+R0 = 0#
+Rc0 = 0#
+x0 = c(S = S0, It = It0, Ib = Ib0, Ic = Ic0, R = R0, Rc = Rc0)#
+times <- seq(0, 100, 1)#
+sol <- as.data.frame(ode(x0, times, rhs, params))#
+sol_recov <- as.data.frame(ode(x0, times, rhs, params_recov))#
+sol<- groom_sol(sol)#
+par(mfrow = c(1,2))#
+plot_raw_numbers(sol)#
+plot_raw_numbers(sol_recov) # with lax in mortality effects in recovered, much more recoverds...
+#Start with bTB only, make sure no brucellosis takes off#
+##############################################################
+Ib0 = N - 100#
+It0 = 100#
+Ib0 = 0#
+Ic0 = 0#
+R0 = 0#
+Rc0 = 0#
+x0 = c(S = S0, It = It0, Ib = Ib0, Ic = Ic0, R = R0, Rc = Rc0)#
+sol <- as.data.frame(ode(x0, times, rhs, params))#
+sol<- groom_sol(sol)#
+plot_raw_numbers(sol)
+# TB only #
+##############################################################
+K = 1000; N= 1000#
+beta_t <- seq(0.0001, 0.001, 0.0003)#
+Ib0 = N - 100#
+It0 = 100#
+Ib0 = 0#
+Ic0 = 0#
+R0 = 0#
+Rc0 = 0#
+x0 = c(S = S0, It = It0, Ib = Ib0, Ic = Ic0, R = R0, Rc = Rc0)#
+times <- seq(0, 1000, 1)#
+out <- list(NA); #
 #
-d$age1 <- "adult" #
-d$age1[d$age_yr %in% c(4) ] <- "juvenile"#
+par(mfrow = c(1, 2))#
+plot(NULL, xlim = c(0, 100), xlab= "Time (in years)", ylim= c(0, 1300), #
+	ylab = "Number of animals")#
+legend("topright", 	title= "beta_t", legend=c("0.0001", "0.0004", "0.0007","0.001"),#
+	col = seq(1:length(beta_t)), lty = 1, bty = "n") 	#
+for(i in 1:length(beta_t)){#
+	params <- c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muR, muRC = muRC, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = beta_t[i], betaB = betaB, betapT = betapT, betapB = betapB)#
+	sol <- as.data.frame(ode(x0, times, rhs, params))#
+	sol<- groom_sol(sol)#
+	out[[i]] <- sol#
+	lines(y = out[[i]]$It, x = out[[i]]$times, col = i)#
+}
+K = 1000; N= 1000#
+beta_t <- seq(0.0001, 0.001, 0.0003)#
+Ib0 = N - 100#
+It0 = 100#
+Ib0 = 0#
+Ic0 = 0#
+R0 = 0#
+Rc0 = 0#
+x0 = c(S = S0, It = It0, Ib = Ib0, Ic = Ic0, R = R0, Rc = Rc0)#
+times <- seq(0, 1000, 1)#
+out <- list(NA); #
 #
-d$age3 <- "adult" #
-d$age3[d$age_yr %in% c(4, 5) ] <- "juvenile"#
+par(mfrow = c(1, 2))#
+plot(NULL, xlim = c(0, 500), xlab= "Time (in years)", ylim= c(0, 1300), #
+	ylab = "Number of animals")#
+legend("topright", 	title= "beta_t", legend=c("0.0001", "0.0004", "0.0007","0.001"),#
+	col = seq(1:length(beta_t)), lty = 1, bty = "n") 	#
+for(i in 1:length(beta_t)){#
+	params <- c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muR, muRC = muRC, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = beta_t[i], betaB = betaB, betapT = betapT, betapB = betapB)#
+	sol <- as.data.frame(ode(x0, times, rhs, params))#
+	sol<- groom_sol(sol)#
+	out[[i]] <- sol#
+	lines(y = out[[i]]$It, x = out[[i]]$times, col = i)#
+}
+# For a given beta_t, find the endemic bTB prevalence#
+##############################################################
+endprev<- c(NA)#
+beta_t <- seq(0.0001, 0.001, 0.00002)  # make more finely spaced#
+for (i in 1:length(beta_t)){#
+	params <- c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muR, muRC = muRC, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = beta_t[i], betaB = betaB, betapT = beta_t[i], betapB = 3.92 * betaB)	#
+	sol <- as.data.frame(ode(x0, times, rhs, params))#
+	sol<- groom_sol(sol)#
+	endprev[i] <- sol$TBprev[101]#
+}#
+plot(x=beta_t, y=endprev, xlab = "Density dependent transmission rate for bTB", ylab = "bTB prevalence", type="l")#
+abline(h = 0.05, col = "red"); abline(h = 0.1, col = "red")#
+abline(h = 0.2, col = "red"); abline(h = 0.3, col = "red")#
+want= c(0.05, 0.1, 0.2, 0.3)  # want beta_t values associated with each of these end prevalences#
+approx(x = endprev, y = beta_t, xout = want)#
+# 0.0002813752 0.0003023988 0.0003465031 0.0004030238#
+legend("topleft", legend= c("0.000281", "0.00030", "0.0003465", "0.00040"), bty= "n")
+# TB only #
+##############################################################
+K = 1000; N= 1000#
+beta_t <- seq(0.0001, 0.001, 0.0003)#
+Ib0 = N - 100#
+It0 = 100#
+Ib0 = 0#
+Ic0 = 0#
+R0 = 0#
+Rc0 = 0#
+x0 = c(S = S0, It = It0, Ib = Ib0, Ic = Ic0, R = R0, Rc = Rc0)#
+times <- seq(0, 1000, 1)#
+out <- list(NA); #
 #
-d$age7<- "adult"#
-d$age7[d$age_sel/12 < 5] <- "subadult"#
-d$age7[d$age_sel/12 > 7] <- "mature"#
-#
-t1<-glmmPQL(fec~ age1, correlation= corAR1(form=~ capturetime |id), random= ~ 1|id, data=d, family=binomial); summary(t1); r.squaredGLMM(t1)
-d$bruc_beforeafter[d$bruc_beforeafter=="nc"] <- 0#
-t1<-glmmPQL(fec~ age1 + bruc + tb + age1*tb, correlation= corAR1(form=~ capturetime |id), random= ~ 1|id, data=d, family=binomial); summary(t1)#
-r.squaredGLMM(t1)#
-t1<-glmmPQL(fec~ age1 + bruc_beforeafter + tb + age1*tb, correlation= corAR1(form=~ capturetime |id), random= ~ 1|id, data=d, family=binomial); summary(t1)#
-r.squaredGLMM(t1)
-t1<-glmmPQL(fec~ age1*bruc + tb*bruc + age1*tb, correlation= corAR1(form=~ capturetime |id), random= ~ 1|id, data=d, family=binomial); summary(t1)#
-r.squaredGLMM(t1) # 0.519, 0.8666#
-t1<-glmmPQL(fec~ age1*bruc_beforeafter + tb*bruc_beforeafter + age1*tb, correlation= corAR1(form=~ capturetime |id), random= ~ 1|id, data=d, family=binomial); summary(t1)#
-r.squaredGLMM(t1)  #0.9145931 0.9875749 #
- t1<-glmmPQL(fec~ age1+bruc_beforeafter + tb*bruc_beforeafter + age1*tb, correlation= corAR1(form=~ capturetime |id), random= ~ 1|id, data=d, family=binomial); summary(t1)
-t1<-glmmPQL(fec~ age1*bruc_beforeafter + tb*bruc_beforeafter + age1*tb, correlation= corAR1(form=~ capturetime |id), random= ~ 1|id, data=d, family=binomial); summary(t1)
-t1<-glmmPQL(fec~ age1 + bruc_beforeafter + tb + age1*tb, correlation= corAR1(form=~ capturetime |id), random= ~ 1|id, data=d, family=binomial); summary(t1)
-t1<-glmmPQL(fec~ age1*bruc_beforeafter + tb*bruc_beforeafter + age1*tb, correlation= corAR1(form=~ capturetime |id), random= ~ 1|id, data=d, family=binomial); summary(t1)
-table(d$fec, d$tb, d$bruc_beforeafter)
-table(d$fec, d$bruc_beforeafter)
-table(d$tb, d$bruc_beforeafter)
-str(d)
-table(d$tb[d$age1 == "adult"], d$bruc_beforeafter[d$age1 == "adult"])
-newdf<-data.frame(#
-	Calf=c(14/25, 10/33, 7/23, 6/14, 2/26, 0/8, 2/7, 1/7), #
-	Agecategory = c(rep("Adult (age > 4)", 4), rep("Juvenile (age = 4)", 4)),#
-	Infection = c("Uninfected", "Brucellosis", "Tuberculosis", "Co-infected", "Uninfected", "Brucellosis", "Tuberculosis", "Co-infected"),#
-	N = c(25, 33, 23, 14, 26, 8, 7, 7))#
-newdf$se<- sqrt(newdf$Calf * (1 - newdf$Calf) / newdf$N)#
-newdf$order <- c(seq(1, 4), seq(1,4))#
-newdf$Infection <- as.factor(newdf$Infection)#
-newdf$Infection <- factor(newdf$Infection, levels = newdf$Infection[order(unique(newdf$order))])#
-#
-p9<- ggplot(newdf, aes(x=Infection, y=Calf, group=Agecategory, colour=Agecategory)) + #
-  #geom_line()+#
-  geom_point(size=3, shape=19) + # colour="darkred", fill="darkred" +#
-  geom_errorbar(aes(ymin= newdf$Calf-newdf$se, ymax=newdf$Calf+newdf$se), width=0.2) + #
-  scale_colour_manual(values=c("darkslategray", "darkseagreen3"))#
-p10<- p9 +#
-  theme_bw() + # removes ugly gray.#
-  ylab("Proportion of buffalo observed with a calf") +#
-  scale_y_continuous(limits=c(0,0.8)) + #
-  theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank(), #
-        # legend information#
-        legend.position=c(0.82, 0.9),  #
-        legend.background= element_rect(fill="white", colour="white"),#
-        legend.key= element_blank(),#
-        legend.title= element_blank(),#
-        legend.text = element_text(size=15)   )#
-#
-p10
-table(d$tb[d$age1 == "adult"], d$bruc_beforeafter[d$age1 == "adult"])
-table(d$tb[d$age1 == "juvenile"], d$bruc_beforeafter[d$age1 == "juvenile"])
-table(d$tb[d$age1 == "adult" && d$fec==1], d$bruc_beforeafter[d$age1 == "adult" && d$fec==1])
-head(D)
-head(d)
-table(d$tb[d$age1 == "adult" && d$fec=="1"], d$bruc_beforeafter[d$age1 == "adult" && d$fec=="1"])
-table(d$tb[d$age1 == "adult" & d$fec=="1"], d$bruc_beforeafter[d$age1 == "adult" & d$fec=="1"])
-table(d$tb[d$age1 == "juvenile" & d$fec=="1"], d$bruc_beforeafter[d$age1 == "juvenile" & d$fec=="1"])
-table(d$fec, d$tb, d$bruc_beforeafter)#
-newdf<-data.frame(#
-	Calf=c(14/25, 1/5, 9/28, 7/23, 1/8, 5/6,  # adults#
-		 2/26, 0/3, 0/5, 2/7, 0/4, 1/3),  # juveniles#
-	Agecategory = c(rep("Adult (age > 4)", 4), rep("Juvenile (age = 4)", 4)),#
-	Infection = c("Uninfected", "Bruc Converter", "Bruc PFC", "Tuberculosis", "Co-infected, Converter", "Co-infected, PFC",#
-		"Uninfected", "Bruc Converter", "Bruc PFC", "Tuberculosis", "Co-infected, Converter", "Co-infected, PFC",),#
-	N = c(25, 5, 28, 23, 8, 6, 26, 3, 5, 7, 4, 3))#
-newdf$se<- sqrt(newdf$Calf * (1 - newdf$Calf) / newdf$N)
-table(d$fec, d$tb, d$bruc_beforeafter)#
-newdf<-data.frame(#
-	Calf=c(14/25, 1/5, 9/28, 7/23, 1/8, 5/6,  # adults#
-		 2/26, 0/3, 0/5, 2/7, 0/4, 1/3),  # juveniles#
-	Agecategory = c(rep("Adult (age > 4)", 4), rep("Juvenile (age = 4)", 4)),#
-	Infection = c("Uninfected", "Bruc Converter", "Bruc PFC", "Tuberculosis", "Co-infected, Converter", "Co-infected, PFC", "Uninfected", "Bruc Converter", "Bruc PFC", "Tuberculosis", "Co-infected, Converter", "Co-infected, PFC"),#
-	N = c(25, 5, 28, 23, 8, 6, 26, 3, 5, 7, 4, 3))
-table(d$fec, d$tb, d$bruc_beforeafter)#
-newdf<-data.frame(#
-	Calf=c(14/25, 1/5, 9/28, 7/23, 1/8, 5/6,  # adults#
-		 2/26, 0/3, 0/5, 2/7, 0/4, 1/3),  # juveniles#
-	Agecategory = c(rep("Adult (age > 4)", 6), rep("Juvenile (age = 4)", 6)),#
-	Infection = c("Uninfected", "Bruc Converter", "Bruc PFC", "Tuberculosis", "Co-infected, Converter", "Co-infected, PFC", "Uninfected", "Bruc Converter", "Bruc PFC", "Tuberculosis", "Co-infected, Converter", "Co-infected, PFC"),#
-	N = c(25, 5, 28, 23, 8, 6, 26, 3, 5, 7, 4, 3))#
-newdf$se<- sqrt(newdf$Calf * (1 - newdf$Calf) / newdf$N)#
-newdf$order <- c(seq(1, 4), seq(1,4))
-newdf$se<- sqrt(newdf$Calf * (1 - newdf$Calf) / newdf$N)#
-newdf$order <- c(seq(1, 6), seq(1,6))#
-newdf$Infection <- as.factor(newdf$Infection)#
-newdf$Infection <- factor(newdf$Infection, levels = newdf$Infection[order(unique(newdf$order))])
-newdf
-p11<- ggplot(newdf, aes(x=Infection, y=Calf, group=Agecategory, colour=Agecategory)) + #
-  #geom_line()+#
-  geom_point(size=3, shape=19) + # colour="darkred", fill="darkred" +#
-  geom_errorbar(aes(ymin= newdf$Calf-newdf$se, ymax=newdf$Calf+newdf$se), width=0.2) + #
-  scale_colour_manual(values=c("darkslategray", "darkseagreen3"))#
-p12<- p11 +#
-  theme_bw() + # removes ugly gray.#
-  ylab("Proportion of buffalo observed with a calf") +#
-  scale_y_continuous(limits=c(0,0.8)) + #
-  theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank(), #
-        # legend information#
-        legend.position=c(0.82, 0.9),  #
-        legend.background= element_rect(fill="white", colour="white"),#
-        legend.key= element_blank(),#
-        legend.title= element_blank(),#
-        legend.text = element_text(size=15)   )#
-#
-p12
-newdf<-data.frame(#
-	Calf=c(14/25, 1/5, 9/28, 7/23, 1/8, 5/6,  # adults#
-		 2/26, 0/3, 0/5, 2/7, 0/4, 1/3),  # juveniles#
-	Agecategory = c(rep("Adult (age > 4)", 6), rep("Juvenile (age = 4)", 6)),#
-	Infection = c("Uninfected", "Bruc Converter", "Bruc PFC", "Tuberculosis", "Co-Converter", "Co-PFC", "Uninfected", "Bruc Converter", "Bruc PFC", "Tuberculosis", "Co-Converter", "Co-PFC"),#
-	N = c(25, 5, 28, 23, 8, 6, 26, 3, 5, 7, 4, 3))#
-newdf$se<- sqrt(newdf$Calf * (1 - newdf$Calf) / newdf$N)#
-newdf$order <- c(seq(1, 6), seq(1,6))#
-newdf$Infection <- as.factor(newdf$Infection)#
-newdf$Infection <- factor(newdf$Infection, levels = newdf$Infection[order(unique(newdf$order))])#
-p11<- ggplot(newdf, aes(x=Infection, y=Calf, group=Agecategory, colour=Agecategory)) + #
-  #geom_line()+#
-  geom_point(size=3, shape=19) + # colour="darkred", fill="darkred" +#
-  geom_errorbar(aes(ymin= newdf$Calf-newdf$se, ymax=newdf$Calf+newdf$se), width=0.2) + #
-  scale_colour_manual(values=c("darkslategray", "darkseagreen3"))#
-p12<- p11 +#
-  theme_bw() + # removes ugly gray.#
-  ylab("Proportion of buffalo observed with a calf") +#
-  scale_y_continuous(limits=c(0,1)) + #
-  theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank(), #
-        # legend information#
-        legend.position=c(0.82, 0.9),  #
-        legend.background= element_rect(fill="white", colour="white"),#
-        legend.key= element_blank(),#
-        legend.title= element_blank(),#
-        legend.text = element_text(size=15)   )#
-#
-p12
-p11<- ggplot(newdf, aes(x=Infection, y=Calf, group=Agecategory, colour=Agecategory)) + #
-  #geom_line()+#
-  geom_point(size=3, shape=19) + # colour="darkred", fill="darkred" +#
-  geom_errorbar(aes(ymin= newdf$Calf-newdf$se, ymax=newdf$Calf+newdf$se), width=0.2) + #
-  scale_colour_manual(values=c("darkslategray", "darkseagreen3"))#
-p12<- p11 +#
-  theme_bw() + # removes ugly gray.#
-  ylab("Proportion of buffalo observed with a calf") +#
-  scale_y_continuous(limits=c(0,1)) + #
-  theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank(), #
-        # legend information#
-        legend.position=c(0.7, 0.9),  #
-        legend.background= element_rect(fill="white", colour="white"),#
-        legend.key= element_blank(),#
-        legend.title= element_blank(),#
-        legend.text = element_text(size=15)   )#
-#
-p12
-newdf<-data.frame(#
-	Calf=c(14/25, 1/5, 9/28, 7/23, 1/8, 5/6,  # adults#
-		 2/26, 0/3, 0/5, 2/7, 0/4, 1/3),  # juveniles#
-	Agecategory = c(rep("Adult (age > 4)", 6), rep("Juvenile (age = 4)", 6)),#
-	Infection = c("Uninfected", "Bruc Converter", "Bruc PFC", "Tuberculosis", "Co-Converter", "Co-PFC", "Uninfected", "BR Converter", "BR PFC", "bTB", "bTB & BR Converter", "bTB & BR PFC"),#
-	N = c(25, 5, 28, 23, 8, 6, 26, 3, 5, 7, 4, 3))#
-newdf$se<- sqrt(newdf$Calf * (1 - newdf$Calf) / newdf$N)#
-newdf$order <- c(seq(1, 6), seq(1,6))#
-newdf$Infection <- as.factor(newdf$Infection)#
-newdf$Infection <- factor(newdf$Infection, levels = newdf$Infection[order(unique(newdf$order))])#
-p11<- ggplot(newdf, aes(x=Infection, y=Calf, group=Agecategory, colour=Agecategory)) + #
-  #geom_line()+#
-  geom_point(size=3, shape=19) + # colour="darkred", fill="darkred" +#
-  geom_errorbar(aes(ymin= newdf$Calf-newdf$se, ymax=newdf$Calf+newdf$se), width=0.2) + #
-  scale_colour_manual(values=c("darkslategray", "darkseagreen3"))#
-p12<- p11 +#
-  theme_bw() + # removes ugly gray.#
-  ylab("Proportion of buffalo observed with a calf") +#
-  scale_y_continuous(limits=c(0,1)) + #
-  theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank(), #
-        # legend information#
-        legend.position=c(0.7, 0.9),  #
-        legend.background= element_rect(fill="white", colour="white"),#
-        legend.key= element_blank(),#
-        legend.title= element_blank(),#
-        legend.text = element_text(size=15)   )#
-#
-p12
-newdf<-data.frame(#
-	Calf=c(14/25, 1/5, 9/28, 7/23, 1/8, 5/6,  # adults#
-		 2/26, 0/3, 0/5, 2/7, 0/4, 1/3),  # juveniles#
-	Agecategory = c(rep("Adult (age > 4)", 6), rep("Juvenile (age = 4)", 6)),#
-	Infection = c("Uninfected", "BR Converter", "BR PFC", "bTB", "bTB & BR Converter", "bTB & BR PFC", "Uninfected", "BR Converter", "BR PFC", "bTB", "bTB & BR Converter", "bTB & BR PFC"),#
-	N = c(25, 5, 28, 23, 8, 6, 26, 3, 5, 7, 4, 3))#
-newdf$se<- sqrt(newdf$Calf * (1 - newdf$Calf) / newdf$N)#
-newdf$order <- c(seq(1, 6), seq(1,6))#
-newdf$Infection <- as.factor(newdf$Infection)#
-newdf$Infection <- factor(newdf$Infection, levels = newdf$Infection[order(unique(newdf$order))])#
-p11<- ggplot(newdf, aes(x=Infection, y=Calf, group=Agecategory, colour=Agecategory)) + #
-  #geom_line()+#
-  geom_point(size=3, shape=19) + # colour="darkred", fill="darkred" +#
-  geom_errorbar(aes(ymin= newdf$Calf-newdf$se, ymax=newdf$Calf+newdf$se), width=0.2) + #
-  scale_colour_manual(values=c("darkslategray", "darkseagreen3"))#
-p12<- p11 +#
-  theme_bw() + # removes ugly gray.#
-  ylab("Proportion of buffalo observed with a calf") +#
-  scale_y_continuous(limits=c(0,1)) + #
-  theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank(), #
-        # legend information#
-        legend.position=c(0.7, 0.9),  #
-        legend.background= element_rect(fill="white", colour="white"),#
-        legend.key= element_blank(),#
-        legend.title= element_blank(),#
-        legend.text = element_text(size=15)   )
-p12
-p11<- ggplot(newdf, aes(x=Infection, y=Calf, group=Agecategory, colour=Agecategory)) + #
-  #geom_line()+#
-  geom_point(size=3, shape=19) + # colour="darkred", fill="darkred" +#
-  geom_errorbar(aes(ymin= newdf$Calf-newdf$se, ymax=newdf$Calf+newdf$se), width=0.2) + #
-  scale_colour_manual(values=c("darkslategray", "darkseagreen3"))#
-p12<- p11 +#
-  theme_bw() + # removes ugly gray.#
-  ylab("Proportion of buffalo observed with a calf") +#
-  scale_y_continuous(limits=c(0,1.2)) + #
-  theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank(), #
-        # legend information#
-        legend.position=c(0.7, 0.9),  #
-        legend.background= element_rect(fill="white", colour="white"),#
-        legend.key= element_blank(),#
-        legend.title= element_blank(),#
-        legend.text = element_text(size=15)   ) + #
-        annotate("N = 25, 26"), x= "Uninfected", y = 0.77)
-?annotate
-?annotate
-p12<- p11 +#
-  theme_bw() + # removes ugly gray.#
-  ylab("Proportion of buffalo observed with a calf") +#
-  scale_y_continuous(limits=c(0,1.2)) + #
-  theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank(), #
-        # legend information#
-        legend.position=c(0.7, 0.9),  #
-        legend.background= element_rect(fill="white", colour="white"),#
-        legend.key= element_blank(),#
-        legend.title= element_blank(),#
-        legend.text = element_text(size=15)   ) + #
-        annotate("text", x= "Uninfected", y = 0.77, label = "N = 25, 26")#
-        #annotate("N= 25, 26", x = "Uninfected", y = 0.77, label = "30")#
-#
-p12
-p11<- ggplot(newdf, aes(x=Infection, y=Calf, group=Agecategory, colour=Agecategory)) + #
-  #geom_line()+#
-  geom_point(size=3, shape=19) + # colour="darkred", fill="darkred" +#
-  geom_errorbar(aes(ymin= newdf$Calf-newdf$se, ymax=newdf$Calf+newdf$se), width=0.2) + #
-  scale_colour_manual(values=c("darkslategray", "darkseagreen3"))#
-p12<- p11 +#
-  theme_bw() + # removes ugly gray.#
-  ylab("Proportion of buffalo observed with a calf") +#
-  scale_y_continuous(limits=c(0,1.15)) + #
-  theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank(), #
-        # legend information#
-        legend.position=c(0.7, 0.9),  #
-        legend.background= element_rect(fill="white", colour="white"),#
-        legend.key= element_blank(),#
-        legend.title= element_blank(),#
-        legend.text = element_text(size=15)   ) + #
-        annotate("text", x= "Uninfected", y = 0.77, label = "N = 25, 26") +#
-        annotate("text", x= "BR Converter", y = 0.77, label = "N = 5, 3") + #
-        annotate("text", x= "BR PFC", y = 0.77, label = "N = 28, 5") + #
-        annotate("text", x= "bTB", y = 0.77, label = "N = 23, 7") + #
-        annotate("text", x= "bTB & BR Converter", y = 0.77, label = "N = 8, 4") + #
-        annotate("text", x= "bTB & BR PFC", y = 1.1, label = "N = 6, 3")#
-p12
-p11<- ggplot(newdf, aes(x=Infection, y=Calf, group=Agecategory, colour=Agecategory)) + #
-  #geom_line()+#
-  geom_point(size=3, shape=19) + # colour="darkred", fill="darkred" +#
-  geom_errorbar(aes(ymin= newdf$Calf-newdf$se, ymax=newdf$Calf+newdf$se), width=0.2) + #
-  scale_colour_manual(values=c("darkslategray", "darkseagreen3"))#
-p12<- p11 +#
-  theme_bw() + # removes ugly gray.#
-  ylab("Proportion of buffalo observed with a calf") +#
-  scale_y_continuous(limits=c(0,1)) + #
-  theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank(), #
-        # legend information#
-        legend.position=c(0.7, 0.9),  #
-        legend.background= element_rect(fill="white", colour="white"),#
-        legend.key= element_blank(),#
-        legend.title= element_blank(),#
-        legend.text = element_text(size=15)   ) + #
-        annotate("text", x= "Uninfected", y = 0.77, label = "N = 25, 26") +#
-        annotate("text", x= "BR Converter", y = 0.57, label = "N = 5, 3") + #
-        annotate("text", x= "BR PFC", y = 0.57, label = "N = 28, 5") + #
-        annotate("text", x= "bTB", y = 0.57, label = "N = 23, 7") + #
-        annotate("text", x= "bTB & BR Converter", y = 0.57, label = "N = 8, 4") + #
-        annotate("text", x= "bTB & BR PFC", y = 1.05, label = "N = 6, 3")#
-p12
-p12<- p11 +#
-  theme_bw() + # removes ugly gray.#
-  ylab("Proportion of buffalo observed with a calf") +#
-  scale_y_continuous(limits=c(0,1.07)) + #
-  theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank(), #
-        # legend information#
-        legend.position=c(0.7, 0.9),  #
-        legend.background= element_rect(fill="white", colour="white"),#
-        legend.key= element_blank(),#
-        legend.title= element_blank(),#
-        legend.text = element_text(size=15)   ) + #
-        annotate("text", x= "Uninfected", y = 0.77, label = "N = 25, 26") +#
-        annotate("text", x= "BR Converter", y = 0.57, label = "N = 5, 3") + #
-        annotate("text", x= "BR PFC", y = 0.57, label = "N = 28, 5") + #
-        annotate("text", x= "bTB", y = 0.57, label = "N = 23, 7") + #
-        annotate("text", x= "bTB & BR Converter", y = 0.57, label = "N = 8, 4") + #
-        annotate("text", x= "bTB & BR PFC", y = 1.05, label = "N = 6, 3")#
-p12
-p12<- p11 +#
-  theme_bw() + # removes ugly gray.#
-  ylab("Proportion of buffalo observed with a calf") +#
-  scale_y_continuous(limits=c(0,1.07)) + #
-  theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank(), #
-        # legend information#
-        legend.position=c(0.7, 0.9),  #
-        legend.background= element_rect(fill="white", colour="white"),#
-        legend.key= element_blank(),#
-        legend.title= element_blank(),#
-        legend.text = element_text(size=15)   ) + #
-        annotate("text", x= "Uninfected", y = 0.77, label = "N = 25, 26") +#
-        annotate("text", x= "BR Converter", y = 0.55, label = "N = 5, 3") + #
-        annotate("text", x= "BR PFC", y = 0.55, label = "N = 28, 5") + #
-        annotate("text", x= "bTB", y = 0.55, label = "N = 23, 7") + #
-        annotate("text", x= "bTB & BR Converter", y = 0.55, label = "N = 8, 4") + #
-        annotate("text", x= "bTB & BR PFC", y = 1.05, label = "N = 6, 3")#
-p12
-t1<-glmmPQL(fec~ age1+bruc_beforeafter + tb*bruc_beforeafter + age1*tb, correlation= corAR1(form=~ capturetime |id), random= ~ 1|id, data=d, family=binomial); summary(t1)
-p11<- ggplot(newdf, aes(x=Infection, y=Calf, group=Agecategory, colour=Agecategory)) + #
-  #geom_line()+#
-  geom_point(size=3, shape=19) + # colour="darkred", fill="darkred" +#
-  geom_errorbar(aes(ymin= newdf$Calf-newdf$se, ymax=newdf$Calf+newdf$se), width=0.2) + #
-  scale_colour_manual(values=c("darkslategray", "darkseagreen3"))#
-p12<- p11 +#
-  theme_bw() + # removes ugly gray.#
-  ylab("Proportion of buffalo observed with a calf") +#
-  scale_y_continuous(limits=c(0,1.07)) + #
-  theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank(), #
-        # legend information#
-        legend.position=c(0.7, 0.9),  #
-        legend.background= element_rect(fill="white", colour="white"),#
-        legend.key= element_blank(),#
-        legend.title= element_blank(),#
-        legend.text = element_text(size=15)   ) + #
-        annotate("text", x= "Uninfected", y = 0.77, label = "N = 25, 26") +#
-        annotate("text", x= "BR Converter", y = 0.55, label = "N = 5, 3") + #
-        annotate("text", x= "BR PFC", y = 0.55, label = "N = 28, 5") + #
-        annotate("text", x= "bTB", y = 0.55, label = "N = 23, 7") + #
-        annotate("text", x= "bTB & BR Converter", y = 0.55, label = "N = 8, 4") + #
-        annotate("text", x= "bTB & BR PFC", y = 1.05, label = "N = 6, 3")#
-p12
-apply(d$age_yr, median)
-apply(d$age_yr, d$bruc_beforeafter, median)
-tapply(d$age_yr, d$bruc_beforeafter, median)
-tapply(d$age_yr, d$bruc_beforeafter, mean)
-tapply(d$age_yr, list(d$bruc_beforeafter, d$tb), mean)
-t1<-glmmPQL(fec~ age1+bruc_beforeafter, correlation= corAR1(form=~ capturetime |id), random= ~ 1|id, data=d, family=binomial); summary(t1)
-t1<-glmmPQL(fec~ age1+bruc_beforeafter + tb*bruc_beforeafter + age1*tb, correlation= corAR1(form=~ capturetime |id), random= ~ 1|id, data=d, family=binomial); summary(t1)
-dnotb<-d[d$tb == ]
-dnotb<-d[d$tb == 0,]
-t1<-glmmPQL(fec~ age1*bruc_beforeafter, correlation= corAR1(form=~ capturetime |id), random= ~ 1|id, data=dnotb, family=binomial); summary(t1)
-t1<-glmmPQL(fec~ age1+bruc_beforeafter, correlation= corAR1(form=~ capturetime |id), random= ~ 1|id, data=dnotb, family=binomial); summary(t1)
-dtb<-d[d$tb == 1,]
-t1<-glmmPQL(fec~ age1*bruc_beforeafter, correlation= corAR1(form=~ capturetime |id), random= ~ 1|id, data=dtb, family=binomial); summary(t1)
-t1<-glmmPQL(fec~ age1+bruc_beforeafter, correlation= corAR1(form=~ capturetime |id), random= ~ 1|id, data=dtb, family=binomial); summary(t1)
-t1<-glmmPQL(fec~ age1*bruc_beforeafter + tb*bruc_beforeafter + age1*tb, correlation= corAR1(form=~ capturetime |id), random= ~ 1|id, data=d, family=binomial); summary(t1)
-t1<-glmmPQL(fec~ age1+bruc_beforeafter + tb*bruc_beforeafter + age1*tb, correlation= corAR1(form=~ capturetime |id), random= ~ 1|id, data=d, family=binomial); summary(t1)
-###############################################
-###############################################
-library(lme4)#
-library(arm)#
-library(ggplot2)#
-library(MASS) #glmmpql#
-library(MuMIn)#
-#########################################################################
-# Read in data, calculate approximation for calving, in calving period#
-#########################################################################
-data<- read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/cross_sectional_data_withdz_cleandisease_nofinal_Feb2016_capturetime_forsurv.csv")#
-data2<- data[data$herdorig=="LS",]#
-calftime <- c(0, 12, 24, 36)#
-data4<- data2[data2$capturetime %in% calftime,]#
-data4$fec<- NA#
-table(data4$milk , data4$calf)#
-# With milk one 10 year old, two 12 year olds, no 9, 11, 0, or 1 yr olds (good)#
-# one 11 year old without milk#
-# called age <=10 yes#
-# called 10 unknowns with milk yes; 3 unknowns with no/unknown milks no#
-include = c( 10, 2, 3,4, 5, 6, 7, 8, 9, "yes")#
-data4$fec[data4$calf %in% include] <- 1 #
-data4$fec[data4$calf %in% c(11, 12, "no")] <- 0#
-data4$fec[data4$calf=="unknown" & data4$milk=="yes"] <- 1#
-data4$fec[data4$calf=="unknown" & data4$milk=="unknown"] <- 0#
-data4$fec[data4$calf=="unknown" & data4$milk=="no"] <- 0#
-#
-# overall rates: #
-table(data4$fec, data4$tb, data4$bruc)#
-#
-#########################################################################
-# NEED TO ACCOUNT FOR AGE- #
-# Figures show no calves in buffalo < 4yrs and no TB in buffalo 9+ years, so analyses subset to capture these age categories. #
-#########################################################################
-par(mfrow=c(2,2))#
-hist(as.numeric(data4$age_yr[data4$tb==0 & data4$bruc=="negative"]), main="Uninfected", xlab= "Age")#
-hist(data4$age_yr[data4$tb==0 & data4$bruc=="positive"], main = "Brucellosis + ", xlab= "Age")#
-hist(data4$age_yr[data4$tb==1 & data4$bruc=="negative"], main = "TB +", xlab= "Age")#
-hist(data4$age_yr[data4$tb==1 & data4$bruc=="positive"], main = "Coinfected", xlab= "Age")#
-#
-d<- data4#
-d$tb[d$tb==0] <- "negative"#
-d$tb[d$tb==1] <- "positive"#
-d$tb <- as.factor(d$tb)#
-a<- data.frame(table(d$fec, d$tb, d$bruc,  d$age_yr)); colnames(a)<- c("Fec", "TB", "Brucellosis", "Age", "Freq")#
-a$col <- c("blue4", "brown4", "dodgerblue", "brown1", "darkslategray3", "lightcoral", "lightskyblue", "mistyrose1")#
-# preg= red, not= blue#
-#
-# make a stacked barplot#
-make_stacked_barplot = function(age){#
-	temp<- a[a$Age==age,]#
-	temp$Brucellosis<- relevel(temp$Brucellosis, "negative")#
-	temp$TB<- relevel(temp$TB, "negative")#
-	a<- temp[with(temp, order(temp$Fec, temp$Brucellosis, temp$TB)),]#
-	mat<- matrix(a$Freq, nrow=2, ncol=4, byrow=TRUE, #
-	dimnames=list(c("no calf", "calf"), c("Uninfected", "TB+", "Brucellosis+", "Co-infected")))#
-	prop <- prop.table(mat, margin=2)#
-	par(mar=c(5.1, 4.1, 4.1, 7.1), xpd=TRUE)#
-	barplot(mat, col=heat.colors(length(rownames(mat))), width=2, main=paste("Age= ", age), las=1, #
-	ylab= "Number of buffalo")#
-	legend("topright", fill=heat.colors(length(rownames(mat))), legend=rownames(mat),bty="n")#
-}	#
-#
-#ages<- c(2, 3,4,5,6,7,8, 9, 10)#
-ages<- c(4,5,6,7,8, 9)#
-par(mfrow=c(2,3))#
-for (age in ages){#
-	make_stacked_barplot(age)#
+par(mfrow = c(1, 2))#
+plot(NULL, xlim = c(0, 500), xlab= "Time (in years)", ylim= c(0, 1300), #
+	ylab = "Number of bTB positive animals")#
+legend("topright", 	title= "beta_t", legend=c("0.0001", "0.0004", "0.0007","0.001"),#
+	col = seq(1:length(beta_t)), lty = 1, bty = "n") 	#
+for(i in 1:length(beta_t)){#
+	params <- c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muR, muRC = muRC, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = beta_t[i], betaB = betaB, betapT = betapT, betapB = betapB)#
+	sol <- as.data.frame(ode(x0, times, rhs, params))#
+	sol<- groom_sol(sol)#
+	out[[i]] <- sol#
+	lines(y = out[[i]]$It, x = out[[i]]$times, col = i)#
+}
+# For a given beta_t, find the endemic bTB prevalence#
+##############################################################
+endprev<- c(NA)#
+beta_t <- seq(0.0001, 0.001, 0.00002)  # make more finely spaced#
+for (i in 1:length(beta_t)){#
+	params <- c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muR, muRC = muRC, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = beta_t[i], betaB = betaB, betapT = beta_t[i], betapB = 3.92 * betaB)	#
+	sol <- as.data.frame(ode(x0, times, rhs, params))#
+	sol<- groom_sol(sol)#
+	endprev[i] <- sol$TBprev[101]#
+}#
+plot(x=beta_t, y=endprev, xlab = "Density dependent transmission rate for bTB", ylab = "bTB prevalence", type="l")#
+abline(h = 0.05, col = "red"); abline(h = 0.1, col = "red")#
+abline(h = 0.2, col = "red"); abline(h = 0.3, col = "red")#
+want= c(0.05, 0.1, 0.2, 0.3)  # want beta_t values associated with each of these end prevalences#
+approx(x = endprev, y = beta_t, xout = want)#
+# 0.0002927019 0.0003264325 0.0004164822 0.0005711783#
+legend("topleft", legend= c("0.00029", "0.00033", "0.000416", "0.00057"), bty= "n")
+par(mfrow=c(1, 2))
+betaT <- 0.0002909  # re-set just in case#
+beta_b <- c(0.0001, seq(0.001, 0.003, 0.001))#
+Ib0 = N - 100#
+It0 = 0#
+Ib0 = 100#
+Ic0 = 0#
+R0 = 0#
+Rc0 = 0#
+x0 = c(S = S0, It = It0, Ib = Ib0, Ic = Ic0, R = R0, Rc = Rc0)#
+times <- seq(0, 1000, 1)#
+out <- list(NA); outr <- list(NA)
+par(mfrow=c(1, 2))#
+plot(NULL, xlim = c(0, 100), xlab= "Time (in years)", ylim= c(0, 1000), #
+	ylab = "Number of Ib and Rb animals")#
+legend("topright", title= "beta_b", legend=c("0.0001", "0.001", "0.002", "0.003"), #
+	col = seq(1:length(beta_b)), lty = 1, bty = "n")#
+title(main = list("Fitness effects in Brucellosis Recoverds", cex = 0.7)) #
+for(i in 1:length(beta_b)){#
+	params <- c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muR, muRC = muRC, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = betaT, betaB = beta_b[i], betapT = betapT, betapB = 3.92 * beta_b[i])	#
+	params_recov <- c(b1= b1, b2 = b2, b3 = b3, b4= 1, b5 = b2, # assuming b4 =1, b5 = b2 #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muS, muRC = muT, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = betaT, betaB = beta_b[i], betapT = betapT, betapB = 3.92 * beta_b[i])	#
+	sol <- as.data.frame(ode(x0, times, rhs, params))#
+	sol<- groom_sol(sol)#
+	sol_recov <- as.data.frame(ode(x0, times, rhs, params_recov))#
+	sol_recov <- groom_sol(sol_recov)#
+	out[[i]] <- sol; outr[[i]] <- sol_recov#
+	lines(y = out[[i]]$Ib, x = out[[i]]$times, col = i)#
+	lines(y = out[[i]]$R, x = out[[i]]$times, col = i, lty = 2)#
+}
+plot(NULL, xlim = c(0, 100), xlab= "Time (in years)", ylim= c(0, 1000), #
+	ylab = "Number of animals")#
+title(main = list("No fitness effects in Brucellosis Recoverds", cex = 0.7)) #
+for(i in 1:length(beta_b)){#
+	lines(y = outr[[i]]$Ib, x = outr[[i]]$times, col = i)#
+	lines(y = outr[[i]]$R, x = outr[[i]]$times, col = i, lty = 2)#
+}
+par(mfrow=c(1, 2))#
+plot(NULL, xlim = c(0, 100), xlab= "Time (in years)", ylim= c(0, 700), #
+	ylab = "Number of Ib and Rb animals")#
+legend("topright", title= "beta_b", legend=c("0.0001", "0.001", "0.002", "0.003"), #
+	col = seq(1:length(beta_b)), lty = 1, bty = "n")#
+title(main = list("Fitness effects in Brucellosis Recoverds", cex = 0.7)) #
+for(i in 1:length(beta_b)){#
+	params <- c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muR, muRC = muRC, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = betaT, betaB = beta_b[i], betapT = betapT, betapB = 3.92 * beta_b[i])	#
+	params_recov <- c(b1= b1, b2 = b2, b3 = b3, b4= 1, b5 = b2, # assuming b4 =1, b5 = b2 #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muS, muRC = muT, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = betaT, betaB = beta_b[i], betapT = betapT, betapB = 3.92 * beta_b[i])	#
+	sol <- as.data.frame(ode(x0, times, rhs, params))#
+	sol<- groom_sol(sol)#
+	sol_recov <- as.data.frame(ode(x0, times, rhs, params_recov))#
+	sol_recov <- groom_sol(sol_recov)#
+	out[[i]] <- sol; outr[[i]] <- sol_recov#
+	lines(y = out[[i]]$Ib, x = out[[i]]$times, col = i)#
+	lines(y = out[[i]]$R, x = out[[i]]$times, col = i, lty = 2)#
 }#
 #
-#########################################################################
-#Choose age category that is most appropriate#
-#########################################################################
-d<- data4[data4$age_yr > 3 & data4$age_yr <= 9,]#
-d$age5 <- "adult"; #
-d$age5[d$age_yr %in% c(4) ] <- "juvenile"#
-d$age5[d$age_yr %in% c(8, 9) ] <- "mature"#
-#
-d$age6 <- "adult"; #
-d$age6[d$age_yr %in% c(4, 5) ] <- "juvenile"#
-d$age6[d$age_yr %in% c(8, 9) ] <- "mature"#
-#
-d$age1 <- "adult" #
-d$age1[d$age_yr %in% c(4) ] <- "juvenile"#
-#
-d$age3 <- "adult" #
-d$age3[d$age_yr %in% c(4, 5) ] <- "juvenile"#
-#
-d$age7<- "adult"#
-d$age7[d$age_sel/12 < 5] <- "subadult"#
-d$age7[d$age_sel/12 > 7] <- "mature"
-t1<-glmmPQL(fec~ age1*bruc + tb*bruc + age1*tb, correlation= corAR1(form=~ capturetime |id), random= ~ 1|id, data=d, family=binomial); summary(t1)
-d$age1j<-relevel(d$age1, "juvenile")
-str(d)
-d$age1<- as.factor(d$age1)
-d$age1j<-relevel(d$age1, "juvenile")
-t1<-glmmPQL(fec~ age1j*bruc + tb*bruc + age1j*tb, correlation= corAR1(form=~ capturetime |id), random= ~ 1|id, data=d, family=binomial); summary(t1)
-t1<-glmmPQL(fec~ age1*bruc + tb*bruc + age1*tb, correlation= corAR1(form=~ capturetime |id), random= ~ 1|id, data=d, family=binomial); summary(t1)
-data<-read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/cross_sectional_data_withdz_cleandisease_nofinal_Feb2016_capturetime_forsurv.csv")  # 5 animals added from last time#
-#
-# make datasets for Courtney#
-convert<-data[data $brucconvert==1 & data$convert==1,]#
-write.csv(convert, "~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/convertersonly_Feb2016.csv")#
-length(convert$id); length(unique(convert$id))
-brconvert<- data[data$brucconvert==1,]#
-write.csv(brconvert, "~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/brucconverters_Feb2016.csv")#
-length(brconvert$id); length(unique(brconvert$id))
-tbconvert<- data[data$convert==1,]#
-write.csv(tbconvert, "~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/tbconverters_Feb2016.csv")#
-length(tbconvert$id); length(unique(tbconvert$id))
-summary(data)
-quantile(data$age_sel[data$incid==1], c(0.5, 0.95))/12#
-#
-brpos<- brconvert[brconvert$bruc_beforeafter==1,]#
-b<- NA#
-a<- tapply(brpos$age_sel, brpos$id, min)#
-for (i in 1:length(a)){#
-	if (!is.na(a[[i]])){#
-		b[i] <- a[[i]]#
-	}}#
-#
-b[is.na(b)]<-0#
-c<- b[b>0]#
-quantile(c, c(0.5, 0.95))/12
-quantile(data$age_sel[data$incid==1], c(0.05, 0.95))/12
-summary(data$age_sel/12)
-summary(data$age_sel[data$incid==1]/12)
-quantile(data$age_sel[data$incid==1], c(0.05, 0.95))/12
-incidbr<- data[data$incid_bruc_jo ==1,c(2:5,9)]
-head(incidbr)
-colnames(data)
-incidbr<- data[data$incid_bruc_jo ==1,c(2:5,9, 15)]
-head(incidbr)
-incidbr<- data[data$incid_bruc_jo ==1,c(2:5,9, 15)]#
-quantile(incidbr$age_sel, c(0.05, 0.95))/12#
-summary(incidbr)
-58/12
-length(incidbr[,1])
-length(brconvert$id); length(unique(brconvert$id))
-length(brconvert$incid_bruc_jo[brconvert$incid_bruc_jo == 1])
-length(brconvert$id[brconvert$incid_bruc_jo == 1])
-data<-read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/cross_sectional_data_withdz_cleandisease_nofinal_Feb2016_capturetime_forsurv.csv")  # 5 animals added from last time#
-#
-# make datasets for Courtney#
-convert<-data[data $brucconvert==1 & data$convert==1,]#
-write.csv(convert, "~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/convertersonly_Feb2016.csv")#
-length(convert$id); length(unique(convert$id))  # 14 both, 98 time observations#
-#
-brconvert<- data[data$brucconvert==1,]#
-write.csv(brconvert, "~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/brucconverters_Feb2016.csv")#
-length(brconvert$id); length(unique(brconvert$id))
-incidbr<- data[data$incid_bruc_jo ==1,c(2:5,9, 15)]#
-quantile(incidbr$age_sel, c(0.05, 0.95))/12#
-summary(incidbr)
-58/12
-head(incidbr)
-head(data)
-colnames(data)
-incidbr<- data[data$incid_bruc_jo ==1,c(2:5,9, 15, 30)]
-incidbr<- data[data$incid_bruc_jo ==1,c(2:5,9, 15, 30)]
-head(incidbr)
-table(incidbr$tb)
-10/29
-head(data)
-table(data$bruc[data$incid==1])
-14/47
-exp(-0.22*2)
-1/0.22
-###############################################################
-###############################################################
-# Step 1.2: Fit function for duration of infection assuming a binomial likelihood#
-###############################################################
-###############################################################
-xSAT1 = c(0, 2, 6)  # number of newly recovered buffalo at time 2, 4, 6, 8#
-data = c(8, 8, 6)  # number of infected buffalo at time 0, 2, 4.#
-xSAT2 = c(1, 2, 3) # number of newly recovered buffalo at time 2, 4, 6#
-dataSAT2 = c(8, 7, 3)  # number buffalo remaining infected at time 0, 2, 4#
-xSAT3 = c(1, 7)#
-dataSAT3 = c(8, 7)#
-#
-gamma = 0.2#
-#
-binomNLL = function(x, gamma, data){#
-	NLLt02 <- dbinom(x = x[1], size = data[1], prob = 1- exp(- gamma * 2), log= TRUE)#
-	NLLt24 <- dbinom(x = x[2], size = data[2], prob = 1- exp(- gamma * 2), log= TRUE)#
-	ifelse (length(x)>2, #
-	NLLt46 <- dbinom(x = x[3], size = data[3], prob = 1- exp(- gamma * 2), log= TRUE), NLLt46 <- 0)#
-		ifelse (length(x)>2, #
-	NLLt68 <- dbinom(x = x[3], size = data[3], prob = 1- exp(- gamma * 2), log= TRUE), NLLt46 <- 0)#
-	binom_NLL <- - (NLLt02+ NLLt24 + NLLt46)#
-	return(binom_NLL)#
+plot(NULL, xlim = c(0, 100), xlab= "Time (in years)", ylim= c(0, 1000), #
+	ylab = "Number of animals")#
+title(main = list("No fitness effects in Brucellosis Recoverds", cex = 0.7)) #
+for(i in 1:length(beta_b)){#
+	lines(y = outr[[i]]$Ib, x = outr[[i]]$times, col = i)#
+	lines(y = outr[[i]]$R, x = outr[[i]]$times, col = i, lty = 2)#
+}
+endprev<- c(NA); endprev_recov <- c(NA)#
+beta_b <- seq(0.0005, 0.002, 0.0001)#
+for (i in 1:length(beta_b)){#
+	params <- c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muR, muRC = muRC, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = betaT, betaB = beta_b[i], betapT = betapT, betapB = 3.92 * beta_b[i])	#
+	params_recov = c(b1= b1, b2 = b2, b3 = b3, b4= 1, b5 = b2, # assuming b4 =1, b5 = b2 #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muS, muRC = muT, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = betaT, betaB = beta_b[i], betapT = betapT, betapB = 3.92 * beta_b[i])#
+	sol <- as.data.frame(ode(x0, times, rhs, params))#
+	sol<- groom_sol(sol)#
+	sol_recov <- as.data.frame(ode(x0, times, rhs, params_recov))#
+	sol_recov <- groom_sol(sol_recov)#
+	endprev[i] <- sol$Brucprev[101]#
+	endprev_recov[i] <- sol_recov$Brucprev[101]#
 }#
-gamma = seq(1/30, 1/1, 1/300); #
-NLL<- NA; NLLS2<- NA; NLLS3<- NA#
-for (i in 1:length(gamma)){#
-	NLL[i] <- binomNLL(x = xSAT1, gamma = gamma[i], data = data)#
-	NLLS2[i] <- binomNLL(x = xSAT2, gamma = gamma[i], data = dataSAT2)#
-	NLLS3[i] <- binomNLL(x = xSAT3, gamma = gamma[i], data = dataSAT3)[[1]]  #???????#
+par(mfrow = c(1,2))#
+plot(x=beta_b, y=endprev, xlab = "Density dependent transmission rate for brucellosis", ylab = "Brucellosis prevalence", type="l")#
+abline(h = 0.05, col = "red"); abline(h = 0.1, col = "red")#
+abline(h = 0.2, col = "red"); abline(h = 0.3, col = "red")#
+want= c(0.05, 0.1, 0.2, 0.3)  # want beta_t values associated with each of these end prevalences#
+approx(x = endprev, y = beta_b, xout = want)
+plot(x = beta_b, y = endprev_recov)
+approx(x = endprev_recov, y = beta_b, xout = want)
+plot(x=beta_b, y=endprev, xlab = "Density dependent transmission rate for brucellosis", ylab = "Brucellosis prevalence", type="l")#
+abline(h = 0.05, col = "red"); abline(h = 0.1, col = "red")#
+abline(h = 0.2, col = "red"); abline(h = 0.3, col = "red")#
+want= c(0.05, 0.1, 0.2, 0.3)  # want beta_t values associated with each of these end prevalences#
+approx(x = endprev, y = beta_b, xout = want)
+K = 1000; N= 1000#
+# beta_b values that cover range giving 5, 10, 20, 30% prev#
+beta_b <- c(0.0005, 0.0006158220, 0.0006384635, 0.0006850706, #
+	0.0007839580, 0.0008544705, 0.0009060297, 0.001, 0.0015, 0.002, 0.0025, 0.003) #
+beta_t <- c(0.0001, 0.0002813752, 0.0003023988, 0.0003465031, #
+	0.0004030238, seq(0.0004, 0.001,0.0001)) #
+# beta_t values giving 5, 10, 20, 30% prev: 0.0002728621 0.0002998335 0.0003412031 0.0003923223#
+Ib0 = N - 100#
+It0 = 50#
+Ib0 = 50#
+Ic0 = 0#
+R0 = 0#
+Rc0 = 0#
+x0 = c(S = S0, It = It0, Ib = Ib0, Ic = Ic0, R = R0, Rc = Rc0)#
+times <- seq(0, 100, 1)#
+#
+# parameters set as mortality in recoverd = mortality in infected; sigma, epsilon= as above#
+out_allmort <- data.frame(betaB = rep(beta_b, each= length(beta_t)), #
+	betaT = rep(beta_t, length(beta_b)), #
+	N = NA, TBprev = NA, Brucprev = NA, BrucprecentR = NA, #
+	prevTBinBrneg = NA, prevTBinCo = NA, prevBinTBneg= NA, prevBinCo = NA)#
+#
+# parameters set as mortality in recoverd = mortality in susceptibles; sigma, epsilon= as above#
+out_redmort <- out_allmort#
+#
+# change sigma/ep also later#
+val <- 1#
+for(i in 1:length(out_allmort[,1])){#
+	# for out_allmort#
+	params <- c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muR = muR, muRC = muRC, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = out_allmort$betaT[i], betaB = out_allmort$betaB[i], #
+		betapT = out_allmort$betaT[i], betapB = 3.92 * out_allmort$betaB[i])#
+	params_recov = c(b1= b1, b2 = b2, b3 = b3, b4= 1, b5 = b2, # assuming b4 =1, b5 = b2 #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muS, muRC = muT, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = betaT, betaB = beta_b[i], betapT = betapT, betapB = 3.92 * beta_b[i])		#
+	sol <- as.data.frame(ode(x0, times, rhs, params))#
+	sol<- groom_sol(sol)#
+	d <- sol[101,]	#
+	out_allmort$N[i] <- d$N#
+	out_allmort$TBprev[i] <- d$TBprev #
+	out_allmort$Brucprev[i] <-  d$Brucprev#
+	out_allmort$BrucprecentR[i] = d$R / d$N#
+	out_allmort$prevTBinBrneg[i] = d$It / (d$S + d$It)#
+	out_allmort$prevTBinCo[i] = (d$Ic + d$Rc)/ (d$Ib + d$Ic + d$R + d$Rc)#
+	out_allmort$prevBinTBneg[i]= (d$Ib+ d$R) / (d$S + d$Ib + d$R)#
+	out_allmort$prevBinCo[i] = (d$Ic + d$Rc) / (d$It + d$Ic + d$Rc)#
+	solr <- as.data.frame(ode(x0, times, rhs, params_recov))#
+	solr<- groom_sol(sol)#
+	d <- solr[101,]	#
+	out_redmort$N[i] <- d$N#
+	out_redmort$TBprev[i] <- d$TBprev #
+	out_redmort$Brucprev[i] <-  d$Brucprev#
+	out_redmort$BrucprecentR[i] = d$R / d$N#
+	out_redmort$prevTBinBrneg[i] = d$It / (d$S + d$It)#
+	out_redmort$prevTBinCo[i] = (d$Ic + d$Rc)/ (d$Ib + d$Ic + d$R + d$Rc)#
+	out_redmort$prevBinTBneg[i]= (d$Ib+ d$R) / (d$S + d$Ib + d$R)#
+	out_redmort$prevBinCo[i] = (d$Ic + d$Rc) / (d$It + d$Ic + d$Rc)#
+	val <- val + 1#
+	rm(d, sol, solr)#
+}
+K = 1000; N= 1000#
+# beta_b values that cover range giving 5, 10, 20, 30% prev#
+beta_b <- c(0.0005, 0.0006680888, 0.0007484669, 0.0009577703, 0.0013161095,#
+	0.0006215872, 0.0006676442, 0.0007707343, 0.0008997341,#
+	0.0015, 0.002, 0.0025, 0.003) #
+beta_t <- c(0.0001, 0.0002, 0.0002927019, 0.0003264325, 0.0004164822, 0.0005711783,#
+	seq(0.0006, 0.0015,0.0001)) #
+# beta_t values giving 5, 10, 20, 30% prev: 0.0002728621 0.0002998335 0.0003412031 0.0003923223#
+Ib0 = N - 100#
+It0 = 50#
+Ib0 = 50#
+Ic0 = 0#
+R0 = 0#
+Rc0 = 0#
+x0 = c(S = S0, It = It0, Ib = Ib0, Ic = Ic0, R = R0, Rc = Rc0)#
+times <- seq(0, 100, 1)#
+#
+# parameters set as mortality in recoverd = mortality in infected; sigma, epsilon= as above#
+out_allmort <- data.frame(betaB = rep(beta_b, each= length(beta_t)), #
+	betaT = rep(beta_t, length(beta_b)), #
+	N = NA, TBprev = NA, Brucprev = NA, BrucprecentR = NA, #
+	prevTBinBrneg = NA, prevTBinCo = NA, prevBinTBneg= NA, prevBinCo = NA)#
+#
+# parameters set as mortality in recoverd = mortality in susceptibles; sigma, epsilon= as above#
+out_redmort <- out_allmort#
+#
+# change sigma/ep also later#
+val <- 1#
+for(i in 1:length(out_allmort[,1])){#
+	# for out_allmort#
+	params <- c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muR = muR, muRC = muRC, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = out_allmort$betaT[i], betaB = out_allmort$betaB[i], #
+		betapT = out_allmort$betaT[i], betapB = 3.92 * out_allmort$betaB[i])#
+	params_recov = c(b1= b1, b2 = b2, b3 = b3, b4= 1, b5 = b2, # assuming b4 =1, b5 = b2 #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muS, muRC = muT, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = betaT, betaB = beta_b[i], betapT = betapT, betapB = 3.92 * beta_b[i])		#
+	sol <- as.data.frame(ode(x0, times, rhs, params))#
+	sol<- groom_sol(sol)#
+	d <- sol[101,]	#
+	out_allmort$N[i] <- d$N#
+	out_allmort$TBprev[i] <- d$TBprev #
+	out_allmort$Brucprev[i] <-  d$Brucprev#
+	out_allmort$BrucprecentR[i] = d$R / d$N#
+	out_allmort$prevTBinBrneg[i] = d$It / (d$S + d$It)#
+	out_allmort$prevTBinCo[i] = (d$Ic + d$Rc)/ (d$Ib + d$Ic + d$R + d$Rc)#
+	out_allmort$prevBinTBneg[i]= (d$Ib+ d$R) / (d$S + d$Ib + d$R)#
+	out_allmort$prevBinCo[i] = (d$Ic + d$Rc) / (d$It + d$Ic + d$Rc)#
+	solr <- as.data.frame(ode(x0, times, rhs, params_recov))#
+	solr<- groom_sol(sol)#
+	d <- solr[101,]	#
+	out_redmort$N[i] <- d$N#
+	out_redmort$TBprev[i] <- d$TBprev #
+	out_redmort$Brucprev[i] <-  d$Brucprev#
+	out_redmort$BrucprecentR[i] = d$R / d$N#
+	out_redmort$prevTBinBrneg[i] = d$It / (d$S + d$It)#
+	out_redmort$prevTBinCo[i] = (d$Ic + d$Rc)/ (d$Ib + d$Ic + d$R + d$Rc)#
+	out_redmort$prevBinTBneg[i]= (d$Ib+ d$R) / (d$S + d$Ib + d$R)#
+	out_redmort$prevBinCo[i] = (d$Ic + d$Rc) / (d$It + d$Ic + d$Rc)#
+	val <- val + 1#
+	rm(d, sol, solr)#
+}
+par(mfrow = c(2,2), mar =c(4, 4, 2, 1))#
+plot(y= rep(0.05, 5),  #
+	x = c(0.0001, 0.0002728621, 0.0002998335, 0.0003412031, 0.001), #
+	xlab = "Transmission rate for bTB", #
+	ylab = "Brucellosis prevalence", type = "l", col = 'red', #
+	ylim = c(0, 1), xlim = c(0.0001, 0.001), cex.lab = 0.8, cex.axis = 0.8)#
+df <- out_allmort[out_allmort$betaB == 0.0006680888,]#
+#df <- out_redmort[out_redmort$betaB == 0.0006215872,]#
+lines(y = df$Brucprev, x = df$betaT, col = "blue")#
+points(x = df$betaT, y = df$prevBinTBneg, col = "light blue", pch = 19)#
+points(x = df$betaT, y = df$prevBinCo, col = "dark blue", pch = 19)#
+legend("topright", bty="n", #
+	legend = c("before bTB", "after bTB, overall", "after bTB, prev in bTB -", #
+		"after bTB, prev in bTB +"), #
+	cex = 0.8, col = c("red", "blue", "light blue", "dark blue"),#
+	lty = c(1, 1, 0, 0), pch = c(NA, NA, 19, 19))
+# plot- consequences of bTB invaison at default brucellosis prevalence at 10%#
+plot(y= rep(0.10, 5),  # default brucellosis prevalence at 10%#
+	x = c(0.0001, 0.0002728621, 0.0002998335, 0.0003412031, 0.001), #
+	xlab = "Transmission rate for bTB", #
+	ylab = "Brucellosis prevalence", type = "l", col = 'red', #
+	ylim = c(0, 1), xlim = c(0.0001, 0.001), cex.lab = 0.8, cex.axis = 0.8)#
+df <- out_allmort[out_allmort$betaB == 0.0007484669,]#
+#df <- out_redmort[out_redmort$betaB == 0.0006676442,]#
+lines(y = df$Brucprev, x = df$betaT, col = "blue")#
+points(x = df$betaT, y = df$prevBinTBneg, col = "light blue", pch = 19)#
+points(x = df$betaT, y = df$prevBinCo, col = "dark blue", pch = 19)#
+legend("topright", bty="n", #
+	legend = c("before bTB", "after bTB, overall", "after bTB, prev in bTB -", #
+		"after bTB, prev in bTB +"), #
+	cex = 0.8, col = c("red", "blue", "light blue", "dark blue"),#
+	lty = c(1, 1, 0, 0), pch = c(NA, NA, 19, 19))#
+#
+# plot- consequences of bTB invaison at default brucellosis prevalence at 20%#
+plot(y= rep(0.20, 5),  # default brucellosis prevalence at 10%#
+	x = c(0.0001, 0.0002728621, 0.0002998335, 0.0003412031, 0.001), #
+	xlab = "Transmission rate for bTB", #
+	ylab = "Brucellosis prevalence", type = "l", col = 'red', #
+	ylim = c(0, 1), xlim = c(0.0001, 0.001), cex.lab = 0.8, cex.axis = 0.8)#
+df <- out_allmort[out_allmort$betaB == 0.0009577703,]#
+#df <- out_redmort[out_redmort$betaB == 0.0007707343,]#
+#
+lines(y = df$Brucprev, x = df$betaT, col = "blue")#
+points(x = df$betaT, y = df$prevBinTBneg, col = "light blue", pch = 19)#
+points(x = df$betaT, y = df$prevBinCo, col = "dark blue", pch = 19)#
+legend("topright", bty="n", #
+	legend = c("before bTB", "after bTB, overall", "after bTB, prev in bTB -", #
+		"after bTB, prev in bTB +"), #
+	cex = 0.8, col = c("red", "blue", "light blue", "dark blue"),#
+	lty = c(1, 1, 0, 0), pch = c(NA, NA, 19, 19))#
+#
+# plot- consequences of bTB invaison at default brucellosis prevalence at 30%#
+plot(y= rep(0.30, 5),  # default brucellosis prevalence at 10%#
+	x = c(0.0001, 0.0002728621, 0.0002998335, 0.0003412031, 0.001), #
+	xlab = "Transmission rate for bTB", #
+	ylab = "Brucellosis prevalence", type = "l", col = 'red', #
+	ylim = c(0, 1), xlim = c(0.0001, 0.001), cex.lab = 0.8, cex.axis = 0.8)#
+df <- out_allmort[out_allmort$betaB == 0.0013161095,]#
+#df <- out_redmort[out_redmort$betaB == 0.0008997341,]#
+lines(y = df$Brucprev, x = df$betaT, col = "blue")#
+points(x = df$betaT, y = df$prevBinTBneg, col = "light blue", pch = 19)#
+points(x = df$betaT, y = df$prevBinCo, col = "dark blue", pch = 19)#
+legend("topright", bty="n", #
+	legend = c("before bTB", "after bTB, overall", "after bTB, prev in bTB -", #
+		"after bTB, prev in bTB +"), #
+	cex = 0.8, col = c("red", "blue", "light blue", "dark blue"),#
+	lty = c(1, 1, 0, 0), pch = c(NA, NA, 19, 19))
+out_allmort
+head(out_allmort)
+params
+params_recov
+0.13/0.41
+OR <- exp(logOR)#
+	x <- OR/(p1/(1-p1))#
+	b <- x/(p1*(1-x))#
+	return(b)#
+}
+get_new_prop_birth = function(logOR, p1){#
+	OR <- exp(logOR)#
+	x <- OR/(p1/(1-p1))#
+	b <- x/(p1*(1-x))#
+	return(b)#
+}
+relageall = c(0.137, rep(0.368/4, 4), rep(0.185/4, 4),  # Jolles 2005, set max age at 18#
+	rep(0.235/6, 6), rep(0.075/3, 3))					# Also in Caron et al. from 2001 KNP#
+relage = c(relageall[1], sum(relageall[2:3]), relageall[4],  #
+	relageall[5], sum(relageall[6:length(relageall)]) )  # sums to 1#
+N = 1000#
+K = 1000#
+##############################################################
+# Mortality, susceptible females#
+##############################################################
+muSa <- NA; muTa <- NA; muBa <- NA; muCa <- NA#
+muSa[1] <- 1- 0.7 # mortality rate in calves age [0-1) (1/yr)#
+muSa[2] <- 1- 0.884 # mortality rate in yearlings [1-3) (1/yr)#
+muSa[3] <- 1- 0.884 # mortality rate in juveniles [3-4) (1/yr)#
+muSa[4] <-  1- 0.963 # mortality rate in sub-adults [4-5)  (1/yr)#
+muSa[5] <-  1- 0.963 # mortality rate in adults 5+  (1/yr)#
+muS <- sum(muSa* relage) #
+#
+# mortality, TB, and Brucellosis positive animals#
+muT <- 2.82 * muS#
+muB <- 3.02 * muS#
+muC <- (2.82 + 3.02) * muS#
+muRC <- muC#
+muR <- muB#
+#
+##############################################################
+# Births#
+##############################################################
+b <- 0.41 # proportion in LS right before calving that were pregs (or had milk-> assume, can check this)#
+# In interdrought periods, buffalo populations grew at rates from 5-15%. #
+# This is in populations with brucellosis but not bTB.#
+# set r = 1.1... in susceptible poulations.
+b1
+b1 <- get_new_prop_birth(-1.619, b) # proportional reduction with bTB
+b1
+b
+b
+b*0.97
+b2 <- get_new_prop_birth(-1.5, b)   # proportional reduction with bruc#
+b3 <- b2 # ASSUME animals with chronic brucellosis have same fecundity as active brucellosis #
+b4 <- get_new_prop_birth((-1.619 - 1.50 + 2.28), b) # proportional reduction if co-infected#
+b5 <- b4 # #
+r <- b - muS
+r
+##############################################################
+# transmission and recovery rates to vary later. #
+##############################################################
+# transmission parameters (constant with age)#
+betaT =  0.01           # 0.043 transmission rate of TB (with N = 250)#
+betapT <- betaT  		# transnmission rate of TB in brucellosis infected buffalo#
+betaB = 0.04      		# transmission rate of brucellosis#
+betapB = 3.92 * betaB	# tranmsission rate of bruceillosis in TB + buffalo#
+#
+gamma = 1/3  # recovery rate = 1/2 years#
+epsilon = 0.01#
+#rho <- 0.05  # rate of vertical transmission#
+# Jolles et al. 2009 modeled bTB as density dependent#
+# Cross & Getz 2008 model bTB as frequency dependent (but with a rel constat population size)#
+##############################################################
+##############################################################
+# Write ODEs, density dependence... no age structure#
+##############################################################
+##############################################################
+rhs = function(times, x, params){#
+	###########################
+	# Inputs: t = time sequence; x = initial conditions in one vector in order of variable orderd juv, adult for each category#
+	# params= list(#
+	# b1, b2, b3, b4, b5,  prop reduction in fecundity with TB, bruc, chronic bruc, co, coinfect/chronic #
+	# K #
+	# betaT, betapT, betaB, betapB, transmission rates, p indicates co-infected first#
+	# gamma, epsilon, ignore rho for now (proportion of buffalo born from infectious mothers that are infectious).#
+	# b = max birth rate (when N = 0) #
+	# muS, muT, muB, muC, muR, muRC mortality rates.  #
+	# NOW Assume chronic stages have mortality rates equal to acute stage!!!#
+	###########################
+	with(as.list(c(x, params)), {#
+		# Overall population size (N)#
+		N <- S + It + Ib + Ic + R + Rc#
+		# Population contributing to births (Nb); account for reduced births with infection#
+		Nb <- S + b1 * It + b2 * Ib + b3 * Ic + b4 * R + b5 * Rc#
+		# Frequency dependent force of infection is independent of age#
+		lambdaT <- betaT * (It + Ic + Rc) #
+		lambdaB <- betaB * (Ib + Ic) #
+		lambdapT <- betapT * (It + Ic + Rc)#
+		lambdapB <- betapB * (Ib + Ic) #
+		# differential equations, assume mortality in chronics is same as active infection#
+		dS <- b * Nb * (1 - (r/b) * (N/K) ) - (lambdaT + lambdaB) * S - muS * S #
+		dIt <- lambdaT * S - (lambdapB + muT) * It #
+		dIb <- lambdaB * S + epsilon * R - (gamma + lambdapT + muB) * Ib#
+		dIc <- lambdapT * Ib + lambdapB * It + epsilon * Rc - (gamma + muC) * Ic#
+		dR <-  gamma * Ib - (epsilon + muR + lambdapT) * R#
+		dRc <- lambdapT * R + gamma * Ic - (epsilon + muRC) * Rc#
+		out = list(c(dS, dIt, dIb, dIc, dR, dRc))#
+		return(out)#
+		}#
+	)#
 }#
-plot(y = NLL, x= 1/gamma, pch= 19, ylab = "Negative Log Likelihood", xlab = "Duration of Viremia (days)", col= "dark blue", cex = 0.5, ylim= c(5, 15), xlim= c(1, 10))#
-	points(y = NLLS2, x= 1/gamma, pch= 19, col = "dark green", cex= 0.5)#
-	points(y = NLLS3, x= 1/gamma, pch= 19, cex= 0.5)#
-legend("topright", legend = c("SAT 1", "SAT 2", "SAT 3"), pch= c(19, 19, 19), col = c("dark blue", "dark green", "black"), bty = "n")#
-#
-gamma = 0.2#
-LLS1 <- optim(fn = binomNLL, par = c(gamma), x = xSAT1, data=data, method = "Brent", upper = 0.5, lower = 0.01) # ML estimate SAT 1 = 0.2259926; 4.4240#
-abline(v = 1/LLS1$par, col= "dark blue")#
-LLS2<- optim(fn = binomNLL, par = c(gamma), x = xSAT2, data=dataSAT2, method = "Brent", upper = 0.9, lower = 0.01) # ML estimate SAT 2 = 0.2027326; 4.9326 d#
-abline(v = 1/LLS2$par, col= "dark green")#
-LLS3 <- optim(fn = binomNLL, par = c(gamma), x = xSAT3, data=dataSAT3, method = "Brent", upper = 0.9, lower = 0.01) # ML estimate SAT 3 = 0.38107; 2.62419#
-abline(v = 1/LLS3$par, col= "black")#
-#
-# get same value from optim even if start intial duration as really small#
-gamma = 0.05#
- optim(fn = binomNLL, par = c(gamma), x = xSAT1, data=data, method = "Brent", upper = 0.5, lower = 0.01)#
-#
-###############################################################
-###############################################################
-# Step 1.3: Profile likelihood method to estimate Confidence Interval#
-###############################################################
-###############################################################
-get_CI = function(nll, optim_likelihood){#
-	gamma = seq(1/30, 1/2, 1/300)#
-	NLL_lower <- nll[1:which.min(nll)]#
-	NLL_upper <- nll[which.min(nll):length(nll)]#
-	temp <- data.frame(lowerLL = NA, lowerEst= NA, upperLL = NA, upperEst = NA)#
-	lower <- approx(NLL_lower, gamma[1:which.min(nll)], xout = optim_likelihood + qchisq(0.95, 1)/2)#
-	upper <- approx(NLL_upper, gamma[which.min(nll):length(nll)], xout = optim_likelihood + qchisq(0.95, 1)/2)#
-	temp$lowerLL <- lower$x#
-	temp$lowerEst <- lower$y#
-	temp$upperLL <- upper$x#
-	temp$upperEst <- upper$y	#
-	return(temp)#
+groom_sol = function(sol){#
+	colnames(sol) <- c("times", "S", "It", "Ib", "Ic", "R", "Rc") #
+	sol$N <- sol$S + sol$It + sol$Ib + sol$Ic + sol$R + sol$Rc#
+	sol$TBprev <- (sol$It + sol$Ic + sol$Rc) / sol$N#
+	sol$Brucprev <- (sol$Ib + sol$R + sol$Ic + sol$Rc) / sol$N#
+	sol$propTB_co <- (sol$Ic + sol$Rc) / (sol$It + sol$Ic + sol$Rc)#
+	sol$propBruc_co <- (sol$Ic + sol$Rc) / (sol$Ib + sol$R + sol$Ic + sol$Rc)#
+	return(sol)#
 }#
 #
-LL_SAT1 <- LLS1$value#
-get_CI(NLL, LL_SAT1)#
-LL_SAT2 <- LLS2$value#
-get_CI(NLLS2, LL_SAT2)#
-LL_SAT3 <- LLS3$value#
-get_CI(NLLS3, LL_SAT3)#
+plot_raw_numbers = function(sol){#
+	plot(sol$time, sol$S, col= "black", type= 'l', ylim = c(0, 1200), ylab = "Number of animals", xlab = "Time (in years")#
+	lines(sol$time, sol$It, col= "red")#
+	lines(sol$time, sol$Ib, col= "blue")#
+	lines(sol$time, sol$Ic, col= "green")#
+	lines(sol$time, sol$R, col = "orange")#
+	lines(sol$time, sol$Rc, col = "pink")#
+	legend("topright", legend = c("S", "It", "Ib", "Ic", "R", "Rc"), col = c("black", "red", "blue", "green", "orange", "pink"), bty="n", lty = 1)#
+}
+##############################################################
+##############################################################
+params = c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, #
+	b = b, r = r, K = K,#
+	muS = muS, muB = muB, muT = muT, muC = muC, muR = muR, muRC = muRC, #
+	gamma = gamma, epsilon = epsilon,#
+	betaT = betaT, betaB = betaB, betapT = betapT, betapB = betapB)#
+# params assuming fecundity/survival effects of brucellosis are limited to infected class#
+params_recov = c(b1= b1, b2 = b2, b3 = b3, b4= 1, b5 = b2, # assuming b4 =1, b5 = b2 #
+	b = b, r = r, K = K,#
+	muS = muS, muB = muB, muT = muT, muC = muC, muR = muS, muRC = muT, #
+	gamma = gamma, epsilon = epsilon,#
+	betaT = betaT, betaB = betaB, betapT = betapT, betapB = betapB)#
 #
-# SAT1: 4.42 (2.36 - 9.73)#
-# lowerLL  lowerEst  upperLL  upperEst#
-# 13.00912 0.1028126 13.00912 0.4237867#
-# SAT2: 4.93 (2.42 - 12.5)#
-# lowerLL   lowerEst upperLL  upperEst#
-# 8.25402 0.08025447 8.25402 0.4137235#
-# SAT3: 2.63 (1.39 - 5.818)#
- lowerLL  lowerEst  upperLL upperEst#
-1 10.20514 0.1718915 10.20514   0.72  # gamma[208] and gamma[209]#
-###############################################################
-###############################################################
-# Step 2.1: Fit function for the transmission rate#
-###############################################################
-###############################################################
-binomNLL = function (x, beta, gamma, data){	#
-	# probability an infected animal remains infectious at time t. #
-	integral02 <- pexp(q = 2, rate = gamma)#
-	integral24 <- pexp(q = 4, rate = gamma) - pexp(q = 2, rate = gamma )#
-	integral46 <- pexp(q = 6, rate = gamma) - pexp(q = 4, rate = gamma )#
-	integral68 <- pexp(q = 8, rate = gamma) - pexp(q = 6, rate = gamma)#
-	# Survival function for infection (probability an animal remains uninfectious at day 2#
-	# p_2day <- exp(- beta * 4 * integral02)  # old in units of 2 days#
-	p_2day <- exp(-2* beta * 4 * integral02)#
-	NLLt02 <- -sum( dbinom(x = x[1], size= 4, p = 1 - p_2day, log=TRUE))#
+#Start no disease, make sure ends with none, pop goes to K#
+##############################################################
+S0 = 500#
+It0 = 0#
+Ib0 = 0#
+Ic0 = 0#
+R0 = 0#
+Rc0 = 0#
+x0 = c(S = S0, It = It0, Ib = Ib0, Ic = Ic0, R = R0, Rc = Rc0)#
+times <- seq(0, 100, 1)#
+sol <- as.data.frame(ode(x0, times, rhs, params))#
+sol_recov <- as.data.frame(ode(x0, times, rhs, params_recov))#
+plot_raw_numbers(sol)
+plot_raw_numbers(sol_recov)
+##############################################################
+S0 = N-100#
+It0 = 0#
+Ib0 = 100#
+Ic0 = 0#
+R0 = 0#
+Rc0 = 0#
+x0 = c(S = S0, It = It0, Ib = Ib0, Ic = Ic0, R = R0, Rc = Rc0)#
+times <- seq(0, 100, 1)#
+sol <- as.data.frame(ode(x0, times, rhs, params))#
+sol_recov <- as.data.frame(ode(x0, times, rhs, params_recov))#
+sol<- groom_sol(sol)#
+par(mfrow = c(1,2))#
+plot_raw_numbers(sol)
+plot_raw_numbers(sol_recov) # with lax in mortality effects in recovered, much more recoverds...
+##############################################################
+params = c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, #
+	b = b, r = r, K = K,#
+	muS = muS, muB = muB, muT = muT, muC = muC, muR = muR, muRC = muRC, #
+	gamma = gamma, epsilon = epsilon,#
+	betaT = betaT, betaB = betaB, betapT = betapT, betapB = betapB)#
+# params assuming fecundity/survival effects of brucellosis are limited to infected class#
+params_recov = c(b1= b1, b2 = b2, b3 = b3, b4= 1, b5 = b2, # assuming b4 =1, b5 = b2 #
+	b = b, r = r, K = K,#
+	muS = muS, muB = muB, muT = muT, muC = muC, muR = muS, muRC = muT, #
+	gamma = gamma, epsilon = epsilon,#
+	betaT = betaT, betaB = betaB, betapT = betapT, betapB = betapB)#
 #
-	if (length(data) > 1){	#
-		# p_4day <- p_2day * exp(-beta * (4 * integral24  + data[2] * integral02) ) #
-		p_4day <- p_2day * exp(-2 * beta * (4 * integral24  + data[2] * integral02) ) #
-		NLLt24 <- -sum( dbinom(x = x[2], size= 4, p = 1 - p_4day, log=TRUE))#
-	}#
-	else {NLLt24 <- 0}#
-	if (length(data) > 2){#
-		#p_6day <- p_4day * exp(-beta * (4 * integral46  + data[2] * integral24 + data[3] * integral02))#
-		p_6day <- p_4day * exp(-beta * 2 * (4 * integral46  + data[2] * integral24 + data[3] * integral02))#
-		NLLt46 <- -sum( dbinom(x = x[3], size= 4, p = 1 - p_6day, log=TRUE))#
-	} else {NLLt46 <- 0}#
+#Start no disease, make sure ends with none, pop goes to K#
+##############################################################
+S0 = 500#
+It0 = 0#
+Ib0 = 0#
+Ic0 = 0#
+R0 = 0#
+Rc0 = 0#
+x0 = c(S = S0, It = It0, Ib = Ib0, Ic = Ic0, R = R0, Rc = Rc0)#
+times <- seq(0, 100, 1)#
+sol <- as.data.frame(ode(x0, times, rhs, params))#
+sol_recov <- as.data.frame(ode(x0, times, rhs, params_recov))#
+plot_raw_numbers(sol)#
+plot_raw_numbers(sol_recov)
+beta_b
+betaB
+# transmission parameters (constant with age)#
+betaT =  0.001           # 0.043 transmission rate of TB (with N = 250)#
+betapT <- betaT  		# transnmission rate of TB in brucellosis infected buffalo#
+betaB = 0.001      		# transmission rate of brucellosis#
+betapB = 3.92 * betaB	# tranmsission rate of bruceillosis in TB + buffalo#
 #
-	if (length(data) > 3){#
-		#p_8day <- p_6day * exp(-beta * (4 * integral68  + data[2] * integral46 + data[3] * integral24 + data[4] * integral02))#
-		p_8day <- p_6day * exp(-beta * 2 * (4 * integral68  + data[2] * integral46 + data[3] * integral24 + data[4] * integral02))#
-		NLLt46 <- -sum( dbinom(x = x[4], size= 4, p = 1 - p_6day, log=TRUE))#
-	} else {NLLt46 <- 0}#
-#
-	binom_NLL <- (NLLt02 + NLLt24 + NLLt46)#
-	return(binom_NLL)#
+gamma = 1/3  # recovery rate = 1/2 years#
+epsilon = 0.01#
+#rho <- 0.05  # rate of vertical transmission#
+# Jolles et al. 2009 modeled bTB as density dependent#
+# Cross & Getz 2008 model bTB as frequency dependent (but with a rel constat population size)#
+##############################################################
+##############################################################
+# Write ODEs, density dependence... no age structure#
+##############################################################
+##############################################################
+rhs = function(times, x, params){#
+	###########################
+	# Inputs: t = time sequence; x = initial conditions in one vector in order of variable orderd juv, adult for each category#
+	# params= list(#
+	# b1, b2, b3, b4, b5,  prop reduction in fecundity with TB, bruc, chronic bruc, co, coinfect/chronic #
+	# K #
+	# betaT, betapT, betaB, betapB, transmission rates, p indicates co-infected first#
+	# gamma, epsilon, ignore rho for now (proportion of buffalo born from infectious mothers that are infectious).#
+	# b = max birth rate (when N = 0) #
+	# muS, muT, muB, muC, muR, muRC mortality rates.  #
+	# NOW Assume chronic stages have mortality rates equal to acute stage!!!#
+	###########################
+	with(as.list(c(x, params)), {#
+		# Overall population size (N)#
+		N <- S + It + Ib + Ic + R + Rc#
+		# Population contributing to births (Nb); account for reduced births with infection#
+		Nb <- S + b1 * It + b2 * Ib + b3 * Ic + b4 * R + b5 * Rc#
+		# Frequency dependent force of infection is independent of age#
+		lambdaT <- betaT * (It + Ic + Rc) #
+		lambdaB <- betaB * (Ib + Ic) #
+		lambdapT <- betapT * (It + Ic + Rc)#
+		lambdapB <- betapB * (Ib + Ic) #
+		# differential equations, assume mortality in chronics is same as active infection#
+		dS <- b * Nb * (1 - (r/b) * (N/K) ) - (lambdaT + lambdaB) * S - muS * S #
+		dIt <- lambdaT * S - (lambdapB + muT) * It #
+		dIb <- lambdaB * S + epsilon * R - (gamma + lambdapT + muB) * Ib#
+		dIc <- lambdapT * Ib + lambdapB * It + epsilon * Rc - (gamma + muC) * Ic#
+		dR <-  gamma * Ib - (epsilon + muR + lambdapT) * R#
+		dRc <- lambdapT * R + gamma * Ic - (epsilon + muRC) * Rc#
+		out = list(c(dS, dIt, dIb, dIc, dR, dRc))#
+		return(out)#
+		}#
+	)#
 }#
-# data and best fitting gamma values from above#
-xSAT1 = c(4)  #
-dataSAT1 = c(4) # number of new infected buffalo at time = 2, 4.... buffalo#
-xSAT2 = c(1, 4) # number of infected buffalo at time t#
-dataSAT2 = c(1, 3) # number of new infected buffalo at time = 2, 4.... buffalo#
-xSAT3 = c(0, 2, 3, 3, 4)#
-dataSAT3 = c(0, 2, 1, 0, 1) # number of new infected buffalo at time = 2, 4.... buffalo#
-gammaSAT1 <- LLS1$par#
-gammaSAT2 <- LLS2$par#
-gammaSAT3 <- LLS3$par
-###############################################################
-binomNLL = function (x, beta, S, Iave){	#
-	# Survival function for infection (probability an animal remains uninfectious at day 2#
-	# p_2day <- exp(- beta * 4 * integral02)  # old in units of 2 days#
-	p_2day <- exp(-2* beta * Iave[1])#
-	NLLt02 <- -sum( dbinom(x = x[1], size= S[1], p = 1 - p_2day, log=TRUE))#
-#
-	if (length(Iave) > 1){	#
-		p_4day <- exp(-2 * beta * Iave[2]) #
-		NLLt24 <- -sum( dbinom(x = x[2], size= S[2], p = 1 - p_4day, log=TRUE))#
-	}#
-	else {NLLt24 <- 0}#
-	if (length(Iave) > 2){#
-		p_6day <- exp(- beta * 2 * Iave[3])#
-		NLLt46 <- -sum( dbinom(x = x[3], size= S[3], p = 1 - p_6day, log=TRUE))#
-	} else {NLLt46 <- 0}#
-#
-	if (length(Iave) > 3){#
-		p_8day <- exp(- beta * 2 * Iave[4])#
-		NLLt68 <- -sum( dbinom(x = x[4], size= S[4], p = 1 - p_6day, log=TRUE))#
-	} else {NLLt68 <- 0}#
-	binom_NLL <- (NLLt02 + NLLt24 + NLLt46 + NLLt68)#
-	return(binom_NLL)#
-}#
-# data and best fitting gamma values from above#
-cSAT1 <- c(4)#
-IaveSAT1 <- c(6)#
-IinitSAT1 <- c(4)#
-SSAT1 <- c(4)#
-#
-# SAT2, Contact only#
-cSAT2 = c(1, 3) # number of new infections buffalo at time t to t+dt#
-IaveSAT2 = c(4.5, 6) # average number of infected buffalo between t and t+ df#
-IinitSAT2 = c(4, 5)#
-SSAT2 = c(4, 3)#
-#
-# SAT3, Contact only#
-cSAT3 = c(0, 2, 1, 0, 1)#
-IaveSAT3 = c(4, 3, 2.5, 2, 1)#
-IinitSAT3 = c(4, 4, 2, 3, 1)#
-SSAT3 = c(4, 4, 2, 1, 1)#
-#
-# Plot log likelihood at various values#
-beta = seq(0.001, 4, 0.001)#
-NLL <- NA; NLLS2 <- NA; NLLS3 <- NA; NLLinit <- NA; NLLS2init <- NA; NLLS3init <- NA #
-for (i in 1:length(beta)){#
-	NLL[i] <- binomNLL(x = cSAT1, beta = beta[i], S = SSAT1, Iave = IaveSAT1)#
-	NLLinit[i] <- binomNLL(x = cSAT1, beta = beta[i], S = SSAT1, Iave = IinitSAT1)#
-	NLLS2[i] <- binomNLL(x = cSAT2, beta = beta[i], S = SSAT2, Iave = IaveSAT2)#
-	NLLS2init[i] <- binomNLL(x = cSAT2, beta = beta[i], S = SSAT2, Iave = IinitSAT2)#
-	NLLS3[i] <- binomNLL(x = cSAT3, beta = beta[i], S = SSAT3, Iave = IaveSAT3)#
-	NLLS3init[i] <- binomNLL(x = cSAT3, beta = beta[i], S = SSAT3, Iave = IinitSAT3)#
+groom_sol = function(sol){#
+	colnames(sol) <- c("times", "S", "It", "Ib", "Ic", "R", "Rc") #
+	sol$N <- sol$S + sol$It + sol$Ib + sol$Ic + sol$R + sol$Rc#
+	sol$TBprev <- (sol$It + sol$Ic + sol$Rc) / sol$N#
+	sol$Brucprev <- (sol$Ib + sol$R + sol$Ic + sol$Rc) / sol$N#
+	sol$propTB_co <- (sol$Ic + sol$Rc) / (sol$It + sol$Ic + sol$Rc)#
+	sol$propBruc_co <- (sol$Ic + sol$Rc) / (sol$Ib + sol$R + sol$Ic + sol$Rc)#
+	return(sol)#
 }#
 #
-plot(y = NLLS2, x= beta, pch= 19, ylab = "Negative Log Likelihood", xlab = "Transmission Rate", col= "dark green", cex = 0.5, ylim = c(0, 20), xlim = c(0.05, 1.5)) #
-points(y = NLLS2init, x= beta, pch= 19, col= "green", cex = 0.5) #
-points(y = NLLS3, x= beta, pch= 19, col= "dark gray", cex = 0.5)#
-points(y = NLLS3, x= beta, pch= 19, col= "black", cex = 0.5)#
-points(y = NLL, x= beta, pch= 19, col= "dark blue", cex = 0.5)#
-points(y = NLLinit, x= beta, pch= 19, col= "blue", cex = 0.5)#
-legend("topright", legend = c("SAT 1", "SAT 2", "SAT 3"), pch= c(19, 19, 19), col = c("dark blue", "dark green", "black"), bty = "n")#
+plot_raw_numbers = function(sol){#
+	plot(sol$time, sol$S, col= "black", type= 'l', ylim = c(0, 1200), ylab = "Number of animals", xlab = "Time (in years")#
+	lines(sol$time, sol$It, col= "red")#
+	lines(sol$time, sol$Ib, col= "blue")#
+	lines(sol$time, sol$Ic, col= "green")#
+	lines(sol$time, sol$R, col = "orange")#
+	lines(sol$time, sol$Rc, col = "pink")#
+	legend("topright", legend = c("S", "It", "Ib", "Ic", "R", "Rc"), col = c("black", "red", "blue", "green", "orange", "pink"), bty="n", lty = 1)#
+}#
+##############################################################
+##############################################################
+##############################################################
+# Test Run- #
+##############################################################
+##############################################################
+params = c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, #
+	b = b, r = r, K = K,#
+	muS = muS, muB = muB, muT = muT, muC = muC, muR = muR, muRC = muRC, #
+	gamma = gamma, epsilon = epsilon,#
+	betaT = betaT, betaB = betaB, betapT = betapT, betapB = betapB)#
+# params assuming fecundity/survival effects of brucellosis are limited to infected class#
+params_recov = c(b1= b1, b2 = b2, b3 = b3, b4= 1, b5 = b2, # assuming b4 =1, b5 = b2 #
+	b = b, r = r, K = K,#
+	muS = muS, muB = muB, muT = muT, muC = muC, muR = muS, muRC = muT, #
+	gamma = gamma, epsilon = epsilon,#
+	betaT = betaT, betaB = betaB, betapT = betapT, betapB = betapB)#
 #
-beta = 0.1#
-LLS2<- optim(par = beta, fn = binomNLL, x = cSAT2, S = SSAT2, Iave = IaveSAT2, method = "Brent", upper = 1, lower = 0.01)  # 0.0873#
-LLS3<- optim(fn = binomNLL, par = beta, x = cSAT3, S = SSAT3, Iave = IaveSAT3, method = "Brent", upper = 1, lower = 0.01) #
-abline(v = LLS2$par, col= "dark green")#
-abline(v = LLS3$par, col= "black")
-LLS2.1 <-  optim(par = beta, fn = binomNLL, x = cSAT2, S = SSAT2, Iave = IinitSAT2, method = "Brent", upper = 1, lower = 0.01) #
-LLS3.1 <-  optim(par = beta, fn = binomNLL, x = cSAT3, S = SSAT3, Iave = IinitSAT2, method = "Brent", upper = 1, lower = 0.01)
-LLS2.1
-LLS3.1
-0.1*(1/0.2)*8
-0.033*(1/0.38)*8
-LLS3<- optim(fn = binomNLL, par = beta, x = cSAT3, S = SSAT3, Iave = IaveSAT3, method = "Brent", upper = 1, lower = 0.01)
-LLS3
-0.05 * 8
-1/0.48
-0.05 * 8 * (1/0.48)
-0.033 * 8 * (1/0.48)
-0.033 * 8 * (1/0.38)
-0.7 * 8 * (1/0.23)
-0.2 * 8 * (1/0.23)
-exp(-0.23)
+#Start no disease, make sure ends with none, pop goes to K#
+##############################################################
+S0 = 500#
+It0 = 0#
+Ib0 = 0#
+Ic0 = 0#
+R0 = 0#
+Rc0 = 0#
+x0 = c(S = S0, It = It0, Ib = Ib0, Ic = Ic0, R = R0, Rc = Rc0)#
+times <- seq(0, 100, 1)#
+sol <- as.data.frame(ode(x0, times, rhs, params))#
+sol_recov <- as.data.frame(ode(x0, times, rhs, params_recov))#
+par(mfrow=c(1,2))#
+plot_raw_numbers(sol)#
+plot_raw_numbers(sol_recov)
+#Start with brucellosis only, make sure no bTB takes off#
+##############################################################
+S0 = N-100#
+It0 = 0#
+Ib0 = 100#
+Ic0 = 0#
+R0 = 0#
+Rc0 = 0#
+x0 = c(S = S0, It = It0, Ib = Ib0, Ic = Ic0, R = R0, Rc = Rc0)#
+times <- seq(0, 100, 1)#
+sol <- as.data.frame(ode(x0, times, rhs, params))#
+sol_recov <- as.data.frame(ode(x0, times, rhs, params_recov))#
+sol<- groom_sol(sol)#
+par(mfrow = c(1,2))#
+plot_raw_numbers(sol)#
+plot_raw_numbers(sol_recov)
+#Start with bTB only, make sure no brucellosis takes off#
+##############################################################
+Ib0 = N - 100#
+It0 = 100#
+Ib0 = 0#
+Ic0 = 0#
+R0 = 0#
+Rc0 = 0#
+x0 = c(S = S0, It = It0, Ib = Ib0, Ic = Ic0, R = R0, Rc = Rc0)#
+sol <- as.data.frame(ode(x0, times, rhs, params))#
+sol<- groom_sol(sol)#
+plot_raw_numbers(sol)
+# TB only #
+##############################################################
+K = 1000; N= 1000#
+beta_t <- seq(0.0001, 0.001, 0.0003)#
+Ib0 = N - 100#
+It0 = 100#
+Ib0 = 0#
+Ic0 = 0#
+R0 = 0#
+Rc0 = 0#
+x0 = c(S = S0, It = It0, Ib = Ib0, Ic = Ic0, R = R0, Rc = Rc0)#
+times <- seq(0, 1000, 1)#
+out <- list(NA); #
+#
+par(mfrow = c(1, 2))
+plot(NULL, xlim = c(0, 500), xlab= "Time (in years)", ylim= c(0, 1300), #
+	ylab = "Number of bTB positive animals")#
+legend("topright", 	title= "beta_t", legend=c("0.0001", "0.0004", "0.0007","0.001"),#
+	col = seq(1:length(beta_t)), lty = 1, bty = "n") 	#
+for(i in 1:length(beta_t)){#
+	params <- c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muR, muRC = muRC, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = beta_t[i], betaB = betaB, betapT = betapT, betapB = betapB)#
+	sol <- as.data.frame(ode(x0, times, rhs, params))#
+	sol<- groom_sol(sol)#
+	out[[i]] <- sol#
+	lines(y = out[[i]]$It, x = out[[i]]$times, col = i)#
+}#
+# For a given beta_t, find the endemic bTB prevalence#
+##############################################################
+endprev<- c(NA)#
+beta_t <- seq(0.0001, 0.001, 0.00002)  # make more finely spaced#
+for (i in 1:length(beta_t)){#
+	params <- c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muR, muRC = muRC, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = beta_t[i], betaB = betaB, betapT = beta_t[i], betapB = 3.92 * betaB)	#
+	sol <- as.data.frame(ode(x0, times, rhs, params))#
+	sol<- groom_sol(sol)#
+	endprev[i] <- sol$TBprev[101]#
+}#
+plot(x=beta_t, y=endprev, xlab = "Density dependent transmission rate for bTB", ylab = "bTB prevalence", type="l")#
+abline(h = 0.05, col = "red"); abline(h = 0.1, col = "red")#
+abline(h = 0.2, col = "red"); abline(h = 0.3, col = "red")#
+want= c(0.05, 0.1, 0.2, 0.3)  # want beta_t values associated with each of these end prevalences#
+approx(x = endprev, y = beta_t, xout = want)
+legend("topleft", legend= c("0.00029", "0.00031", "0.00038", "0.00046"), bty= "n")
+beta_b <- c(seq(0.0001, 0.001, 0.0002), seq(0.001, 0.003, 0.001))
+betaT <- 0.0002909  # re-set just in case#
+beta_b <- c(seq(0.0001, 0.001, 0.0003), seq(0.001, 0.003, 0.001))#
+Ib0 = N - 100#
+It0 = 0#
+Ib0 = 100#
+Ic0 = 0#
+R0 = 0#
+Rc0 = 0#
+x0 = c(S = S0, It = It0, Ib = Ib0, Ic = Ic0, R = R0, Rc = Rc0)#
+times <- seq(0, 1000, 1)#
+out <- list(NA); outr <- list(NA)#
+#
+par(mfrow=c(1, 2))#
+plot(NULL, xlim = c(0, 100), xlab= "Time (in years)", ylim= c(0, 700), #
+	ylab = "Number of Ib and Rb animals")#
+legend("topright", title= "beta_b", legend=c("0.0001", "0.001", "0.002", "0.003"), #
+	col = seq(1:length(beta_b)), lty = 1, bty = "n")#
+title(main = list("Fitness effects in Brucellosis Recoverds", cex = 0.7)) #
+for(i in 1:length(beta_b)){#
+	params <- c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muR, muRC = muRC, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = betaT, betaB = beta_b[i], betapT = betapT, betapB = 3.92 * beta_b[i])	#
+	params_recov <- c(b1= b1, b2 = b2, b3 = b3, b4= 1, b5 = b2, # assuming b4 =1, b5 = b2 #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muS, muRC = muT, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = betaT, betaB = beta_b[i], betapT = betapT, betapB = 3.92 * beta_b[i])	#
+	sol <- as.data.frame(ode(x0, times, rhs, params))#
+	sol<- groom_sol(sol)#
+	sol_recov <- as.data.frame(ode(x0, times, rhs, params_recov))#
+	sol_recov <- groom_sol(sol_recov)#
+	out[[i]] <- sol; outr[[i]] <- sol_recov#
+	lines(y = out[[i]]$Ib, x = out[[i]]$times, col = i)#
+	lines(y = out[[i]]$R, x = out[[i]]$times, col = i, lty = 2)#
+}
+beta_b
+par(mfrow=c(1, 2))#
+plot(NULL, xlim = c(0, 100), xlab= "Time (in years)", ylim= c(0, 700), #
+	ylab = "Number of Ib and Rb animals")#
+legend("topright", title= "beta_b", legend=c("0.0001", "0.0004", "0.0007", "0.001"), #
+	col = seq(1:length(beta_b)), lty = 1, bty = "n")#
+title(main = list("Fitness effects in Brucellosis Recoverds", cex = 0.7)) #
+for(i in 1:length(beta_b-2)){#
+	params <- c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muR, muRC = muRC, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = betaT, betaB = beta_b[i], betapT = betapT, betapB = 3.92 * beta_b[i])	#
+	params_recov <- c(b1= b1, b2 = b2, b3 = b3, b4= 1, b5 = b2, # assuming b4 =1, b5 = b2 #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muS, muRC = muT, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = betaT, betaB = beta_b[i], betapT = betapT, betapB = 3.92 * beta_b[i])	#
+	sol <- as.data.frame(ode(x0, times, rhs, params))#
+	sol<- groom_sol(sol)#
+	sol_recov <- as.data.frame(ode(x0, times, rhs, params_recov))#
+	sol_recov <- groom_sol(sol_recov)#
+	out[[i]] <- sol; outr[[i]] <- sol_recov#
+	lines(y = out[[i]]$Ib, x = out[[i]]$times, col = i)#
+	lines(y = out[[i]]$R, x = out[[i]]$times, col = i, lty = 2)#
+}#
+#
+plot(NULL, xlim = c(0, 100), xlab= "Time (in years)", ylim= c(0, 1000), #
+	ylab = "Number of animals")
+length(beta_b)
+length(beta_b-2)
+length(beta_b)-1
+1:length(beta_b)-1
+par(mfrow=c(1, 2))#
+plot(NULL, xlim = c(0, 100), xlab= "Time (in years)", ylim= c(0, 700), #
+	ylab = "Number of Ib and Rb animals")#
+legend("topright", title= "beta_b", legend=c("0.0001", "0.0004", "0.0007", "0.001"), #
+	col = seq(1:length(beta_b)-2), lty = 1, bty = "n")#
+title(main = list("Fitness effects in Brucellosis Recoverds", cex = 0.7)) #
+for(i in 1:length(beta_b)-2){#
+	params <- c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muR, muRC = muRC, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = betaT, betaB = beta_b[i], betapT = betapT, betapB = 3.92 * beta_b[i])	#
+	params_recov <- c(b1= b1, b2 = b2, b3 = b3, b4= 1, b5 = b2, # assuming b4 =1, b5 = b2 #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muS, muRC = muT, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = betaT, betaB = beta_b[i], betapT = betapT, betapB = 3.92 * beta_b[i])	#
+	sol <- as.data.frame(ode(x0, times, rhs, params))#
+	sol<- groom_sol(sol)#
+	sol_recov <- as.data.frame(ode(x0, times, rhs, params_recov))#
+	sol_recov <- groom_sol(sol_recov)#
+	out[[i]] <- sol; outr[[i]] <- sol_recov#
+	lines(y = out[[i]]$Ib, x = out[[i]]$times, col = i)#
+	lines(y = out[[i]]$R, x = out[[i]]$times, col = i, lty = 2)#
+}
+# Brucellosis only#
+##############################################################
+betaT <- 0.0002909  # re-set just in case#
+beta_b <- c(seq(0.0001, 0.001, 0.0003), seq(0.001, 0.003, 0.001))#
+Ib0 = N - 100#
+It0 = 0#
+Ib0 = 100#
+Ic0 = 0#
+R0 = 0#
+Rc0 = 0#
+x0 = c(S = S0, It = It0, Ib = Ib0, Ic = Ic0, R = R0, Rc = Rc0)#
+times <- seq(0, 1000, 1)#
+out <- list(NA); outr <- list(NA)#
+#
+par(mfrow=c(1, 2))#
+plot(NULL, xlim = c(0, 100), xlab= "Time (in years)", ylim= c(0, 700), #
+	ylab = "Number of Ib and Rb animals")#
+legend("topright", title= "beta_b", legend=c("0.0001", "0.0004", "0.0007", "0.001"), #
+	col = seq(1:length(beta_b)-2), lty = 1, bty = "n")#
+title(main = list("Fitness effects in Brucellosis Recoverds", cex = 0.7)) #
+for(i in 1:length(beta_b)-2){#
+	params <- c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muR, muRC = muRC, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = betaT, betaB = beta_b[i], betapT = betapT, betapB = 3.92 * beta_b[i])	#
+	params_recov <- c(b1= b1, b2 = b2, b3 = b3, b4= 1, b5 = b2, # assuming b4 =1, b5 = b2 #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muS, muRC = muT, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = betaT, betaB = beta_b[i], betapT = betapT, betapB = 3.92 * beta_b[i])	#
+	sol <- as.data.frame(ode(x0, times, rhs, params))#
+	sol<- groom_sol(sol)#
+	sol_recov <- as.data.frame(ode(x0, times, rhs, params_recov))#
+	sol_recov <- groom_sol(sol_recov)#
+	out[[i]] <- sol; outr[[i]] <- sol_recov#
+	lines(y = out[[i]]$Ib, x = out[[i]]$times, col = i)#
+	lines(y = out[[i]]$R, x = out[[i]]$times, col = i, lty = 2)#
+}
+head(sol)
+# Brucellosis only#
+##############################################################
+betaT <- 0.0002909  # re-set just in case#
+beta_b <- c(seq(0.0001, 0.001, 0.0003), seq(0.001, 0.003, 0.001))#
+Ib0 = N - 100#
+It0 = 0#
+Ib0 = 100#
+Ic0 = 0#
+R0 = 0#
+Rc0 = 0#
+x0 = c(S = S0, It = It0, Ib = Ib0, Ic = Ic0, R = R0, Rc = Rc0)#
+times <- seq(0, 1000, 1)#
+out <- list(NA); outr <- list(NA)#
+#
+par(mfrow=c(1, 2))#
+plot(NULL, xlim = c(0, 100), xlab= "Time (in years)", ylim= c(0, 700), #
+	ylab = "Number of Ib and Rb animals")#
+legend("topright", title= "beta_b", legend=c("0.0001", "0.0004", "0.0007", "0.001"), #
+	col = seq(1:length(beta_b)-2), lty = 1, bty = "n")#
+title(main = list("Fitness effects in Brucellosis Recoverds", cex = 0.7)) #
+for(i in 1:length(beta_b)-2){#
+	params <- c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muR, muRC = muRC, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = betaT, betaB = beta_b[i], betapT = betapT, betapB = 3.92 * beta_b[i])	#
+	params_recov <- c(b1= b1, b2 = b2, b3 = b3, b4= 1, b5 = b2, # assuming b4 =1, b5 = b2 #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muS, muRC = muT, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = betaT, betaB = beta_b[i], betapT = betapT, betapB = 3.92 * beta_b[i])	#
+	sol <- as.data.frame(ode(x0, times, rhs, params))#
+	sol_recov <- as.data.frame(ode(x0, times, rhs, params_recov))#
+	out[[i]] <- groom_sol(sol); outr[[i]] <- groom_sol(sol_recov)#
+	lines(y = out[[i]]$Ib, x = out[[i]]$times, col = i)#
+	lines(y = out[[i]]$R, x = out[[i]]$times, col = i, lty = 2)#
+	rm(sol, sol_recov, params, params_recov)#
+}
+for(i in 1:length(beta_b)-2){#
+	params <- c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muR, muRC = muRC, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = betaT, betaB = beta_b[i], betapT = betapT, betapB = 3.92 * beta_b[i])	#
+	params_recov <- c(b1= b1, b2 = b2, b3 = b3, b4= 1, b5 = b2, # assuming b4 =1, b5 = b2 #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muS, muRC = muT, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = betaT, betaB = beta_b[i], betapT = betapT, betapB = 3.92 * beta_b[i])	#
+	sol <- as.data.frame(ode(x0, times, rhs, params))#
+	sol_recov <- as.data.frame(ode(x0, times, rhs, params_recov))#
+	head(sol)#
+	out[[i]] <- groom_sol(sol); outr[[i]] <- groom_sol(sol_recov)#
+	lines(y = out[[i]]$Ib, x = out[[i]]$times, col = i)#
+	lines(y = out[[i]]$R, x = out[[i]]$times, col = i, lty = 2)#
+	rm(sol, sol_recov, params, params_recov)#
+}
+params <- c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muR, muRC = muRC, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = betaT, betaB = beta_b[i], betapT = betapT, betapB = 3.92 * beta_b[i])	#
+	params_recov <- c(b1= b1, b2 = b2, b3 = b3, b4= 1, b5 = b2, # assuming b4 =1, b5 = b2 #
+		b = b, r = r, K = K,#
+		muS = muS, muB = muB, muT = muT, muC = muC, muR = muS, muRC = muT, #
+		gamma = gamma, epsilon = epsilon,#
+		betaT = betaT, betaB = beta_b[i], betapT = betapT, betapB = 3.92 * beta_b[i])	#
+	sol <- as.data.frame(ode(x0, times, rhs, params))#
+	sol_recov <- as.data.frame(ode(x0, times, rhs, params_recov))#
+	head(sol)
+head(groom_sol(sol))
