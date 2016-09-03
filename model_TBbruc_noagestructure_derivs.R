@@ -2,7 +2,7 @@
 #############################################################
 #############################################################
 # Age structured SIR model for TB and Brucellosis v.1
-# Wednesday 8, June 2016
+# Last update: 1 September 2016
 #############################################################
 #############################################################
 #############################################################
@@ -15,41 +15,6 @@ get_new_prop_birth = function(logOR, p1){
 	b <- x/(p1*(1-x))
 	return(b)
 }
-
-# evaluation data
-data <- read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/		final_datasets_copied_from_phdfolder/cross_sectional_data_withdz_cleandisease_nofinal_Feb2016_capturetime_forsurv.csv")
-
-overallbruc <- NA; overallbtb <- NA 
-brucintbneg <- NA; brucintbpos <- NA
-tbinbrucneg <- NA; tbinbrucpos <- NA
-for (i in 1:1000){
-	# sample one time point for each individual id (should be 151)
-	ssdata <- ddply(data, .(id), function(id) {id[sample(nrow(id), size = 1),]})
-	# calculate prevalence overall and infection specific
-	overallbruc[i] <- length(ssdata$bruc[ssdata$bruc=="positive"])/ length(ssdata$bruc)
-	overallbtb[i] <- length(ssdata$tb[ssdata$tb==1])/ length(ssdata$tb)
-	brucintbneg[i] <- length(ssdata$tb[ssdata$bruc=="positive" & ssdata$tb == 0]) / 
-		length(ssdata$tb[ssdata$tb==0])
-	brucintbpos[i] <- length(ssdata$tb[ssdata$bruc=="positive" & ssdata$tb == 1]) / 
-		length(ssdata$tb[ssdata$tb==1])
-	tbinbrucneg[i] <- length(ssdata$tb[ssdata$bruc=="negative" & ssdata$tb == 1]) / 
-		length(ssdata$tb[ssdata$bruc=="negative"])
-	tbinbrucpos[i] <- length(ssdata$tb[ssdata$bruc=="positive" & ssdata$tb == 1]) / 
-		length(ssdata$tb[ssdata$bruc=="positive"])
-}
-quantile(overallbruc, c(0.025, 0.25, 0.5, 0.75, 0.975)) 
-# 0.3112583 0.3311258 0.3443709 0.3576159 0.3774834 
-quantile(overallbtb, c(0.025, 0.25, 0.5, 0.75, 0.975))
-# 0.2317881 0.2582781 0.2715232 0.2847682 0.3112583
-quantile(brucintbneg, c(0.025, 0.25, 0.5, 0.75, 0.975))
-# 0.2654405 0.2892206 0.3035714 0.3181818 0.3451408
-quantile(brucintbpos, c(0.025, 0.25, 0.5, 0.75, 0.975))
-# 0.3657982 0.4222222 0.4523810 0.4864865 0.5405985
-quantile(tbinbrucneg, c(0.025, 0.25, 0.5, 0.75, 0.975))
-# 0.1781895 0.2103947 0.2268041 0.2448980 0.2783505
-quantile(tbinbrucpos, c(0.025, 0.25, 0.5, 0.75, 0.975))
-# 0.2857143 0.3333333 0.3584906 0.3818182 0.4313725
-
 
 #############################################################
 #############################################################
@@ -133,8 +98,8 @@ rhs = function(times, x, params){
 		N <- S + It + Ib + Ic + R + Rc
 		
 		# Population contributing to births (Nb); account for reduced births with infection
-		Nb <- S + b1 * It + b2 * Ib + b3 * Ic + b4 * R + b5 * Rc
-			
+		Nb <- S + b1 * It + b2 * Ib + b3 *R + b4 * Ic + b5 * Rc
+					
 		# Frequency dependent force of infection is independent of age
 		lambdaT <- betaT * (It + Ic + Rc) 
 		lambdaB <- betaB * (Ib + Ic) 
@@ -285,7 +250,7 @@ for(i in 1:length(beta_t)){
 # For a given beta_t, find the endemic bTB prevalence
 #############################################################
 endprev<- c(NA)
-beta_t <- seq(0.0001, 0.001, 0.00002)  # make more finely spaced
+beta_t <- seq(0.0001, 0.001, 0.00001)  # make more finely spaced
 for (i in 1:length(beta_t)){
 	params <- c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, 
 		b = b, r = r, K = K,
@@ -301,7 +266,7 @@ abline(h = 0.05, col = "red"); abline(h = 0.1, col = "red")
 abline(h = 0.2, col = "red"); abline(h = 0.3, col = "red")
 want= c(0.05, 0.1, 0.2, 0.3)  # want beta_t values associated with each of these end prevalences
 approx(x = endprev, y = beta_t, xout = want)
-# 0.0002875412 0.0003147644 0.0003764948 0.0004593076
+# 0.0002890386 0.0003149813 0.0003764191 0.0004592954
 legend("topleft", legend= c("0.00029", "0.00031", "0.00038", "0.00046"), bty= "n")
 
 
@@ -331,7 +296,7 @@ for(i in 1:5){
 		muS = muS, muB = muB, muT = muT, muC = muC, muR = muR, muRC = muRC, 
 		gamma = gamma, epsilon = epsilon,
 		betaT = betaT, betaB = beta_b[i], betapT = betapT, betapB = 3.92 * beta_b[i])	
-	params_recov <- c(b1= b1, b2 = b2, b3 = b3, b4= 1, b5 = b2, # assuming b4 =1, b5 = b2 
+	params_recov <- c(b1= b1, b2 = b2, b3 = 1, b4= b4, b5 = b1, 
 		b = b, r = r, K = K,
 		muS = muS, muB = muB, muT = muT, muC = muC, muR = muS, muRC = muT, 
 		gamma = gamma, epsilon = epsilon,
@@ -349,7 +314,7 @@ for(i in 1:5){
 plot(NULL, xlim = c(0, 100), xlab= "Time (in years)", ylim= c(0, 500), 
 	ylab = "Number of animals")
 title(main = list("No fitness effects in Brucellosis Recoverds", cex = 0.7)) 
-for(i in 1:length(beta_b)){
+for(i in 1:5){
 	lines(y = outr[[i]]$Ib, x = outr[[i]]$times, col = i)
 	lines(y = outr[[i]]$R, x = outr[[i]]$times, col = i, lty = 2)
 }
@@ -363,11 +328,11 @@ for (i in 1:length(beta_b)){
 		muS = muS, muB = muB, muT = muT, muC = muC, muR = muR, muRC = muRC, 
 		gamma = gamma, epsilon = epsilon,
 		betaT = betaT, betaB = beta_b[i], betapT = betapT, betapB = 3.92 * beta_b[i])	
-	params_recov = c(b1= b1, b2 = b2, b3 = b3, b4= 1, b5 = b2, # assuming b4 =1, b5 = b2 
+	params_recov <- c(b1= b1, b2 = b2, b3 = 1, b4= b4, b5 = b1, 
 		b = b, r = r, K = K,
 		muS = muS, muB = muB, muT = muT, muC = muC, muR = muS, muRC = muT, 
 		gamma = gamma, epsilon = epsilon,
-		betaT = betaT, betaB = beta_b[i], betapT = betapT, betapB = 3.92 * beta_b[i])
+		betaT = betaT, betaB = beta_b[i], betapT = betapT, betapB = 3.92 * beta_b[i])	
 	sol <- as.data.frame(ode(x0, times, rhs, params))
 	sol<- groom_sol(sol)
 	sol_recov <- as.data.frame(ode(x0, times, rhs, params_recov))
@@ -381,11 +346,11 @@ abline(h = 0.05, col = "red"); abline(h = 0.1, col = "red")
 abline(h = 0.2, col = "red"); abline(h = 0.3, col = "red")
 want= c(0.05, 0.1, 0.2, 0.3)  # want beta_t values associated with each of these end prevalences
 approx(x = endprev, y = beta_b, xout = want)
-#0.0006414904 0.0006830101 0.0007736913 0.0008886672
+# 0.0006592174 0.0007162451 0.0008537897 0.0010365370
 
 plot(x = beta_b, y = endprev_recov, type = "l")
 approx(x = endprev_recov, y = beta_b, xout = want)
-# 0.0006200171 0.0006627512 0.0007553400 0.0008754510  # recov
+# 0.0006200171 0.0006627512 0.0007553400 0.0008754510
 
 
 # TB and Brucellosis, loops through transmission rate values for each set of hypotheses!

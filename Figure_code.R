@@ -380,21 +380,24 @@ summary(m)
 # Compile estimates above into a df with other age specific estimate: 
 library(tidyr)
 survivaldf <- data.frame(age = seq(1, 15, 1), 
-	Cross2009female = c(0.9, 0.9, rep(0.95, 5), rep(0.85, 5), rep(0.9, 3)),
-	Cross2009male = c(0.82, 0.82, rep(0.77, 2), rep(0.97, 3), rep(0.65, 5), rep(0.1, 3)), 
-	CrossGetz2006male = c(NA, rep(0.84, 7), rep(0.59, 7)),
-	CrossGetz2006female = c(NA, rep(0.95, 7), rep(0.86, 7)),
-	Jolles2005TBneg = c(rep(0.85, 4), rep(0.97, 11)),
-	Jolles2005TBpos = c(rep(0.85, 4), rep(0.86, 11)),
-	FunstonMills = c(0.87, rep(0.92, 14)), 
+	#Cross2009female = c(0.9, 0.9, rep(0.95, 5), rep(0.85, 5), rep(0.9, 3)),
+	#Cross2009male = c(0.82, 0.82, rep(0.77, 2), rep(0.97, 3), rep(0.65, 5), rep(0.1, 3)), 
+	#CrossGetz2006male = c(NA, rep(0.84, 7), rep(0.59, 7)),
+	#CrossGetz2006female = c(NA, rep(0.95, 7), rep(0.86, 7)),
+	#Jolles2005TBneg = c(rep(0.85, 4), rep(0.97, 11)),
+	#Jolles2005TBpos = c(rep(0.85, 4), rep(0.86, 11)),
+	#FunstonMills = c(0.87, rep(0.92, 14)), 
 	SurvUn = c(NA, 0.884, 0.884, rep(0.963, 9), NA, NA, NA),
 	SurvTB = c(NA, rep(0.689, 2), rep(0.892, 9), NA, NA, NA), 
 	SurvBR =  c(NA, rep(0.706, 2), rep(0.899, 9), NA, NA, NA),
 	SurvCo = c(NA, rep(0.349, 2), rep(0.724, 9), NA, NA, NA)
 )
-	
-survlong <- gather(survivaldf, key = dataset, value = estimate, Cross2009female:SurvCo)
-survlong$colour <- "Estimates from African buffalo in southern Africa"
+
+# Hashed out text allows you to also plot other datasets in gray...	
+#survlong <- gather(survivaldf, key = dataset, value = estimate, Cross2009female:SurvCo)
+#survlong$colour <- "Estimates from African buffalo in southern Africa"
+survlong <- gather(survivaldf, key = dataset, value = estimate, SurvUn:SurvCo)
+survlong$colour <- NA
 survlong$colour[survlong$dataset %in% c("SurvUn")] <- "Uninfected"
 survlong$colour[survlong$dataset %in% c("SurvTB")] <- "Tuberculosis"
 survlong$colour[survlong$dataset %in% c("SurvBR")] <- "Brucellosis"
@@ -410,10 +413,17 @@ p6 <- ggplot(survlong, aes(x = age, y = estimate, colour = colour, size = colour
 	geom_line(aes(linetype = colour)) + 
 	scale_x_continuous(breaks=seq(1, 15, 2)) + 
 	theme_bw() + 
-	scale_colour_manual(values = c("gray80","goldenrod1", "slateblue3", "chartreuse4","tomato3")) +# Br, Co, Other, TB, Uninfected
-	scale_size_manual(values = c(1.2, 2, 2, 2, 2)) +
-	scale_shape_manual(values = c(15, 18, 17, 17, 19)) +
-	scale_linetype_manual(values = c('dotted', 'longdash', 'dotdash', 'dashed', 'twodash')) +  # shape = sex,
+	scale_colour_manual(values = c("goldenrod1", "slateblue3", "chartreuse4","tomato3")) +
+	# Br, Co, Other, TB, Uninfected
+	scale_size_manual(values = c(2, 2, 2, 2)) +
+	scale_shape_manual(values = c(18, 17, 17, 19)) +
+	scale_linetype_manual(values = c('longdash', 'dotdash', 'dashed', 'twodash')) +
+	# hashed out text allows plotting other studies values in gray
+	#scale_colour_manual(values = c("gray80","goldenrod1", "slateblue3", 		"chartreuse4","tomato3")) +# Br, Co, Other, TB, Uninfected
+	#scale_size_manual(values = c(1.2, 2, 2, 2, 2)) +
+	#scale_shape_manual(values = c(15, 18, 17, 17, 19)) +
+	#scale_linetype_manual(values = c('dotted', 'longdash', 'dotdash', 'dashed', 'twodash'))
+	#shape = sex,
 	theme(panel.border = element_blank(), 
 		axis.title.x = element_text(size=16, vjust=-0.15),
         axis.title.y = element_text(size=16, vjust= 0.8),
@@ -422,7 +432,7 @@ p6 <- ggplot(survlong, aes(x = age, y = estimate, colour = colour, size = colour
         theme(axis.line.x = element_line(colour= "black"),
   			axis.line.y = element_line(colour= "black"),   
 			#legend information
-        	legend.position=c(0.65, 0.18),  
+        	legend.position=c(0.85, 0.2),  
         	legend.background= element_rect(fill="white", colour="white"),
         	legend.key= element_blank(),
         	legend.title= element_blank(),
@@ -569,7 +579,8 @@ p9<- ggplot(newdf, aes(x=Infection, y=Calf, group=Agecategory, colour=Agecategor
   scale_colour_manual(values=c("darkslategray", "darkseagreen3"))
 p10<- p9 +
   theme_bw() + # removes ugly gray.
-  ylab("Proportion of buffalo observed with a calf") +
+  ylab("Fecundity") +  # Proportion of buffalo observed with a calf
+  xlab("")+
   scale_y_continuous(limits=c(0,0.8)) + 
   theme(axis.line.x = element_line(colour= "black"),
   		axis.line.y = element_line(colour= "black"),
@@ -586,6 +597,56 @@ p10<- p9 +
         legend.text = element_text(size=15)   )
 
 p10
+
+
+
+
+
+########################################################################
+########################################################################
+# Incidence Figure, 2c
+########################################################################
+########################################################################
+df2<- data.frame(name=c("Tuberculosis\n (LS)", "Tuberculosis\n (CB)", 
+	"Site (LS)", "Age (cont.)"), 
+	est= c(3.92729, 0.3827, 0.5128, 0.7254), 
+	lower= c(1.317883, 0.04062, 0.18539, 0.51913), 
+	upper= c(11.703, 3.606, 1.418, 1.014), 
+	order=c(1,2,3,4))
+	df2$name <- factor(df2$name, levels= df2$name[order(df2$order, decreasing = TRUE)])
+
+p11 <- ggplot(df2, aes(x=df2$name, y=df2$est)) + 
+	geom_point(df2$estimate, size = 3, shape = 19)+ 
+	geom_errorbar(aes(ymin=df2$lower, ymax=df2$upper, width=0.1)) +  				
+    theme_bw() +
+    theme(panel.border= element_blank(), 
+          axis.title.x=element_text(size=14), axis.title.y=element_blank() ) + 
+    theme(axis.line.x = element_line(color="black"), 
+          axis.line.y = element_line(color="black")) + 
+	coord_flip() + 
+	ylab("Relative risk of mortality") +
+	geom_segment(aes(x=0, xend=4.3, y=1, yend=1), linetype=2, colour = "dark red") +
+	ylim(-0.01,11.8) + 
+	theme(
+		axis.title.x = element_text(size=16, vjust=-0.15),
+        axis.title.y = element_blank(), #element_text(size=16, vjust= 0.8),
+        axis.text.x = element_text(size=14, vjust=-0.05),
+        axis.text.y = element_text(size=14))
+
+multiplot(p7, p11, p6, p10, cols=2)
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

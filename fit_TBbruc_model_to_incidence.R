@@ -1,97 +1,112 @@
 #############################################################
 #############################################################
-# Data, assume poisson distributed likelihood
 #############################################################
 #############################################################
-new_TB_LS <- c(0, 1, 10, 3, 3, 2, 2, 1)
-new_TB_CB <- c(0, 0, 4, 1, 5, 2, 2, 1)
-new_B_LS <- c(0, 0, 0, 1, 4, 4, 3, 2)
-new_B_CB <- c(0, 4, 0, 4, 0, 3, 1, 1)
+# Code to fit model (defined in run_stochastic_coinfection_model), to data incidence rate data
+# 1- Sept- 2016
 #############################################################
 #############################################################
-# Write ODEs, density dependence... no age structure; \
-# note betapT and betapB not here
-# Keeping track of more than in model_TBbruc_derivs
+#############################################################
+#############################################################
+# Outline
+#############################################################
+# 1) Load fixed parameters and model
+# 2) Load Data to fit to and data for evaluation
+# 3) Impliment sto
+# 4) Fit to Data by maximizing binomial likelihood, deterministic
+
+
+
+#############################################################
+#############################################################
+
+
+#############################################################
+#############################################################
+1) Load fixed parameters, model
 #############################################################
 #############################################################
 require("deSolve")
-source('~/GitHub/bTB-bruc-co-infection-ms/fixed_parameters.R', chdir = TRUE)
-agedata <- read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/cross_sectional_data_withdz_cleandisease_nofinal_Feb2016_capturetime.csv")
-LSage <- agedata$age_yr[agedata$herdorig == "LS" & agedata$capturetime == 0]
-CBage <- agedata$age_yr[agedata$herdorig == "CB" & agedata$capturetime == 3]
-
-LS<- agedata[agedata$herdorig=="LS",]
-LSmass <- LS[LS$capturetime==0,]
-LSmass[,c(3, 22, 30)]
-
-
-
+# get fixed.params & fixed.params.recov
+source('~/GitHub/bTB-bruc-co-infection-ms/fixed_parameters_recovery.R', chdir = TRUE)
+source('~/GitHub/bTB-bruc-co-infection-ms/fixed_parameters_norecovery.R', chdir = TRUE)
+# rhs function, determinitic model, no agestr
+source('~/GitHub/bTB-bruc-co-infection-ms/rhs.R', chdir = TRUE) 
+# functions to run the stochastic co-infection model
+source('~/GitHub/bTB-bruc-co-infection-ms/run_stochastic_coinfection_model.R', chdir = TRUE)
 #############################################################
-rhs = function(times, x, params){
-	##########################
-	# Inputs: t = time sequence; x = initial conditions in one vector in order of variable orderd juv, adult for each category
-	# params= list(
-	# b1, b2, b3, b4, b5,  prop reduction in fecundity with TB, bruc, chronic bruc, co, coinfect/chronic 
-	# K 
-	# betaT, betapT, betaB, betapB, transmission rates, p indicates co-infected first
-	# gamma, epsilon, ignore rho for now (proportion of buffalo born from infectious mothers that are infectious).
-	# b = max birth rate (when N = 0) 
-	# muS, muT, muB, muC, muR, muRC mortality rates.  
-	# NOW Assume chronic stages have mortality rates equal to acute stage!!!
-	##########################
-	with(as.list(c(x, params)), {
-					
-		# Overall population size (N)
-		N <- S + It + Ib + Ic + R + Rc
-		
-		# Population contributing to births (Nb); account for reduced births with infection
-		Nb <- S + b1 * It + b2 * Ib + b3 * Ic + b4 * R + b5 * Rc
-			
-		# Frequency dependent force of infection is independent of age
-		betapB <- 3.92 * betaB
-		betapT <- betaT
-		lambdaT <- betaT * (It + Ic + Rc) / N
-		lambdaB <- betaB * (Ib + Ic) / N 
-		lambdapT <- betapT * (It + Ic + Rc) / N
-		lambdapB <- betapB * (Ib + Ic) / N
-		
-		# differential equations, assume mortality in chronics is same as active infection
-		dS <- b * Nb * (1 - (r/b) * (N/K) ) - (lambdaT + lambdaB) * S - muS * S 
-		dIt <- lambdaT * S - (lambdapB + muT) * It 
-		dIb <- lambdaB * S + epsilon * R - (gamma + lambdapT + muB) * Ib
-		dIc <- lambdapT * Ib + lambdapB * It + epsilon * Rc - (gamma + muC) * Ic
-		dR <-  gamma * Ib - (epsilon + muR + lambdapT) * R
-		dRc <- lambdapT * R + gamma * Ic - (epsilon + muRC) * Rc
-		
-		# derived quantities (number of co-infecteds with Bruc first/ TB first)
-		ifelse (Ic1 >= 0, 
-			dIc1 <- lambdapT * Ib + epsilon * Rc1 - (gamma + muC) * Ic1, 
-			dIc1 <- 0) # ???????
-		ifelse (Ic2 >= 0, 
-			dIc2 <- lambdapB * It + epsilon * Rc2 - (gamma + muC) * Ic2, 
-			dIc2 <- 0)
-		ifelse (Rc1 >= 0,
-			dRc1 <- lambdapT * R  + gamma * Ic1 - (epsilon+ muRC) * Rc1, 
-			dRc1 <- 0)
-		ifelse(Rc2 >= 0, 
-			dRc2 <- gamma * Ic2 - (epsilon+ muRC) * Rc2, 
-			dRc2 <- 0)
+#############################################################
+2) Load Data to fit and data for evaluation
+#############################################################
+#############################################################
+# incidence rates, Lower Sabie (do not use...)
+pS_TB <- c(0.0303, 0.28125, 0.074, 0.0435, 0.0555, 0.0667)
+pS_B <- c(0, 0, 0.0363, 0.0390, 0.0740, 0.0000)
+pB_TB <- c(0, 0, 0, 0.134, 0.095, 0.08667, 0.0139)
+pTB_B <- c(0, 0.083, 0.091, 0.091, 0.083, 0.071, 0)
+hist(c(pS_TB, pS_B, pB_TB, pTB_B))
+# Total number avaliable to become infected
+NS <- c(33, 32, 27, 25, 23, 18, 15)
+nB <- c(15, 12, 11, 11, 12, 14, 15)
+nTB <- c(2, 3, 12, 11, 10, 11, 9, 8)
+# Number of new infections
+x_S_TB <- c(0, 1, 9, 2, 2, 1, 1, 1) # total: 0, 1, 10, 3, 3, 2, 2, 1
+x_B_TB <- c(0, 0, 0, 0, 1, 3, 1, 2)
+x_S_B <- c(0, 0, 0, 1, 3, 1, 2, 0) # total brucellosis: 0, 0, 0, 1, 4, 4, 3, 2
+x_TB_B <- c(0, 0, 1, 1, 1, 1, 1, 0)
 
-		# cumulative number of bTB cases from Susceptibles that did not die
-		dTBfS <- lambdaT * S - muT * It	
-		# cumulative number of brucellosis cases from Susceptibles that did not die
-		dBfS <- lambdaB * S - muB * Ib
-		# cumulative number of bTB cases from buffalo with brucellosis first
-		dTBfB <- dIc1 + dRc1
-		# cumulative number of brucellosis cases from buffalo with bTB first
-		dBfTB <- dIc2 + dRc2
-		
-		
-		out = list(c(dS, dIt, dIb, dIc, dR, dRc, dIc1, dIc2, dRc1, dRc2, dTBfS, dBfS, dTBfB, dBfTB))
-		return(out)
-		}
-	)
+
+# totals and new infections for Crocodile Bridge
+NS_CB <- c(35, 31, 28, 26, 26, 23, 20)
+nB_CB <- c(8, 10, 8, 10, 6, 9, 10)
+nTB_CB <- c(3, 3, 10, 9, 10, 10, 12, 12)
+
+x_S_TB_CB <- c(0, 0, 4, 1, 2, 1, 2, 1) #total TB: c(0, 0, 4, 1, 5, 2, 2, 1)
+x_B_TB_CB <- c(0, 0, 0, 0, 3, 1, 0, 0)
+x_S_B_CB  <- c(0, 3, 0, 4, 0, 3, 1, 1) #total Bruc: c(0, 4, 0, 4, 0, 3, 1, 1)
+x_TB_B_CB <- c(0, 1, 0, 0, 0, 0, 0, 0)
+
+# Assume the probability that the number of new bTB infections = 2 on first chunk
+# use data on the number sampled; model predicted incidence rate... 
+# ... calculate probability of observing the number of new infections observed
+dbinom(x = 2, size = NS[1], prob = pS_TB[1], log = FALSE) 
+
+# Evaluation data- Bootstrap prevalence estimates!
+#############################################################
+data <- read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/		final_datasets_copied_from_phdfolder/cross_sectional_data_withdz_cleandisease_nofinal_Feb2016_capturetime_forsurv.csv")
+
+overallbruc <- NA; overallbtb <- NA 
+brucintbneg <- NA; brucintbpos <- NA
+tbinbrucneg <- NA; tbinbrucpos <- NA
+for (i in 1:1000){
+	# sample one time point for each individual id (should be 151)
+	ssdata <- ddply(data, .(id), function(id) {id[sample(nrow(id), size = 1),]})
+	# calculate prevalence overall and infection specific
+	overallbruc[i] <- length(ssdata$bruc[ssdata$bruc=="positive"])/ length(ssdata$bruc)
+	overallbtb[i] <- length(ssdata$tb[ssdata$tb==1])/ length(ssdata$tb)
+	brucintbneg[i] <- length(ssdata$tb[ssdata$bruc=="positive" & ssdata$tb == 0]) / 
+		length(ssdata$tb[ssdata$tb==0])
+	brucintbpos[i] <- length(ssdata$tb[ssdata$bruc=="positive" & ssdata$tb == 1]) / 
+		length(ssdata$tb[ssdata$tb==1])
+	tbinbrucneg[i] <- length(ssdata$tb[ssdata$bruc=="negative" & ssdata$tb == 1]) / 
+		length(ssdata$tb[ssdata$bruc=="negative"])
+	tbinbrucpos[i] <- length(ssdata$tb[ssdata$bruc=="positive" & ssdata$tb == 1]) / 
+		length(ssdata$tb[ssdata$bruc=="positive"])
 }
+quantile(overallbruc, c(0.025, 0.25, 0.5, 0.75, 0.975)) 
+# 0.3112583 0.3311258 0.3443709 0.3576159 0.3774834 
+quantile(overallbtb, c(0.025, 0.25, 0.5, 0.75, 0.975))
+# 0.2317881 0.2582781 0.2715232 0.2847682 0.3112583
+quantile(brucintbneg, c(0.025, 0.25, 0.5, 0.75, 0.975))
+# 0.2654405 0.2892206 0.3035714 0.3181818 0.3451408
+quantile(brucintbpos, c(0.025, 0.25, 0.5, 0.75, 0.975))
+# 0.3657982 0.4222222 0.4523810 0.4864865 0.5405985
+quantile(tbinbrucneg, c(0.025, 0.25, 0.5, 0.75, 0.975))
+# 0.1781895 0.2103947 0.2268041 0.2448980 0.2783505
+quantile(tbinbrucpos, c(0.025, 0.25, 0.5, 0.75, 0.975))
+# 0.2857143 0.3333333 0.3584906 0.3818182 0.4313725
+
+
 
 plot_raw_numbers = function(sol){
 	plot(sol$time, sol$S, col= "black", type= 'l', ylim = c(0, 1200), ylab = "Number of animals", xlab = "Time (in years)")
@@ -103,92 +118,85 @@ plot_raw_numbers = function(sol){
 	legend("topright", legend = c("S", "It", "Ib", "Ic", "R", "Rc"), col = c("black", "red", "blue", "green", "orange", "pink"), bty="n", lty = 1)
 }
 
+#############################################################
+#############################################################
+3) Impliment Stochastic Version
+#############################################################
+#############################################################
+# no recovery
+params.fixed = c(fixed.params, gamma=1/2)
+params <- c(params.fixed, betaB = 0.003, betapB = 0.009, betaT = 0.0006, betapT = 0.0006000)
 
-#############################################################
-# Test Runs
-par(mfrow = c(1, 2))
-S0 = 500
-It0 = 50
-Ib0 = 50
-Ic0 = 0
-R0 = 0
-Rc0 = 0
-times <- seq(0, 100, 1)
-betaT <- 0.4
-betaB <- 0.6
-params = c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, 
-	b = b, r = r, K = K,
-	muS = muS, muB = muB, muT = muT, muR = muR, muRC = muRC, 
-	gamma = gamma, epsilon = epsilon,
-	betaT = betaT, betaB = betaB)  # betapT & betapB specified in function
-x0 = c(S = S0, It = It0, Ib = Ib0, Ic = Ic0, R = R0, Rc = Rc0,
-	Ic1 = 0, Ic2 = 0, Rc1 = 0, Rc2 = 0, 
-	TBfS = 0, BfS = 0, TBfB = 0, BfTB = 0)
-sol <- as.data.frame(ode(x0, times, rhs, params))  # returns as many columns as elements in x0
-plot_raw_numbers(sol)
+# recovery assumption
+params.recov <- c(fixed.params.recov, gamma = 1/2, betaB = 0.003, betapB = 0.009, betaT = 0.0006, betapT = 0.0006000)
 
-#############################################################
-# with longer lower mortality in buffalo recovered from brucellosis
-params = c(b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, 
-	b = b, r = r, K = K,
-	muS = muS, muB = muB, muT = muT, muR = muS, muRC = muT, 
-	gamma = gamma, epsilon = epsilon,
-	betaT = betaT, betaB = betaB) 
-sol <- as.data.frame(ode(x0, times, rhs, params))  # returns as many columns as elements in x0
-plot_raw_numbers(sol)
-
-#############################################################
-#############################################################
-# Add the simulation/sampling parts
-#############################################################
-#############################################################
-
-get_num_new_infections = function(betavals, params.fixed, herd){
-	# Run model at parameters
-    params0 = c(betaT = betavals[1], betaB = betavals[2])
-    Y0 <- c(S = 450, It = 20, Ib = 20, Ic = 0, R = 0, Rc = 10)
-	sol <- as.data.frame(ode(Y0, times, rhs, params= c(params0, params.fixed)))
-
-	# Randomly sample buffalo of age specified in first capture of LS/CB
-	#############################################################
-	# First get ages
-	if (herd == "LS"){
-		Page = LSage
-	} else if (herd == "CB"){
-		Page = CBage
+nsims <- 10	
+nstep <- 10000
+data<- run_stochastic_coinfection_model(params, nstep, nsims)
+data.recov <- run_stochastic_coinfection_model(params.recov, nstep, nsims)
+#betaB=0.001, betapB=0.003,betaT=0.0006,betapT=0.0006000)-> bruc dies out 
+#betaB=0.003, betapB=0.009,betaT=0.0006,betapT=0.0006000)-> tb dies out
+make_stochastic_plots = function(data){
+	par(mfrow = c(2, 2))
+	# It
+	plot(It~ cumtime, data= data[[1]], 
+		xlab = "Time", ylab = "It", type = 'o', cex = 0.3)
+	for (k in 1:nsims){
+		lines(It~cumtime, data = data[[k]], col = k, 
+		type = 'o', cex = 0.3)
 	}
-	# Define P(infection|age) based on model parameters... (now end state)
-	
-	
+	plot(Ib~ cumtime, data= data[[1]], 
+		xlab = "Time", ylab = "Ib", type = 'o', cex = 0.3)
+	for (k in 1:nsims){
+		lines(Ib~cumtime, data = data[[k]], col = k,
+		type = 'o', cex = 0.3)
+	}
+	plot(R~ cumtime, data= data[[1]], 
+		xlab = "Time", ylab = "Rb", type = 'o', cex = 0.3)
+	for (k in 1:nsims){
+		lines(R~cumtime, data = data[[k]], col = k, 
+		type = 'o', cex = 0.3)
+	}
+	plot(Ic~ cumtime, data= data[[1]],
+		xlab = "Time", ylab = "Ic", type = 'o', cex = 0.3)
+	for (k in 1:nsims){
+		lines(Ic~cumtime, data = data[[k]], col = k, 
+		type = 'o', cex = 0.3)
+	}
 }
-
-
+make_stochastic_plots(data)
+make_stochastic_plots(data.recov)  # both persist!
 #############################################################
 #############################################################
-# Fit to Data by maximizing poisson likelihood, deterministic
+# 4) Fit to Data by maximizing binomial likelihood, stochastic
 #############################################################
 #############################################################
-# ASSUMTION 1: FIXED RECOVERY, REACTIVATION RATE; muR = muS; muRC = muT
+# ASSUMTION 1: FIXED RECOVERY (2yrs) & REACTIVATION; muR = muI; muRC = muC
 #############################################################
-ML.sir = function(betavals, params.fixed, data){
+ML.sir.norecovery = function(betavals, params.fixed, data){
 	##############################################
 	# INPUT: 
 	# betavals = c(betat, betab)
 	# params.fixed = all other parameters
 	# data = number of new cases per capture (0.5/yr)= a list of length ?
 	# Returns: NLL value to be optimized. 
-    	##############################################
+    ##############################################
 
+	# model, expected incidence rates (per 0.5 year)
+	times <- seq(0, 500, 0.5)  
+
+	Y0 <- c(S = 950, It = 20, Ib = 20, Ic = 0, R = 0, Rc = 10)
+    params0 = c(betaT = betavals[1], betapT = betavals[1], 
+    		betaB = betavals[2], betapB = 3.92 * betavals[2])
+	sol <- as.data.frame(ode(Y0, times, rhs, parms= c(params0, params.fixed)))
+	
 	# Data
     obs_num_new_tb <- data$tb  # calculated as change in n frm t -1 to t
     obs_num_new_bruc <- data$br
     # obs_num_new_tb_co <- data$tbco
     # obs_num_new_bruc_co <- data$brucco
 
-	# Run model at parameters
-    params0 = c(betaT = betavals[1], betaB = betavals[2])
-    Y0 <- c(S = 450, It = 20, Ib = 20, Ic = 0, R = 0, Rc = 10)
-	sol <- as.data.frame(ode(Y0, times, rhs, params= c(params0, params.fixed)))
+
 
 	# Randomly sample 200 buffalo, with age distribution in data...
 	
@@ -208,7 +216,7 @@ ML.sir = function(betavals, params.fixed, data){
 }
 
 
-params.fixed = 
+params.fixed = c(fixed.params, gamma=1/2)
 times <- seq(0, 500, 0.5)  # now want data in half year time intervals.
 
 
@@ -220,3 +228,34 @@ times <- seq(0, 500, 0.5)  # now want data in half year time intervals.
 
 # ASSUMTION 3: ESTIMATE RECOVERY, REACTIVATION RATE; muR = muS; muRC = muT
 #############################################################
+
+
+
+
+
+
+# CUT STUFF: 
+#############################################################
+#############################################################
+# Data- assume binomially distributed likelihood
+# Data plots in prims
+#############################################################
+#############################################################
+new_TB_LS <- c(0, 1, 10, 3, 3, 2, 2, 1)
+new_TB_CB <- c(0, 0, 4, 1, 5, 2, 2, 1)
+new_B_LS <- c(0, 0, 0, 1, 4, 4, 3, 2)
+new_B_CB <- c(0, 4, 0, 4, 0, 3, 1, 1)
+#############################################################
+#############################################################
+# Write ODEs, density dependence... no age structure; \
+# note betapT and betapB not here
+# Keeping track of more than in model_TBbruc_derivs
+#############################################################
+#############################################################
+agedata <- read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/cross_sectional_data_withdz_cleandisease_nofinal_Feb2016_capturetime.csv")
+LSage <- agedata$age_yr[agedata$herdorig == "LS" & agedata$capturetime == 0]
+CBage <- agedata$age_yr[agedata$herdorig == "CB" & agedata$capturetime == 3]
+
+LS<- agedata[agedata$herdorig=="LS",]
+LSmass <- LS[LS$capturetime==0,]
+LSmass[,c(3, 22, 30)]

@@ -163,7 +163,8 @@ test.mod<-coxph(Surv(start, stop, convert.time)~ TB_3*age_yr2+herd2+ cluster(ani
 test.mod<-coxph(Surv(start, stop, convert.time)~ TB_3*age_yr2+TB_3*herd2+ cluster(animal), data=data); summary(test.mod)
 
 
-#Selection
+#Selection 
+
 test.mod<-coxph(Surv(start, stop, convert.time)~ TB_3*herd2+age_yr2+ cluster(animal), data=data); extractAIC(test.mod)
 test.mod<-coxph(Surv(start, stop, convert.time)~ TB_3*age_yr2+herd2+ cluster(animal), data=data); extractAIC(test.mod)
 temp<- data[data$convert.time==1,]
@@ -185,3 +186,9 @@ test.mod<-coxph(Surv(start, stop, convert.time)~ TB_3+herd2+age_yr2+ cluster(ani
 test.mod<-coxph(Surv(start, stop, convert.time)~ TB_3*herd2+age_yr2+ cluster(animal), data=data2); summary(test.mod)
 test.mod<-coxph(Surv(start, stop, convert.time)~ TB_3*age_yr2+herd2+ cluster(animal), data=data2); summary(test.mod)
 
+
+# ANd if use categories...above (REPORTED WITH CONTINUOUS AGE...)
+data$testage<- NA
+data$testage[data$age_yr <3] <- "young"
+data$testage[data$age_yr >= 3] <- "old"
+test.mod<-coxph(Surv(start, stop, convert.time)~ TB_3*herd2+testage+ cluster(animal), data=data);

@@ -109,14 +109,15 @@ Now consider the brucellosis only model:
 \frac{dR_{B}}{dt}&=  \gamma I_{B} - \epsilon R_{B} - \mu_{RB} R_{B} \\  										% Chronic brucellosis 
 \end{align*}
 
-$R_{o} ^B$ for brucellosis in the case that bTB is absent is, $R_{o}^{B} = \frac{\beta_B K}{\mu_S+\gamma + \delta}$  CHECK ME????? \\
+$R_{o} ^B$ for brucellosis in the case that bTB is absent is, $R_{o}^{B} = \frac{\beta_B K (\epsilon + \mu_R)}{(\gamma + \mu_B) (\epsilon + \mu_{RB}) + \epsilon \gamma}$ \\
 The endemic equilibrium for brucellosis when bTB is absent is $E* = (S_{t}^*, I_{Bt}^*, R_{Bt}^*)$, where 
-$S_{t}^* = 2, \\
-I_{Bt}^* = 2, \\
-R_{Bt}^* = 2$. \\
-$R_o$ for bTB when brucellosis is present is, $R_{o}^{T} = 2$. \\
-
-
+$S_{t}^* = \frac{K}{R_{o} ^B}$, \\
+$I_{Bt}^* = \frac{K}{2} \frac{1}{b_2(1+\delta)+ b_3 (\delta + \delta^2)} + \Big[b b_2 + b b_3 \delta - \frac{ \beta_B K}{R_o} - \frac{r + r \delta + b_2 + b_3 \delta}{R_o}\Big] +\\
+ \sqrt{4 + \frac{K}{b_2 (1-\delta) + b_3 (\delta + \delta^2)} \Big[b b_2 + b b_3 \delta - \frac{ \beta_B K}{R_o} - \frac{r + r \delta + b_2 + b_3 \delta}{R_o}\Big] ^2}$,\\
+$R_{Bt}^* =  \frac{\gamma I_{Bt}^*}{\epsilon - \mu_R}$. \\
+$R_o$ for bTB when brucellosis is present is evaluated at these conditions, where $\delta = \frac{\gamma}{\epsilon - \mu_R}.$
+$R_{o}^{T} = 2$. \\
+CHECK THIS WITH NUMERICAL INTEGRATION!!
 
 
 \pagebreak 

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2014) (preloaded format=pdflatex 2014.5.25)  24 AUG 2016 16:39
+This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2014) (preloaded format=pdflatex 2014.5.25)  2 SEP 2016 14:32
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -446,12 +446,12 @@ Overfull \hbox (1.65193pt too wide) detected at line 103
  []
 
 [5]
-Underfull \hbox (badness 10000) in paragraph at lines 112--118
+Underfull \hbox (badness 10000) in paragraph at lines 112--120
 
  []
 
 [6]
-Underfull \hbox (badness 10000) in paragraph at lines 123--141
+Underfull \hbox (badness 10000) in paragraph at lines 125--143
 
  []
 
@@ -484,7 +484,7 @@ onts/type1/public/amsfonts/cm/cmsy6.pfb></usr/local/texlive/2014/texmf-dist/fon
 ts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/texlive/2014/texmf-dist/fonts
 /type1/public/amsfonts/cm/cmti12.pfb>
 Output written on BTB_Bruc_coinfection_model_densitydepence_noagestructure.pdf 
-(12 pages, 567695 bytes).
+(12 pages, 569821 bytes).
 PDF statistics:
  236 PDF objects out of 1000 (max. 8388607)
  172 compressed objects within 2 object streams
