@@ -163,9 +163,8 @@ test.mod<-coxph(Surv(start, stop, convert.time)~ TB_3*age_yr2+herd2+ cluster(ani
 test.mod<-coxph(Surv(start, stop, convert.time)~ TB_3*age_yr2+TB_3*herd2+ cluster(animal), data=data); summary(test.mod)
 
 
-#Selection 
-
-test.mod<-coxph(Surv(start, stop, convert.time)~ TB_3*herd2+age_yr2+ cluster(animal), data=data); extractAIC(test.mod)
+#Selection (age, continuous)
+test.mod<-coxph(Surv(start, stop, convert.time)~ TB_3*herd2+age_yr2+ cluster(animal), data=data); extractAIC(test.mod) # 244.6, 
 test.mod<-coxph(Surv(start, stop, convert.time)~ TB_3*age_yr2+herd2+ cluster(animal), data=data); extractAIC(test.mod)
 temp<- data[data$convert.time==1,]
 
@@ -187,8 +186,19 @@ test.mod<-coxph(Surv(start, stop, convert.time)~ TB_3*herd2+age_yr2+ cluster(ani
 test.mod<-coxph(Surv(start, stop, convert.time)~ TB_3*age_yr2+herd2+ cluster(animal), data=data2); summary(test.mod)
 
 
-# ANd if use categories...above (REPORTED WITH CONTINUOUS AGE...)
+# And if use categories...above (REPORTED WITH CONTINUOUS AGE...)
 data$testage<- NA
 data$testage[data$age_yr <3] <- "young"
 data$testage[data$age_yr >= 3] <- "old"
 test.mod<-coxph(Surv(start, stop, convert.time)~ TB_3*herd2+testage+ cluster(animal), data=data);
+
+
+
+# Effect size for bTB: 
+1) In LS, continuous age, 3.9
+2) In CB, continuous age, 0.39 (TB*herd+age)
+3) In LS, >3, 4.32
+4) In CB, >3 0.39
+5) overall, continuous age (TB + herd + age), 1.9624 (p = 0.123, age is significant and negative)
+6) overall, categorical age, 2.129
+
