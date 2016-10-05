@@ -27,8 +27,8 @@ rhs = function(times, x, params){
 		# Frequency dependent force of infection is independent of age
 		lambdaT <- betaT * (It + Ic + Rc) 
 		lambdaB <- betaB * (Ib + Ic) 
-		lambdapT <- betapT * (It + Ic + Rc)
-		lambdapB <- betapB * (Ib + Ic) 
+		lambdapT <- rhoT * betaT * (It + Ic + Rc)
+		lambdapB <- rhoB * betaB * (Ib + Ic) 
 		
 		# differential equations
 		# assume mortality in chronics is same as active infection

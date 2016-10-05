@@ -77,7 +77,7 @@ table(data$tb[data$capturetime==3])
 table(data$bruc[data$capturetime==0])
 table(data$bruc[data$capturetime==3])
 ############################################################
-# make incidence dataset
+# make brucellosis incidence dataset
 surv<-read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/survival/brucsurvival_TB3controls_longresidnomissing_noerrors_season2_final.csv")
 
 # get IDs of brucellosis converters; tb converters
@@ -140,9 +140,89 @@ write.csv(dftoadd, "test.csv")
 # [61] "Y42"  "Y46b" "Y47" 
 # added to spreadsheet
 
+
+
+############################################################
+# make bTB incidence dataset
+# incidtb, idst 
+surv<-read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/survival/brucsurvival_TB3controls_longresidnomissing_noerrors_season2_final.csv")
+
+# get IDs of brucellosis converters; tb converters
+convertids<- as.character(unique(tbconvert$id))
+incidtb<-data[data$tb_beforeafter!="pfc",]    # from cross-sectional data
+idst <- as.character(unique(incidtb$id))
+
+idst[idst %in% surv$animal]
+idst[!(idst %in% surv$animal)]  
+# 20 buffalo missing from survival dataset: "B22b" "B28"  "B42b" "O35"  "O43"  "R15"  "R34"  "R40"  "R7"   "R9"   "Y2"   "Y23b" "Y24"  "Y26b" "Y30c" "Y33"  "Y45"  "Y7"   "Y7b"  "Y8" 
+
+# these are the ones added to the brucellosis dataset, can get info from the bTB dataset for most of these!
+#"B22b" "B28"  "B37b" "B42b" "O35"  "R15"  "R34"  "R40"  "R7"   "R9"   "Y2"   "Y23b" "Y24"  "Y26b" "Y33"  "Y45"  "Y7"   "Y7b"  "Y8" 
+# added all but R9 (not cleear dz status) and Y2 bTB status is fucked up
+# check not bolus
+
+incidt<-surv
+incidt$convert.time<-NA
+
+# remove all but the smallest time associated with being br positive.
+newdf<-NA
+temp <- incidt[incidt$animal==idst[1],]
+time <- min(temp$start[temp$TB_3==1])
+temp2 <- temp[temp$start <= time,]
+temp2$convert.time[temp2$start==time]<-1
+temp2$convert.time[temp2$start!=time]<-0
+newdf<-temp2
+
+for (i in 2:length(idst)){
+	temp <- incidt[incidt$animal== idst[i],]
+	if(length(temp[,1]) > 0){
+		if (length(temp$TB_3[temp$TB_3 == 1])>0) {
+			time <- min(temp$start[temp$TB_3 == 1])
+			temp2 <- temp[temp$start <= time,]
+			temp2$convert.time[temp2$start==time]<-1
+			temp2$convert.time[temp2$start!=time]<-0
+			newdf<- rbind(newdf, temp2)
+		}
+		else{
+			temp2 <- temp
+			temp2$convert.time <- 0
+			newdf<- rbind(newdf, temp2)
+		}
+	}
+}
+
+write.csv(newdf, "~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/tb_incidence.csv")
+# will have to add the remaining (20) buffalo in by hand...
+tb<-read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/brucellosis_incidence.csv")
+ids <- as.character(unique(tb$animal))
+
+incidt<-as.character(unique(data$id[data$tb_beforeafter!="pfc"]))
+toadd<- incidt[!(incidt %in% ids)]
+dftoadd<- surv[surv$animal %in% toadd,]
+
+
+#write.csv(dftoadd, "test.csv")
+
+# IDs in toadd... but already in incidence to spreadsheet- not added, checked!
+# [1] "B10"  "B2"   "B22"  "B33"  "B42"  "B43"  "B47b" "B5"   "B57"  "O13"  "O26b" "O30"  "O32c" "O40"  "O41"  "O42"  "O43"  "O51"  "R11"  "R20"  "R31"  #"R32"  "R33" "R43"  "R46"    "R8"   "R9"   "Y10b" "Y2"   "Y30"  "Y30c" "Y32"  "Y38"  # needs more thought!
+
+
+# Added to bTB_incidence.csv (2-October-2016)
+# 20 buffalo missing from survival dataset: "B22b" "B28"  "B42b" "O35"  "O43"  "R15"  "R34"  "R40"  "R7"   "R9"  
+#   "Y2"  "Y23b" "Y24"  "Y26b" "Y30c" "Y33"  "Y45"  "Y7"   "Y7b"  "Y8"   # not yet addded
+#NOTE R9 excluded because suspect brucellosis results! Y2 for bTB results
+
+#BOLUS: "R5" , other bolused animals that were previously in the survival df (and removed) are not in this one!
+
+
+#41 converters in cross-sectional data, 41 in bTB incidence data... 
+cross<-read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/cross_sectional_data_withdz_cleandisease_nofinal_Feb2016_capturetime_forsurv.csv")  # 5 animals added from last time
+
+
+
 ############################################################
 ############################################################
-# Models: 
+# Models- BRUCELLOSIS INCIDENCE
 ############################################################
 ############################################################
 data<- read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/brucellosis_incidence.csv")
@@ -185,14 +265,48 @@ test.mod<-coxph(Surv(start, stop, convert.time)~ TB_3+herd2+age_yr2+ cluster(ani
 test.mod<-coxph(Surv(start, stop, convert.time)~ TB_3*herd2+age_yr2+ cluster(animal), data=data2); summary(test.mod)
 test.mod<-coxph(Surv(start, stop, convert.time)~ TB_3*age_yr2+herd2+ cluster(animal), data=data2); summary(test.mod)
 
+data2<- data[data$age_yr2 <14,] # yes, still holds
+
 
 # And if use categories...above (REPORTED WITH CONTINUOUS AGE...)
 data$testage<- NA
 data$testage[data$age_yr <3] <- "young"
 data$testage[data$age_yr >= 3] <- "old"
-test.mod<-coxph(Surv(start, stop, convert.time)~ TB_3*herd2+testage+ cluster(animal), data=data);
+test.mod<-coxph(Surv(start, stop, convert.time)~ TB_3*herd2+testage+ cluster(animal), data=data); summary(test.mod) # 244.4092
+test.mod<-coxph(Surv(start, stop, convert.time)~ TB_3*herd2+TB_3*testage+ cluster(animal), data=data); summary(test.mod) #2 46.9492
+test.mod<-coxph(Surv(start, stop, convert.time)~ herd2+TB_3*testage+ cluster(animal), data=data); summary(test.mod) # 248.7528
+test.mod<-coxph(Surv(start, stop, convert.time)~ TB_3+herd2+testage+ cluster(animal), data=data); summary(test.mod) # 248.75
+
+data$age4<- NA
+data$age4[data$age_yr <4] <- "young"
+data$age4[data$age_yr >= 4] <- "old"
+data$age5<- NA
+data$age5[data$age_yr < 5] <- "young"
+data$age5[data$age_yr >= 5] <- "old"
+data$age2 <- NA
+data$age2[data$age_yr < 2] <- "young"
+data$age2[data$age_yr >= 2] <- "old"
+data$age3p <- NA
+data$age3p[data$age_yr < 3] <- "young"
+data$age3p[data$age_yr >= 3 & data$age_yr <5] <- "adult"
+data$age3p[data$age_yr >=5] <- "old"
+data$age2p <- NA
+data$age2p[data$age_yr < 2] <- "young"
+data$age2p[data$age_yr >= 2 & data$age_yr <4] <- "adult"
+data$age2p[data$age_yr >=4] <- "old"
 
 
+test.mod<-coxph(Surv(start, stop, convert.time)~ TB_3+age4+TB_3*herd2+ cluster(animal), data=data); summary(test.mod) # 247.3
+test.mod<-coxph(Surv(start, stop, convert.time)~ TB_3+age5+TB_3*herd2+ cluster(animal), data=data); summary(test.mod)  # 248.9
+test.mod<-coxph(Surv(start, stop, convert.time)~ TB_3*testage+herd2+ cluster(animal), data=data); summary(test.mod) #244.4
+
+# age category alone!
+test.mod<-coxph(Surv(start, stop, convert.time)~ testage + cluster(animal), data=data); summary(test.mod) # 248.0299
+test.mod<-coxph(Surv(start, stop, convert.time)~ age3p + cluster(animal), data=data); summary(test.mod) # 249.862
+test.mod<-coxph(Surv(start, stop, convert.time)~ age2 + cluster(animal), data=data); summary(test.mod) # 251.63
+test.mod<-coxph(Surv(start, stop, convert.time)~ age2p + cluster(animal), data=data); summary(test.mod) # 251.53
+test.mod<-coxph(Surv(start, stop, convert.time)~ age4 + cluster(animal), data=data); summary(test.mod) # 249.5333
+test.mod<-coxph(Surv(start, stop, convert.time)~ age5 + cluster(animal), data=data); summary(test.mod) # 250.5
 
 # Effect size for bTB: 
 1) In LS, continuous age, 3.9
@@ -202,3 +316,115 @@ test.mod<-coxph(Surv(start, stop, convert.time)~ TB_3*herd2+testage+ cluster(ani
 5) overall, continuous age (TB + herd + age), 1.9624 (p = 0.123, age is significant and negative)
 6) overall, categorical age, 2.129
 
+# EVALUATION: Do we trust that age term- or is this a
+test.mod<-coxph(Surv(start, stop, convert.time)~ TB_3*herd2+testage+ cluster(animal), data=data); summary(test.mod) # 244.4092
+temp<-cox.zph(test.mod)
+print(temp);
+par(mfrow=c(2,3))
+ plot(temp)
+#P. Grambsch and T. Therneau (1994), Proportional hazards tests and diagnostics based on weighted residuals. Biometrika, 81, 515-26.
+
+# residuals
+res<-resid(test.mod)
+
+# get predicted
+predRes <- predict(test.mod, type="risk")
+head(predRes, n=10)
+Shat2 <- survexp(~ TB_3, ratetable=test.mod, data=data)
+with(Shat2, head(data.frame(time, surv), n=4))
+#                 rho  chisq      p
+#TB_3         -0.0289 0.0388 0.8439
+#herd2CB      -0.3780 5.1152 0.0237
+#testageyoung -0.1638 1.2866 0.2567
+#GLOBAL            NA 5.1168 0.1634
+
+test.mod<-coxph(Surv(start, stop, convert.time)~ TB_3*herd2+testage+ herd2:stop+ herd2:TB_3:stop + cluster(animal), data=data); summary(test.mod) # 244.4092
+test.mod<-coxph(Surv(start, stop, convert.time)~ TB_3*herd2+testage+ herd2:stop+ herd2:stop + cluster(animal), data=data); summary(test.mod) # 244.4092
+
+test.mod<-coxph(Surv(start, stop, convert.time)~ TB_3*herd2+testage+ cluster(animal), data=data[data$start > 6,]); summary(test.mod) # 244.4092
+test.mod<-coxph(Surv(start, stop, convert.time)~ TB_3*herd2+testage+ cluster(animal), data=data[data$start < 6,]); summary(test.mod) # 244.4092
+
+# There is a postiive association with bTB in the later half of the study in Lower Sabie; earlier half of the study in CB. 
+# Age effect is independent of all this cluster!
+# Global constant hazard is ok; but some evidence that proporional hazards assumptions is violated for herd parameter... 
+# Argue that model inference overall is valid... 
+# coxph(formula = Surv(start, stop, convert.time) ~ TB_3 * herd2 + 
+#    testage + herd2:stop + herd2:stop + cluster(animal), data = data)
+
+#  n= 1049, number of events= 30 
+
+#                 coef exp(coef) se(coef) robust se      z Pr(>|z|)   
+#TB_3           1.3996    4.0538   0.5098    0.5430  2.578  0.00994 **
+#herd2CB        2.7468   15.5934   1.3391    1.0903  2.519  0.01176 * 
+#testageyoung   0.8466    2.3317   0.3891    0.4208  2.012  0.04422 * 
+#TB_3:herd2CB  -2.2221    0.1084   1.1568    1.2207 -1.820  0.06870 . 
+#herd2aLS:stop  0.2133    1.2378   0.1294    0.1117  1.910  0.05610 . 
+#herd2CB:stop       NA        NA   0.0000    0.0000     NA       NA   
+
+
+
+
+############################################################
+############################################################
+# Models- BTB INCIDENCE
+############################################################
+############################################################
+data<- read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/tb_incidence.csv")
+data$animal<-as.character(data$animal)
+data$age_yr2<- floor(data$age_yr)
+
+length(data$convert.time[data$convert.time==1])  # 41 converters. (131 buffalo)
+
+# just brucella additive models, age continuous (none significant)
+test.mod<-coxph(Surv(start, stop, convert.time)~ brucella+ cluster(animal), data=data)  # 0.23
+test.mod<-coxph(Surv(start, stop, convert.time)~ brucella +herd2+ cluster(animal), data=data); summary(test.mod)
+test.mod<-coxph(Surv(start, stop, convert.time)~ brucella +herd2+age_yr2+ cluster(animal), data=data); summary(test.mod)
+test.mod<-coxph(Surv(start, stop, convert.time)~ brucella +herd2+age_yr2+ I(age_yr2^2)+ cluster(animal), data=data); summary(test.mod) # no age^2
+
+# 2 way
+test.mod<-coxph(Surv(start, stop, convert.time)~ brucella*herd2+age_yr2+ cluster(animal), data=data); summary(test.mod)
+test.mod<-coxph(Surv(start, stop, convert.time)~ brucella*age_yr2+herd2+ I(age_yr2^2)+ cluster(animal), data=data); summary(test.mod) # sig
+test.mod<-coxph(Surv(start, stop, convert.time)~ brucella*I(age_yr2^2)+age_yr2+herd2+  cluster(animal), data=data); summary(test.mod) # sig
+test.mod<-coxph(Surv(start, stop, convert.time)~ brucella*herd2+age_yr2+ cluster(animal), data=data); summary(test.mod)
+test.mod<-coxph(Surv(start, stop, convert.time)~ brucella*age_yr2+herd2+ cluster(animal), data=data); summary(test.mod) # sig
+test.mod<-coxph(Surv(start, stop, convert.time)~ brucella*age_yr2+brucella*herd2+ cluster(animal), data=data); summary(test.mod)
+
+
+#Selection (age, continuous)-  models not significant after excluding the one 14 year old buffalo
+test.mod<-coxph(Surv(start, stop, convert.time)~ brucella*I(age_yr2^2)+age_yr2+herd2+  cluster(animal), data=data); extractAIC(test.mod) # 350.76
+test.mod<-coxph(Surv(start, stop, convert.time)~ brucella*age_yr2+herd2+ I(age_yr2^2)+ cluster(animal), data=data); extractAIC(test.mod) # 352.12
+test.mod<-coxph(Surv(start, stop, convert.time)~ brucella*age_yr2+herd2+ cluster(animal), data=data); extractAIC(test.mod)  # 350.18
+temp<- data[data$convert.time==1,]
+
+# set up age categories
+par(mfrow=c(1,2))
+hist(data$age_yr2, xlab="Age of first capture", col="lightgray")
+temp<- data[data$convert.time==1,]
+hist(temp$age_yr2, xlab="Age of first capture of converters", col="lightgray")
+
+data$testage<- NA
+data$testage[data$age_yr <3] <- "young"
+data$testage[data$age_yr >= 3] <- "old"
+
+
+data$age4<- NA
+data$age4[data$age_yr <4] <- "young"
+data$age4[data$age_yr >= 4] <- "old"
+data$age5<- NA
+data$age5[data$age_yr < 5] <- "young"
+data$age5[data$age_yr >= 5] <- "old"
+
+# just brucella additive models, age categorical (none significant)
+test.mod<-coxph(Surv(start, stop, convert.time)~ brucella +herd2+testage+ cluster(animal), data=data); summary(test.mod) # 1.29 times higher... but n.s.
+test.mod<-coxph(Surv(start, stop, convert.time)~ brucella +herd2+age4+ cluster(animal), data=data); summary(test.mod)
+test.mod<-coxph(Surv(start, stop, convert.time)~ brucella +herd2+age5+ cluster(animal), data=data); summary(test.mod)
+
+# two-way interactions
+test.mod<-coxph(Surv(start, stop, convert.time)~ brucella*testage +herd2+ cluster(animal), data=data); summary(test.mod) #n.s.
+test.mod<-coxph(Surv(start, stop, convert.time)~ brucella* age4 +herd2+ cluster(animal), data=data); summary(test.mod)
+test.mod<-coxph(Surv(start, stop, convert.time)~ brucella* age5 +herd2+ cluster(animal), data=data); summary(test.mod)
+
+# Selection (age, categorical)
+test.mod<-coxph(Surv(start, stop, convert.time)~ herd2 + testage+ cluster(animal), data=data); extractAIC(test.mod) 	# 347.86
+test.mod<-coxph(Surv(start, stop, convert.time)~ herd2 + age4+ cluster(animal), data=data); extractAIC(test.mod) 		# 350.79
+test.mod<-coxph(Surv(start, stop, convert.time)~ herd2 + age5+ cluster(animal), data=data); extractAIC(test.mod) 		# 349.6

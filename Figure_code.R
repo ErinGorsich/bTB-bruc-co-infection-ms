@@ -367,10 +367,10 @@ mort<-with(df, data.frame(
 	tb = c(0, 0, 1, 1, 0, 0, 1, 1), 
 	bruc = c(0, 0, 0, 0, 1, 1, 1, 1)))
 plot_add.mod<-coxph(Surv(start, stop, death.time)~herd+age+ tb+ bruc + cluster(animal), data=df)
-m<-survfit(plot_add.mod, newdata=mort)
+m<-survfit(plot_add.mod, newdata=mort); summary(m)
 m<-survfit(plot_add.mod, newdata=mort[mort$herd=="LS" & mort$age=="adult",]); summary(m)
 m<-survfit(plot_add.mod, newdata=mort[mort$herd=="CB" & mort$age=="adult",]); summary(m)
-summary(m)
+
 
 plot_add.mod<-coxph(Surv(start, stop, death.time)~age, data=df)
 m<-survfit(plot_add.mod, newdata=mort)
@@ -496,17 +496,17 @@ p4<- p3 +
 # plot predicted survival time (same as before but good): 
 df<-data.frame(start=data3$start2, stop=data3$stop2, death.time=data3$death.time, TB=data3$TB_3, Br=data3$brucella, age=data3$age6, herd=data3$herd)
 # set at average herd value (0.53) so not LS or CB. 
-mort<-with(df, data.frame(TB=0, Br=0, age=rep(mean(age=="adult"), 2), herd=rep(mean(herd=="LS"), 2)))
+mort<-with(df, data.frame(tb=0, bruc=0, age=rep(mean(age=="adult"), 2), herd=rep(mean(herd=="LS"), 2)))
 mortTB<-with(df, data.frame(TB=1, Br=0, age=rep(mean(age=="adult"),2), herd=rep(mean(herd=="LS"), 2)))
 mortBr<-with(df, data.frame(Br=1, TB=0, age=rep(mean(age=="adult"),2), herd=rep(mean(herd=="LS"), 2)))
 mortco<-with(df, data.frame(Br=1, TB=1, age=rep(mean(age=="adult"),2), herd=rep(mean(herd=="LS"), 2)))
-mort<-with(df, data.frame(TB=0, Br=0, age=0, herd=0))
-mortTB<-with(df, data.frame(TB=1, Br=0, age=0, herd=0))
-mortBr<-with(df, data.frame(Br=1, TB=0, age=0, herd=0))
-mortco<-with(df, data.frame(Br=1, TB=1, age=0, herd=0))
+mort<-with(df, data.frame(tb=0, bruc=0, age=0, herd=1))
+mortTB<-with(df, data.frame(tb=1, bruc=0, age=0, herd=1))
+mortBr<-with(df, data.frame(bruc=1, tb=0, age=0, herd=1))# herds = 0 or 1 (LS)
+mortco<-with(df, data.frame(bruc=1, tb=1, age=0, herd=1))
 
-plot_add.mod<-coxph(Surv(start, stop, death.time)~Br+herd+TB+herd+age, data=df)
-m<-survfit(plot_add.mod, newdata=mort)
+plot_add.mod<-coxph(Surv(start, stop, death.time)~bruc+herd+tb+herd+age, data=df)
+m<-survfit(plot_add.mod, newdata=mort)  # adults, herd - CB
 mt<-survfit(plot_add.mod, newdata=mortTB)
 mb<-survfit(plot_add.mod, newdata=mortBr)
 mco<-survfit(plot_add.mod, newdata=mortco)

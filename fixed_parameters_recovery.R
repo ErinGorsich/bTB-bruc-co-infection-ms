@@ -30,12 +30,18 @@ muSa[5] <-  1- 0.963 # mortality rate in adults 5+  (1/yr)
 muS <- sum(muSa* relage) 
 
 # mortality, TB, and Brucellosis positive animals
-muT <- 2.82 * muS
-muB <- 3.02 * muS
-muC <- (2.82 + 3.02) * muS
+#muT <- 2.82 * muS
+#muB <- 3.02 * muS
+#muC <- (2.82 + 3.02) * muS
+#muRC <- muT
+#muR <- muS
+
+muS <- 1 - 0.96
+muB <- 1 - 0.89
+muT <- 1 - 0.899
+muC <- 1 - 0.724
 muRC <- muT
 muR <- muS
-
 #############################################################
 # births
 #############################################################

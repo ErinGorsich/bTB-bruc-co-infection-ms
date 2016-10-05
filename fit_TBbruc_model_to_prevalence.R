@@ -2,7 +2,7 @@
 #############################################################
 #############################################################
 #############################################################
-# Code to fit model (defined in run_stochastic_coinfection_model), to data incidence rate data
+# Code to fit model to prevalence data (BETAB = 3.8* BETAB)
 # 27- Sept- 2016
 #############################################################
 #############################################################
@@ -38,7 +38,7 @@ source('~/GitHub/bTB-bruc-co-infection-ms/fixed_parameters_norecovery.R', chdir 
 source('~/GitHub/bTB-bruc-co-infection-ms/rhs.R', chdir = TRUE) 
 # functions to run the stochastic co-infection model
 source('~/GitHub/bTB-bruc-co-infection-ms/run_stochastic_coinfection_model.R', chdir = TRUE)
-source('~/GitHub/bTB-bruc-co-infection-ms/rhs_optim.R', chdir = TRUE)
+source('~/GitHub/bTB-bruc-co-infection-ms/rhs_optim.R', chdir = TRUE)   
 
 #############################################################
 #############################################################
@@ -185,9 +185,9 @@ prevTBobsCB <- 0.28; prevBobsCB <- 0.33
 #############################################################
 objective = function(params.est){
 	# params.est = 2 long = c(betaB, betaT)
-	params <- c(params.fixed, betaB = params.est[1], betaT = params.est[2])
+	params <- c(params.fixed, betaB = params.est[1], betaT = params.est[2], rhoB = 2.1, rhoT = 1.3)
 	# seed from endemic brucellosis conditions, 10 bTB positive buffalo
-	x0 = get_starting_eqbruc(params = c(params, betapT = params.est[2], betapB = 3.92 * params.est[1]))
+	x0 = get_starting_eqbruc(params = c(params))
 	x0[[2]] <- x0[[2]] + 10
 	x0[[1]] <- x0[[1]] - 10  
 	sol <- as.data.frame(ode(x0, times, rhs_optim, params)) # rhs_optim shouldn't get betap's
@@ -199,27 +199,38 @@ objective = function(params.est){
 }
 betaB = 0.003; betaT = 0.0006
 times <- seq(0, 100, 1)
+params.fixed = c(fixed.params, gamma=1/2)
+# make sure optimizer is smooth
+betatest<- seq(0.00001, 0.001, 0.00002); 
+df <- data.frame(betaB = rep(betatest, 3), 
+	betaT = rep(c(0.0001, 0.005, 0.001), each = length(betatest)), 
+	out = NA)
+for(i in 1:length(df[,1])){
+	df$out[i] <- objective(c(df$betaB[i], df$betaT[i]))
+}
+par(mfrow = c(1,3))
+plot(df$out[df$betaT == 0.0001]~df$betaB[df$betaT == 0.0001])
+plot(df$out[df$betaT == 0.005]~df$betaB[df$betaT == 0.005])
+plot(df$out[df$betaT == 0.001]~df$betaB[df$betaT == 0.001])
 
 # H1_1: no recovery from mortality rates!,
 params.fixed = c(fixed.params, gamma=1/2)
 parH1_1 <- optim(c(0.001, 0.001), objective)
-#$par
-#[1] 0.0015010551 0.0009817686
 paramsH1.1 <- c(params.fixed, betab = parH1_1$par[1], betat = parH1_1$par[2])  # run with rhs_optim
 
 # H1_2: no recovery from mortality rates!, 
 params.fixed = c(fixed.params.recov, gamma = 1/2)
 parH1_2 <- optim(c(0.001, 0.001), objective) 
-#[1] 0.0011525874 0.0005426215
 paramsH1.2 <- c(params.fixed, betab = parH1_2$par[1], betat = parH1_2$par[2]) 
 
-# H2: fit beta and gamma
+
+# H2: fit beta and gamma (DOES NOT WORK WITHONLY PREVALENCE)
 #############################################################
 objective = function(params.est){
 	# params.est = 2 long = c(betaB, betaT, gamma)
-	params <- c(params.fixed, betaB = params.est[1], betaT = params.est[2], gamma = params.est[3])
+	params <- c(params.fixed, betaB = params.est[1], betaT = params.est[2], gamma = params.est[3], rhoB = 4.05, rhoT = 1.3)
 	# seed from endemic brucellosis conditions, 10 bTB positive buffalo
-	x0 = get_starting_eqbruc(params = c(params, betapT = params.est[2], betapB = 3.92 * params.est[1]))
+	x0 = get_starting_eqbruc(params = c(params))  
 	x0[[2]] <- x0[[2]] + 10
 	x0[[1]] <- x0[[1]] - 10  
 	sol <- as.data.frame(ode(x0, times, rhs_optim, params)) # rhs_optim shouldn't get betap's
@@ -229,57 +240,19 @@ objective = function(params.est){
 	error <- sqrt(((prevTBobs - prevTB)^2 + (prevBobs - prevB)^2))
 	return (error)
 }
-betaB = 0.003; betaT = 0.0006; gamma = 1/2
-
+betaB = 0.0003; betaT = 0.0006; gamma = 1/2
 # H1: no recovery from mortality rates!,
 params.fixed = c(fixed.params)
-parH2_1 <- optim(c(0.001, 0.001, 0.5), objective)  #[1] 0.0015116517 0.0009817686 0.5065236737
-# parH2_1 <- optim(c(0.001, 0.001, 0.1), objective)  # 0.0008731309 0.0009817686 0.1122180324
+parH2_1 <- optim(c(0.0003, 0.0001, 0.5), objective)  
+parH2_1.1 <- optim(c(0.0001, 0.0001, 0.1), objective) # get different values... based on initials.  Don't estimate both!
 
-#parH2_1LS <- optim(c(0.001, 0.001, 0.5), objective)  #[1] 0.0015116517 0.0009817686 0.5065236737
-#parH2_1CB <- optim(c(0.001, 0.001, 0.5), objective)  #[1] 0.0015116517 0.0009817686 0.5065236737
-
-paramsH2.1 <- c(params.fixed, gamma = parH2_1$par[3], betab = parH2_1$par[1], betat = parH2_1$par[2])  
+#parH2_1LS <- optim(c(0.001, 0.001, 0.5), objective)  
+#parH2_1CB <- optim(c(0.001, 0.001, 0.5), objective) 
+paramsH2.1 <- c(params.fixed, gamma = parH2_1.1$par[3], betab = parH2_1.1$par[1], betat = parH2_1$par[2])  
 
 # H2: recovery from mortality rates!, 
 params.fixed = c(fixed.params.recov)
-parH2_2 <- optim(c(0.001, 0.001, 0.5), objective)
-#[1] 0.0011213656 0.0005479454 0.4715249588
-paramsH2.2 <- c(params.fixed, gamma = parH2_2$par[3], betab = parH2_2$par[1], betat = parH2_2$par[2])  
-
-
-# H3: fit beta, gamma, epsilon- DOES NOT WORK!
-#############################################################
-objective = function(params.est){
-	# params.est = 3 long = c(betaB, betaT, gamma, epsilon)
-	params <- c(params.fixed[-15], epsilon = params.est[4], betaB = params.est[1], 
-		betaT = params.est[2], gamma = params.est[3])
-	# seed from endemic brucellosis conditions, 10 bTB positive buffalo
-	x0 = get_starting_eqbruc(params = c(params, betapT = params.est[2], betapB = 3.92 * params.est[1]))
-	x0[[2]] <- x0[[2]] + 10
-	x0[[1]] <- x0[[1]] - 10  
-	sol <- as.data.frame(ode(x0, times, rhs_optim, params)) # rhs_optim shouldn't get betap's
-	df <- groom_sol(sol)
-	prevTB <- df$TBprev[length(df[,1])]
-	prevB <- df$Brucprev[length(df[,1])]
-	error <- sqrt(((prevTBobs - prevTB)^2 + (prevBobs - prevB)^2))
-	return (error)
-}
-
-betaB = 0.003; betaT = 0.0006; gamma = 1/2, epsilon = 0.1
-
-# H1: no recovery from mortality rates!,
-params.fixed = c(fixed.params)
-parH3_1 <- optim(c(0.001, 0.001, 0.5, 0.1), objective) 
-#At initals (0.001, 0.001, 0.5, 0.1) #0.0013056522 0.0009817686 0.5000315108 0.1471389833
-parH3_1.2 <- optim(c(0.001, 0.001, 0.2, 0.05), objective) #0.0009874805 0.0009817687 0.1999996446 0.0501765831
-parH3_1.3 <- optim(c(0.003, 0.003, 0.5, 0.5), objective) #0.0011060417 0.0009817686 0.5477492790 0.5010306060
-paramsH3.1 <- c(params.fixed, epsilon = parH3_1$par[4], gamma = parH3_1$par[3], betab = parH3_1$par[1], betat = parH3_1$par[2])  
-
-# H2: recovery from mortality rates!, 
-params.fixed = c(fixed.params.recov)
-parH2_2 <- optim(c(0.001, 0.001, 0.5), objective)
-#[1] 0.0011213656 0.0005479454 0.4715249588
+parH2_2 <- optim(c(0.0001, 0.001, 0.1), objective)
 paramsH2.2 <- c(params.fixed, gamma = parH2_2$par[3], betab = parH2_2$par[1], betat = parH2_2$par[2])  
 
 
@@ -321,22 +294,98 @@ get_sum_stats = function(recoveryassumption, params.variable){
 	
 # fill with predictions!
 df$recoveryassumption <- as.character(df$recoveryassumption)
-for (i in 1:length(df[,1])){
+#for (i in 1:length(df[,1])){
+for (i in 1:2){
 	ra <- df$recoveryassumption[i]
 	params.variable <- c(gamma = df$gamma[i], betaB = df$betaB[i], betaT = df$betaT[i],
-		betapT = df$betaT[i], betapB = 3.92 * df$betaB[i])
+		rhoB = 3.8, rhoT = 1)
 	df[i,c(6:11)] <- get_sum_stats(recoveryassumption = ra, 
 		params.variable = params.variable)
 	rm(ra, params.variable)
 }
 
-#df
-#paramsestimated recoveryassumption betaB  betaT   gamma    TBprev  Brucprev TBprevinS TBprevinCo BrucprevinS BrucprevinCo
-#transmission			none 	0.001501 0.0009817 0.5000000 0.2700000 0.3400000 0.1631878  0.47734  0.24343  0.6011
-#transmission			recovery 0.001152 0.0005426 0.5000000 0.2700008 0.3400007 0.1603991  0.48276  0.24091  0.6079
-#tranmssion&recovery	none 	0.001511 0.0009818 0.5065237 0.2700000 0.3400000 0.1631878  0.47734  0.24343  0.6011
-#tranmssion&recovery	recovery 0.001121 0.0005479 0.4715250 0.2700008 0.3400007 0.1603439  0.48286  0.24086  0.6080
+# WITH RHOB = 3.8, RHOT = 1
+# paramsestimated recoveryassumption        betaB        betaT     gamma    		TBprev  Brucprev TBprevinS 	TBprevinCo BrucprevinS BrucprevinCo
+#1        transmission               none 0.0007804677 0.0003206634 0.5000000 0.2699995 0.3399999 0.1777097  0.4491502   0.2565600    0.5655975
+#2        transmission           recovery 0.0006768438 0.0001704345 0.5000000 0.2885072 0.3435391 0.1750562  0.5052979   0.2388633    0.6016821
+#3 tranmssion&recovery               none 0.0007816310 0.0003206634 0.5010354 0.2699995 0.3399999 0.1777097  0.4491502   0.2565600    0.5655975
+#4 tranmssion&recovery           recovery 0.0003010961 0.0002121311 0.1008721 0.2704056 0.3400351 0.1674170  0.4702934   0.2468753    0.5913941
 
+# WITH RhoB = 2.1, RHOT = 1
+
+
+# WITH RhoB = 4.05, RhoT = 1.3
+#     paramsestimated recoveryassumption         betaB         betaT    gamma       TBprev     Brucprev    TBprevinS    TBprevinCo  BrucprevinS BrucprevinCo
+#1        transmission               none  0.0007853113  0.0003092429 0.500000 2.497377e-01 3.377416e-01 1.639872e-01  4.178810e-01 2.620494e-01    0.5651361
+#2        transmission           recovery  0.0006815121  0.0001591978 0.500000 2.482541e-01 3.347141e-01 1.503945e-01  4.427623e-01 2.481096e-01    0.5969641
+#3 tranmssion&recovery               none  0.0003377280  0.0003092429 0.101361 2.413435e-01 3.464417e-01 1.555824e-01  4.031309e-01 2.725612e-01    0.5786829
+#4 tranmssion&recovery           recovery -0.0032333333 -0.0056666667 0.110000 1.840844e-72 2.424844e-44 1.722342e-69 -7.095308e-26 2.424844e-44 -934.6264147
+
+
+# WITH RhoB = 2.1, RhoT = 1.3
+#   paramsestimated recoveryassumption         betaB         betaT    gamma    TBprev  Brucprev  TBprevinS TBprevinCo BrucprevinS BrucprevinCo
+#1        transmission               none  0.0009316195  0.0002797068 0.500000 0.1381098 0.3895812 0.08004476  0.2290894   0.3484577    0.6462174
+#2        transmission           recovery  0.0008050712  0.0001533393 0.500000 0.2175334 0.4089502 0.11139154  0.3709386   0.3287742    0.6973432
+
+
+
+
+
+# Brucellosis prevalence before bTB (no recovery, RhoB=4, rhoT=1.3 looks best!)- same as after bTB
+params = c(params.fixed, betaB= 0.0007853113, betaT = 0.0003092429, rhoT = 1.3, rhoB = 4.05)#check,gamma=0.5
+get_starting_eqbruc(params = params)  
+#       S        It        Ib        Ic         R        Rc 
+#649.42399   0.00000  31.37793   0.00000 313.77927   0.00000 
+(31.377+313.779) / (649.424 + 31.377 + 313.779) #0.3470369
+
+# Effect of brucellosis on bTB invasion: 
+RoTB = params['betaT']* params['K']/ params['muT']  # 3.061811
+RoB = (params[['betaB']] * params[['K']]* (params[['epsilon']] + params[['muR']]) ) /
+	( (params[['gamma']] + params[['muB']]) * (params[['epsilon']] + params[['muR']]) + params[['epsilon']] * params[['gamma']])  # 1.106
+
+RoTBwithC = function(params, x){
+	# Input = parameters and x = equlibrium brucellosis conditions
+	with(as.list(c(x, params)), {
+		betapT = rhoT * betaT
+		betapB = rhoB * betaB
+		Ro = (betapT * R) / (I * betapB + muT) + 
+		(betapT * R * betapB * I * (muRC + epsilon)) / ((I * betapB + muT) * (muC * muRC + muC * epsilon + muRC * gamma)) +
+		(betapT * R * betapB * I * gamma) / ( (I * betapB + muT) * (muC * muRC + muC * epsilon + muRC * gamma) ) + 
+		((betapT * R * (muRC + epsilon)) / (muC * muRC + muC * epsilon + muRC * gamma)) *
+		((betapT * R * gamma) / (muC * muRC + muC * epsilon + muRC * gamma)) + 
+		((betapT * R * gamma) / (muC * muRC + muC * epsilon + muRC * gamma)) * 
+		((betapT * R * epsilon) / (muC * muRC + muC * epsilon + muRC * gamma)) + 
+		(betapT * R * (gamma + muC)) / (muC * muRC + muC * epsilon + muRC * gamma)
+		return(Ro)
+	}
+	)
+}
+
+get_x_analytic_endemic_brucellosis = function(params, RoB= RoB){ 
+	with(as.list(c(params)), {
+		S = K / RoB
+		
+		# solve polynomial to get I 
+		delta = gamma / (epsilon + muR)
+		ap = (-b2 - b3 * delta - b3 * delta - b3 * (delta^2)) * r / K
+		bp = b * b2 + b * b3 * delta - betaB * S - 
+			(r / K) * (S + S * delta + b2 *S + b3 * delta * S)
+		cp = b * S - muS * S - (r * (S^2) / K)
+		I1 = 0.5 * (- bp + sqrt(bp^2 - 4 * ap * cp )) / ap
+		I2 = 0.5 * (- bp - sqrt(bp^2 - 4 * ap * cp )) / ap 
+		I = max(I1, I2)
+		
+		# R is a ratio of I
+		R = I * delta
+
+		x = c(S= S, I = I, R = R)
+	return(x)
+	}
+	)
+}
+
+x = get_x_analytic_endemic_brucellosis(params)
+RoTBwithC(params = params, x = x)  # 0.2684736
 
 #############################################################
 #############################################################
@@ -358,7 +407,7 @@ objective_recov = function(params.est, epsilon, gamma){
 	params <- c(fixed.params.recov[-15], epsilon = epsilon, gamma = gamma, betaB = params.est[1], 
 		betaT = params.est[2])
 	# seed from endemic brucellosis conditions, 10 bTB positive buffalo
-	x0 = get_starting_eqbruc(params = c(params, betapT = params.est[2], betapB = 3.92 * params.est[1]))
+	x0 = get_starting_eqbruc(params = c(params, betapT = params.est[2], betapB = 2.1 * params.est[1]))  #3.92
 	x0[[2]] <- x0[[2]] + 10
 	x0[[1]] <- x0[[1]] - 10  
 	sol <- as.data.frame(ode(x0, times, rhs_optim, params)) # rhs_optim shouldn't get betap's
@@ -373,7 +422,7 @@ objective_norecov = function(params.est, epsilon, gamma){
 	params <- c(fixed.params[-15], epsilon = epsilon, gamma = gamma, betaB = params.est[1], 
 		betaT = params.est[2])
 	# seed from endemic brucellosis conditions, 10 bTB positive buffalo
-	x0 = get_starting_eqbruc(params = c(params, betapT = params.est[2], betapB = 3.92 * params.est[1]))
+	x0 = get_starting_eqbruc(params = c(params, betapT = params.est[2], betapB = 2.1 * params.est[1]))   # 3.92
 	x0[[2]] <- x0[[2]] + 10
 	x0[[1]] <- x0[[1]] - 10  
 	sol <- as.data.frame(ode(x0, times, rhs_optim, params)) # rhs_optim shouldn't get betap's
@@ -392,7 +441,7 @@ objective_all_norecov = function(params.est, epsilon, gamma){
 	params <- c(fixed.params[-15], epsilon = epsilon, gamma = gamma, betaB = params.est[1], 
 		betaT = params.est[2])
 	# seed from endemic brucellosis conditions, 10 bTB positive buffalo
-	x0 = get_starting_eqbruc(params = c(params, betapT = params.est[2], betapB = 3.92 * params.est[1]))
+	x0 = get_starting_eqbruc(params = c(params, betapT = params.est[2], betapB = 2.1 * params.est[1]))   # 3.92
 	x0[[2]] <- x0[[2]] + 10
 	x0[[1]] <- x0[[1]] - 10  
 	sol <- as.data.frame(ode(x0, times, rhs_optim, params)) # rhs_optim shouldn't get betap's
@@ -416,7 +465,7 @@ objective_all_recov = function(params.est, epsilon, gamma){
 	params <- c(fixed.params.recov[-15], epsilon = epsilon, gamma = gamma, betaB = params.est[1], 
 		betaT = params.est[2])
 	# seed from endemic brucellosis conditions, 10 bTB positive buffalo
-	x0 = get_starting_eqbruc(params = c(params, betapT = params.est[2], betapB = 3.92 * params.est[1]))
+	x0 = get_starting_eqbruc(params = c(params, betapT = params.est[2], betapB = 2.1 * params.est[1]))  # 3.92
 	x0[[2]] <- x0[[2]] + 10
 	x0[[1]] <- x0[[1]] - 10  
 	sol <- as.data.frame(ode(x0, times, rhs_optim, params)) # rhs_optim shouldn't get betap's
