@@ -361,6 +361,7 @@ test.mod<-coxph(Surv(start, stop, convert.time)~ TB_3*herd2+testage+ cluster(ani
 #herd2aLS:stop  0.2133    1.2378   0.1294    0.1117  1.910  0.05610 . 
 #herd2CB:stop       NA        NA   0.0000    0.0000     NA       NA   
 
+test.mod<-coxph(Surv(start, stop, convert.time)~ TB_3*herd2+testage+ herd2:stop + cluster(animal), data=data); summary(test.mod) # 244.4092
 
 
 

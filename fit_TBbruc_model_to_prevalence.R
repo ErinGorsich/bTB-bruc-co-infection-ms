@@ -180,12 +180,35 @@ get_starting_eqbruc = function(params){
 prevTBobs <- 0.27; prevBobs <- 0.34
 prevTBobsLS <- 0.27; prevBobsLS <- 0.35
 prevTBobsCB <- 0.28; prevBobsCB <- 0.33
+prevBinSobs <- 0.30; prevBinTobs <- 0.45
+prevTinSobs <- 0.227; prevTinBobs <- 0.358
+
+
+# Test plots
+S0 = 500; It0 = 0; Ib0 = 10; Ic0 = 0; R0 = 0; Rc0 = 0
+x0 = c(S = S0, It = It0, Ib = Ib0, Ic = Ic0, R = R0, Rc = Rc0)
+times <- seq(0, 100, 1)
+params.test = c(fixed.params, gamma=1/2, betaB = 0.001, betaT = 0.002, rhoT = 1.2, rhoB = 4)
+params.test.recov = c(fixed.params.recov, gamma=1/2, betaB = 0.002, betaT = 0.002, rhoT = 1.2, rhoB = 4)
+sol <- as.data.frame(ode(x0, times, rhs, params.test))
+sol.recov<- as.data.frame(ode(x0, times, rhs, params.test.recov))
+par(mfrow=c(1,2))
+plot_raw_numbers(sol)
+plot_raw_numbers(sol.recov)
+
+
+x0 = get_starting_eqbruc(params = params.test)
+x0[[2]]<- 10
+sol <- as.data.frame(ode(x0, times, rhs, params.test))
+plot_raw_numbers(sol)
+
+
 
 # H1:  fit just transmission rates
 #############################################################
 objective = function(params.est){
 	# params.est = 2 long = c(betaB, betaT)
-	params <- c(params.fixed, betaB = params.est[1], betaT = params.est[2], rhoB = 2.1, rhoT = 1.3)
+	params <- c(params.fixed, betaB = params.est[1], betaT = params.est[2], rhoB = 4, rhoT = 1.3)
 	# seed from endemic brucellosis conditions, 10 bTB positive buffalo
 	x0 = get_starting_eqbruc(params = c(params))
 	x0[[2]] <- x0[[2]] + 10
@@ -201,7 +224,7 @@ betaB = 0.003; betaT = 0.0006
 times <- seq(0, 100, 1)
 params.fixed = c(fixed.params, gamma=1/2)
 # make sure optimizer is smooth
-betatest<- seq(0.00001, 0.001, 0.00002); 
+betatest<- seq(0.00001, 0.002, 0.00002); 
 df <- data.frame(betaB = rep(betatest, 3), 
 	betaT = rep(c(0.0001, 0.005, 0.001), each = length(betatest)), 
 	out = NA)
@@ -224,7 +247,7 @@ parH1_2 <- optim(c(0.001, 0.001), objective)
 paramsH1.2 <- c(params.fixed, betab = parH1_2$par[1], betat = parH1_2$par[2]) 
 
 
-# H2: fit beta and gamma (DOES NOT WORK WITHONLY PREVALENCE)
+# H2: fit beta and gamma (DOES NOT WORK WITHONLY PREVALENCE- Fit to co-infection patterns)
 #############################################################
 objective = function(params.est){
 	# params.est = 2 long = c(betaB, betaT, gamma)
@@ -237,22 +260,29 @@ objective = function(params.est){
 	df <- groom_sol(sol)
 	prevTB <- df$TBprev[length(df[,1])]
 	prevB <- df$Brucprev[length(df[,1])]
-	error <- sqrt(((prevTBobs - prevTB)^2 + (prevBobs - prevB)^2))
+	df$TBprevinS <- df$It / (df$S + df$It)
+	df$TBprevinCo <- (df$Ic + df$Rc) / (df$Ib + df$R + df$Ic + df$Rc)
+	df$BrucprevinS <- (df$Ib + df$R) / (df$S + df$Ib + df$R)
+	df$BrucprevinCo <- (df$Ic + df$Rc) / (df$Ic + df$Rc + df$It)
+	prevTinS <- df$TBprevinS[length(df[,1])]
+	prevTinB <- df$TBprevinCo[length(df[,1])]
+	prevBinS <- df$BrucprevinS[length(df[,1])]
+	prevBinT <- df$BrucprevinCo[length(df[,1])]
+	error <- sqrt(((prevTBobs - prevTB)^2 + (prevBobs - prevB)^2 + 
+		(prevBinSobs - prevBinS)^2 + (prevBinTobs - prevBinT)^2 + 
+		(prevTinSobs - prevTinS)^2 + (prevTinBobs - prevTinB)^2))
 	return (error)
 }
 betaB = 0.0003; betaT = 0.0006; gamma = 1/2
 # H1: no recovery from mortality rates!,
 params.fixed = c(fixed.params)
-parH2_1 <- optim(c(0.0003, 0.0001, 0.5), objective)  
-parH2_1.1 <- optim(c(0.0001, 0.0001, 0.1), objective) # get different values... based on initials.  Don't estimate both!
-
-#parH2_1LS <- optim(c(0.001, 0.001, 0.5), objective)  
-#parH2_1CB <- optim(c(0.001, 0.001, 0.5), objective) 
+parH2_1 <- optim(c(0.001, 0.001, 0.5), objective)  
+parH2_1.1 <- optim(c(0.001, 0.001, 0.3), objective) # get different values... based on initials.  Don't estimate both!
 paramsH2.1 <- c(params.fixed, gamma = parH2_1.1$par[3], betab = parH2_1.1$par[1], betat = parH2_1$par[2])  
 
 # H2: recovery from mortality rates!, 
 params.fixed = c(fixed.params.recov)
-parH2_2 <- optim(c(0.0001, 0.001, 0.1), objective)
+parH2_2 <- optim(c(0.0001, 0.0001, 0.3), objective)
 paramsH2.2 <- c(params.fixed, gamma = parH2_2$par[3], betab = parH2_2$par[1], betat = parH2_2$par[2])  
 
 
@@ -262,7 +292,7 @@ df <- data.frame(paramsestimated = c(rep("transmission", 2), rep("tranmssion&rec
 	betaT = c(paramsH1.1[[18]], paramsH1.2[[18]], paramsH2.1[[18]], paramsH2.2[[18]]), 
 	gamma = c(0.5, 0.5, paramsH2.1[[16]], paramsH2.2[[16]]),
 	TBprev = NA, Brucprev = NA, TBprevinS = NA, TBprevinCo = NA, BrucprevinS = NA, BrucprevinCo = NA)
-	
+
 get_sum_stats = function(recoveryassumption, params.variable){
 	if(recoveryassumption == "none"){
 		params = c(fixed.params, params.variable)
@@ -294,8 +324,7 @@ get_sum_stats = function(recoveryassumption, params.variable){
 	
 # fill with predictions!
 df$recoveryassumption <- as.character(df$recoveryassumption)
-#for (i in 1:length(df[,1])){
-for (i in 1:2){
+for (i in 1:length(df[,1])){
 	ra <- df$recoveryassumption[i]
 	params.variable <- c(gamma = df$gamma[i], betaB = df$betaB[i], betaT = df$betaT[i],
 		rhoB = 3.8, rhoT = 1)
@@ -303,6 +332,7 @@ for (i in 1:2){
 		params.variable = params.variable)
 	rm(ra, params.variable)
 }
+df[5,] <- c(as.factor("want"), NA, NA, NA, NA, prevTBobs, prevBobs, prevTinSobs, prevTinBobs, prevBinSobs, prevBinTobs)
 
 # WITH RHOB = 3.8, RHOT = 1
 # paramsestimated recoveryassumption        betaB        betaT     gamma    		TBprev  Brucprev TBprevinS 	TBprevinCo BrucprevinS BrucprevinCo
@@ -327,12 +357,46 @@ for (i in 1:2){
 #1        transmission               none  0.0009316195  0.0002797068 0.500000 0.1381098 0.3895812 0.08004476  0.2290894   0.3484577    0.6462174
 #2        transmission           recovery  0.0008050712  0.0001533393 0.500000 0.2175334 0.4089502 0.11139154  0.3709386   0.3287742    0.6973432
 
+# with Rho = 4.05, RhoT = 1.3, birth rate correct
+      paramsestimated recoveryassumption        betaB        betaT     gamma    TBprev  Brucprev TBprevinS TBprevinCo BrucprevinS
+1        transmission               none 0.0011833400 0.0004635346 0.5000000 0.2504315 0.3468542 0.1617607  0.4174034   0.2695899
+2        transmission           recovery 0.0007819946 0.0001747663 0.5000000 0.2358579 0.3443672 0.1394647  0.4193789   0.2616619
+3 tranmssion&recovery               none 0.0006780541 0.0003520847 0.3028689 0.2069446 0.2862540 0.1469724  0.3564792   0.2322793
+4 tranmssion&recovery           recovery 0.0005195999 0.0001597524 0.3379498 0.1815035 0.2633437 0.1235737  0.3435517   0.2112062
+5                <NA>               <NA>           NA           NA        NA 0.2700000 0.3400000 0.2270000  0.3580000   0.3000000
+  BrucprevinCo
+1    0.5781148
+2    0.6123192
+3    0.4930962
+4    0.4984597
+5    0.4500000
+
+
+
+betaBfit = df$betaB[1]  #0.00228
+betaTfit = df$betaT[1]  # 0.000464
+params.fixed = c(fixed.params, gamma=1/2)
+params = c(params.fixed, betaB= betaBfit, betaT = betaTfit, rhoT = 1.3, rhoB = 4.0)#check,gamma=0.5
+x0 <- get_starting_eqbruc(params = params) 
+(58+241.78)/(480+58+241.78)  # 38% (vs. 34 with bTB)
+
+x0[2] <- 1 
+sol <- as.data.frame(ode(x0, times, rhs, params))
+plot_raw_numbers(sol)
+
+
+# check matches fit: 
+TBprevinS <- sol$It[101] / (sol$S[101] + sol$It[101])
+TBprevinCo <- (sol$Ic[101] + sol$Rc[101]) / (sol$Ib[101] + sol$R[101] + sol$Ic[101] + sol$Rc[101])
+BrucprevinS <- (sol$Ib[101] + sol$R[101]) / (sol$S[101] + sol$Ib[101] + sol$R[101])
+BrucprevinCo <- (sol$Ic[101] + sol$Rc[101]) / (sol$Ic[101] + sol$Rc[101] + sol$It[101])
+
 
 
 
 
 # Brucellosis prevalence before bTB (no recovery, RhoB=4, rhoT=1.3 looks best!)- same as after bTB
-params = c(params.fixed, betaB= 0.0007853113, betaT = 0.0003092429, rhoT = 1.3, rhoB = 4.05)#check,gamma=0.5
+params = c(params.fixed, betaB= 0.0007853113, betaT = 0.0003092429, rhoT = 1.3, rhoB = 4.0)#check,gamma=0.5
 get_starting_eqbruc(params = params)  
 #       S        It        Ib        Ic         R        Rc 
 #649.42399   0.00000  31.37793   0.00000 313.77927   0.00000 

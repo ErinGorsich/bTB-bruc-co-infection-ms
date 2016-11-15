@@ -37,6 +37,10 @@ pregdata$pregmilk <- paste(pregdata$preg, pregdata$milk)
 table(pregdata$pregmilk, pregdata$tb, pregdata$bruc)  
 (23+10+4)/(23+10+58) # four not pregnants had milk, so assume they just gave birth...  made yes 
 
+# plot acf plot
+acf(data4$fec)
+pacf(data4$fec)
+
 ########################################################################
 # NEED TO ACCOUNT FOR AGE- 
 # Figures show no calves in buffalo < 4yrs and no TB in buffalo 9+ years, so analyses subset to capture these age categories. 
@@ -99,6 +103,7 @@ d$age7<- "adult"
 d$age7[d$age_sel/12 < 5] <- "subadult"
 d$age7[d$age_sel/12 > 7] <- "mature"
 
+# FIX ME- THINK ABOUT BETTER PACKAGE... 
 t1<-glmmPQL(fec~ age1, correlation= corAR1(form=~ capturetime |id), random= ~ 1|id, data=d, family=binomial); summary(t1); r.squaredGLMM(t1)
 t1<-glmmPQL(fec~ age3, correlation= corAR1(form=~ capturetime |id), random= ~ 1|id, data=d, family=binomial); summary(t1); r.squaredGLMM(t1)
 t1<-glmmPQL(fec~ age5, correlation= corAR1(form=~ capturetime |id), random= ~ 1|id, data=d, family=binomial); summary(t1) #mature didn't improve

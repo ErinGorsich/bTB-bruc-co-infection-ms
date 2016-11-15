@@ -1,6 +1,7 @@
 #############################################################
 #############################################################
-# Fixed parameters, Animals in recoverd class have similar birth/death rates to infecteds  
+# Fixed parameters, Animals in recoverd class have similar birth/death rates to infecteds 
+# No age structure model 
 #############################################################
 #############################################################
 get_new_prop_birth = function(logOR, p1){
@@ -10,38 +11,15 @@ get_new_prop_birth = function(logOR, p1){
 	return(b)
 }
 
-# age structure information, used to calculate mortality rates in susceptibles. 
-relageall = c(0.137, rep(0.368/4, 4), rep(0.185/4, 4),  # Jolles 2005, set max age at 18
-	rep(0.235/6, 6), rep(0.075/3, 3))					# Also in Caron et al. from 2001 KNP
-relage = c(relageall[1], sum(relageall[2:3]), relageall[4],  
-	relageall[5], sum(relageall[6:length(relageall)]) )  # sums to 1
 K = 1000
-
 
 #############################################################
 # Mortality, susceptible females
 #############################################################
-muSa <- NA; muTa <- NA; muBa <- NA; muCa <- NA
-muSa[1] <- 1- 0.7 # mortality rate in calves age [0-1) (1/yr)
-muSa[2] <- 1- 0.884 # mortality rate in yearlings [1-3) (1/yr)
-muSa[3] <- 1- 0.884 # mortality rate in juveniles [3-4) (1/yr)
-muSa[4] <-  1- 0.963 # mortality rate in sub-adults [4-5)  (1/yr)
-muSa[5] <-  1- 0.963 # mortality rate in adults 5+  (1/yr)
-muS <- sum(muSa* relage) 
-
-# mortality, TB, and Brucellosis positive animals
-#muT <- 2.82 * muS
-#muB <- 3.02 * muS
-#muC <- (2.82 + 3.02) * muS
-#muRC <- muC
-#muR <- muB
-
-
-
 muS <- 1 - 0.96
-muB <- 1 - 0.89
-muT <- 1 - 0.899
-muC <- 1 - 0.724
+muB <- 1 - 0.89		# = 3.02 * muS
+muT <- 1 - 0.899  	# = 2.82 * muS
+muC <- 1 - 0.724		# = (3.02 + 2.82) * muS
 muRC <- muC
 muR <- muB
 
@@ -49,16 +27,16 @@ muR <- muB
 #############################################################
 # births
 #############################################################
-b <- 0.41 # proportion in LS right before calving that were pregs (or had milk-> assume, can check this)
+b <- 0.41/2 # proportion in LS right before calving that were pregs (or had milk-> assume, can check this)- divide by two for females
 # In interdrought periods, buffalo populations grew at rates from 5-15%. 
 r <- b - muS
 
 # these represent prob_birth_Infected/probability_birth_Susceptible
-b1 <- get_new_prop_birth(-1.619, b) # proportional reduction with bTB
-b2 <- get_new_prop_birth(-1.5, b)   # proportional reduction with bruc
+b1 <- 0.65 # proportional reduction with bTB
+b2 <- 0.68   # proportional reduction with bruc
 b3 <- b2 # ASSUME animals with chronic brucellosis have same fecundity as active brucellosis 
 # FIX ME- SET TO NO CHANGE
-b4 <- 1 #get_new_prop_birth(-0.839, b) # proportional reduction if co; -1.619 - 1.50 + 2.28
+b4 <- 0.8 #get_new_prop_birth(-0.839, b) # proportional reduction if co; -1.619 - 1.50 + 2.28
 b5 <- b4 # 
 
 #############################################################

@@ -590,7 +590,7 @@ p10<- p9 +
         axis.text.y = element_text(size=14),
         panel.border = element_blank(), 
         # legend information
-        legend.position=c(0.82, 0.9),  
+        legend.position=c(0.8, 0.9),  
         legend.background= element_rect(fill="white", colour="white"),
         legend.key= element_blank(),
         legend.title= element_blank(),
@@ -608,10 +608,10 @@ p10
 ########################################################################
 ########################################################################
 df2<- data.frame(name=c("Tuberculosis\n (LS)", "Tuberculosis\n (CB)", 
-	"Site (LS)", "Age (cont.)"), 
-	est= c(3.92729, 0.3827, 0.5128, 0.7254), 
-	lower= c(1.317883, 0.04062, 0.18539, 0.51913), 
-	upper= c(11.703, 3.606, 1.418, 1.014), 
+	"Site (LS)", "Age (< 3 yr)"), 
+	est= c(4.32, 0.39, 0.49, 2.42), 
+	lower= c(1.51, 0.04062, 0.18, 1.04), 
+	upper= c(12.3, 3.69, 1.32, 5.62), 
 	order=c(1,2,3,4))
 	df2$name <- factor(df2$name, levels= df2$name[order(df2$order, decreasing = TRUE)])
 
@@ -624,9 +624,9 @@ p11 <- ggplot(df2, aes(x=df2$name, y=df2$est)) +
     theme(axis.line.x = element_line(color="black"), 
           axis.line.y = element_line(color="black")) + 
 	coord_flip() + 
-	ylab("Relative risk of mortality") +
+	ylab("Relative risk of brucellosis infection") +
 	geom_segment(aes(x=0, xend=4.3, y=1, yend=1), linetype=2, colour = "dark red") +
-	ylim(-0.01,11.8) + 
+	ylim(-0.01,12.31) + 
 	theme(
 		axis.title.x = element_text(size=16, vjust=-0.15),
         axis.title.y = element_blank(), #element_text(size=16, vjust= 0.8),
