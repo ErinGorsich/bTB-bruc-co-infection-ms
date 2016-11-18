@@ -144,10 +144,11 @@ rhs_age_matrix_ricker = function(times, x, params){
 		Nb <- S + b1 * It + b2 * Ib + 
 			b3 * R + b4 * Ic + b5 * Rc
 		birth <- c(b %*% Nb, rep(0, 19))
-#		dS <- birth * (exp(- Nall/800)) + aging %*% S
-#			- (lambdaT + lambdaB) * S - muS * S
-		dS <- birth  + aging %*% S
-			- (lambdaT + lambdaB) * S - muS * S		
+#		dS <- birth * (exp(- Nall/900)) + aging %*% S - muS * S
+#		dS <- birth  + aging %*% S -
+#			 (lambdaT + lambdaB) * S - muS * S		
+		dS <- birth * (exp(- Nall/900)) + aging %*% S -
+			(lambdaT + lambdaB) * S - muS * S
 		dIt <- lambdaT * S - (lambdapB + muT) * It + aging %*% It 
 		dIb <- lambdaB * S + aging %*% Ib +
 			epsilon * R - (gamma + lambdapT + muB) * Ib
