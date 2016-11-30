@@ -5,8 +5,11 @@
 #######################################################
 setwd("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder")
 library(ggplot2)
+library(tidyr)
 library('grid')
 library('gridExtra') # specifies layout
+library(survival)
+
 # read in data prepared in cross_sectional_dataprep, groomed for my bTB statuses
 #data<-read.csv("cross_sectional_data_withdz_cleandisease_nofinal_Feb2016_capturetime_forsurv.csv")
 data<-read.csv("cross_sectional_data_withdz_cleandisease_nofinal_Feb2016_capturetime.csv")
@@ -99,6 +102,48 @@ p3<-ggplot(d, aes(x=age)) +
 vp<- viewport(width=0.4, height=0.4, x=0.34, y=0.75)
 print(p2)
 print(p3, vp=vp)
+
+
+
+###### SAME FIGURE BUT WITHOUT PFC's for Brucellosis 
+# (to avoid differential antibody loss)
+datanpfc <- data[data$bruc_beforeafter != "pfc",]
+data_nofinal<-datanpfc[datanpfc$final_capture=="0",] 
+d2<-data.frame(btb=data_nofinal$tb , bruc=as.character(data_nofinal$bruc), age=data_nofinal$age_sel/12, 
+              id=data_nofinal$id)
+d2<-d2[d2$age<14,]
+binsize=2
+agebins=c(seq(0, max(d2$age), binsize), max(d2$age+1))
+agebins<- c(agebins[c(1:6)], 16.5)
+d2$bruc2<-NA
+newdf<-data.frame(agebin=c(agebins, agebins), Brucprev=NA, 
+                  TB=c(rep("bTB-", length(agebins)),rep("bTB+", length(agebins)) ),
+                  N=NA)  
+
+
+for (i in 1:length(d2$bruc)){
+  ifelse(d2$bruc[i]=="negative", d2$bruc2[i]<-0, d2$bruc2[i]<-1)
+}
+d2$bruc<-as.numeric(d2$bruc2)
+for (i in 1:(length(agebins)-1)){
+  neg<-d2[d2$btb==0,]
+  pos<-d2[d2$btb==1,]
+  d_neg<-d2[d2$age>=agebins[i] & d2$age<agebins[i+1] & d2$btb=="0",]
+  d_pos<-d2[d2$age>=agebins[i] & d2$age<agebins[i+1] & d2$btb=="1",]
+  newdf$Brucprev[i]<-get_prev(d_neg$bruc)
+  newdf$Brucprev[i+length(agebins)]<-get_prev(d_pos$bruc)
+  newdf$N[i]<- length(d_neg$bruc)
+  newdf$N[i+length(agebins)]<- length(d_pos$bruc)
+}
+newdf<-newdf[newdf$agebin<16,]
+newdf$se<-sqrt(newdf$Brucprev*(1-newdf$Brucprev)/newdf$N)
+newdf$se[is.na(newdf$se)]<-0
+
+# remove 0-2 bin because no TB+
+newdf2<-newdf[newdf$N>1,]; newdf<-newdf2
+
+
+
 
 #######################################################
 #######################################################
@@ -344,15 +389,24 @@ dev.off()
 # Figure 2- Survival and incidence plots
 #######################################################
 #######################################################
-library(survival)
 data2<-read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/survival/brucsurvival_TB3controls_longresidnomissing_noerrors_season2_final_fixed.csv")
 bolus <- c("R22", "R24", "R27", "R35", "R45", "R45b", "R50", "R6", "Y20", "Y31c", "Y31d", "Y39", "Y43", "Y44")
 #"W1" is ok.
 data3<- data2[!(data2$animal %in% bolus),]
 data3<- data3[data3$animal!= "O10",]
 
-final.mod<-coxph(Surv(start, stop, death.time)~brucella+TB_3+herd2+ age6+ cluster(animal), data=data3); summary(final.mod)
-full.mod<-test.mod
+# V1
+#final.mod<-coxph(Surv(start, stop, death.time)~brucella+TB_3+herd2+ age6+ cluster(animal), data=data3); summary(final.mod)
+#full.mod<-test.mod
+
+# V2
+# 0-2, 3-5, 6+
+#data3$age2.4 <- data3$age2.3
+#data3$age2.4[data3$age_yr2 == 6] <- "matureadult"
+#data3$age2.4[data3$age_yr2 == 3] <- "subadult"
+#data3$age2.4 <- as.character(data3$age2.4)
+#final.mod<-coxph(Surv(start, stop, death.time)~brucella*age2.4+TB_3+herd2+ cluster(animal), data=data3); summary(final.mod)
+
 
 #######################################################
 # Age and infection specific survival rates relative to estimated elsewhere
@@ -378,7 +432,6 @@ summary(m)
 
 
 # Compile estimates above into a df with other age specific estimate: 
-library(tidyr)
 survivaldf <- data.frame(age = seq(1, 15, 1), 
 	#Cross2009female = c(0.9, 0.9, rep(0.95, 5), rep(0.85, 5), rep(0.9, 3)),
 	#Cross2009male = c(0.82, 0.82, rep(0.77, 2), rep(0.97, 3), rep(0.65, 5), rep(0.1, 3)), 
@@ -486,6 +539,54 @@ p4<- p3 +
         legend.key= element_blank(),
         legend.title= element_blank(),
         legend.text = element_text(size=15)   )
+
+
+######################################################
+# Figure 3b, remake
+######################################################
+
+survivaldf <- data.frame(age = seq(1, 15, 1), 
+	SurvUn = c(NA, 0.86, rep(0.94, 10), NA, NA, NA),
+	SurvTB = c(NA, 0.7186, rep(0.8794, 10), NA, NA, NA), 
+	SurvBR =  c(NA, 0.314, rep(0.940, 3), rep(0.730, 7), NA, NA, NA),
+	SurvCo = c(NA, 0.0326, rep(0.8794, 3), rep(0.6094, 7), NA, NA, NA)
+)
+
+survlong <- gather(survivaldf, key = dataset, value = estimate, SurvUn:SurvCo)
+survlong$colour <- NA
+survlong$colour[survlong$dataset %in% c("SurvUn")] <- "Uninfected"
+survlong$colour[survlong$dataset %in% c("SurvTB")] <- "Tuberculosis"
+survlong$colour[survlong$dataset %in% c("SurvBR")] <- "Brucellosis"
+survlong$colour[survlong$dataset %in% c("SurvCo")] <- "Co-infected"
+survlong$order <- seq(1, length(survlong[,1]))
+survlong$colour <- as.factor(survlong$colour)
+survlong$colour <- factor(survlong$colour, levels = survlong$colour[order(unique(survlong$order))])
+
+
+remake_p6 <- ggplot(survlong, aes(x = age, y = estimate, colour = colour, size = colour, shape = colour, group = dataset)) + 
+	xlab("Age (years)") + ylab("Annual Survival") +
+	geom_point(aes(size = colour)) +  #shape = sex
+	geom_line(aes(linetype = colour)) + 
+	scale_x_continuous(breaks=seq(1, 15, 2)) + 
+	theme_bw() + 
+	scale_colour_manual(values = c("goldenrod1", "slateblue3", "chartreuse4","tomato3")) +
+	# Br, Co, Other, TB, Uninfected
+	scale_size_manual(values = c(2, 2, 2, 2)) +
+	scale_shape_manual(values = c(18, 17, 17, 19)) +
+	scale_linetype_manual(values = c('longdash', 'dotdash', 'dashed', 'twodash')) +
+	theme(panel.border = element_blank(), 
+		axis.title.x = element_text(size=16, vjust=-0.15),
+        axis.title.y = element_text(size=16, vjust= 0.8),
+        axis.text.x = element_text(size=14, vjust=-0.05),
+        axis.text.y = element_text(size=14)) + 
+        theme(axis.line.x = element_line(colour= "black"),
+  			axis.line.y = element_line(colour= "black"),   
+			#legend information
+        	legend.position=c(0.85, 0.2),  
+        	legend.background= element_rect(fill="white", colour="white"),
+        	legend.key= element_blank(),
+        	legend.title= element_blank(),
+        	legend.text = element_text(size=10))
 
 
 
@@ -633,7 +734,12 @@ p11 <- ggplot(df2, aes(x=df2$name, y=df2$est)) +
         axis.text.x = element_text(size=14, vjust=-0.05),
         axis.text.y = element_text(size=14))
 
+# V1
 multiplot(p7, p11, p6, p10, cols=2)
+
+#V2
+multiplot(remake_p6, p10, cols=2)
+
 
 
 

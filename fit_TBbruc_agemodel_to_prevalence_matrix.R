@@ -87,7 +87,7 @@ plot_dz_agestructure = function(x, dz){
 
 plot_raw_numbers = function(sol){
 	plot(sol$time, apply(sol[s_index+1], 1, sum), col= "black",
-		type= 'l', ylim = c(0, 800), ylab = "Number of animals", 
+		type= 'l', ylim = c(0, 1100), ylab = "Number of animals", 
 		xlab = "Time (in years)")
 	lines(sol$time, apply(sol[it_index+1], 1, sum), col= "red")
 	lines(sol$time, apply(sol[ib_index+1], 1, sum), col= "blue")
@@ -99,24 +99,78 @@ plot_raw_numbers = function(sol){
 		bty="n", lty = 1)
 }
 
+get_prevalence = function(sol){
+	S <- sum(sol[length(sol) , s_index+1])
+	It <- sum(sol[length(sol) , it_index +1])
+	Ib <- sum(sol[length(sol) , ib_index +1])
+	Ic <- sum(sol[length(sol) , ic_index +1])
+	R <- sum(sol[length(sol) , r_index +1])
+	Rc <- sum(sol[length(sol) , rc_index +1])
+	N <- sum(sol[length(sol), 2:121])
+	prevTB <- (It + Ic + Rc) / N 
+	prevB <- (Ib + Ic + R + Rc) / N
+	prevBinS <- (Ib + R) / (S + Ib + R)
+	prevBinT <- (Ic + Rc) / (It + Ic + Rc)
+	return(list(prevTB = prevTB, prevB = prevB,
+		prevBinS = prevBinS, prevBinT = prevBinT))
+}
 
-
+plot_ageprevalence = function(sol){
+	S <- rep(0, 20); It <- rep(0, 20); Ib <- rep(0, 20);
+	Ic <- rep(0, 20); R <- rep(0, 20); Rc <- rep(0, 20)
+	N <- rep(0, 20)
+	for (i in 1:20){
+		S[i] <- sum(sol[length(sol) , i + 1])
+		It[i] <- sum(sol[length(sol) , i + 21])
+		Ib[i] <- sum(sol[length(sol) , 41 +i])
+		Ic[i] <- sum(sol[length(sol) , 61 +i])
+		R[i] <- sum(sol[length(sol) , 81 +i])
+		Rc[i] <- sum(sol[length(sol) , 101 +i])
+		N[i] <- sum(sol[length(sol), c(1+i, 21+i, 41+i, 61 + i, 81+i, 101+i)])
+	}
+	
+	prevB <- (Ib + Ic + R + Rc) / N
+	prevT <- (It + Ic + Rc)/ N
+	prevBinS <- (Ib + R) / (S + Ib + R)
+	prevBinT <- (Ic + Rc) / (It + Ic + Rc) 
+	
+	overall_prevB <- (sum(Ib) + sum(Ic) + sum(R) + sum(Rc)) / sum(N)
+	overall_prevT <- (sum(It) + sum(Ic) + sum(Rc)) / sum(N)
+	overall_prevBinS <- (sum(Ib) + sum(R)) / (sum(S) + sum(Ib) + sum(R))
+	overall_prevBinT <- (sum(Ic) + sum(Rc)) / (sum(It) + sum(Ic) + sum(Rc))
+	overallN = sum(N) 
+	
+	par(mfrow = c(1,2))
+	plot(y = prevB, x= seq(1, 20, 1), type = "b", col = "dark blue", ylim = c(0, 0.8),
+		ylab = "Prevalence", xlab = "Age", pch = 19, 
+		main = paste("Overall prevalences, Br =", round(overall_prevB, 3), 
+		" TB = ", round(overall_prevT, 3) ))
+	points(y = prevT, x = seq(1,20,1), type = "b", col = "dark red", pch = 19)
+	legend("bottomright", bty = "n", legend = c("Bruc", "TB"), 
+		pch = c(19, 19), col = c("dark blue", "dark red"))
+	plot(y = prevBinS, x = seq(1,20,1), type = "b", col = "dark blue", pch = 19, 
+		ylab = "Brucellosis prevalence", xlab = "Age", ylim = c(0, 0.8), 
+		main = paste("Br|S =", round(overall_prevBinS, 3), 
+		" Br|Co = ", round(overall_prevBinT, 3) )
+		)
+	text(x = 10, y = 0.55, labels = paste("Final N = ", round(overallN, 2)))
+	points(y = prevBinT, x = seq(1,20,1), type = "b", col = "dark red", pch = 19)
+}
 
 #############################################################
 #############################################################
-
 # Figure out parameters that give reasonable age structure 
 # Test plots, with no Disease, none takes off
 # STILL NEED TO CLARIFY ASSUMPTIONS ON AGE STRUCTURE WITH AND WITHOUT DZ
 #############################################################
-S0 = 500*relage; It0 = 0*relage; Ib0 = 0*relage; 
+S0 = 1000*relage; It0 = 0*relage; Ib0 = 0*relage; 
 Ic0 = 0*relage; R0 = 0 * relage; Rc0 = 0 * relage
 x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)
 times <- seq(0, 500, 1)
 params.test = c(fixed.params, list(gamma=1/2, betaB = 0.01,
-	betaT = 0.001, rhoT = 1.2, rhoB = 4))
+	betaT = 0.0001, rhoT = 1.2, rhoB = 4))
 params.test.recov = c(fixed.params.recov, list(gamma=1/2, 
-	betaB = 0.01, betaT = 0.001, rhoT = 1.2, rhoB = 4))
+	betaB = 0.0001, betaT = 0.001, rhoT = 1.2, rhoB = 4))
 
 
 sol <- as.data.frame(ode(x0, times, rhs_age_matrix_ricker, params.test))
@@ -126,18 +180,12 @@ par(mfrow = c(2,2))
 plot(x = sol$time, y = apply(sol[c(2:120)], 1, sum), 
 	pch = 19, main = "Density Dependent, no Recovery")
 plot(x = sol.recov$time, y = apply(sol.recov[c(2:120)], 1, sum), 
-	pch = 19, main = "Density Dependent, no Recovery")
+	pch = 19, main = "Density Dependent, Recovery")
 
 plot_raw_numbers(sol)
-
-#par(mfrow = c(2, 2))
-#plot_agestructure(as.matrix(sol[1,c(2:121)]))
-#plot_agestructure(as.matrix(sol[25,c(2:121)]))
-#plot_agestructure(as.matrix(sol[50,c(2:121)]))
 plot_agestructure(as.matrix(sol[101,c(2:121)]))  # better, no density dependence...
 
-
-
+stable_age <- unname(unlist( sol[500, c(2:21)]/sum(sol[500, c(2:21)]) ))
 
 # Figure out birth rates taht give age structure above... 
 f = function(b, x){
@@ -152,8 +200,12 @@ f = function(b, x){
 
 # Test 2: Add brucellosis, only get brucellosis --> works! 
 #############################################################
-S0 = 450*relage; It0 = 0*relage; Ib0 = 20*relage; 
-Ic0 = 0*relage; R0 = 30 * relage; Rc0 = 0 * relage
+params.test = c(fixed.params, list(gamma=1/2, 
+	betaB = 0.0015, betaT = 0.001, rhoT = 1.2, rhoB = 4))
+params.test.recov = c(fixed.params.recov, list(gamma=1/2, 
+	betaB = 0.0015, betaT = 0.001, rhoT = 1.2, rhoB = 4))
+S0 = 980* stable_age; It0 = 0* stable_age; Ib0 = 20* stable_age; 
+Ic0 = 0* stable_age; R0 = 30 * stable_age; Rc0 = 0 * stable_age
 x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)
 times <- seq(0, 500, 1)
 sol <- as.data.frame(ode(x0, times, rhs_age_matrix_ricker, params.test))
@@ -162,38 +214,153 @@ sol.recov<- as.data.frame(ode(x0, times, rhs_age_matrix_ricker, params.test.reco
 par(mfrow = c(2,2))
 plot(x = sol$time, y = apply(sol[c(2:120)], 1, sum), 
 	pch = 19, main = "Density Dependent, no Recovery")
-plot(x = sol.recov$time, y = apply(sol[c(2:120)], 1, sum), 
+plot(x = sol.recov$time, y = apply(sol.recov[c(2:120)], 1, sum), 
 	pch = 19, main = "Density Dependent, Recovery")
 #plot_age_prev_by_coinfection(sol)
 plot_raw_numbers(sol)
+plot_raw_numbers(sol.recov)
+get_prevalence(sol); 
+################
+get_prevalence(sol.recov)
 plot_agestructure(as.matrix(sol[101,c(2:121)])) 
+plot_ageprevalence(sol)
+
+endemic_agestructure <- unname(unlist( sol[500, c(2:121)]/sum(sol[500, c(2:121)]) ))
+endemic_agestructure_recov <- unname(unlist( sol.recov[500, c(2:121)]/sum(sol.recov[500, c(2:121)]) ))
+
 
 # Test 3: Add bTB, only get bTB --> Check! 
 #############################################################	
+params.test = c(fixed.params, list(gamma=1/2,
+	betaB = 0.002, betaT = 0.0005, rhoT = 1.2, rhoB = 4))
+params.test.recov = c(fixed.params.recov, list(gamma=1/2, 
+	betaB = 0.002, betaT = 0.0005, rhoT = 1.2, rhoB = 4))
+S0 = 980* stable_age; It0 = 2* stable_age; Ib0 = 0* stable_age; 
+Ic0 = 0* stable_age; R0 = 0 * stable_age; Rc0 = 0 * stable_age
+x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)
+times <- seq(0, 500, 1)
+sol <- as.data.frame(ode(x0, times, rhs_age_matrix_ricker, params.test))
+sol.recov<- as.data.frame(ode(x0, times, rhs_age_matrix_ricker, params.test.recov))
+
+par(mfrow = c(2,2))
+plot(x = sol$time, y = apply(sol[c(2:120)], 1, sum), 
+	pch = 19, main = "Density Dependent, no Recovery")
+plot(x = sol.recov$time, y = apply(sol.recov[c(2:120)], 1, sum), 
+	pch = 19, main = "Density Dependent, Recovery")
+#plot_age_prev_by_coinfection(sol)
+plot_raw_numbers(sol)
+plot_raw_numbers(sol.recov)
+get_prevalence(sol); 
+################
+get_prevalence(sol.recov)
+
+plot_agestructure(as.matrix(sol[101,c(2:121)])) 
+plot_ageprevalence(sol)
+
 	
 	
+
+#############################################################
+#############################################################
+#2) Add bTB to EE population... 
+#############################################################
+#############################################################
+params.test = c(fixed.params, list(gamma=1/2, 
+	betaB = 0.002, betaT = 0.0005, rhoT = 1.2, rhoB = 2))  
+params.test.recov = c(fixed.params.recov, list(gamma=1/2, 
+	betaB = 0.002, betaT = 0.0005, rhoT = 1.2, rhoB = 2))
+# betaT = 0.005 gives bTB prev ~25% without bruc; essentially no prevalence with bruc.
+
+
+x0 = 1000 * endemic_agestructure
+x0recov = 1000 * endemic_agestructure_recov
+x0[21:40] <- 5
+x0recov[21:40] <- 5
+times <- seq(0, 500, 1)
+sol <- as.data.frame(ode(x0, times, rhs_age_matrix_ricker, params.test))
+sol.recov<- as.data.frame(ode(x0recov, times, rhs_age_matrix_ricker, params.test.recov))
+
+par(mfrow = c(2,2))
+plot(x = sol$time, y = apply(sol[c(2:120)], 1, sum), 
+	pch = 19, main = "Density Dependent, no Recovery")
+plot(x = sol.recov$time, y = apply(sol.recov[c(2:120)], 1, sum), 
+	pch = 19, main = "Density Dependent, Recovery")
+#plot_age_prev_by_coinfection(sol)
+plot_raw_numbers(sol)
+plot_raw_numbers(sol.recov)
+get_prevalence(sol); 
+################
+get_prevalence(sol.recov)
+
+par(mfrow = c(1,2))
+plot_agestructure(as.matrix(sol[101,c(2:121)])) 
+plot_ageprevalence(sol)
+plot_ageprevalence(sol.recov)
+
+# only works without recovery: But without recovery, we get waay less bTB than without brucellosis
+params.test = c(fixed.params, list(gamma=1/2, 
+	betaB = 0.002, betaT = 0.0006, rhoT = 1, rhoB = 1))  
+sol <- as.data.frame(ode(x0, times, rhs_age_matrix_ricker, params.test))
+plot_ageprevalence(sol)
+get_prevalence(sol)
+
+
+#############################################################
+#############################################################
+#2) Looop through transmission parameters to see...
+#############################################################
+#############################################################
+x0 = 1000 * endemic_agestructure
+x0recov = 1000 * endemic_agestructure_recov
+x0[21:40] <- 5
+x0recov[21:40] <- 5
+times <- seq(0, 500, 1)
+modeloutput <- data.frame(
+	betaTvec = rep(c(0.0005, 0.001, 0.0015, 0.002, 0.0025, 0.003, 0.0035), 8),
+	rhoB = rep(c(1, 2, 3, 4), each = 14),
+	rhoT = rep(c(rep(1, 7), rep(1.3, 7)), 4), 
+	brucprev = NA, tbprev = NA, 
+	brucprevins = NA, brucprevintb = NA, 
+	brucprevR = NA, tbprevR = NA, 
+	brucprevinsR = NA, brucprevintbR = NA)
+
+setwd("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/draft2/figures/model_output_agestructure")
+for (i in 1:length(modeloutput[,1])){
+	print (modeloutput$betaTvec[i])
+	params.test = c(fixed.params, list(gamma=1/2, 
+		betaB = 0.0025, betaT = modeloutput$betaTvec[i], 
+		rhoT = modeloutput$rhoT[i], rhoB = modeloutput$rhoB[i]))  
+	params.test.recov = c(fixed.params.recov, list(gamma=1/2, 
+		betaB = 0.0025, betaT = modeloutput$betaTvec[i],
+		 rhoT = modeloutput$rhoT[i], rhoB = modeloutput$rhoB[i]))
+
+	sol <- as.data.frame(ode(x0, times, rhs_age_matrix_ricker, params.test))
+	sol.recov<- as.data.frame(ode(x0recov, times, rhs_age_matrix_ricker, 
+		params.test.recov))
 	
+	temp <- get_prevalence(sol)
+	tempR <- get_prevalence(sol.recov)
 	
-#############################################################
-#############################################################
-#2) Test plots and grooming functions
-#############################################################
-#############################################################
+	modeloutput$brucprev[i] <- temp$prevB
+	modeloutput$brucprevR[i] <- tempR$prevB
+	modeloutput$tbprev[i] <- temp$prevTB
+	modeloutput$tbprevR[i] <- tempR$prevTB
+	modeloutput$brucprevins[i] <- temp$prevBinS
+	modeloutput$brucprevinsR[i] <- tempR$prevBinS
+	modeloutput$brucprevintb[i] <- temp$prevBinT
+	modeloutput$brucprevintbR[i] <- tempR$prevBinT
 
-
-
-
-
-
-groom_sol = function(sol){
-	colnames(sol) <- c("times", "S", "It", "Ib", "Ic", "R", "Rc") 
-	sol$N <- sol$S + sol$It + sol$Ib + sol$Ic + sol$R + sol$Rc
-	sol$TBprev <- (sol$It + sol$Ic + sol$Rc) / sol$N
-	sol$Brucprev <- (sol$Ib + sol$R + sol$Ic + sol$Rc) / sol$N
-	sol$propTB_co <- (sol$Ic + sol$Rc) / (sol$It + sol$Ic + sol$Rc)
-	sol$propBruc_co <- (sol$Ic + sol$Rc) / (sol$Ib + sol$R + sol$Ic + sol$Rc)
-	return(sol)
+	jpeg(paste("Norecov_betaT=", modeloutput$betaTvec[i], 
+		"_rho_", modeloutput$rhoB[i], "_", modeloutput$rhoT[i], 
+		".jpg", sep = ""), width = 650, height = 480, units = "px")		
+	plot_ageprevalence(sol)
+	dev.off()
+	
+	jpeg(paste("Recov_betaT=", modeloutput$betaTvec[i], 
+		"_rho_", modeloutput$rhoB[i], "_", modeloutput$rhoT[i],
+		".jpg", sep = ""), , width = 650, height = 480, units = "px")
+	plot_ageprevalence(sol.recov)
+	dev.off()
 }
-
 
 

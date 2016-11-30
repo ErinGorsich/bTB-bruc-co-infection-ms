@@ -307,20 +307,52 @@ I(age_yrsd^2)     2.389     0.4186    1.3316    4.2849
 ############################################
 # 0-2, 2-4, 4-8, 8+
 # juveniles (0-2) and subadults (2-4) both have higher mortality than adults (4-8); subadults not significantly different than juveniles (p=0.11)
-test.mod<-coxph(Surv(start, stop, death.time)~brucella+TB_3+herd2+ age1+ cluster(animal), data=data3); summary(test.mod) 
+test.mod<-coxph(Surv(start, stop, death.time)~brucella*age1+TB_3+herd2+ age1+ cluster(animal), data=data3); summary(test.mod) 
 # AIC = 320.9481; LogLike =  -167.0254 -154.4741
 test.mod<-coxph(Surv(start, stop, death.time)~age1+ cluster(animal), data=data3); test.mod$loglik 
 
 
-# 0-3, 3-5, 5-8, 8+
+# 0-2, 3-4, 5-7, 8+
 test.mod<-coxph(Surv(start, stop, death.time)~brucella+TB_3+herd2+ age2+ cluster(animal), data=data3); summary(test.mod) 
 # AIC = 314.7509; LogLike =  -167.0254 -151.3755
+test.mod<-coxph(Surv(start, stop, death.time)~brucella*age2+TB_3+herd2+ cluster(animal), data=data3); summary(test.mod)  #LL error
 
-# 0-2, 2-4, 4+ -> 0-2 yr olds have highest mortality. 2-4 vs 4+ similar 
+
+# 0-1, 2-3, 4+ 
 test.mod<-coxph(Surv(start, stop, death.time)~brucella+TB_3+herd2+ age3+ cluster(animal), data=data3); summary(test.mod)
 # AIC = 319.3569; LogLike = -167.0254  -154.6784
+test.mod<-coxph(Surv(start, stop, death.time)~brucella*age3+TB_3+herd2+ age3+ cluster(animal), data=data3); summary(test.mod)
 
-# 0-3, 3-5, 5+ -> 0-3 yr olds have highest mortality. 3-5 vs 5+ similar
+# 0-1, 2-4, 5+ 
+data3$age3.2 <- data3$age3
+data3$age3.2[data3$age_yr2 == 4] <- "subadult"
+data3$age3.2 <- as.factor(as.character(data3$age3.2))
+test.mod<-coxph(Surv(start, stop, death.time)~brucella*age3.2+TB_3+herd2+ cluster(animal), data=data3); summary(test.mod)
+
+
+# 0-2, 3-6, 7+ -> 0-2 yr
+data3$age2.2 <- data3$age2
+data3$age2.2[data3$age_yr2 == 4] <- "subadult"
+data3$age2.2[data3$age_yr2 == 5] <- "subadult"
+data3$age2.2[data3$age_yr2 == 6] <- "subadult"
+data3$age2.2[data3$age_yr2 == 7] <- "matureadult"
+data3$age2.2 <- as.factor(as.character(data3$age2.2))
+test.mod<-coxph(Surv(start, stop, death.time)~brucella*age2.2+TB_3+herd2+ cluster(animal), data=data3); summary(test.mod)
+#data3$age2.2<- relevel(data3$age2.2, "subadult")
+
+data3$age2.3 <- data3$age2.2
+data3$age2.3[data3$age_yr2 == 3] <- "juvenile"
+test.mod<-coxph(Surv(start, stop, death.time)~brucella*age2.3+TB_3+herd2+ cluster(animal), data=data3); summary(test.mod)
+
+# 0-2, 3-5, 6+
+data3$age2.4 <- data3$age2.3
+data3$age2.4[data3$age_yr2 == 6] <- "matureadult"
+data3$age2.4[data3$age_yr2 == 3] <- "subadult"
+data3$age2.4 <- as.character(data3$age2.4)
+test.mod<-coxph(Surv(start, stop, death.time)~brucella*age2.4+TB_3+herd2+ cluster(animal), data=data3); summary(test.mod)
+
+
+# 0-2, 3-4, 5+ -> 0-3 yr olds have highest mortality. 3-5 vs 5+ similar
 test.mod<-coxph(Surv(start, stop, death.time)~brucella+TB_3+herd2+ age4+ cluster(animal), data=data3); summary(test.mod)
 # AIC = 313.242; LogLike = -167.0254 -151.6210
 
@@ -328,6 +360,12 @@ test.mod<-coxph(Surv(start, stop, death.time)~brucella+TB_3+herd2+ age4+ cluster
 test.mod<-coxph(Surv(start, stop, death.time)~brucella+TB_3+herd2+ age5+ cluster(animal), data=data3); summary(test.mod)
 test.mod<-coxph(Surv(start, stop, death.time)~ age5+ cluster(animal), data=data3); summary(test.mod)
 # AIC = 323.0442; LogLike = -167.0254 -157.5221
+
+
+data3$age2.2 <- data3$age2
+data3$age2.2[data3$age_yr == 7] <- "matureadult"
+
+
 
 #0-3, 3+
 final.mod<-coxph(Surv(start2, stop2, death.time)~brucella+TB_3+herd2+ age6+ cluster(animal), data=data3); summary(final.mod)
@@ -357,6 +395,58 @@ final.mod<-coxph(Surv(start2, stop2, death.time)~brucella+TB_3+herd2+ age6+ clus
 #Score (logrank) test = 32.82  on 4 df,   p=1.298e-06,   Robust = 15.46  p=0.00383
 
 
+######!!!!!!!!  # SEE AGE-SPECIFIC PATTERN WITH BRUCELLOSIS!
+data3$age2.4 <- as.factor(data3$age2.4)
+data3$age2.4 <- relevel(data3$age2.4, "matureadult")
+data3$age2.4 <- relevel(data3$age2.4, "subadult")
+final.mod<-coxph(Surv(start2, stop2, death.time)~brucella+TB_3+herd2+ age2.4*brucella+ cluster(animal), data=data3); summary(final.mod)
+predRes <- predict(final.mod, type="risk")
+head(predRes, n=10)
+Shat2 <- survexp(~ age2.4 + TB_3, ratetable=final.mod, data=data3[data3$brucella == 0,])
+with(Shat2, head(data.frame(time, surv), n=4))
+Shat2 <- survexp(~ age2.4 + TB_3, ratetable=final.mod, data=data3[data3$brucella == 1,])
+with(Shat2, head(data.frame(time, surv), n=4))
+
+
+# Juvenile: 
+#                               coef exp(coef) se(coef) robust se      z Pr(>|z|)   
+#brucella                    1.58217   4.86552  0.50558   0.51212  3.089  0.00201 **
+#TB_3                        1.13865   3.12255  0.36471   0.34905  3.262  0.00111 **
+#herd2CB                     0.75853   2.13514  0.34770   0.32821  2.311  0.02083 * 
+#age2.4matureadult          -1.19107   0.30390  1.10847   1.16339 -1.024  0.30594   
+#age2.4subadult             -0.61855   0.53872  0.55199   0.57149 -1.082  0.27910   
+#brucella:age2.4matureadult  0.08662   1.09048  1.22112   1.26645  0.068  0.94547   
+#brucella:age2.4subadult    -1.57650   0.20670  0.78290   0.77776 -2.027  0.04267 * 
+
+
+# Subadult: 
+#                                coef exp(coef)  se(coef) robust se      z Pr(>|z|)   
+#brucella                    0.005675  1.005691  0.609981  0.608143  0.009  0.99255   
+#TB_3                        1.138651  3.122554  0.364711  0.349049  3.262  0.00111 **
+#herd2CB                     0.758531  2.135138  0.347704  0.328212  2.311  0.02083 * 
+#age2.4matureadult          -0.572513  0.564106  1.057936  1.096687 -0.522  0.60164   
+#age2.4juvenile              0.618554  1.856242  0.551986  0.571493  1.082  0.27910   
+#brucella:age2.4matureadult  1.663119  5.275739  1.263485  1.294638  1.285  0.19892   
+#brucella:age2.4juvenile     1.576498  4.837983  0.782904  0.777763  2.027  0.04267 * 
+
+
+
+
+data3$age7 <- data3$age3							 
+data3$age7[data3$age7 == "juvenile"] <- "subadult"   # pre-repro (0-3)
+data3$age7 <- as.character(data3$age7)				# post-repro (4+)
+
+data3$age8 <- data3$age7							 
+data3$age8[data3$age_yr2 == 4] <- "subadult"         # pre-repro (0-4)
+data3$age8 <- as.character(data3$age8)				 # post-repro (5+)
+
+data3$age9 <- data3$age2							 
+data3$age9[data3$age_yr2 == 3] <- "juvenile"         # pre-repro (0-3)
+data3$age9[data3$age_yr2 == 5] <- "subadult" # pre-repro (4-6)
+data3$age9[data3$age_yr2 == 6] <- "subadult" # pre-repro (4-6)
+data3$age9[data3$age_yr2 == 7] <- "matureadult"        #(7+)
+data3$age9 <- as.factor(as.character(data3$age9))				 # post-repro (6+)
+data3$age9 <- relevel(data3$age9, "matureadult")
 ########################################################
 # CPH model diagnostics
 # no change with start/stop designations: exact same covariates

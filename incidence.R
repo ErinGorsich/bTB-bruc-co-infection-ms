@@ -296,6 +296,16 @@ data$age2p[data$age_yr >= 2 & data$age_yr <4] <- "adult"
 data$age2p[data$age_yr >=4] <- "old"
 
 
+data$agelate <- NA
+data$agelate[data$age_yr < 2.5] <- "young"
+data$agelate[data$age_yr < 5.5 & data$age_yr >= 2.5] <- "subadult"
+data$agelate[data$age_yr >= 5.5] <- "mature"
+
+data$ageearly <- NA
+data$ageearly[data$age_yr <1.5] <- "young"
+data$ageearly[data$age_yr <5.5 & data$age_yr >=1.5] <- "subadult"
+data$ageearly[data$age_yr >= 5.5] <- "mature"
+
 test.mod<-coxph(Surv(start, stop, convert.time)~ TB_3+age4+TB_3*herd2+ cluster(animal), data=data); summary(test.mod) # 247.3
 test.mod<-coxph(Surv(start, stop, convert.time)~ TB_3+age5+TB_3*herd2+ cluster(animal), data=data); summary(test.mod)  # 248.9
 test.mod<-coxph(Surv(start, stop, convert.time)~ TB_3*testage+herd2+ cluster(animal), data=data); summary(test.mod) #244.4
