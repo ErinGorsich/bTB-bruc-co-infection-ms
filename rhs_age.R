@@ -54,34 +54,36 @@ rhs_age_matrix = function(times, x, params){
 		betaTm <- matrix(c(rep(betaT, 400)), nrow = 20, ncol = 20)
 	
 		# lambdaB = age specific vectors!
-		lambdaT <- betaTm %*% (It + Ic + Rc) / Nall 
+		# bTB = density dependent, bruc = freq dependent
+		lambdaT <- betaTm %*% (It + Ic + Rc)
 		lambdaB <- betaBm %*% (Ib + Ic) / Nall
-		lambdapT <- rhoT * betaTm %*% (It + Ic + Rc) / Nall
+		lambdapT <- rhoT * betaTm %*% (It + Ic + Rc)
 		lambdapB <- rhoB * betaBm %*% (Ib + Ic) / Nall
 
 		# Age spcific pop contributing to births (Nb = vector); 
 		# reduced births(b1, b2...=vectors; Nb = vector, birth = vector) 
 		Nb <- S + b1 * It + b2 * Ib + 
 			b3 * R + b4 * Ic + b5 * Rc
+			
 		birth <- c(b %*% Nb)
-		r <- 5
-		logistic_births <- c(birth * ((1- (r/birth)*(Nall/K))), rep(0, 19))
-		dS <- logistic_births + aging %*% S
-			- (lambdaT + lambdaB) * S - muS * S
+		recruitment <- c(birth / ( 1 + (Nall/K)^theta), rep(0, 19))
+		dS <- recruitment + aging %*% S - (lambdaT + lambdaB) * S - muS * S
 		dIt <- lambdaT * S - (lambdapB + muT) * It + aging %*% It
-		dIb <- lambdaB * S + aging %*% Ib +
-			epsilon * R - (gamma + lambdapT + muB) * Ib
-		dIc <- lambdapT * Ib + lambdapB * It + aging %*% Ic +
-			epsilon * Rc - (gamma + muC) * Ic
+		dIb <- lambdaB * S + aging %*% Ib +	epsilon * R - (gamma + lambdapT + muB) * Ib
+		dIc <- lambdapT*Ib + lambdapB*It + aging %*% Ic + epsilon * Rc - (gamma + muC)*Ic
 		dR <- gamma * Ib - (epsilon + muR + lambdapT) * R + aging %*% R
-		dRc <- lambdapT * R + gamma * Ic + aging %*% Rc -
-			(epsilon + muRC) * Rc
-		
+		dRc <- lambdapT * R + gamma * Ic + aging %*% Rc - (epsilon + muRC) * Rc
 		out = list(c(dS, dIt, dIb, dIc, dR, dRc))
 		return(out)	
 		}
 	)	
 }
+
+
+birthplay = function(r, Nall){
+	0.5*800- r * 800 * (Nall/1000)
+}
+
 
 
 # Ricker
@@ -134,10 +136,11 @@ rhs_age_matrix_ricker = function(times, x, params){
 		betaTm <- matrix(c(rep(betaT, 400)), nrow = 20, ncol = 20)
 	
 		# lambdaB = age specific vectors!
+		# bTB = density dependent, bruc = freq dependent (prev, both density)
 		lambdaT <- betaTm %*% (It + Ic + Rc) #/ Nall
-		lambdaB <- betaBm %*% (Ib + Ic) #/ Nall  # extra 100 from freqdep
+		lambdaB <- betaBm %*% (Ib + Ic) / Nall  # extra 100 from freqdep
 		lambdapT <- rhoT * betaTm %*% (It + Ic + Rc) #/ Nall
-		lambdapB <- rhoB * betaBm %*% (Ib + Ic) #/ Nall
+		lambdapB <- rhoB * betaBm %*% (Ib + Ic) / Nall
 
 		# Age spcific pop contributing to births (Nb = vector); 
 		# reduced births(b1, b2...=vectors; Nb = vector, birth = vector) 

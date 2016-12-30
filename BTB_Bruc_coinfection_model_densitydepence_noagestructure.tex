@@ -326,6 +326,52 @@ When $\alpha_T=0$, then $I^*=K(1-1/\mathcal{R}_0)$. We fix other parameters and 
 
 
 
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Attempt 100 with age structure and density dependent births and death rates
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{align*}
+N & = \sum_{a=1}^{20} S_{_a} + I_{T_a} + I_{B_a} + R_{B_a} + I_{C_a} + R_{C_a} \\
+T &=  \sum_{a=1}^{20} I_{T_a} + I_{C_a} + R_{C_a} \\
+B &=  \sum_{a=1}^{20} I_{B_a}+I_{C_a} \\
+N_{b}(a) &= S_a + b_1(a) I_{T_a}+ b_2(a) I_{B_a} + b_3(a) R_{B_a} + b_4(a) I_{C_a} + b_5(a) R_{C_a} \\
+R(a) &= \begin{cases}
+    \frac{\mathbf{b}^\top \mathbf{N_b}}{1+(\frac{N}{K})^\phi}  & \text{if $a = 1$},
+    \\
+    0 & \text{otherwise},
+  \end{cases} \\
+\frac{dS_a}{dt} &= R(a) - \beta_{T}{(a)} T S_a - \frac{\beta_B (a) B}{N} S_a - (\mu_{S}(a) + \nu) S  \\ % S 
+\frac{dI_{T_a}}{dt}&= \beta_T (a) T S_a -  \frac{\beta'_{B}(a) B}{N} I_{T_a} - (\mu_{T}(a) + \nu) I_{T} \\						% TB 
+\frac{dI_{B_a}}{dt}&=  \frac{\beta_B (a) B}{N}S_a - \beta'_{T}(a) T I_{B_a} + \epsilon R_{B}  - (\gamma + \mu_{B}(a) + \nu) I_{B} \\ % B
+\frac{dI_{C_a}}{dt}&=  \beta'_{T}(a) T I_{B_a} + \frac{\beta'_{B}(a) B}{N} I_{T_a} + \epsilon R_{C}  - (\gamma + \mu_{C}(a) + \nu)I_{C}\\  %Co
+\frac{dR_{B_a}}{dt}&=  \gamma I_{B} - (\epsilon + \mu_{RB}(a) + \nu) R_{B} \\  									% Chronic brucellosis 
+\frac{dR_{C_a}}{dt}&=  \beta'_{T}(a) T R_{B_a} + \gamma I_{C} - (\epsilon + \mu_{RC}(a) + \nu) R_{C} \\ 		% Chronic B and co
+\end{align*}
+
+\begin{align*}
+N & = \sum_{a=1}^{20} S(a) + I_{T}(a) + I_{B}(a) + R_{B}(a) + I_{C}(a) + R_{C}(a) \\
+T &=  \sum_{a=1}^{20} I_{T}(a) + I_{C}(a) + R_{C}(a) \\
+B &=  \sum_{a=1}^{20} I_{B}(a)+I_{C}(a) \\
+N_{b}(a) &= S(a) + b_1(a) I_{T}(a)+ b_2(a) I_{B}(a) + b_3(a) R_{B}(a) + b_4(a) I_{C}(a) + b_5(a) R_{C}(a) \\
+R(a) &= \begin{cases}
+    \frac{\mathbf{b}^\top \mathbf{N_b}}{1+(\frac{N}{K})^\phi}  & \text{if $a = 1$},
+    \\
+    0 & \text{otherwise},
+  \end{cases} \\
+\frac{dS(a)}{dt} &= R(a) - \beta_{T}{(a)} T S(a) - \frac{\beta_B (a) B}{N} S(a) - (\mu_{S}(a) + \nu) S(a)  \\ 				% S 
+\frac{dI_{T}(a)}{dt}&= \beta_T (a) T S(a) -  \frac{\beta'_{B}(a) B}{N} I_{T}(a) - (\mu_{T}(a) + \nu) I_{T}(a) \\			% TB 
+\frac{dI_{B}(a)}{dt}&=  \frac{\beta_B (a) B}{N}S(a) - \beta'_{T}(a) T I_{B}(a) + \epsilon R_{B}(a)  - (\gamma + \mu_{B}(a) + \nu) I_{B}(a) \\ % B
+\frac{dI_{C}(a)}{dt}&=  \beta'_{T}(a) T I_{B}(a) + \frac{\beta'_{B}(a) B}{N} I_{T}(a) + \epsilon R_{C}(a)  - (\gamma + \mu_{C}(a) + \nu)I_{C}(a)\\  %Co
+\frac{dR_{B}(a)}{dt}&=  \gamma I_{B}(a) - (\epsilon + \mu_{RB}(a) + \nu) R_{B}(a) \\  							% Chronic brucellosis 
+\frac{dR_{C}(a)}{dt}&=  \beta'_{T}(a) T R_{B}(a) + \gamma I_{C}(a) - (\epsilon + \mu_{RC}(a) + \nu) R_{C}(a) \\ 		% Chronic B and co
+\end{align*}
+
+
+
+
+
 \section*{Citations}
 
 Alexander, B., Schnurrenberger, P.R., Brown, R.R. 1981. Numbers of Brucella abortus in the placenta, umbilicus and fetal fluid of two naturally infected cows. Veterinary Record. 108, 500. 
