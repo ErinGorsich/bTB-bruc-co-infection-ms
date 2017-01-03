@@ -50,7 +50,7 @@ rhs_age_matrix = function(times, x, params){
 		# turn betaB into a matrix
 		betaBm <- matrix(nrow = 20, ncol = 20)
 		betaBm[1:20, 1:20] <- betaB
-		betaBm[4:6,] <- exp(0.0885) * betaB  #4-6yr have higher suscept.
+		betaBm[2:3,] <- exp(0.0885) * betaB  #2-3yr have higher suscept.
 		betaTm <- matrix(c(rep(betaT, 400)), nrow = 20, ncol = 20)
 	
 		# lambdaB = age specific vectors!
@@ -132,7 +132,7 @@ rhs_age_matrix_ricker = function(times, x, params){
 		# turn betaB into a matrix
 		betaBm <- matrix(nrow = 20, ncol = 20)
 		betaBm[1:20, 1:20] <- betaB
-		betaBm[4:6,] <- exp(0.0885) * betaB  #4-6yr have higher suscept.
+		betaBm[2:3,] <- exp(0.0885) * betaB  #2-4yr pre-reproductives have higher suscept.
 		betaTm <- matrix(c(rep(betaT, 400)), nrow = 20, ncol = 20)
 	
 		# lambdaB = age specific vectors!

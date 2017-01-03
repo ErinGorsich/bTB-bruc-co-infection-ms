@@ -349,7 +349,7 @@ with(Shat2, head(data.frame(time, surv), n=4))
 #GLOBAL            NA 5.1168 0.1634
 
 test.mod<-coxph(Surv(start, stop, convert.time)~ TB_3*herd2+testage+ herd2:stop+ herd2:TB_3:stop + cluster(animal), data=data); summary(test.mod) # 244.4092
-test.mod<-coxph(Surv(start, stop, convert.time)~ TB_3*herd2+testage+ herd2:stop+ herd2:stop + cluster(animal), data=data); summary(test.mod) # 244.4092
+test.mod<-coxph(Surv(start, stop, convert.time)~ TB_3*herd2+testage+ herd2:stop+ cluster(animal), data=data); summary(test.mod) # 244.4092
 
 test.mod<-coxph(Surv(start, stop, convert.time)~ TB_3*herd2+testage+ cluster(animal), data=data[data$start > 6,]); summary(test.mod) # 244.4092
 test.mod<-coxph(Surv(start, stop, convert.time)~ TB_3*herd2+testage+ cluster(animal), data=data[data$start < 6,]); summary(test.mod) # 244.4092
@@ -372,6 +372,9 @@ test.mod<-coxph(Surv(start, stop, convert.time)~ TB_3*herd2+testage+ cluster(ani
 #herd2CB:stop       NA        NA   0.0000    0.0000     NA       NA   
 
 test.mod<-coxph(Surv(start, stop, convert.time)~ TB_3*herd2+testage+ herd2:stop + cluster(animal), data=data); summary(test.mod) # 244.4092
+
+# Average effect of bTB, taken accross herds: 
+
 
 
 

@@ -834,6 +834,53 @@ p12
 
 
 
+
+#######################################################
+#######################################################
+# Figure 5a
+#######################################################
+#######################################################
+df<- readRDS("coinfection_pattern_results.rds")
+f2 <- data.frame(Evaluation = c("Model", "Model", "Data", "Data"), 
+	Infection = c("Single infection", "Co-infection", "Single infection", "Co-infection"), 
+	BrucellosisPrevalence = c(df$prevBinS, df$prevBinT, 0.3035, 0.4524), 
+	TBPrevalence = c(df$prevTinS, df$prevTinB, 0.227, 0.3585), 
+	CILowB = c(NA, NA, 0.2654405, 0.3657982), 
+	CIHighB = c(NA, NA, 0.3451408, 0.5405985), 
+	CILowTB = c(NA, NA, 0.1781895, 0.2857143), 
+	CIHighTB = c(NA, NA, 0.2783505, 0.4313725))
+df2 <- reshape(f2, varying = c("BrucellosisPrevalence", "TBPrevalence"), 
+	v.names = "Prevalence", timevar = "Name", times = c("Brucellosis", "bTB"), 
+	direction = "long")
+df2$Infection <- relevel(df2$Infection, "Single infection")
+df2$CILow <- c(NA, NA, 0.26544, 0.365798, NA, NA, 0.1781895, 0.2857)
+df2$CIHigh <- c(NA, NA, 0.3451408, 0.540598, NA, NA, 0.27835, 0.43137)
+
+limits <- aes(ymax = df2$CIHigh[df2$Evaluation == "Data"], ymin= df2$CILow[df2$Evaluation == "Data"])
+p1 <- 
+ggplot(df2[df2$Evaluation == "Model",], aes(x = Name, y = Prevalence, fill = Infection)) + 
+	geom_bar(position = position_dodge(), stat = "identity") + ylim(0, 0.8) + 
+	theme_bw() +  scale_fill_manual(values=c("steelblue", "orangered4")) +
+	theme(axis.line.x = element_line(colour= "black"),
+  		axis.line.y = element_line(colour= "black"),
+  		axis.title.x = element_blank(),#element_text(size=16, vjust=-0.15),
+        axis.title.y = element_text(size=18, vjust= 0.8),
+        axis.text.x = element_text(size=18, vjust=-0.05),
+        axis.text.y = element_text(size=18),
+        panel.border = element_blank(), 
+		legend.position=c(0.8, 0.9),  
+        legend.background= element_rect(fill="white", colour="white"),
+        legend.key= element_blank(),
+        legend.title= element_blank(),
+        legend.text = element_text(size=16))  + 
+	geom_point(data = df2[df2$Evaluation == "Data",], colour = "black", 
+		position = position_dodge(width = 0.9))   + 
+	geom_errorbar(limits, position = position_dodge(width = 0.9), width= 0.25)      
+# turn off dots in legend.  Add model/data to legend
+
+
+
+
 #############################################
 #############################################
 # Notes of GLMM

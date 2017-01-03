@@ -120,8 +120,8 @@ plot_raw_numbers = function(sol){
 }
 
 get_prevalence = function(sol){
-	S <- sum(sol[length(sol) , s_index+1])
-	It <- sum(sol[length(sol) , it_index +1])
+	S <- sum(sol[length(sol), s_index+1])
+	It <- sum(sol[length(sol), it_index +1])
 	Ib <- sum(sol[length(sol) , ib_index +1])
 	Ic <- sum(sol[length(sol) , ic_index +1])
 	R <- sum(sol[length(sol) , r_index +1])
