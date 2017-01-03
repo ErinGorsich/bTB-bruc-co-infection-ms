@@ -9,6 +9,8 @@ library(tidyr)
 library('grid')
 library('gridExtra') # specifies layout
 library(survival)
+library(lattice)
+library(RColorBrewer)
 
 # read in data prepared in cross_sectional_dataprep, groomed for my bTB statuses
 #data<-read.csv("cross_sectional_data_withdz_cleandisease_nofinal_Feb2016_capturetime_forsurv.csv")
@@ -143,6 +145,23 @@ newdf$se[is.na(newdf$se)]<-0
 newdf2<-newdf[newdf$N>1,]; newdf<-newdf2
 
 
+
+
+# only inset plot
+png("Age_histogram.png", width = 800, height = 800, units = "px")
+ggplot(d, aes(x=age)) + 
+	geom_histogram(data=d, fill= "steelblue", alpha=0.3, 
+		colour = "steelblue4", stat="bin", binwidth= 1, linetype = 1, size = 2) + 
+	theme_bw()+ 
+	xlab("Age (years)")+ ylab("Number of buffalo")+
+	theme(panel.border = element_blank(), 
+        panel.margin = element_blank(),
+        panel.grid.major= element_blank(),
+        panel.grid.minor= element_blank()) + 
+	theme(axis.line.x = element_line(colour= "black", size = 2), 
+		axis.line.y = element_line(colour= "black", size = 2)) + 
+	theme(axis.title = element_blank(), axis.text = element_blank())
+dev.off()
 
 
 #######################################################
@@ -747,15 +766,6 @@ multiplot(remake_p6, p10, cols=2)
 
 
 
-
-
-
-
-
-
-
-
-
 ########################################################################
 ########################################################################
 # Fecundity Figure for supplememt with pfc in it. 
@@ -832,7 +842,54 @@ p12
 
 
 
+#######################################################
+#######################################################
+# Figure 4- Levelplots
+#######################################################
+#######################################################
+epi <- read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/draft2/post-labmeeting/vary_rho/vary_rho.csv")
+cols <- brewer.pal(11, "RdBu")
+cols2 <- colorRampPalette(brewer.pal(11, "RdBu"))
 
+epi$bTBplot <- epi$bTBprev - 0.30
+epi$brucplot <- epi$brucprev - 0.30
+
+df <- reshape(epi, direction = "long", varying = c("bTBplot", "brucplot"),
+	v.names = "Difference", timevar = "infection", times = c("bTB", "brucellosis"))
+
+p <- ggplot(data = df, aes(x = rhoB, y = rhoT))
+p + theme_bw() + facet_wrap(~ infection) + 
+	xlab(expression(paste(Proportional~increase~"in"~brucellosis~
+		transmission~with~"co-infection,"~ beta[B]^{"'"}, "/", beta[B]))) + 
+	ylab(expression(paste(Proportional~increase~"in"~bTB~
+		transmission~with~"co-infection,"~ beta[T]^{"'"}, "/", beta[T]) )) +
+	theme(panel.grid.major = element_blank(), 
+	plot.title = element_text(size = 14),
+	axis.title = element_text(size = 12), axis.text = element_text(size = 12), 
+	legend.text = element_text(size=12), 
+	legend.text.align = 1, 
+	legend.key.size = unit(1, "cm") ) + 
+	geom_tile(aes(fill = Difference)) +
+	scale_fill_distiller(palette = "RdYlBu", direction = -1, limits = c(-0.30, 0.30))
+	
+#levelplot(bTBplot~rhoB*rhoT, data = epi, main = "bTB prevalence", 
+#	xlab = expression(paste(beta[B]^{"'"}, "/", beta[B]) ), 
+#	ylab = expression(paste(beta[TB]^{"'"}, "/", beta[TB])), 
+#	at = seq(-0.30, +0.12, 0.02 ), 
+#	col.regions = cols2)
+	
+#ggplot(epi, aes(rhoB, rhoT, brucplot)) + geom_tile(aes(fill = brucplot)) +
+#	theme_bw() + scale_fill_manual(values = cols2)
+	
+# better than: frac(beta[B], beta[b]) )) )
+#p3 <- levelplot(brucplot~rhoB*rhoT, data = epi, main = "brucellosis prevalence", 
+#	xlab = expression(paste(beta[B]^{"'"}, "/", beta[B]) ), 
+#	ylab = expression(paste(beta[TB]^{"'"}, "/", beta[TB])), 
+#	at = seq(-0.30, +0.12, 0.02 ), col.regions = cols2)
+
+# 1- change to difference
+# 2- chage color scheme to reflect zero difference
+# 3- put plots together
 
 
 #######################################################
