@@ -312,11 +312,10 @@ get_structured_prevalence = function(sol){
 
 objective = function(params.est){
 	# params.est = 2 long = c(betaB, betaT)
-	#params <- c(fixed.params, list(gamma=1/2, betaB = params.est[1],
-	#betaT = params.est[2]/10000, rhoT = 1, rhoB = 2.1, theta= 4, K = 433))
 	params <- c(fixed.params, list(gamma=1/2, betaB = params.est[1],
-	betaT = params.est[2]/10000, rhoT = 1, rhoB = 1.2, theta= 4, K = 433))
-	
+		betaT = params.est[2]/10000, rhoT = 1, rhoB = 2.1, theta= 4, K = 433))
+	#params <- c(fixed.params, list(gamma=1/2, betaB = params.est[1],
+	#	betaT = params.est[2]/10000, rhoT = 1, rhoB = 4, theta= 4, K = 433))
 	# seed from endemic brucellosis conditions, 10 bTB positive buffalo
 	x0 = get_starting_eqbruc(params = c(params))
 	x0[[25]] <- x0[[25]] + 2
@@ -346,9 +345,9 @@ objective_recov = function(params.est){
 
 # Rho = 4, no recovery
 par <- optim(c(1.025, 0.00094*10000), objective) 
-#0.797551 9.640622
-params <- c(fixed.params, list(gamma=1/2, betaB = 0.797551,
-	betaT = 9.640622/10000, rhoT = 1, rhoB = 4, theta= 4, K = 433))
+#????????
+params <- c(fixed.params, list(gamma=1/2, betaB = 0.801543,
+	betaT = 11.013771/10000, rhoT = 1, rhoB = 4, theta= 4, K = 433))
 x0 = get_starting_eqbruc(params = c(params))
 x0[[25]] <- x0[[25]] + 2
 x0[[5]] <- x0[[5]] - 2
@@ -361,9 +360,8 @@ plot_ageprevalence(sol)
 
 # Rho = 2.1, no recovery
 par <- optim(c(1.025, 0.00094*10000), objective)  # starting vals=30% prev w/out co-infection
-#0.9636965 9.1928187
-params <- c(fixed.params, list(gamma=1/2, betaB = 0.9636965,
-	betaT = 9.1928187/10000, rhoT = 1, rhoB = 2.1, theta= 4, K = 433))
+params <- c(fixed.params, list(gamma=1/2, betaB = par$par[1],
+	betaT = par$par[2]/10000, rhoT = 1, rhoB = 2.1, theta= 4, K = 433))# 0.9747418 12.6267575
 x0 = get_starting_eqbruc(params = c(params))
 x0[[25]] <- x0[[25]] + 2
 x0[[5]] <- x0[[5]] - 2
@@ -375,15 +373,172 @@ par(mfrow = c(1, 2))
 plot_raw_numbers(sol)
 plot_ageprevalence(sol)
 
-# rho = 1.5, no recovery
-par <- optim(c(1.025, 0.00094*10000), objective)  # starting vals=30% prev w/out co-infection
-params <- c(fixed.params, list(gamma=1/2, betaB = 1.038374,
-	betaT = 9.001541/10000, rhoT = 1, rhoB = 1.2, theta= 4, K = 433))
-
 # Rho = 4, recovery
 
 # Rho = 2.1, recovery
+par <- optim(c(1.025, 0.00094*10000), objective_recov)  # starting vals=30% prev w/out co-infection
+params <- c(fixed.params.recov, list(gamma=1/2, betaB = par$par[1],
+	betaT = par$par[2]/10000, rhoT = 1, rhoB = 2.1, theta= 4, K = 433)) #[1] 1.078660 9.155646
 
+x0 = get_starting_eqbruc(params = c(params))
+x0[[25]] <- x0[[25]] + 2
+x0[[5]] <- x0[[5]] - 2
+sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))
+get_prevalence(sol)  # 27, 34!!!  (26.6, 53.8, 28.8, 42.8)
+get_structured_prevalence(sol)
+make_structured_summary_plots(sol)
+par(mfrow = c(1, 2))
+plot_raw_numbers(sol)
+plot_ageprevalence(sol)
+
+
+##################################################################################################
+##################################################################################################
+##################################################################################################
+# play- Higher baseline mortality, same, age-specific mortality of Br.
+objective1 = function(params.est){
+	# params.est = 2 long = c(betaB, betaT)
+	params <- c(test.fixed.params, list(gamma=1/2, betaB = params.est[1],
+	betaT = params.est[2]/10000, rhoT = 1, rhoB = 2.1, theta= 4, K = 433))
+	
+	# seed from endemic brucellosis conditions, 10 bTB positive buffalo
+	x0 = get_starting_eqbruc(params = c(params))
+	x0[[25]] <- x0[[25]] + 2
+	if(x0[[5]] > 2){
+		x0[[5]] <- x0[[5]] - 2}  
+	sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))
+	df <- get_structured_prevalence(sol)
+	error <- sqrt(((prevTBobs - df$prevTB)^2 + (prevBobs - df$prevB)^2))
+	return (error)
+}
+par <- optim(c(1.025, 0.00094*10000), objective1)  # starting vals=30% prev w/out co-infection
+params <- c(test.fixed.params, list(gamma=1/2, betaB = 1.231858,   
+	betaT = 11.044283/10000, rhoT = 1, rhoB = 2.1, theta= 4, K = 433))  #1.231858 11.044283
+x0 = get_starting_eqbruc(params = c(params))
+x0[[25]] <- x0[[25]] + 2
+x0[[5]] <- x0[[5]] - 2
+sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))
+get_structured_prevalence(sol); make_structured_summary_plots(sol)
+par(mfrow = c(1, 2))
+plot_raw_numbers(sol); plot_ageprevalence(sol)
+#--> NO TB????
+
+# Higher baseline mortality, old, age-independent mortality of Br.
+# test.fixed.params.olddz
+objective2 = function(params.est){
+	# params.est = 2 long = c(betaB, betaT)
+	params <- c(test.fixed.params.olddz, list(gamma=1/2, betaB = params.est[1],
+	betaT = params.est[2]/10000, rhoT = 1, rhoB = 2.1, theta= 4, K = 433))
+	
+	# seed from endemic brucellosis conditions, 10 bTB positive buffalo
+	x0 = get_starting_eqbruc(params = c(params))
+	x0[[25]] <- x0[[25]] + 2
+	if(x0[[5]] > 2){
+		x0[[5]] <- x0[[5]] - 2}  
+	sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))
+	df <- get_structured_prevalence(sol)
+	error <- sqrt(((prevTBobs - df$prevTB)^2 + (prevBobs - df$prevB)^2))
+	return (error)
+}
+par <- optim(c(1.1, 0.001*10000), objective2) 
+params <- c(test.fixed.params.olddz, list(gamma=1/2, betaB = 1.294567,   
+	betaT = 10.859937/10000, rhoT = 1, rhoB = 2.1, theta= 4, K = 433))  #1.294562 10.859937
+x0 = get_starting_eqbruc(params = c(params))
+x0[[25]] <- x0[[25]] + 2
+x0[[5]] <- x0[[5]] - 2
+sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))
+get_structured_prevalence(sol); make_structured_summary_plots(sol)
+par(mfrow = c(1, 2))
+plot_raw_numbers(sol); plot_ageprevalence(sol)
+
+
+
+objective3 = function(params.est){
+	# params.est = 2 long = c(betaB, betaT)
+	params <- c(fixed.params.olddz, list(gamma=1/2, betaB = params.est[1],
+	betaT = params.est[2]/10000, rhoT = 1, rhoB = 2.1, theta= 4, K = 433))
+	
+	# seed from endemic brucellosis conditions, 10 bTB positive buffalo
+	x0 = get_starting_eqbruc(params = c(params))
+	x0[[25]] <- x0[[25]] + 2
+	if(x0[[5]] > 2){
+		x0[[5]] <- x0[[5]] - 2}  
+	sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))
+	df <- get_structured_prevalence(sol)
+	error <- sqrt(((prevTBobs - df$prevTB)^2 + (prevBobs - df$prevB)^2))
+	return (error)
+}
+par <- optim(c(1.025, 0.001*10000), objective3) #[1] 1.004592 12.833531
+params <- c(fixed.params.olddz, list(gamma=1/2, betaB = 1.004592,   
+	betaT = 12.833531/10000, rhoT = 1, rhoB = 2.1, theta= 4, K = 433))  
+#params <- c(fixed.params.olddz, list(gamma=1/2, betaB = par$par[1],   
+#	betaT = par$par[2]/10000, rhoT = 1, rhoB = 2.1, theta= 4, K = 433))  
+	
+x0 = get_starting_eqbruc(params = c(params))
+x0[[25]] <- x0[[25]] + 2
+x0[[5]] <- x0[[5]] - 2
+sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))
+get_structured_prevalence(sol); make_structured_summary_plots(sol)
+par(mfrow = c(1, 2))
+plot_raw_numbers(sol); plot_ageprevalence(sol)
+
+setwd("~/GitHub/bTB-bruc-co-infection-ms")
+df <- get_structured_prevalence(sol)
+saveRDS(df, "coinfection_pattern_results.rds")
+
+objective3.4 = function(params.est){
+	# params.est = 2 long = c(betaB, betaT)
+	params <- c(fixed.params.olddz, list(gamma=1/2, betaB = params.est[1],
+	betaT = params.est[2]/10000, rhoT = 1, rhoB = 4, theta= 4, K = 433))
+	
+	# seed from endemic brucellosis conditions, 10 bTB positive buffalo
+	x0 = get_starting_eqbruc(params = c(params))
+	x0[[25]] <- x0[[25]] + 2
+	if(x0[[5]] > 2){
+		x0[[5]] <- x0[[5]] - 2}  
+	sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))
+	df <- get_structured_prevalence(sol)
+	error <- sqrt(((prevTBobs - df$prevTB)^2 + (prevBobs - df$prevB)^2))
+	return (error)
+}
+par <- optim(c(1.025, 0.001*10000), objective3.4) #[1] 1.004592 12.833531
+params <- c(fixed.params.olddz, list(gamma=1/2, betaB = par$par[1],   
+	betaT = par$par[2]/10000, rhoT = 1, rhoB = 4, theta= 4, K = 433))  
+x0 = get_starting_eqbruc(params = c(params))
+x0[[25]] <- x0[[25]] + 2
+x0[[5]] <- x0[[5]] - 2
+sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))
+get_structured_prevalence(sol); make_structured_summary_plots(sol)
+par(mfrow = c(1, 2))
+plot_raw_numbers(sol); plot_ageprevalence(sol)
+
+
+
+objective4 = function(params.est){
+	# params.est = 2 long = c(betaB, betaT)
+	params <- c(fixed.params.recov.olddz, list(gamma=1/2, betaB = params.est[1],
+	betaT = params.est[2]/10000, rhoT = 1, rhoB = 2.1, theta= 4, K = 433))
+	
+	# seed from endemic brucellosis conditions, 10 bTB positive buffalo
+	x0 = get_starting_eqbruc(params = c(params))
+	x0[[25]] <- x0[[25]] + 2
+	if(x0[[5]] > 2){
+		x0[[5]] <- x0[[5]] - 2}  
+	sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))
+	df <- get_structured_prevalence(sol)
+	error <- sqrt(((prevTBobs - df$prevTB)^2 + (prevBobs - df$prevB)^2))
+	return (error)
+}
+par <- optim(c(1.025, 0.001*10000), objective4) #[1]
+params <- c(fixed.params.recov.olddz, list(gamma=1/2, betaB = par$par[1],   
+	betaT = par$par[2]/10000, rhoT = 1, rhoB = 2.1, theta= 4, K = 433))  
+x0 = get_starting_eqbruc(params = c(params))
+x0[[25]] <- x0[[25]] + 2
+x0[[5]] <- x0[[5]] - 2
+sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))
+get_structured_prevalence(sol); make_structured_summary_plots(sol)
+par(mfrow = c(1, 2))
+plot_raw_numbers(sol); plot_ageprevalence(sol)
 
 
 

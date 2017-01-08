@@ -19,6 +19,9 @@
 # King & Wearing, Age Structured Models
 #############################################################
 
+STOP- THIS CODE NEEDS UPDATED MAKE SURE USING PARAMETERS 
+WITHOUT AGE SPECIFIC EFFECTS OF INFECTION
+
 #############################################################
 #############################################################
 #1) Load fixed parameters, model
@@ -214,9 +217,9 @@ x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)
 times <- seq(0, 500, 1)
 
 
-params.test_log = c(fixed.params, list(gamma=1/2, betaB = 0.01,
+params.test_log = c(fixed.params.olddz, list(gamma=1/2, betaB = 0.01,
 	betaT = 0.0001, rhoT = 1.2, rhoB = 4, theta= 4, K = 433))
-params.test.recov_log = c(fixed.params.recov, list(gamma=1/2, 
+params.test.recov_log = c(fixed.params.recov.olddz, list(gamma=1/2, 
 	betaB = 0.0001, betaT = 0.001, rhoT = 1.2, rhoB = 4, theta = 4, K = 433))
 
 sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params.test_log))
@@ -236,7 +239,7 @@ stable_age <- unname(unlist( sol[500, c(2:21)]/sum(sol[500, c(2:21)]) ))
 theta_temp = seq(1, 10, 1)
 plot(NA, ylim = c(600, 1500), xlim = c(0, 500), xlab = "Time", ylab = "N")
 for (i in 1:length(theta_temp)){
-	params.test_log = c(fixed.params, list(gamma=1/2, betaB = 0.01,
+	params.test_log = c(fixed.params.olddz, list(gamma=1/2, betaB = 0.01,
 		betaT = 0.0001, rhoT = 1.2, rhoB = 4, theta= theta_temp[i], K = 1000))
 	sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params.test_log))
 	lines(x = sol$time, y = apply(sol[c(2:120)], 1, sum), type = "l",
@@ -253,9 +256,9 @@ betaB_temp <- seq(0.5, 1.5, 0.01) # slow
 betaB_temp <- betaB_temp[1:75]
 prevB <- NA; prevBrecov <- NA
 for (i in 1:length(betaB_temp)){
-	params.test_log = c(fixed.params, list(gamma=1/2, theta = 4, K = 433,
+	params.test_log = c(fixed.params.olddz, list(gamma=1/2, theta = 4, K = 433,
 		betaB = betaB_temp[i], betaT = 0.001, rhoT = 1, rhoB = 4))
-	params.test.recov_log = c(fixed.params.recov, list(gamma=1/2, theta = 4, K = 433,
+	params.test.recov_log = c(fixed.params.recov.olddz, list(gamma=1/2, theta = 4, K = 433,
 		betaB = betaB_temp[i], betaT = 0.001, rhoT = 1.2, rhoB = 4))
 	sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params.test_log))
 	sol.recov<- as.data.frame(ode(x0, times, rhs_age_matrix, params.test.recov_log))
@@ -273,11 +276,11 @@ betaB_temp[which(prevB < 0.21 & prevB > 0.19)]		# 0.915
 betaB_temp[which(prevB < 0.31 & prevB > 0.29)]		# 1.025
 betaB_temp[which(prevB < 0.405 & prevB > 0.395)]	# 1.185
 
-# set at 30% Brucellosis prevalence wihtout bTB, betaB = 1.025
-params.test_log = c(fixed.params, list(gamma=1/2, theta = 4, K = 433,
-	betaB = 1.025, betaT = 0.001, rhoT = 1, rhoB = 4))
-params.test.recov_log = c(fixed.params.recov, list(gamma=1/2, theta = 4, K = 433,
-	betaB = 1.025, betaT = 0.001, rhoT = 1, rhoB = 4))
+# set at 30% Brucellosis prevalence wihtout bTB, betaB = 1.025 --> SET TO 34% WITH bTB.. from fitting
+params.test_log = c(fixed.params.olddz, list(gamma=1/2, theta = 4, K = 433,
+	betaB = 1.004592, betaT = 0.001, rhoT = 1, rhoB = 2))
+params.test.recov_log = c(fixed.params.recov.olddz, list(gamma=1/2, theta = 4, K = 433,
+	betaB = 1.004592, betaT = 0.001, rhoT = 1, rhoB = 4))
 
 times <- seq(0, 500, 1)
 sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params.test_log))
@@ -347,30 +350,30 @@ plot_agestructure(as.matrix(sol[101,c(2:121)]))
 #############################################################
 # endemic_agestructure is set to final prevalence/age structure in bruc only model
 x0 = endemic_agestructure
-x0recov = endemic_agestructure_recov
+#x0recov = endemic_agestructure_recov
 x0[28] <- 5; x0[8] <- x0[8] - 5
-x0recov[28] <- 5; x0recov[8] <- x0recov[8] - 5
+#x0recov[28] <- 5; x0recov[8] <- x0recov[8] - 5
 times <- seq(0, 500, 1)
 
-# Gives 30% bruc prev without bTB; Gives 20% bTB prevalence without brucellosis
-params.test_log = c(fixed.params, list(gamma=1/2, theta = 4, K = 433,
-	betaB = 1.025, betaT = 0.00044, rhoT = 1, rhoB = 4))
-params.test.recov_log = c(fixed.params.recov, list(gamma=1/2, theta = 4, K = 433,
-	betaB = 1.025, betaT = 0.00044, rhoT = 1, rhoB = 4))
+# CHOSEN PARAMETERS IN FITTING
+params.test_log = c(fixed.params.olddz, list(gamma=1/2, theta = 4, K = 433,
+	betaB = 1.004592, betaT = 12.833531/10000, rhoT = 1, rhoB = 2))
+#params.test.recov_log = c(fixed.params.olddz.recov, list(gamma=1/2, theta = 4, K = 433,
+#	betaB = 1.025, betaT = 0.00044, rhoT = 1, rhoB = 4))
 
 sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params.test_log))
-sol.recov<- as.data.frame(ode(x0recov, times, rhs_age_matrix, params.test.recov_log))
+#sol.recov<- as.data.frame(ode(x0recov, times, rhs_age_matrix, params.test.recov_log))
 
 par(mfrow = c(1,2))
 plot_raw_numbers(sol)
 plot_raw_numbers(sol.recov)
-get_prevalence(sol); get_prevalence(sol.recov);   # almost no change in Bruc prev, no bTB!
+get_prevalence(sol); #get_prevalence(sol.recov);   # almost no change in Bruc prev, no bTB!
 
 # Make Summary Plots
 x0 = endemic_agestructure
-x0recov = endemic_agestructure_recov
+#x0recov = endemic_agestructure_recov
 x0[28] <- 5; x0[8] <- x0[8] - 5
-x0recov[28] <- 5; x0recov[8] <- x0recov[8] - 5
+#x0recov[28] <- 5; x0recov[8] <- x0recov[8] - 5
 
 rhoB_test <- seq(1, 10, 0.5)
 rhoT_test <- seq(1, 10, 0.5)
@@ -383,13 +386,13 @@ epi <- data.frame(
 	rbTB_inS = NA, rbTB_inB = NA, rbruc_inS = NA, rbruc_inTB = NA)
 	
 for (i in 1:length(epi[,1])){
-	params.test_log = c(fixed.params, list(gamma=1/2, theta = 4, K = 433,
-		betaB = 1.025, betaT = 0.00044, rhoT = epi$rhoT[i], rhoB = epi$rhoB[i]))
-	params.test.recov_log = c(fixed.params.recov, list(gamma=1/2, theta = 4, K = 433,
-		betaB = 1.025, betaT = 0.00044, rhoT = epi$rhoT[i], rhoB = epi$rhoB[i]))
+	params.test_log = c(fixed.params.olddz, list(gamma=1/2, theta = 4, K = 433, # vs. 0.00044 before
+		betaB = 1.025, betaT = 12.833531/10000, rhoT = epi$rhoT[i], rhoB = epi$rhoB[i]))
+	params.test.recov_log = c(fixed.params.recov.olddz, list(gamma=1/2, theta = 4, K = 433,
+		betaB = 1.025, betaT = 12.833531/10000, rhoT = epi$rhoT[i], rhoB = epi$rhoB[i]))
 	sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params.test_log))
-	sol.recov<- as.data.frame(ode(x0recov, times, rhs_age_matrix, params.test.recov_log))
-	temp <- get_prevalence(sol); rtemp <- get_prevalence(sol.recov)
+	#sol.recov<- as.data.frame(ode(x0recov, times, rhs_age_matrix, params.test.recov_log))
+	temp <- get_prevalence(sol);# rtemp <- get_prevalence(sol.recov)
 	
 	epi$bTBprev[i] = temp$prevTB
 	epi$brucprev[i] = temp$prevB 	
@@ -399,19 +402,36 @@ for (i in 1:length(epi[,1])){
 	epi$bruc_inS[i] = temp$prevBinS 
 	epi$bruc_inTB[i] = temp$prevBinT
 
-	epi$rbTBprev[i] = rtemp$prevTB 
-	epi$rbrucprev[i] = rtemp$prevB 	
-	epi$rfinalN[i] = sum(sol.recov[length(sol.recov), c(2:121)])
-	epi$rbTB_inS[i] = rtemp$prevTinS  
-	epi$rbTB_inB[i] = rtemp$prevTinB 
-	epi$rbruc_inS[i] = rtemp$prevBinS
-	epi$rbruc_inTB[i] = rtemp$prevBinT
-	rm(params.test_log, params.test.recov_log, sol, sol.recov, temp, rtemp)
+	#epi$rbTBprev[i] = rtemp$prevTB 
+	#epi$rbrucprev[i] = rtemp$prevB 	
+	#epi$rfinalN[i] = sum(sol.recov[length(sol.recov), c(2:121)])
+	#epi$rbTB_inS[i] = rtemp$prevTinS  
+	#epi$rbTB_inB[i] = rtemp$prevTinB 
+	#epi$rbruc_inS[i] = rtemp$prevBinS
+	#epi$rbruc_inTB[i] = rtemp$prevBinT
+	#rm(params.test_log, params.test.recov_log, sol, sol.recov, temp, rtemp)
+	rm(params.test_log, psol, temp)
 }
 
 write.csv(epi, "~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/draft2/post-labmeeting/vary_rho.csv")
+
 # Add lines for what it looks like without brucellosis around
 # choose diverging palette (... but needs turned into range...col.region = brewer.pal(8, "RdYlBu")), centered on non-co-infected values
+params.test_log = c(fixed.params.olddz, list(gamma=1/2, theta = 4, K = 433, # vs. 0.00044 before
+	betaB = 1.025, betaT = 12.833531/10000, rhoT = epi$rhoT[i], rhoB = epi$rhoB[i]))
+x0 = endemic_agestructure
+params.test_log = c(fixed.params.olddz, list(gamma=1/2, theta = 4, K = 433, # vs. 0.00044 before
+	betaB = 1.025, betaT = 12.833531/10000, rhoT = epi$rhoT[i], rhoB = epi$rhoB[i]))
+sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params.test_log))
+get_prevalence(sol) # 0.318564 without bTB
+S0 = 400* stable_age; It0 = 20 * stable_age; Ib0 = 0* stable_age; 
+Ic0 = 0* stable_age; R0 = 0 * stable_age; Rc0 = 0 * stable_age
+x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)
+sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params.test_log))
+get_prevalence(sol) # 0.5810836 without bTB
+
+
+
 epi <- read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/draft2/post-labmeeting/vary_rho/vary_rho.csv") 
 
 # bTB prevalence (vs. 30% alone)
@@ -455,6 +475,9 @@ grid.arrange(p5, p6, ncol = 2)
 
 
 library(RColorBrewer)
+
+
+
 
 
 

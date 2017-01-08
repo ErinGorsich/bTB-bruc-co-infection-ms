@@ -24,22 +24,16 @@ muS[1:2]<- 1- 0.86 # mortality rate in yearlings
 muS[3:15]<-  1- 0.94 # mortality rate in adults 
 muS[16:20]<-  1- 0.86 # mortality rate in adults 15+  (1/yr)
 
-# USE AGE 2.4
-#muS[1:2] <- 1 - 0.86
-#muS[3-5] <- 1 - 0.87
-#muS[6:15] <- 1- 0.98
-#muS[15:20] <- 1- 0.86
-
-muT <- 2.01 * muS
+muT <- 3.12 * muS
 muB <- 0
 muB[1:2] <- 4.9 * muS[1:2]
 muB[3:6] <- muS[3:6]
 muB[7:20] <- 4.5 * muS[7:20]
 
 muC <- 0
-muC[1:2] <- (2.01 + 4.9) * muS[1:2]
-muC[3:6] <- (2.01) * muS[3:6]
-muC[7:20] <- (2.01 + 4.5) * muS[7:20]
+muC[1:2] <- (3.12 + 4.9) * muS[1:2]
+muC[3:6] <- (3.12) * muS[3:6]
+muC[7:20] <- (3.12 + 4.5) * muS[7:20]
 muRC <- muC
 muR <- muB
 
@@ -74,3 +68,68 @@ fixed.params = list(aging = aging,
 
 
 
+################################################################
+# TEST- DELETE LATER (a little lower)
+################################################################
+# same rates, higher baseline
+muS <- NA; muT <- NA; muB <- NA; muC <- NA
+muS[1:2]<- 1- 0.8 # mortality rate in yearlings 
+muS[3:15]<-  1- 0.9 # mortality rate in adults 
+muS[16:20]<-  1- 0.8 # mortality rate in adults 15+  (1/yr)
+
+muT <- 3.12 * muS
+muB <- 0
+muB[1:2] <- 4.9 * muS[1:2]
+muB[3:6] <- muS[3:6]
+muB[7:20] <- 4.5 * muS[7:20]
+
+muC <- 0
+muC[1:2] <- (3.12 + 4.9) * muS[1:2]
+muC[3:6] <- (3.12) * muS[3:6]
+muC[7:20] <- (3.12 + 4.5) * muS[7:20]
+muRC <- muC
+muR <- muB
+
+test.fixed.params = list(aging = aging, 
+	b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, b = b, 
+	muS = muS, muB = muB, muT = muT, muC = muC, 
+	muR = muR, muRC = muRC, 	epsilon = epsilon)
+
+################################
+
+# higher baseline (as above), old disease rates
+muS <- NA; muT <- NA; muB <- NA; muC <- NA
+muS[1:2]<- 1- 0.8 # mortality rate in yearlings 
+muS[3:15]<-  1- 0.9 # mortality rate in adults 
+muS[16:20]<-  1- 0.8 # mortality rate in adults 15+  (1/yr)
+
+muT <- 2.8 * muS
+muB <- 3 * muS
+muC <- (2.8 + 3) * muS
+muRC <- muC
+muR <- muB
+
+
+test.fixed.params.olddz =  list(aging = aging, 
+	b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, b = b, 
+	muS = muS, muB = muB, muT = muT, muC = muC, 
+	muR = muR, muRC = muRC, 	epsilon = epsilon)
+
+################################
+
+
+
+muS <- NA; muT <- NA; muB <- NA; muC <- NA
+muS[1:2]<- 1- 0.86 # mortality rate in yearlings 
+muS[3:15]<-  1- 0.94 # mortality rate in adults 
+muS[16:20]<-  1- 0.86 # mortality rate in adults 15+  (1/yr)
+
+muT <- 2.8 * muS
+muB <- 3 * muS
+muC <- (2.8 + 3) * muS
+muRC <- muC
+muR <- muB
+fixed.params.olddz =  list(aging = aging, 
+	b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, b = b, 
+	muS = muS, muB = muB, muT = muT, muC = muC, 
+	muR = muR, muRC = muRC, 	epsilon = epsilon)

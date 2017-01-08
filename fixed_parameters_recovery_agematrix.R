@@ -24,16 +24,16 @@ muS[3:15]<-  1- 0.94 # mortality rate in adults
 muS[16:20]<-  1- 0.86 # mortality rate in adults 15+  (1/yr)
 
 # mortality, TB, and Brucellosis positive animals
-muT <- 2.01 * muS
+muT <- 3.12 * muS
 muB <- 0
 muB[1:2] <- 4.9 * muS[1:2]
 muB[3:6] <- muS[3:6]
 muB[7:20] <- 4.5 * muS[7:20]
 
 muC <- 0
-muC[1:2] <- (2.01 + 4.9) * muS[1:2]
-muC[3:6] <- (2.01) * muS[3:6]
-muC[7:20] <- (2.01 + 4.5) * muS[7:20]
+muC[1:2] <- (3.12 + 4.9) * muS[1:2]
+muC[3:6] <- (3.12) * muS[3:6]
+muC[7:20] <- (3.12 + 4.5) * muS[7:20]
 muRC <- muT
 muR <- muS
 
@@ -65,4 +65,18 @@ fixed.params.recov = list(aging = aging,
 
 
 
+
+muS <- NA; muT <- NA; muB <- NA; muC <- NA
+muS[1:2]<- 1- 0.86 # mortality rate in yearlings 
+muS[3:15]<-  1- 0.94 # mortality rate in adults 
+muS[16:20]<-  1- 0.86 # mortality rate in adults 15+  (1/yr)
+muT <- 2.8 * muS
+muB <- 3 * muS
+muC <- (2.8 + 3) * muS
+muRC <- muT
+muR <- muS
+fixed.params.recov.olddz = list(aging = aging, 
+	b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, b = b, 
+	muS = muS, muB = muB, muT = muT, muC = muC,
+	muR = muR, muRC = muRC, epsilon = epsilon)
 
