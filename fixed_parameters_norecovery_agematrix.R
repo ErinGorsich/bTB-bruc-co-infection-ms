@@ -54,7 +54,7 @@ b[16:20] <- max(b[5] * 0.7, 0)	# age 15 +; raw data (14/25)
 b1 <- c(rep(1, 4), rep(0.86, 20-4)) # c(rep(1, 4), rep(0.65, 20-4))		# with bTB (from raw data)
 b2 <- c(1, 1, 1, 1, rep(0.8, 20-4))		# brucellosis
 b3<- b2  								# chronic/recovered = active
-b4<- rep(1, 20) 		# coinfected
+b4<- rep(1, 20) 						# coinfected
 b5 <- b4 								# chronic-coinf = coinfected
 
 epsilon = 0.01
@@ -132,4 +132,4 @@ muR <- muB
 fixed.params.olddz =  list(aging = aging, 
 	b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, b = b, 
 	muS = muS, muB = muB, muT = muT, muC = muC, 
-	muR = muR, muRC = muRC, 	epsilon = epsilon)
+	muR = muR, muRC = muRC, epsilon = epsilon)

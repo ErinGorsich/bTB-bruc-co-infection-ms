@@ -345,24 +345,19 @@ get_prevalence(sol);
 plot_agestructure(as.matrix(sol[101,c(2:121)])) 
 
 
-
+#############################################################
 # Test 4: Add co-infection (Introduce bTB after set levels of brucellosis)
+# Vary proportional increase in transmission
 #############################################################
 # endemic_agestructure is set to final prevalence/age structure in bruc only model
 x0 = endemic_agestructure
-#x0recov = endemic_agestructure_recov
 x0[28] <- 5; x0[8] <- x0[8] - 5
-#x0recov[28] <- 5; x0recov[8] <- x0recov[8] - 5
 times <- seq(0, 500, 1)
 
 # CHOSEN PARAMETERS IN FITTING
 params.test_log = c(fixed.params.olddz, list(gamma=1/2, theta = 4, K = 433,
 	betaB = 1.004592, betaT = 12.833531/10000, rhoT = 1, rhoB = 2))
-#params.test.recov_log = c(fixed.params.olddz.recov, list(gamma=1/2, theta = 4, K = 433,
-#	betaB = 1.025, betaT = 0.00044, rhoT = 1, rhoB = 4))
-
 sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params.test_log))
-#sol.recov<- as.data.frame(ode(x0recov, times, rhs_age_matrix, params.test.recov_log))
 
 par(mfrow = c(1,2))
 plot_raw_numbers(sol)
@@ -371,9 +366,7 @@ get_prevalence(sol); #get_prevalence(sol.recov);   # almost no change in Bruc pr
 
 # Make Summary Plots
 x0 = endemic_agestructure
-#x0recov = endemic_agestructure_recov
 x0[28] <- 5; x0[8] <- x0[8] - 5
-#x0recov[28] <- 5; x0recov[8] <- x0recov[8] - 5
 
 rhoB_test <- seq(1, 10, 0.5)
 rhoT_test <- seq(1, 10, 0.5)
@@ -381,18 +374,13 @@ epi <- data.frame(
 	rhoB= rep(rhoB_test, length(rhoB_test)), 
 	rhoT = rep(rhoT_test, each = length(rhoB_test)), 
 	bTBprev = NA, brucprev = NA, 	finalN = NA, 
-	bTB_inS = NA, bTB_inB = NA, bruc_inS = NA, bruc_inTB = NA,
-	rbTBprev = NA, rbrucprev = NA, rfinalN = NA, 
-	rbTB_inS = NA, rbTB_inB = NA, rbruc_inS = NA, rbruc_inTB = NA)
+	bTB_inS = NA, bTB_inB = NA, bruc_inS = NA, bruc_inTB = NA)
 	
 for (i in 1:length(epi[,1])){
 	params.test_log = c(fixed.params.olddz, list(gamma=1/2, theta = 4, K = 433, # vs. 0.00044 before
 		betaB = 1.025, betaT = 12.833531/10000, rhoT = epi$rhoT[i], rhoB = epi$rhoB[i]))
-	params.test.recov_log = c(fixed.params.recov.olddz, list(gamma=1/2, theta = 4, K = 433,
-		betaB = 1.025, betaT = 12.833531/10000, rhoT = epi$rhoT[i], rhoB = epi$rhoB[i]))
 	sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params.test_log))
-	#sol.recov<- as.data.frame(ode(x0recov, times, rhs_age_matrix, params.test.recov_log))
-	temp <- get_prevalence(sol);# rtemp <- get_prevalence(sol.recov)
+	temp <- get_prevalence(sol)
 	
 	epi$bTBprev[i] = temp$prevTB
 	epi$brucprev[i] = temp$prevB 	
@@ -401,16 +389,7 @@ for (i in 1:length(epi[,1])){
 	epi$bTB_inB[i] = temp$prevTinB
 	epi$bruc_inS[i] = temp$prevBinS 
 	epi$bruc_inTB[i] = temp$prevBinT
-
-	#epi$rbTBprev[i] = rtemp$prevTB 
-	#epi$rbrucprev[i] = rtemp$prevB 	
-	#epi$rfinalN[i] = sum(sol.recov[length(sol.recov), c(2:121)])
-	#epi$rbTB_inS[i] = rtemp$prevTinS  
-	#epi$rbTB_inB[i] = rtemp$prevTinB 
-	#epi$rbruc_inS[i] = rtemp$prevBinS
-	#epi$rbruc_inTB[i] = rtemp$prevBinT
-	#rm(params.test_log, params.test.recov_log, sol, sol.recov, temp, rtemp)
-	rm(params.test_log, psol, temp)
+	rm(params.test_log, sol, temp)
 }
 
 write.csv(epi, "~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/draft2/post-labmeeting/vary_rho.csv")
@@ -475,6 +454,115 @@ grid.arrange(p5, p6, ncol = 2)
 
 
 library(RColorBrewer)
+
+
+
+
+
+#############################################################
+#############################################################
+# 4.5) Co-infection levelplots, manipulate mortality and transmission
+#############################################################
+#############################################################
+
+# endemic_agestructure is set to final prevalence/age structure in bruc only model
+x0 = endemic_agestructure
+x0[28] <- 5; x0[8] <- x0[8] - 5
+times <- seq(0, 500, 1)
+
+# CHOSEN PARAMETERS IN FITTING
+params.test_log = c(fixed.params.olddz, list(gamma=1/2, theta = 4, K = 433,
+	betaB = 1.004592, betaT = 12.833531/10000, rhoT = 1, rhoB = 2))
+sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params.test_log))
+
+par(mfrow = c(1,2))
+plot_raw_numbers(sol)
+plot_raw_numbers(sol.recov)
+get_prevalence(sol); #get_prevalence(sol.recov);   # almost no change in Bruc prev, no bTB!
+
+x0 = endemic_agestructure
+x0[28] <- 5; x0[8] <- x0[8] - 5
+
+rhoB_test <- seq(1, 10, 0.1)
+mort_test <- seq(1, 10, 0.1)
+rhoT_test <- seq(1, 10, 0.1)
+
+# Data frame to hold results of changing bruc effects on bTB
+epiTB <- data.frame(
+	rhoT= rep(rhoB_test, length(rhoB_test)), 
+	mort = rep(mort_test, each = length(rhoB_test)), 
+	bTBprev = NA, brucprev = NA, 	finalN = NA, 
+	bTB_inS = NA, bTB_inB = NA, bruc_inS = NA, bruc_inTB = NA)
+
+# Data frame to hold results of changing bTB effects on bruc
+epiB <- data.frame(
+	rhoB= rep(rhoB_test, length(rhoB_test)), 
+	mort = rep(mort_test, each = length(rhoB_test)),
+	bTBprev = NA, brucprev = NA, 	finalN = NA, 
+	bTB_inS = NA, bTB_inB = NA, bruc_inS = NA, bruc_inTB = NA)
+epiB<- epiB[epiB$mort < 7.2,]
+epiTB <- epiTB[epiTB$mort < 7.2, ]
+	
+for (i in 1:length(epiTB[,1])){
+	print(i)
+	params.test_log = c(fixed.params.olddz, list(gamma=1/2, theta = 4, K = 433,
+		betaB = 1.025, betaT = 12.833531/10000, rhoT = epiTB$rhoT[i], rhoB = 1))
+	params.test_log$muC <- epiTB$mort[i] * params.test_log$muS
+	params.test_log$muRC <- epiTB$mort[i] * params.test_log$muS
+		
+	sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params.test_log))
+	temp <- get_prevalence(sol)
+	
+	epiTB$bTBprev[i] = temp$prevTB
+	epiTB$brucprev[i] = temp$prevB 	
+	epiTB$finalN[i] = sum(sol[length(sol), c(2:121)])
+	epiTB$bTB_inS[i] = temp$prevTinS 
+	epiTB$bTB_inB[i] = temp$prevTinB
+	epiTB$bruc_inS[i] = temp$prevBinS 
+	epiTB$bruc_inTB[i] = temp$prevBinT
+	rm(params.test_log, sol, temp)
+}
+write.csv(epiTB, "~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/draft2/post-labmeeting/epiT.csv")
+
+for (i in 1:length(epiB[,1])){
+	params.test_log = c(fixed.params.olddz, list(gamma=1/2, theta = 4, K = 433, 
+		betaB = 1.025, betaT = 12.833531/10000, rhoT = 2.1, rhoB = epiB$rhoB[i]))
+	params.test_log$muC <- epiB$mort[i] * params.test_log$muS
+	params.test_log$muRC <- epiB$mort[i] * params.test_log$muS
+			
+	sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params.test_log))
+	temp <- get_prevalence(sol)
+	
+	epiB$bTBprev[i] = temp$prevTB
+	epiB$brucprev[i] = temp$prevB 	
+	epiB$finalN[i] = sum(sol[length(sol), c(2:121)])
+	epiB$bTB_inS[i] = temp$prevTinS 
+	epiB$bTB_inB[i] = temp$prevTinB
+	epiB$bruc_inS[i] = temp$prevBinS 
+	epiB$bruc_inTB[i] = temp$prevBinT
+	rm(params.test_log, sol, temp)
+	print(i)
+}
+
+write.csv(epiB, "~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/draft2/post-labmeeting/epiB.csv")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

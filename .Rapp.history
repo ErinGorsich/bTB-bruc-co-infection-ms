@@ -1,408 +1,660 @@
-9.2463780/10000
-objective = function(params.est){#
-	# params.est = 2 long = c(betaB, betaT)#
-	#params <- c(fixed.params, list(gamma=1/2, betaB = params.est[1],#
-	#betaT = params.est[2]/10000, rhoT = 1, rhoB = 2.1, theta= 4, K = 433))#
-	params <- c(fixed.params, list(gamma=1/2, betaB = params.est[1],#
-	betaT = params.est[2]/10000, rhoT = 1, rhoB = 4, theta= 4, K = 433))#
-	# seed from endemic brucellosis conditions, 10 bTB positive buffalo#
-	x0 = get_starting_eqbruc(params = c(params))#
-	x0[[25]] <- x0[[25]] + 2#
-	if(x0[[5]] > 2){#
-		x0[[5]] <- x0[[5]] - 2}  #
-	sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))#
-	df <- get_structured_prevalence(sol)#
-	error <- sqrt(((prevTBobs - df$prevTB)^2 + (prevBobs - df$prevB)^2))#
-	return (error)#
-}
-par <- optim(c(1.025, 0.00054*10000), objective, method = c("L-BFGS-B"), lower = c(0.4, 0.8), upper = c(2, 0.001 * 10000))  # starting vals=30% prev w/out co-infection
-par
-x0 = get_starting_eqbruc(params = c(params))#
-x0[[25]] <- x0[[25]] + 2#
-x0[[5]] <- x0[[5]] - 2#
-sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))#
-get_prevalence(sol)
-params <- c(fixed.params, list(gamma=1/2, betaB = 1.129042,#
-	betaT = 9.2463780/10000, rhoT = 1, rhoB = 4, theta= 4, K = 433))#
-x0 = get_starting_eqbruc(params = c(params))#
-x0[[25]] <- x0[[25]] + 2#
-x0[[5]] <- x0[[5]] - 2#
-sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))#
-get_prevalence(sol)
-par(mfrow = c(1, 2))#
-plot_raw_numbers(sol)#
-plot_ageprevalence(sol)
-par <- optim(c(1.025, 0.00094*10000), objective)
-par
-params <- c(fixed.params, list(gamma=1/2, betaB = 0.797551,#
-	betaT = 9.640622/10000, rhoT = 1, rhoB = 4, theta= 4, K = 433))#
-x0 = get_starting_eqbruc(params = c(params))#
-x0[[25]] <- x0[[25]] + 2#
-x0[[5]] <- x0[[5]] - 2#
-sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))#
-get_prevalence(sol)  # 27, 34!!!  (26.6, 53.8, 28.8, 42.8)#
-make_summary_plots(sol)
-objective
-get_structured_prevalence
-get_structured_prevalence(sol)
-make_structured_summary_plots(sol)
-par(mfrow = c(1, 2))#
-plot_raw_numbers(sol)#
-plot_ageprevalence(sol)
-exp(0.76)
-0.04*4
-0.14*4
-exp(0.885)
-fixed.params
-# logistic#
-rhs_age_matrix = function(times, x, params){#
-	###########################
-	# Inputs: t = time sequence; #
-	# x = initial conditions, vector(length=24), 4 age categories#
-	# params= list(#
-	# b1,b2,b3,b4,b5: age sp. prop reduction in fecundity (20 long)#
-	# with TB/bruc/chronic bruc/co/co-chronic #
-	# betaT, betaB: transmission rates, age independent#
-	# rhoB & rhoT: prop increase in transmission #
-	# with co-infection (scalor=age independent)#
-	# gamma, epsilon: scalors	 #
-	# b = a vector (0, small no., birth rate set to get growth = 1.2, same rate)#
-	# muS, muT, muB, muC, muR, muRC age specific mortality rates.  #
-	###########################
-	# Output: differences, for 20 ages#
-	###########################
-	with(as.list(c(x, params)), {#
-#
-		# Assign state variables, each 20 long, #
-		# 4 categories: 1-3.9, 4-4.9, 5-14.9, 15+)#
-		# from incidence anlaysis, use [0-3),[3 +) #
-		# from mortality analysis, use [0-3),[3 +)#
-		# from birth analyis, use, [3-5),[5+)#
-		s_index <- 1:20#
-		it_index <- 21:40#
-		ib_index <- 41:60#
-		ic_index <- 61:80#
-		r_index <- 81:100#
-		rc_index <- 101:120#
-#
-		S = x[s_index] 				#
-		It = x[it_index] 			#
-		Ib = x[ib_index]#
-		Ic = x[ic_index]#
-		R = x[r_index]#
-		Rc = x[rc_index]#
-#
-		# Population size (N)#
-		Nall <- sum(S + It + Ib + Ic + R + Rc)  # overall#
-		N <- S + It + Ib +Ic + R + Rc 			# by age category#
-#
-		# Frequency dependent force of infection is age dependent #
-		# turn betaB into a matrix#
-		betaBm <- matrix(nrow = 20, ncol = 20)#
-		betaBm[1:20, 1:20] <- betaB#
-		betaBm[2:4,] <- exp(0.0885) * betaB  #2-4yr have higher suscept.#
-		betaTm <- matrix(c(rep(betaT, 400)), nrow = 20, ncol = 20)#
-		# lambdaB = age specific vectors!#
-		# bTB = density dependent, bruc = freq dependent#
-		lambdaT <- betaTm %*% (It + Ic + Rc)#
-		lambdaB <- betaBm %*% (Ib + Ic) / Nall#
-		lambdapT <- rhoT * betaTm %*% (It + Ic + Rc)#
-		lambdapB <- rhoB * betaBm %*% (Ib + Ic) / Nall#
-#
-		# Age spcific pop contributing to births (Nb = vector); #
-		# reduced births(b1, b2...=vectors; Nb = vector, birth = vector) #
-		Nb <- S + b1 * It + b2 * Ib + #
-			b3 * R + b4 * Ic + b5 * Rc#
-		birth <- c(b %*% Nb)#
-		recruitment <- c(birth / ( 1 + (Nall/K)^theta), rep(0, 19))#
-		dS <- recruitment + aging %*% S - (lambdaT + lambdaB) * S - muS * S#
-		dIt <- lambdaT * S - (lambdapB + muT) * It + aging %*% It#
-		dIb <- lambdaB * S + aging %*% Ib +	epsilon * R - (gamma + lambdapT + muB) * Ib#
-		dIc <- lambdapT*Ib + lambdapB*It + aging %*% Ic + epsilon * Rc - (gamma + muC)*Ic#
-		dR <- gamma * Ib - (epsilon + muR + lambdapT) * R + aging %*% R#
-		dRc <- lambdapT * R + gamma * Ic + aging %*% Rc - (epsilon + muRC) * Rc#
-		out = list(c(dS, dIt, dIb, dIc, dR, dRc))#
-		return(out)	#
-		}#
-	)	#
-}
-objective = function(params.est){#
-	# params.est = 2 long = c(betaB, betaT)#
-	#params <- c(fixed.params, list(gamma=1/2, betaB = params.est[1],#
-	#betaT = params.est[2]/10000, rhoT = 1, rhoB = 2.1, theta= 4, K = 433))#
-	params <- c(fixed.params, list(gamma=1/2, betaB = params.est[1],#
-	betaT = params.est[2]/10000, rhoT = 1, rhoB = 2, theta= 4, K = 433))#
-	# seed from endemic brucellosis conditions, 10 bTB positive buffalo#
-	x0 = get_starting_eqbruc(params = c(params))#
-	x0[[25]] <- x0[[25]] + 2#
-	if(x0[[5]] > 2){#
-		x0[[5]] <- x0[[5]] - 2}  #
-	sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))#
-	df <- get_structured_prevalence(sol)#
-	error <- sqrt(((prevTBobs - df$prevTB)^2 + (prevBobs - df$prevB)^2))#
-	return (error)#
-}
-par <- optim(c(1.025, 0.00094*10000), objective)  # starting vals=30% prev w/out co-infection
-par
-params <- c(fixed.params, list(gamma=1/2, betaB = 0.9511784,#
-	betaT = 9.1652575/10000, rhoT = 1, rhoB = 2.1, theta= 4, K = 433))#
-x0 = get_starting_eqbruc(params = c(params))#
-x0[[25]] <- x0[[25]] + 2#
-x0[[5]] <- x0[[5]] - 2#
-sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))#
-get_prevalence(sol)
-get_structured_prevalence(sol)
-make_structured_summary_plots(sol)
-par(mfrow = c(1, 2))#
-plot_raw_numbers(sol)#
-plot_ageprevalence(sol)
-##############################################################
-##############################################################
-# Write ODEs, density dependence... age structure, gamma ageing & wafwi#
-##############################################################
-##############################################################
-#
-# logistic#
-rhs_age_matrix = function(times, x, params){#
-	###########################
-	# Inputs: t = time sequence; #
-	# x = initial conditions, vector(length=24), 4 age categories#
-	# params= list(#
-	# b1,b2,b3,b4,b5: age sp. prop reduction in fecundity (20 long)#
-	# with TB/bruc/chronic bruc/co/co-chronic #
-	# betaT, betaB: transmission rates, age independent#
-	# rhoB & rhoT: prop increase in transmission #
-	# with co-infection (scalor=age independent)#
-	# gamma, epsilon: scalors	 #
-	# b = a vector (0, small no., birth rate set to get growth = 1.2, same rate)#
-	# muS, muT, muB, muC, muR, muRC age specific mortality rates.  #
-	###########################
-	# Output: differences, for 20 ages#
-	###########################
-	with(as.list(c(x, params)), {#
-#
-		# Assign state variables, each 20 long, #
-		# 4 categories: 1-3.9, 4-4.9, 5-14.9, 15+)#
-		# from incidence anlaysis, use [0-3),[3 +) #
-		# from mortality analysis, use [0-3),[3 +)#
-		# from birth analyis, use, [3-5),[5+)#
-		s_index <- 1:20#
-		it_index <- 21:40#
-		ib_index <- 41:60#
-		ic_index <- 61:80#
-		r_index <- 81:100#
-		rc_index <- 101:120#
-#
-		S = x[s_index] 				#
-		It = x[it_index] 			#
-		Ib = x[ib_index]#
-		Ic = x[ic_index]#
-		R = x[r_index]#
-		Rc = x[rc_index]#
-#
-		# Population size (N)#
-		Nall <- sum(S + It + Ib + Ic + R + Rc)  # overall#
-		N <- S + It + Ib +Ic + R + Rc 			# by age category#
-#
-		# Frequency dependent force of infection is age dependent #
-		# turn betaB into a matrix#
-		betaBm <- matrix(nrow = 20, ncol = 20)#
-		betaBm[1:20, 1:20] <- betaB#
-		betaBm[2:3,] <- exp(0.0885) * betaB  #2-3yr have higher suscept.#
-		betaTm <- matrix(c(rep(betaT, 400)), nrow = 20, ncol = 20)#
-		# lambdaB = age specific vectors!#
-		# bTB = density dependent, bruc = freq dependent#
-		lambdaT <- betaTm %*% (It + Ic + Rc)#
-		lambdaB <- betaBm %*% (Ib + Ic) / Nall#
-		lambdapT <- rhoT * betaTm %*% (It + Ic + Rc)#
-		lambdapB <- rhoB * betaBm %*% (Ib + Ic) / Nall#
-#
-		# Age spcific pop contributing to births (Nb = vector); #
-		# reduced births(b1, b2...=vectors; Nb = vector, birth = vector) #
-		Nb <- S + b1 * It + b2 * Ib + #
-			b3 * R + b4 * Ic + b5 * Rc#
-		birth <- c(b %*% Nb)#
-		recruitment <- c(birth / ( 1 + (Nall/K)^theta), rep(0, 19))#
-		dS <- recruitment + aging %*% S - (lambdaT + lambdaB) * S - muS * S#
-		dIt <- lambdaT * S - (lambdapB + muT) * It + aging %*% It#
-		dIb <- lambdaB * S + aging %*% Ib +	epsilon * R - (gamma + lambdapT + muB) * Ib#
-		dIc <- lambdapT*Ib + lambdapB*It + aging %*% Ic + epsilon * Rc - (gamma + muC)*Ic#
-		dR <- gamma * Ib - (epsilon + muR + lambdapT) * R + aging %*% R#
-		dRc <- lambdapT * R + gamma * Ic + aging %*% Rc - (epsilon + muRC) * Rc#
-		out = list(c(dS, dIt, dIb, dIc, dR, dRc))#
-		return(out)	#
-		}#
-	)	#
-}
-par <- optim(c(1.025, 0.00094*10000), objective)  # starting vals=30% prev w/out co-infection
-par
-params <- c(fixed.params, list(gamma=1/2, betaB = 0.9636965,#
-	betaT = 9.1928187/10000, rhoT = 1, rhoB = 2.1, theta= 4, K = 433))#
-x0 = get_starting_eqbruc(params = c(params))#
-x0[[25]] <- x0[[25]] + 2#
-x0[[5]] <- x0[[5]] - 2#
-sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))#
-get_prevalence(sol)  # 27, 34!!!  (26.6, 53.8, 28.8, 42.8)#
-get_structured_prevalence(sol)#
-make_structured_summary_plots(sol)
-par(mfrow = c(1, 2))#
-plot_raw_numbers(sol)#
-plot_ageprevalence(sol)
-par(mfrow = c(1, 2))#
-plot_raw_numbers(sol)#
-plot_ageprevalence(sol)
-make_structured_summary_plots(sol)
-objective = function(params.est){#
-	# params.est = 2 long = c(betaB, betaT)#
-	#params <- c(fixed.params, list(gamma=1/2, betaB = params.est[1],#
-	#betaT = params.est[2]/10000, rhoT = 1, rhoB = 2.1, theta= 4, K = 433))#
-	params <- c(fixed.params, list(gamma=1/2, betaB = params.est[1],#
-	betaT = params.est[2]/10000, rhoT = 1, rhoB = 1.5, theta= 4, K = 433))#
-	# seed from endemic brucellosis conditions, 10 bTB positive buffalo#
-	x0 = get_starting_eqbruc(params = c(params))#
-	x0[[25]] <- x0[[25]] + 2#
-	if(x0[[5]] > 2){#
-		x0[[5]] <- x0[[5]] - 2}  #
-	sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))#
-	df <- get_structured_prevalence(sol)#
-	error <- sqrt(((prevTBobs - df$prevTB)^2 + (prevBobs - df$prevB)^2))#
-	return (error)#
-}
-par <- optim(c(1.025, 0.00094*10000), objective)  # starting vals=30% prev w/out co-infection
-par
-x0 = get_starting_eqbruc(params = c(params))#
-x0[[25]] <- x0[[25]] + 2#
-x0[[5]] <- x0[[5]] - 2#
-sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))#
-get_prevalence(sol)  # 27, 34!!!  (26.6, 53.8, 28.8, 42.8)#
-get_structured_prevalence(sol)
-make_structured_summary_plots(sol)
-par(mfrow = c(1, 2))#
-plot_raw_numbers(sol)#
-plot_ageprevalence(sol)
-objective = function(params.est){#
-	# params.est = 2 long = c(betaB, betaT)#
-	#params <- c(fixed.params, list(gamma=1/2, betaB = params.est[1],#
-	#betaT = params.est[2]/10000, rhoT = 1, rhoB = 2.1, theta= 4, K = 433))#
-	params <- c(fixed.params, list(gamma=1/2, betaB = params.est[1],#
-	betaT = params.est[2]/10000, rhoT = 1, rhoB = 1.2, theta= 4, K = 433))#
-	# seed from endemic brucellosis conditions, 10 bTB positive buffalo#
-	x0 = get_starting_eqbruc(params = c(params))#
-	x0[[25]] <- x0[[25]] + 2#
-	if(x0[[5]] > 2){#
-		x0[[5]] <- x0[[5]] - 2}  #
-	sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))#
-	df <- get_structured_prevalence(sol)#
-	error <- sqrt(((prevTBobs - df$prevTB)^2 + (prevBobs - df$prevB)^2))#
-	return (error)#
-}
-par <- optim(c(1.025, 0.00094*10000), objective)
-params <- c(fixed.params, list(gamma=1/2, betaB = 0.9636965,#
-	betaT = 9.1928187/10000, rhoT = 1, rhoB = 2.1, theta= 4, K = 433))#
-x0 = get_starting_eqbruc(params = c(params))#
-x0[[25]] <- x0[[25]] + 2#
-x0[[5]] <- x0[[5]] - 2#
-sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))#
-get_prevalence(sol)  # 27, 34!!!  (26.6, 53.8, 28.8, 42.8)#
-get_structured_prevalence(sol)#
-make_structured_summary_plots(sol)
-par(mfrow = c(1, 2))#
-plot_raw_numbers(sol)#
-plot_ageprevalence(sol)
-par(mfrow = c(1, 2))#
-plot_raw_numbers(sol)#
-plot_ageprevalence(sol)
-make_structured_summary_plots(sol)
-df2 <- data.frame(Evaluation = c("Model", "Model", "Data", "Data"), #
-	Infection = c("Single", "Co", "Single", "Co"), #
-	BrucellosisPrevalence = c(df$prevBinS, df$prevBinT, 0.3035, 0.4524), #
-	TBPrevalence = c(df$prevTinS, df$prevTinB, 0.227, 0.3585), #
-	CILowB = c(NA, NA, 0.2654405, 0.3657982), #
-	CIHighB = c(NA, NA, 0.3451408, 0.5405985), #
-	CILowTB = c(NA, NA, 0.1781895, 0.2857143), #
-	CIHighTB = c(NA, NA, 0.2783505, 0.4313725))
-df <- get_structured_prevalence(sol)
-f2 <- data.frame(Evaluation = c("Model", "Model", "Data", "Data"), #
-	Infection = c("Single", "Co", "Single", "Co"), #
-	BrucellosisPrevalence = c(df$prevBinS, df$prevBinT, 0.3035, 0.4524), #
-	TBPrevalence = c(df$prevTinS, df$prevTinB, 0.227, 0.3585), #
-	CILowB = c(NA, NA, 0.2654405, 0.3657982), #
-	CIHighB = c(NA, NA, 0.3451408, 0.5405985), #
-	CILowTB = c(NA, NA, 0.1781895, 0.2857143), #
-	CIHighTB = c(NA, NA, 0.2783505, 0.4313725))
+df2 <- data.frame(Infection = c("Brucellosis", "Brucellosis", "Tuberculosis", "Tuberculosis"), #
+	Coinfection = c("Uninfected", "Infected", "Uninfected", "Infected"),#
+	Incidence = c(0.054, 0.082, 0.081, 0.07), # made up#
+	N = c(100, 50, 100, 50)) # also made up #
+df2$SE <- sqrt(df2$Incidence*(1-df2$Incidence)/df2$N)#
+df2$color <- as.character(seq(1,4,1))#
+df2$Infection <- relevel(df2$Infection, "Tuberculosis")#
+df$Coinfection <- relevel(df2$Coinfection, "Uninfected")
+setwd("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder")#
+source('~/GitHub/bTB-bruc-co-infection-ms/multiplot.R', chdir = TRUE)#
+library(ggplot2)#
+library(tidyr)#
+library('grid')#
+library('gridExtra') # specifies layout#
+library(survival)#
+library(lattice)#
+library(RColorBrewer)
+df2 <- data.frame(Infection = c("Brucellosis", "Brucellosis", "Tuberculosis", "Tuberculosis"), #
+	Coinfection = c("Uninfected", "Infected", "Uninfected", "Infected"),#
+	Incidence = c(0.054, 0.082, 0.081, 0.07), # made up#
+	N = c(173+189-14-8-6, 58+57-6-5-7, 173+189-14-8-6, 90+61-10-1-4)) # also made up #
+df2$SE <- sqrt(df2$Incidence*(1-df2$Incidence)/df2$N)#
+df2$color <- as.character(seq(1,4,1))#
+df2$Infection <- relevel(df2$Infection, "Tuberculosis")#
+df$Coinfection <- relevel(df2$Coinfection, "Uninfected")
+df2 <- data.frame(Infection = c("Brucellosis", "Brucellosis", "Tuberculosis", "Tuberculosis"), #
+	Coinfection = c("Uninfected", "Infected", "Uninfected", "Infected"),#
+	Incidence = c(0.054, 0.082, 0.081, 0.07), # made up#
+	N = c(173+189-14-8-6, 58+57-6-5-7, 173+189-14-8-6, 90+61-10-1-4))
 df2
-f2
-df2 <- reshape(f2, varying = c("BrucellosisPrevalence", "TBPrevalence"), #
-	v.names = "Prevalence", direction = "long")
+df2$SE <- sqrt(df2$Incidence*(1-df2$Incidence)/df2$N)
+df2$color <- as.character(seq(1,4,1))
+df2$Infection <- relevel(df2$Infection, "Tuberculosis")
+df$Coinfection <- relevel(df2$Coinfection, "Uninfected")
+df2$Coinfection <- relevel(df2$Coinfection, "Uninfected")
+p12 <- #
+ggplot(df2, aes(x = Infection, y = Incidence, colour = color, shape = Coinfection)) + #colour = color,#
+	geom_point(position = position_dodge(0.3), stat = "identity", size =4) +#
+	geom_errorbar(aes(ymin=df2$Incidence - df2$SE, ymax= df2$Incidence + df2$SE, width=0.1), #
+	position = position_dodge(0.3)) +	ylim(0, 0.3) + #
+	xlab("") +#
+	theme_bw() +#
+	scale_colour_manual(values = c("goldenrod1","slateblue3","goldenrod1","chartreuse4"), guide = FALSE) +#
+	#scale_fill_manual(values=c("goldenrod1","slateblue3","goldenrod1","chartreuse4"), guide = FALSE) +  			#"slateblue4","darkgreen"#
+	#scale_colour_manual(values = c("goldenrod3","slateblue4","goldenrod3","darkgreen"), guide = FALSE) +#
+	theme(axis.line.x = element_line(colour= "black"),#
+  		axis.line.y = element_line(colour= "black"),#
+  		axis.title.x = element_text(size=16, vjust=-0.15),#
+         axis.title.y = element_text(size=16, vjust= 0.8),#
+         axis.text.x = element_text(size=14, vjust=-0.05),#
+         axis.text.y = element_text(size=14),#
+         panel.border = element_blank(), #
+	legend.position=c(0.8, 0.9),  #
+        legend.background= element_rect(fill="white", colour="white"),#
+        legend.key= element_blank(),#
+        legend.title= element_blank(),#
+        legend.text = element_text(size=12))
+p12
+p12 <- #
+ggplot(df2, aes(x = Infection, y = Incidence, colour = color, shape = Coinfection)) + #colour = color,#
+	geom_point(position = position_dodge(0.3), stat = "identity", size =4) +#
+	geom_errorbar(aes(ymin=df2$Incidence - df2$SE, ymax= df2$Incidence + df2$SE, width=0.1), #
+	position = position_dodge(0.3)) +	ylim(0, 0.13) + #
+	xlab("") +#
+	theme_bw() +#
+	scale_colour_manual(values = c("goldenrod1","slateblue3","goldenrod1","chartreuse4"), guide = FALSE) +#
+	#scale_fill_manual(values=c("goldenrod1","slateblue3","goldenrod1","chartreuse4"), guide = FALSE) +  			#"slateblue4","darkgreen"#
+	#scale_colour_manual(values = c("goldenrod3","slateblue4","goldenrod3","darkgreen"), guide = FALSE) +#
+	theme(axis.line.x = element_line(colour= "black"),#
+  		axis.line.y = element_line(colour= "black"),#
+  		axis.title.x = element_text(size=16, vjust=-0.15),#
+         axis.title.y = element_text(size=16, vjust= 0.8),#
+         axis.text.x = element_text(size=14, vjust=-0.05),#
+         axis.text.y = element_text(size=14),#
+         panel.border = element_blank(), #
+	legend.position=c(0.8, 0.9),  #
+        legend.background= element_rect(fill="white", colour="white"),#
+        legend.key= element_blank(),#
+        legend.title= element_blank(),#
+        legend.text = element_text(size=12))
+p12
+ggplot(df2, aes(x = Infection, y = Incidence, colour = color, shape = Coinfection)) + #colour = color,#
+	geom_point(position = position_dodge(0.3), stat = "identity", size =4) +#
+	#geom_errorbar(aes(ymin=df2$Incidence - df2$SE, ymax= df2$Incidence + df2$SE, width=0.1), #
+	#position = position_dodge(0.3)) +#
+	geom_line() + #
+	ylim(0, 0.13) + #
+	xlab("") +#
+	theme_bw() +#
+	scale_colour_manual(values = c("goldenrod1","slateblue3","goldenrod1","chartreuse4"), guide = FALSE) +#
+	#scale_fill_manual(values=c("goldenrod1","slateblue3","goldenrod1","chartreuse4"), guide = FALSE) +  			#"slateblue4","darkgreen"#
+	#scale_colour_manual(values = c("goldenrod3","slateblue4","goldenrod3","darkgreen"), guide = FALSE) +#
+	theme(axis.line.x = element_line(colour= "black"),#
+  		axis.line.y = element_line(colour= "black"),#
+  		axis.title.x = element_text(size=16, vjust=-0.15),#
+         axis.title.y = element_text(size=16, vjust= 0.8),#
+         axis.text.x = element_text(size=14, vjust=-0.05),#
+         axis.text.y = element_text(size=14),#
+         panel.border = element_blank(), #
+	legend.position=c(0.8, 0.9),  #
+        legend.background= element_rect(fill="white", colour="white"),#
+        legend.key= element_blank(),#
+        legend.title= element_blank(),#
+        legend.text = element_text(size=12))
+?geom_line
+?las
+ggplot(df2, aes(x = Infection, y = Incidence, colour = color, shape = Coinfection)) + #colour = color,#
+	geom_point(position = position_dodge(0.3), stat = "identity", size =4) +#
+	#geom_errorbar(aes(ymin=df2$Incidence - df2$SE, ymax= df2$Incidence + df2$SE, width=0.1), #
+	#position = position_dodge(0.3)) +#
+	geom_line(df2, aes(x = Infection, y = Incidence, linetype = Infection)) + #
+	ylim(0, 0.13) + #
+	xlab("") +#
+	theme_bw() +#
+	scale_colour_manual(values = c("goldenrod1","slateblue3","goldenrod1","chartreuse4"), guide = FALSE) +#
+	#scale_fill_manual(values=c("goldenrod1","slateblue3","goldenrod1","chartreuse4"), guide = FALSE) +  			#"slateblue4","darkgreen"#
+	#scale_colour_manual(values = c("goldenrod3","slateblue4","goldenrod3","darkgreen"), guide = FALSE) +#
+	theme(axis.line.x = element_line(colour= "black"),#
+  		axis.line.y = element_line(colour= "black"),#
+  		axis.title.x = element_text(size=16, vjust=-0.15),#
+         axis.title.y = element_text(size=16, vjust= 0.8),#
+         axis.text.x = element_text(size=14, vjust=-0.05),#
+         axis.text.y = element_text(size=14),#
+         panel.border = element_blank(), #
+	legend.position=c(0.8, 0.9),  #
+        legend.background= element_rect(fill="white", colour="white"),#
+        legend.key= element_blank(),#
+        legend.title= element_blank(),#
+        legend.text = element_text(size=12))
+ggplot(df2, aes(x = Infection, y = Incidence, colour = color, shape = Coinfection)) + #colour = color,#
+	geom_point(position = position_dodge(0.3), stat = "identity", size =4) +#
+	#geom_errorbar(aes(ymin=df2$Incidence - df2$SE, ymax= df2$Incidence + df2$SE, width=0.1), #
+	#position = position_dodge(0.3)) +#
+	geom_line(df2, aes(x = Infection, y = Incidence)) + #
+	ylim(0, 0.13) + #
+	xlab("") +#
+	theme_bw() +#
+	scale_colour_manual(values = c("goldenrod1","slateblue3","goldenrod1","chartreuse4"), guide = FALSE) +#
+	#scale_fill_manual(values=c("goldenrod1","slateblue3","goldenrod1","chartreuse4"), guide = FALSE) +  			#"slateblue4","darkgreen"#
+	#scale_colour_manual(values = c("goldenrod3","slateblue4","goldenrod3","darkgreen"), guide = FALSE) +#
+	theme(axis.line.x = element_line(colour= "black"),#
+  		axis.line.y = element_line(colour= "black"),#
+  		axis.title.x = element_text(size=16, vjust=-0.15),#
+         axis.title.y = element_text(size=16, vjust= 0.8),#
+         axis.text.x = element_text(size=14, vjust=-0.05),#
+         axis.text.y = element_text(size=14),#
+         panel.border = element_blank(), #
+	legend.position=c(0.8, 0.9),  #
+        legend.background= element_rect(fill="white", colour="white"),#
+        legend.key= element_blank(),#
+        legend.title= element_blank(),#
+        legend.text = element_text(size=12))
+ggplot(df2, aes(x = Infection, y = Incidence, colour = color, shape = Coinfection)) + #colour = color,#
+	geom_point(position = position_dodge(0.3), stat = "identity", size =4) +#
+	#geom_errorbar(aes(ymin=df2$Incidence - df2$SE, ymax= df2$Incidence + df2$SE, width=0.1), #
+	#position = position_dodge(0.3)) +#
+	geom_line() + #
+	ylim(0, 0.13) + #
+	xlab("") +#
+	theme_bw() +#
+	scale_colour_manual(values = c("goldenrod1","slateblue3","goldenrod1","chartreuse4"), guide = FALSE) +#
+	#scale_fill_manual(values=c("goldenrod1","slateblue3","goldenrod1","chartreuse4"), guide = FALSE) +  			#"slateblue4","darkgreen"#
+	#scale_colour_manual(values = c("goldenrod3","slateblue4","goldenrod3","darkgreen"), guide = FALSE) +#
+	theme(axis.line.x = element_line(colour= "black"),#
+  		axis.line.y = element_line(colour= "black"),#
+  		axis.title.x = element_text(size=16, vjust=-0.15),#
+         axis.title.y = element_text(size=16, vjust= 0.8),#
+         axis.text.x = element_text(size=14, vjust=-0.05),#
+         axis.text.y = element_text(size=14),#
+         panel.border = element_blank(), #
+	legend.position=c(0.8, 0.9),  #
+        legend.background= element_rect(fill="white", colour="white"),#
+        legend.key= element_blank(),#
+        legend.title= element_blank(),#
+        legend.text = element_text(size=12))
+geom_point(position = position_dodge(0.3), stat = "identity", size =4) +#
+	#geom_errorbar(aes(ymin=df2$Incidence - df2$SE, ymax= df2$Incidence + df2$SE, width=0.1), #
+	#position = position_dodge(0.3)) +#
+	geom_line(Infection) + #
+	ylim(0, 0.13) + #
+	xlab("") +#
+	theme_bw() +#
+	scale_colour_manual(values = c("goldenrod1","slateblue3","goldenrod1","chartreuse4"), guide = FALSE) +#
+	#scale_fill_manual(values=c("goldenrod1","slateblue3","goldenrod1","chartreuse4"), guide = FALSE) +  			#"slateblue4","darkgreen"#
+	#scale_colour_manual(values = c("goldenrod3","slateblue4","goldenrod3","darkgreen"), guide = FALSE) +#
+	theme(axis.line.x = element_line(colour= "black"),#
+  		axis.line.y = element_line(colour= "black"),#
+  		axis.title.x = element_text(size=16, vjust=-0.15),#
+         axis.title.y = element_text(size=16, vjust= 0.8),#
+         axis.text.x = element_text(size=14, vjust=-0.05),#
+         axis.text.y = element_text(size=14),#
+         panel.border = element_blank(), #
+	legend.position=c(0.8, 0.9),  #
+        legend.background= element_rect(fill="white", colour="white"),#
+        legend.key= element_blank(),#
+        legend.title= element_blank(),#
+        legend.text = element_text(size=12))
+ggplot(df2, aes(x = Infection, y = Incidence, colour = color, shape = Coinfection)) + #colour = color,#
+	geom_point(position = position_dodge(0.3), stat = "identity", size =4) +#
+	#geom_errorbar(aes(ymin=df2$Incidence - df2$SE, ymax= df2$Incidence + df2$SE, width=0.1), #
+	#position = position_dodge(0.3)) +#
+	#geom_line(Infection) + #
+	ylim(0, 0.13) + #
+	xlab("") +#
+	theme_bw() +#
+	scale_colour_manual(values = c("goldenrod1","slateblue3","goldenrod1","chartreuse4"), guide = FALSE) +#
+	#scale_fill_manual(values=c("goldenrod1","slateblue3","goldenrod1","chartreuse4"), guide = FALSE) +  			#"slateblue4","darkgreen"#
+	#scale_colour_manual(values = c("goldenrod3","slateblue4","goldenrod3","darkgreen"), guide = FALSE) +#
+	theme(axis.line.x = element_line(colour= "black"),#
+  		axis.line.y = element_line(colour= "black"),#
+  		axis.title.x = element_text(size=16, vjust=-0.15),#
+         axis.title.y = element_text(size=16, vjust= 0.8),#
+         axis.text.x = element_text(size=14, vjust=-0.05),#
+         axis.text.y = element_text(size=14),#
+         panel.border = element_blank(), #
+	legend.position=c(0.8, 0.9),  #
+        legend.background= element_rect(fill="white", colour="white"),#
+        legend.key= element_blank(),#
+        legend.title= element_blank(),#
+        legend.text = element_text(size=12))
+ggplot(df2, aes(x = Infection, y = Incidence, colour = color, shape = Coinfection)) + #colour = color,#
+	geom_point(position = position_dodge(0.3), stat = "identity", size =4) +#
+	#geom_errorbar(aes(ymin=df2$Incidence - df2$SE, ymax= df2$Incidence + df2$SE, width=0.1), #
+	#position = position_dodge(0.3)) +#
+	geom_line(aes(group =Infection)) + #
+	ylim(0, 0.13) + #
+	xlab("") +#
+	theme_bw() +#
+	scale_colour_manual(values = c("goldenrod1","slateblue3","goldenrod1","chartreuse4"), guide = FALSE) +#
+	#scale_fill_manual(values=c("goldenrod1","slateblue3","goldenrod1","chartreuse4"), guide = FALSE) +  			#"slateblue4","darkgreen"#
+	#scale_colour_manual(values = c("goldenrod3","slateblue4","goldenrod3","darkgreen"), guide = FALSE) +#
+	theme(axis.line.x = element_line(colour= "black"),#
+  		axis.line.y = element_line(colour= "black"),#
+  		axis.title.x = element_text(size=16, vjust=-0.15),#
+         axis.title.y = element_text(size=16, vjust= 0.8),#
+         axis.text.x = element_text(size=14, vjust=-0.05),#
+         axis.text.y = element_text(size=14),#
+         panel.border = element_blank(), #
+	legend.position=c(0.8, 0.9),  #
+        legend.background= element_rect(fill="white", colour="white"),#
+        legend.key= element_blank(),#
+        legend.title= element_blank(),#
+        legend.text = element_text(size=12))
+ggplot(df2, aes(x = Infection, y = Incidence, colour = color, shape = Coinfection)) + #colour = color,#
+	geom_point(position = position_dodge(0.3), stat = "identity", size =4) +#
+	#geom_errorbar(aes(ymin=df2$Incidence - df2$SE, ymax= df2$Incidence + df2$SE, width=0.1), #
+	#position = position_dodge(0.3)) +#
+	geom_line(aes(group =Infection), position = position_dodge(0.3), colour = "black") + #
+	ylim(0, 0.13) + #
+	xlab("") +#
+	theme_bw() +#
+	scale_colour_manual(values = c("goldenrod1","slateblue3","goldenrod1","chartreuse4"), guide = FALSE) +#
+	#scale_fill_manual(values=c("goldenrod1","slateblue3","goldenrod1","chartreuse4"), guide = FALSE) +  			#"slateblue4","darkgreen"#
+	#scale_colour_manual(values = c("goldenrod3","slateblue4","goldenrod3","darkgreen"), guide = FALSE) +#
+	theme(axis.line.x = element_line(colour= "black"),#
+  		axis.line.y = element_line(colour= "black"),#
+  		axis.title.x = element_text(size=16, vjust=-0.15),#
+         axis.title.y = element_text(size=16, vjust= 0.8),#
+         axis.text.x = element_text(size=14, vjust=-0.05),#
+         axis.text.y = element_text(size=14),#
+         panel.border = element_blank(), #
+	legend.position=c(0.8, 0.9),  #
+        legend.background= element_rect(fill="white", colour="white"),#
+        legend.key= element_blank(),#
+        legend.title= element_blank(),#
+        legend.text = element_text(size=12))
+ggplot(df2, aes(x = Infection, y = Incidence, colour = color, shape = Coinfection)) + #colour = color,#
+	geom_point(position = position_dodge(0.3), stat = "identity", size =4) +#
+	geom_errorbar(aes(ymin=df2$Incidence - df2$SE, ymax= df2$Incidence + df2$SE, width=0.1), #
+	position = position_dodge(0.3)) +#
+	#geom_line(aes(group =Infection), position = position_dodge(0.3), colour = "black") + #
+	ylim(0, 0.13) + #
+	xlab("") +#
+	theme_bw() +#
+	scale_colour_manual(values = c("goldenrod1","slateblue3","goldenrod1","chartreuse4"), guide = FALSE) +#
+	#scale_fill_manual(values=c("goldenrod1","slateblue3","goldenrod1","chartreuse4"), guide = FALSE) +  			#"slateblue4","darkgreen"#
+	#scale_colour_manual(values = c("goldenrod3","slateblue4","goldenrod3","darkgreen"), guide = FALSE) +#
+	theme(axis.line.x = element_line(colour= "black"),#
+  		axis.line.y = element_line(colour= "black"),#
+  		axis.title.x = element_text(size=16, vjust=-0.15),#
+         axis.title.y = element_text(size=16, vjust= 0.8),#
+         axis.text.x = element_text(size=14, vjust=-0.05),#
+         axis.text.y = element_text(size=14),#
+         panel.border = element_blank(), #
+	legend.position=c(0.8, 0.9),  #
+        legend.background= element_rect(fill="white", colour="white"),#
+        legend.key= element_blank(),#
+        legend.title= element_blank(),#
+        legend.text = element_text(size=12))
+# read in data prepared in cross_sectional_dataprep, groomed for my bTB statuses#
+#data<-read.csv("cross_sectional_data_withdz_cleandisease_nofinal_Feb2016_capturetime_forsurv.csv")#
+data<-read.csv("cross_sectional_data_withdz_cleandisease_nofinal_Feb2016_capturetime.csv")#
+#
+data_nofinal<-data[data$final_capture=="0",] #
+d<-data.frame(btb=data_nofinal$tb , bruc=as.character(data_nofinal$bruc), age=data_nofinal$age_sel/12, #
+              id=data_nofinal$id)#
+d<-d[d$age<14,]
+########################################################
+########################################################
+# Figure 2- Survival plots#
+########################################################
+########################################################
+data2<-read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/survival/brucsurvival_TB3controls_longresidnomissing_noerrors_season2_final_fixed.csv")#
+bolus <- c("R22", "R24", "R27", "R35", "R45", "R45b", "R50", "R6", "Y20", "Y31c", "Y31d", "Y39", "Y43", "Y44")#
+#"W1" is ok.#
+data3<- data2[!(data2$animal %in% bolus),]#
+data3<- data3[data3$animal!= "O10",]#
+#
+# V1#
+#final.mod<-coxph(Surv(start, stop, death.time)~brucella+TB_3+herd2+ age6+ cluster(animal), data=data3); summary(final.mod)#
+#full.mod<-test.mod#
+#
+# V2#
+# 0-2, 3-5, 6+#
+#data3$age2.4 <- data3$age2.3#
+#data3$age2.4[data3$age_yr2 == 6] <- "matureadult"#
+#data3$age2.4[data3$age_yr2 == 3] <- "subadult"#
+#data3$age2.4 <- as.character(data3$age2.4)#
+#final.mod<-coxph(Surv(start, stop, death.time)~brucella*age2.4+TB_3+herd2+ cluster(animal), data=data3); summary(final.mod)#
+########################################################
+# Age and infection specific survival rates #
+########################################################
+#  Age-Infection specific survival estimates for our population#
+df<-data.frame(start=data3$start2, stop=data3$stop2, death.time=data3$death.time, #
+	age=data3$age6, herd=data3$herd, bruc= data3$brucella, tb = data3$TB_3, animal = data3$animal)#
+mort<-with(df, data.frame(#
+	age=c("adult", "adult", "adult", "adult", "adult", "adult", "adult", "adult", #
+		"juvenile", "juvenile", "juvenile", "juvenile", "juvenile", "juvenile", "juvenile", "juvenile"),#
+	herd = c("LS", "CB", "LS", "CB", "LS", "CB", "LS", "CB"),#
+	tb = c(0, 0, 1, 1, 0, 0, 1, 1), #
+	bruc = c(0, 0, 0, 0, 1, 1, 1, 1)))#
+plot_add.mod<-coxph(Surv(start, stop, death.time)~herd+age+ tb+ bruc + cluster(animal), data=df)#
+m<-survfit(plot_add.mod, newdata=mort); summary(m)#
+m<-survfit(plot_add.mod, newdata=mort[mort$herd=="LS" & mort$age=="adult",]); summary(m)#
+m<-survfit(plot_add.mod, newdata=mort[mort$herd=="CB" & mort$age=="adult",]); summary(m)#
+plot_add.mod<-coxph(Surv(start, stop, death.time)~age, data=df)#
+m<-survfit(plot_add.mod, newdata=mort)#
+summary(m)#
+# Compile estimates above into a df with other age specific estimate: #
+survivaldf <- data.frame(age = seq(1, 15, 1), #
+	SurvUn = c(NA, 0.86, rep(0.94, 10), NA, NA, NA),#
+	SurvTB = c(NA, 0.608, rep(0.832, 10), NA, NA, NA), #
+	SurvBR =  c(NA, 0.58, rep(0.82, 10), NA, NA, NA),#
+	SurvCo = c(NA, 0.188, rep(0.652, 10), NA, NA, NA)#
+)#
+#
+# age specific effects of brucellosis... not using#
+#survivaldf <- data.frame(age = seq(1, 15, 1), #
+#	SurvUn = c(NA, 0.86, rep(0.94, 10), NA, NA, NA),#
+#	SurvTB = c(NA, 0.7186, rep(0.8794, 10), NA, NA, NA), #
+#	SurvBR =  c(NA, 0.314, rep(0.940, 3), rep(0.730, 7), NA, NA, NA),#
+#	SurvCo = c(NA, 0.0326, rep(0.8794, 3), rep(0.6094, 7), NA, NA, NA)#
+#)#
+#original dataframe with outside sources compiled#
+#survivaldf <- data.frame(age = seq(1, 15, 1), #
+	#Cross2009female = c(0.9, 0.9, rep(0.95, 5), rep(0.85, 5), rep(0.9, 3)),#
+	#Cross2009male = c(0.82, 0.82, rep(0.77, 2), rep(0.97, 3), rep(0.65, 5), rep(0.1, 3)), #
+	#CrossGetz2006male = c(NA, rep(0.84, 7), rep(0.59, 7)),#
+	#CrossGetz2006female = c(NA, rep(0.95, 7), rep(0.86, 7)),#
+	#Jolles2005TBneg = c(rep(0.85, 4), rep(0.97, 11)),#
+	#Jolles2005TBpos = c(rep(0.85, 4), rep(0.86, 11)),#
+	#FunstonMills = c(0.87, rep(0.92, 14)), #
+#	SurvUn = c(NA, 0.884, 0.884, rep(0.963, 9), NA, NA, NA),#
+#	SurvTB = c(NA, rep(0.689, 2), rep(0.892, 9), NA, NA, NA), #
+#	SurvBR =  c(NA, rep(0.706, 2), rep(0.899, 9), NA, NA, NA),#
+#	SurvCo = c(NA, rep(0.349, 2), rep(0.724, 9), NA, NA, NA)#
+#)#
+#survlong <- gather(survivaldf, key = dataset, value = estimate, Cross2009female:SurvCo)#
+#survlong$colour <- "Estimates from African buffalo in southern Africa"#
+survlong <- gather(survivaldf, key = dataset, value = estimate, SurvUn:SurvCo)#
+survlong$colour <- NA#
+survlong$colour[survlong$dataset %in% c("SurvUn")] <- "Uninfected"#
+survlong$colour[survlong$dataset %in% c("SurvTB")] <- "Tuberculosis"#
+survlong$colour[survlong$dataset %in% c("SurvBR")] <- "Brucellosis"#
+survlong$colour[survlong$dataset %in% c("SurvCo")] <- "Co-infected"#
+survlong$order <- seq(1, length(survlong[,1]))#
+survlong$colour <- as.factor(survlong$colour)#
+survlong$colour <- factor(survlong$colour, levels = survlong$colour[order(unique(survlong$order))])#
+p6 <- ggplot(survlong, aes(x = age, y = estimate, colour = colour, #
+	size = colour, shape = colour, group = dataset)) + #
+	xlab("Age (years)") + ylab("Annual Survival") +#
+	geom_point(aes(size = colour)) +  #shape = sex#
+	geom_line(aes(linetype = colour)) + #
+	scale_x_continuous(breaks=seq(1, 15, 2)) + #
+	theme_bw() + #
+	scale_colour_manual(values = c("goldenrod1", "slateblue3", "chartreuse4","tomato3")) +#
+	scale_size_manual(values = c(2, 2, 2, 2)) +#
+	scale_shape_manual(values = c(18, 17, 17, 19)) +#
+	scale_linetype_manual(values = c('longdash', 'dotdash', 'dashed', 'twodash')) +#
+	theme(panel.border = element_blank(), #
+		axis.title.x = element_text(size=16, vjust=-0.15),#
+        axis.title.y = element_text(size=16, vjust= 0.8),#
+        axis.text.x = element_text(size=14, vjust=-0.05),#
+        axis.text.y = element_text(size=14)) + #
+        theme(axis.line.x = element_line(colour= "black"),#
+  			axis.line.y = element_line(colour= "black"),   #
+			#legend information#
+        	legend.position=c(0.85, 0.2),  #
+        	legend.background= element_rect(fill="white", colour="white"),#
+        	legend.key= element_blank(),#
+        	legend.title= element_blank(),#
+        	legend.text = element_text(size=14))
+p6
+#########################################################################
+#########################################################################
+# Figure 2: Fecundity Figure#
+#########################################################################
+#########################################################################
+newdf<-data.frame(#
+	Calf=c(14/25, 10/33, 7/23, 6/14, 2/26, 0/8, 2/7, 1/7), #
+	Agecategory = c(rep("Adult (age > 4)", 4), rep("Juvenile (age = 4)", 4)),#
+	Infection = c("Uninfected", "Brucellosis", "Tuberculosis", "Co-infected", "Uninfected", "Brucellosis", "Tuberculosis", "Co-infected"),#
+	N = c(25, 33, 23, 14, 26, 8, 7, 7))#
+newdf$color <- as.factor(seq(1,8))#
+newdf$se<- sqrt(newdf$Calf * (1 - newdf$Calf) / newdf$N)#
+newdf$order <- c(seq(1, 4), seq(1,4))#
+newdf$Infection <- as.factor(newdf$Infection)#
+newdf$Infection <- factor(newdf$Infection, levels = newdf$Infection[order(unique(newdf$order))])#
+#
+p9<- ggplot(newdf, aes(x=Infection, y=Calf, group=Agecategory, colour=Agecategory)) + #
+  #geom_line()+#
+  geom_point(size=3, shape=19) + # colour="darkred", fill="darkred" +#
+  geom_errorbar(aes(ymin= newdf$Calf-newdf$se, ymax=newdf$Calf+newdf$se), width=0.2) + #
+  scale_colour_manual(values=c("darkslategray", "darkseagreen3"))#
+p10<- p9 +#
+  theme_bw() + # removes ugly gray.#
+  ylab("Fecundity") +  # Proportion of buffalo observed with a calf#
+  xlab("")+#
+  scale_y_continuous(limits=c(0,0.8)) + #
+  theme(axis.line.x = element_line(colour= "black"),#
+  		axis.line.y = element_line(colour= "black"),#
+  		axis.title.x = element_text(size=16, vjust=-0.15),#
+        axis.title.y = element_text(size=16, vjust= 0.8),#
+        axis.text.x = element_text(size=14, vjust=-0.05),#
+        axis.text.y = element_text(size=14),#
+        panel.border = element_blank(), #
+        # legend information#
+        legend.position=c(0.8, 0.9),  #
+        legend.background= element_rect(fill="white", colour="white"),#
+        legend.key= element_blank(),#
+        legend.title= element_blank(),#
+        legend.text = element_text(size=14)   )#
+# With Bree's color scheme:  #
+newdf2 <- newdf[c(1:4),]#
+p9<- ggplot(newdf2, aes(x=Infection, y=Calf, colour=Infection)) + #
+	geom_point(position = position_dodge(0.2), size=4, shape=19) + #
+	geom_errorbar(aes(ymin= newdf2$Calf-newdf2$se, ymax=newdf2$Calf+newdf2$se), #
+  		position = position_dodge(0.2), width=0.2) + #
+	scale_colour_manual(values=c("goldenrod1", "slateblue3", "chartreuse4","tomato3"), guide = FALSE)       #
+p10<- p9 +  theme_bw() + # removes ugly gray.#
+  ylab("Fecundity") +  # Proportion of buffalo observed with a calf#
+  scale_y_continuous(limits=c(0,0.8))  + #
+  theme(axis.line.x = element_line(colour= "black"),#
+  		axis.line.y = element_line(colour= "black"),#
+  		axis.title.x = element_blank(),#(size=16, vjust=-0.15),#
+        axis.title.y = element_text(size=16, vjust= 0.8),#
+        axis.text.x = element_text(size=14, vjust=-0.05),#
+        axis.text.y = element_text(size=14),#
+        panel.border = element_blank(),#
+        # legend information#
+        legend.position=c(0.8, 0.9),  #
+        legend.background= element_rect(fill="white", colour="white"),#
+        legend.key= element_blank(),#
+        legend.title= element_blank(),#
+        legend.text = element_text(size=14)) #
+# With juvenile ones on!#
+p9 <- ggplot(newdf, aes(x=Infection, y=Calf, colour = as.character(color), shape = Agecategory, alpha = as.character(color))) + #
+	geom_point(position = position_dodge(0.3), size=4) + #
+	geom_errorbar(aes(ymin= newdf$Calf-newdf$se, ymax=newdf$Calf+newdf$se), #
+  		position = position_dodge(0.3), width=0.2) + #
+	scale_colour_manual(values=c("goldenrod1", "slateblue3", "chartreuse4",#
+		"tomato3", "goldenrod1", "slateblue3", "chartreuse4","tomato3"), #
+		guide = FALSE) + #
+	xlab("") +#
+	scale_alpha_manual(values = c(1,1,1,1,0.5, 0.5, 0.5, 0.5), guide = FALSE)       #
+p10.2<- p9 +  theme_bw() + # removes ugly gray.#
+  ylab("Fecundity") +  # Proportion of buffalo observed with a calf#
+  scale_y_continuous(limits=c(0,0.8))  + #
+  theme(axis.line.x = element_line(colour= "black"),#
+  		axis.line.y = element_line(colour= "black"),#
+  		axis.title.x = element_text(size=16, vjust=-0.15),#
+        axis.title.y = element_text(size=16, vjust= 0.8),#
+        axis.text.x = element_text(size=14, vjust=-0.05),#
+        axis.text.y = element_text(size=14),#
+        panel.border = element_blank(),#
+        # legend information#
+        legend.position=c(0.8, 0.9),  #
+        legend.background= element_rect(fill="white", colour="white"),#
+        legend.key= element_blank(),#
+        legend.title= element_blank(),#
+        legend.text = element_text(size=12))
+# Number of new infections#
+#########################################################################
+df <- data.frame(incid = c(0,0, 1,4,14,0,4,5,8,4,4,7,4,4,2,3), captureperiod = rep(c("1", "2", "3", "4", "5", "6", "7", "8"), each=2), infection = c(rep(c("Tuberculosis", "Brucellosis"), 8)))#
+df$infection <- relevel(df$infection, "Tuberculosis")#
+#
+pincid <- ggplot(df, aes(x = captureperiod, y = incid, fill = infection, colour = infection)) + #
+	geom_bar(position = position_dodge(), stat = "identity") + ylim(0, 14) + #
+	theme_bw() +  scale_fill_manual(values=c("slateblue3", "chartreuse4")) +#
+	scale_colour_manual(values=c("slateblue4", "darkgreen")) +#
+	ylab("Number of new infections") + xlab("Capture period") + #
+	theme(axis.line.x = element_line(colour= "black"),#
+  		axis.line.y = element_line(colour= "black"),#
+  		axis.title.x = element_text(size=16, vjust=-0.15),#
+        axis.title.y = element_text(size=16, vjust= 0.8),#
+        axis.text.x = element_text(size=14, vjust=-0.05),#
+        axis.text.y = element_text(size=14),#
+        panel.border = element_blank(), #
+		legend.position=c(0.85, 0.9),  #
+        legend.background= element_rect(fill="white", colour="white"),#
+        legend.key= element_blank(),#
+        legend.title= element_blank(),#
+        legend.text = element_text(size=12))#
+#
+#df <- data.frame(incid = c(1,2,3,4), infection = c("bTB", "bTB", "brucellosis", "brucellosis"),#
+#	status = c("Single", "Co-infected", "Single", "Co-infected"))#
+#df$infection <- relevel(df$infection, "bTB")#
+#df$status <- relevel(df$status, "Single")#
+#
+# Incidence rate#
+#########################################################################
+df2 <- data.frame(Infection = c("Brucellosis", "Brucellosis", "Tuberculosis", "Tuberculosis"), #
+	Coinfection = c("Uninfected", "Infected", "Uninfected", "Infected"),#
+	Incidence = c(0.052, 0.083, 0.081, 0.07),#
+	N = c(173+189-14-8-6, 58+57-6-5-7, 173+189-14-8-6, 90+61-10-1-4)) #
+df2$SE <- sqrt(df2$Incidence*(1-df2$Incidence)/df2$N)#
+df2$color <- as.character(seq(1,4,1))#
+df2$Infection <- relevel(df2$Infection, "Tuberculosis")#
+df2$Coinfection <- relevel(df2$Coinfection, "Uninfected")#
+#
+p12 <- #
+ggplot(df2, aes(x = Infection, y = Incidence, colour = color, shape = Coinfection)) + #colour = color,#
+	geom_point(position = position_dodge(0.3), stat = "identity", size =4) +#
+	geom_errorbar(aes(ymin=df2$Incidence - df2$SE, ymax= df2$Incidence + df2$SE, width=0.1), #
+		position = position_dodge(0.3)) +#
+	#geom_line(aes(group =Infection), position = position_dodge(0.3), colour = "black") + #
+	ylim(0, 0.13) + #
+	xlab("") +#
+	theme_bw() +#
+	scale_colour_manual(values = c("goldenrod1","slateblue3","goldenrod1","chartreuse4"), guide = FALSE) +#
+	#scale_fill_manual(values=c("goldenrod1","slateblue3","goldenrod1","chartreuse4"), guide = FALSE) +  			#"slateblue4","darkgreen"#
+	#scale_colour_manual(values = c("goldenrod3","slateblue4","goldenrod3","darkgreen"), guide = FALSE) +#
+	theme(axis.line.x = element_line(colour= "black"),#
+  		axis.line.y = element_line(colour= "black"),#
+  		axis.title.x = element_text(size=16, vjust=-0.15),#
+         axis.title.y = element_text(size=16, vjust= 0.8),#
+         axis.text.x = element_text(size=14, vjust=-0.05),#
+         axis.text.y = element_text(size=14),#
+         panel.border = element_blank(), #
+	legend.position=c(0.8, 0.9),  #
+        legend.background= element_rect(fill="white", colour="white"),#
+        legend.key= element_blank(),#
+        legend.title= element_blank(),#
+        legend.text = element_text(size=12)) #
+# FIGURE 2#
+multiplot(p6,  pincid, p10.2, p12 , cols = 2)
+p12 <- #
+ggplot(df2, aes(x = Infection, y = Incidence, colour = color, shape = Coinfection)) + #colour = color,#
+	geom_point(position = position_dodge(0.3), stat = "identity", size =4) +#
+	geom_errorbar(aes(ymin=df2$Incidence - df2$SE, ymax= df2$Incidence + df2$SE, width=0.1), #
+		position = position_dodge(0.3)) +#
+	#geom_line(aes(group =Infection), position = position_dodge(0.3), colour = "black") + #
+	ylim(0, 0.13) + #
+	xlab("") +#
+	theme_bw() +#
+	scale_colour_manual(values = c("goldenrod1","slateblue3","goldenrod1","chartreuse4"), guide = FALSE) +#
+	#scale_fill_manual(values=c("goldenrod1","slateblue3","goldenrod1","chartreuse4"), guide = FALSE) +  			#"slateblue4","darkgreen"#
+	#scale_colour_manual(values = c("goldenrod3","slateblue4","goldenrod3","darkgreen"), guide = FALSE) +#
+	theme(axis.line.x = element_line(colour= "black"),#
+  		axis.line.y = element_line(colour= "black"),#
+  		axis.title.x = element_text(size=16, vjust=-0.15),#
+         axis.title.y = element_text(size=16, vjust= 0.8),#
+         axis.text.x = element_text(size=14, vjust=-0.05),#
+         axis.text.y = element_text(size=14),#
+         panel.border = element_blank(), #
+	legend.position=c(0.1, 0.9),  #
+        legend.background= element_rect(fill="white", colour="white"),#
+        legend.key= element_blank(),#
+        legend.title= element_blank(),#
+        legend.text = element_text(size=12)) #
+# FIGURE 2#
+multiplot(p6,  pincid, p10.2, p12 , cols = 2)
+p12 <- #
+ggplot(df2, aes(x = Infection, y = Incidence, colour = color, shape = Coinfection)) + #colour = color,#
+	geom_point(position = position_dodge(0.3), stat = "identity", size =4) +#
+	geom_errorbar(aes(ymin=df2$Incidence - df2$SE, ymax= df2$Incidence + df2$SE, width=0.1), #
+		position = position_dodge(0.3)) +#
+	#geom_line(aes(group =Infection), position = position_dodge(0.3), colour = "black") + #
+	ylim(0, 0.13) + #
+	xlab("") +#
+	theme_bw() +#
+	scale_colour_manual(values = c("goldenrod1","slateblue3","goldenrod1","chartreuse4"), guide = FALSE) +#
+	#scale_fill_manual(values=c("goldenrod1","slateblue3","goldenrod1","chartreuse4"), guide = FALSE) +  			#"slateblue4","darkgreen"#
+	#scale_colour_manual(values = c("goldenrod3","slateblue4","goldenrod3","darkgreen"), guide = FALSE) +#
+	theme(axis.line.x = element_line(colour= "black"),#
+  		axis.line.y = element_line(colour= "black"),#
+  		axis.title.x = element_text(size=16, vjust=-0.15),#
+         axis.title.y = element_text(size=16, vjust= 0.8),#
+         axis.text.x = element_text(size=14, vjust=-0.05),#
+         axis.text.y = element_text(size=14),#
+         panel.border = element_blank(), #
+	legend.position=c(0.15, 0.9),  #
+        legend.background= element_rect(fill="white", colour="white"),#
+        legend.key= element_blank(),#
+        legend.title= element_blank(),#
+        legend.text = element_text(size=12)) #
+# FIGURE 2#
+multiplot(p6,  pincid, p10.2, p12 , cols = 2)
+ggplot(df2, aes(x = Infection, y = Incidence, colour = color, shape = Coinfection)) + #colour = color,#
+	geom_point(position = position_dodge(0.3), stat = "identity", size =4) +#
+	geom_errorbar(aes(ymin=df2$Incidence - df2$SE, ymax= df2$Incidence + df2$SE, width=0.1), #
+		position = position_dodge(0.3)) +#
+	geom_line(aes(group =Infection), position = position_dodge(0.3), colour = "black") + #
+	ylim(0, 0.13) + #
+	xlab("") +#
+	theme_bw() +#
+	scale_colour_manual(values = c("goldenrod1","slateblue3","goldenrod1","chartreuse4"), guide = FALSE) +#
+	#scale_fill_manual(values=c("goldenrod1","slateblue3","goldenrod1","chartreuse4"), guide = FALSE) +  			#"slateblue4","darkgreen"#
+	#scale_colour_manual(values = c("goldenrod3","slateblue4","goldenrod3","darkgreen"), guide = FALSE) +#
+	theme(axis.line.x = element_line(colour= "black"),#
+  		axis.line.y = element_line(colour= "black"),#
+  		axis.title.x = element_text(size=16, vjust=-0.15),#
+         axis.title.y = element_text(size=16, vjust= 0.8),#
+         axis.text.x = element_text(size=14, vjust=-0.05),#
+         axis.text.y = element_text(size=14),#
+         panel.border = element_blank(), #
+	legend.position=c(0.15, 0.9),  #
+        legend.background= element_rect(fill="white", colour="white"),#
+        legend.key= element_blank(),#
+        legend.title= element_blank(),#
+        legend.text = element_text(size=12))
+ggplot(df2, aes(x = Infection, y = Incidence, colour = color, shape = Coinfection)) + #colour = color,#
+	geom_point(position = position_dodge(0.3), stat = "identity", size =4) +#
+	geom_errorbar(aes(ymin=df2$Incidence - df2$SE, ymax= df2$Incidence + df2$SE, width=0.1), #
+		position = position_dodge(0.3)) +#
+	geom_line(aes(group = Infection), position = position_dodge(0.3), colour = "black") + #
+	ylim(0, 0.13) + #
+	xlab("") +#
+	theme_bw() +#
+	scale_colour_manual(values = c("goldenrod1","slateblue3","goldenrod1","chartreuse4"), guide = FALSE) +#
+	#scale_fill_manual(values=c("goldenrod1","slateblue3","goldenrod1","chartreuse4"), guide = FALSE) +  			#"slateblue4","darkgreen"#
+	#scale_colour_manual(values = c("goldenrod3","slateblue4","goldenrod3","darkgreen"), guide = FALSE) +#
+	theme(axis.line.x = element_line(colour= "black"),#
+  		axis.line.y = element_line(colour= "black"),#
+  		axis.title.x = element_text(size=16, vjust=-0.15),#
+         axis.title.y = element_text(size=16, vjust= 0.8),#
+         axis.text.x = element_text(size=14, vjust=-0.05),#
+         axis.text.y = element_text(size=14),#
+         panel.border = element_blank(), #
+	legend.position=c(0.15, 0.9),  #
+        legend.background= element_rect(fill="white", colour="white"),#
+        legend.key= element_blank(),#
+        legend.title= element_blank(),#
+        legend.text = element_text(size=12))
 df2
-df2 <- reshape(f2, varying = c("BrucellosisPrevalence", "TBPrevalence"), #
-	v.names = "Prevalence", timevar = "Infection", times = c("Brucellosis", "bTB"), #
-	direction = "long")
-df2
-df2 <- reshape(f2, varying = c("BrucellosisPrevalence", "TBPrevalence"), #
-	v.names = "Prevalence", timevar = "Name", times = c("Brucellosis", "bTB"), #
-	direction = "long")
-df2
-ggplot(df2[df2$Evaluation = "Model"], aes(x = Name, y = Prevalence, fill = Infection)) + #
-	geom_bar(position = position_dodge(), stat = "identity") + ylim(0, 0.8)
-ggplot(df2[df2$Evaluation == "Model",], aes(x = Name, y = Prevalence, fill = Infection)) + #
-	geom_bar(position = position_dodge(), stat = "identity") + ylim(0, 0.8)
-df
-getwd()
-?rds
-??write.rds
-??rds
-saveRDS(df, "coinfection_pattern_results.rds")
-ggplot(df2[df2$Evaluation == "Model",], aes(x = Name, y = Prevalence, fill = Infection)) + #
-	geom_bar(position = position_dodge(), stat = "identity") + ylim(0, 0.8) + #
-	theme_bw() + # removes ugly gray.#
-	theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank())
-ggplot(df2[df2$Evaluation == "Model",], aes(x = Name, y = Prevalence, fill = Infection)) + #
-	geom_bar(position = position_dodge(), stat = "identity") + ylim(0, 0.8) + #
-	theme_bw() +  scale_colour_manual(values=c("steelblue", "orangered4")) #
-	theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank())
-ggplot(df2[df2$Evaluation == "Model",], aes(x = Name, y = Prevalence, fill = Infection)) + #
-	geom_bar(position = position_dodge(), stat = "identity") + ylim(0, 0.8) + #
-	theme_bw() +  scale_colour_manual(values=c("steelblue", "orangered4")) +#
-	theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank())
-ggplot(df2[df2$Evaluation == "Model",], aes(x = Name, y = Prevalence, colour = Infection)) + #
-	geom_bar(position = position_dodge(), stat = "identity") + ylim(0, 0.8) + #
-	theme_bw() +  scale_colour_manual(values=c("steelblue", "orangered4")) +#
-	theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank())
-ggplot(df2[df2$Evaluation == "Model",], aes(x = Name, y = Prevalence, fill = Infection)) + #
-	geom_bar(position = position_dodge(), stat = "identity") + ylim(0, 0.8) + #
-	theme_bw() +  scale_fill_manual(values=c("steelblue", "orangered4")) +#
-	theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank())
+?geom_point
+df<- readRDS("coinfection_pattern_results.rds")#
 f2 <- data.frame(Evaluation = c("Model", "Model", "Data", "Data"), #
 	Infection = c("Single infection", "Co-infection", "Single infection", "Co-infection"), #
 	BrucellosisPrevalence = c(df$prevBinS, df$prevBinT, 0.3035, 0.4524), #
@@ -414,984 +666,370 @@ f2 <- data.frame(Evaluation = c("Model", "Model", "Data", "Data"), #
 df2 <- reshape(f2, varying = c("BrucellosisPrevalence", "TBPrevalence"), #
 	v.names = "Prevalence", timevar = "Name", times = c("Brucellosis", "bTB"), #
 	direction = "long")#
-#
-ggplot(df2[df2$Evaluation == "Model",], aes(x = Name, y = Prevalence, fill = Infection)) + #
-	geom_bar(position = position_dodge(), stat = "identity") + ylim(0, 0.8) + #
-	theme_bw() +  scale_fill_manual(values=c("steelblue", "orangered4")) +#
-	theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank(), #
-		legend.position=c(1, 0.7),  #
-        legend.background= element_rect(fill="white", colour="white"),#
-        legend.key= element_blank(),#
-        legend.title= element_blank(),#
-        legend.text = element_text(size=15))
-ggplot(df2[df2$Evaluation == "Model",], aes(x = Name, y = Prevalence, fill = Infection)) + #
-	geom_bar(position = position_dodge(), stat = "identity") + ylim(0, 0.8) + #
-	theme_bw() +  scale_fill_manual(values=c("steelblue", "orangered4")) +#
-	theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank(), #
-		legend.position=c(0.8, 0.8),  #
-        legend.background= element_rect(fill="white", colour="white"),#
-        legend.key= element_blank(),#
-        legend.title= element_blank(),#
-        legend.text = element_text(size=15))
-ggplot(df2[df2$Evaluation == "Model",], aes(x = Name, y = Prevalence, fill = Infection)) + #
-	geom_bar(position = position_dodge(), stat = "identity") + ylim(0, 0.8) + #
-	theme_bw() +  scale_fill_manual(values=c("steelblue", "orangered4")) +#
-	theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank(), #
-		legend.position=c(0.8, 0.9),  #
-        legend.background= element_rect(fill="white", colour="white"),#
-        legend.key= element_blank(),#
-        legend.title= element_blank(),#
-        legend.text = element_text(size=15))
-str(df2)
-df2$Infection <- relevel("Single infection")
-df2$Infection <- relevel(df2$Infection, "Single infection")
-ggplot(df2[df2$Evaluation == "Model",], aes(x = Name, y = Prevalence, fill = Infection)) + #
-	geom_bar(position = position_dodge(), stat = "identity") + ylim(0, 0.8) + #
-	theme_bw() +  scale_fill_manual(values=c("steelblue", "orangered4")) +#
-	theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank(), #
-		legend.position=c(0.8, 0.9),  #
-        legend.background= element_rect(fill="white", colour="white"),#
-        legend.key= element_blank(),#
-        legend.title= element_blank(),#
-        legend.text = element_text(size=15))
-df2
-p2 <- p1 + ggplot(df2[df2$Evaluation == "Data",], aes(x = Name, y = Prevalence)) + #
-	geom_point(position = position_dodge(), stat = "identity")
-p1 <- ggplot(df2[df2$Evaluation == "Model",], aes(x = Name, y = Prevalence, fill = Infection)) + #
-	geom_bar(position = position_dodge(), stat = "identity") + ylim(0, 0.8) + #
-	theme_bw() +  scale_fill_manual(values=c("steelblue", "orangered4")) +#
-	theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank(), #
-		legend.position=c(0.8, 0.9),  #
-        legend.background= element_rect(fill="white", colour="white"),#
-        legend.key= element_blank(),#
-        legend.title= element_blank(),#
-        legend.text = element_text(size=15))         #
-p2 <- p1 + ggplot(df2[df2$Evaluation == "Data",], aes(x = Name, y = Prevalence)) + #
-	geom_point(position = position_dodge(), stat = "identity")
-p1 <- ggplot(df2[df2$Evaluation == "Model",], aes(x = Name, y = Prevalence, fill = Infection)) + #
-	geom_bar(position = position_dodge(), stat = "identity") + ylim(0, 0.8) + #
-	theme_bw() +  scale_fill_manual(values=c("steelblue", "orangered4")) +#
-	theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank(), #
-		legend.position=c(0.8, 0.9),  #
-        legend.background= element_rect(fill="white", colour="white"),#
-        legend.key= element_blank(),#
-        legend.title= element_blank(),#
-        legend.text = element_text(size=15))  + #
-	geom_point(data = df2[df2$Evaluation == "Data",], colour = "black")
-p1
-p1 <- ggplot(df2[df2$Evaluation == "Model",], aes(x = Name, y = Prevalence, fill = Infection)) + #
-	geom_bar(position = position_dodge(), stat = "identity") + ylim(0, 0.8) + #
-	theme_bw() +  scale_fill_manual(values=c("steelblue", "orangered4")) +#
-	theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank(), #
-		legend.position=c(0.8, 0.9),  #
-        legend.background= element_rect(fill="white", colour="white"),#
-        legend.key= element_blank(),#
-        legend.title= element_blank(),#
-        legend.text = element_text(size=15))  + #
-	geom_point(data = df2[df2$Evaluation == "Data",], colour = "black", position = position_dodge())
-p1
-ggplot(df2[df2$Evaluation == "Model",], aes(x = Name, y = Prevalence, fill = Infection)) + #
-	geom_bar(position = position_dodge(), stat = "identity") + ylim(0, 0.8) + #
-	theme_bw() +  scale_fill_manual(values=c("steelblue", "orangered4")) +#
-	theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank(), #
-		legend.position=c(0.8, 0.9),  #
-        legend.background= element_rect(fill="white", colour="white"),#
-        legend.key= element_blank(),#
-        legend.title= element_blank(),#
-        legend.text = element_text(size=15))  + #
-	geom_point(data = df2[df2$Evaluation == "Data",], colour = "black", #
-		position = position_dodge(width = 0.5))
-ggplot(df2[df2$Evaluation == "Model",], aes(x = Name, y = Prevalence, fill = Infection)) + #
-	geom_bar(position = position_dodge(), stat = "identity") + ylim(0, 0.8) + #
-	theme_bw() +  scale_fill_manual(values=c("steelblue", "orangered4")) +#
-	theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank(), #
-		legend.position=c(0.8, 0.9),  #
-        legend.background= element_rect(fill="white", colour="white"),#
-        legend.key= element_blank(),#
-        legend.title= element_blank(),#
-        legend.text = element_text(size=15))  + #
-	geom_point(data = df2[df2$Evaluation == "Data",], colour = "black", #
-		position = position_dodge(width = 1))
-geom_point(data = df2[df2$Evaluation == "Data",], colour = "black", #
-		position = position_dodge(width = 0.8))
-ggplot(df2[df2$Evaluation == "Model",], aes(x = Name, y = Prevalence, fill = Infection)) + #
-	geom_bar(position = position_dodge(), stat = "identity") + ylim(0, 0.8) + #
-	theme_bw() +  scale_fill_manual(values=c("steelblue", "orangered4")) +#
-	theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank(), #
-		legend.position=c(0.8, 0.9),  #
-        legend.background= element_rect(fill="white", colour="white"),#
-        legend.key= element_blank(),#
-        legend.title= element_blank(),#
-        legend.text = element_text(size=15))  + #
-	geom_point(data = df2[df2$Evaluation == "Data",], colour = "black", #
-		position = position_dodge(width = 0.8))
-ggplot(df2[df2$Evaluation == "Model",], aes(x = Name, y = Prevalence, fill = Infection)) + #
-	geom_bar(position = position_dodge(), stat = "identity") + ylim(0, 0.8) + #
-	theme_bw() +  scale_fill_manual(values=c("steelblue", "orangered4")) +#
-	theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank(), #
-		legend.position=c(0.8, 0.9),  #
-        legend.background= element_rect(fill="white", colour="white"),#
-        legend.key= element_blank(),#
-        legend.title= element_blank(),#
-        legend.text = element_text(size=15))  + #
-	geom_point(data = df2[df2$Evaluation == "Data",], colour = "black", #
-		position = position_dodge(width = 0.9))
-ggplot(df2[df2$Evaluation == "Model",], aes(x = Name, y = Prevalence, fill = Infection)) + #
-	geom_bar(position = position_dodge(), stat = "identity") + ylim(0, 0.8) + #
-	theme_bw() +  scale_fill_manual(values=c("steelblue", "orangered4")) +#
-	theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank(), #
-		legend.position=c(0.8, 0.9),  #
-        legend.background= element_rect(fill="white", colour="white"),#
-        legend.key= element_blank(),#
-        legend.title= element_blank(),#
-        legend.text = element_text(size=15))  + #
-	geom_point(data = df2[df2$Evaluation == "Data",], colour = "black", #
-		position = position_dodge(width = 1))
-df2
-limits <- aes(ymax = df2$CIHigh[df2$Evaluation == "Data"] + df2$CILow[df2$Evaluation == "Data"])
+df2$Infection <- relevel(df2$Infection, "Single infection")#
 df2$CILow <- c(NA, NA, 0.26544, 0.365798, NA, NA, 0.1781895, 0.2857)#
-df2$CIHigh <- c(NA, NA, 0.3451408, 0.540598, NA, NA, 0.27835, 0.43137)
+df2$CIHigh <- c(NA, NA, 0.3451408, 0.540598, NA, NA, 0.27835, 0.43137)#
+#
+limits <- aes(ymax = df2$CIHigh[df2$Evaluation == "Data"], ymin= df2$CILow[df2$Evaluation == "Data"])#
+p1 <- #
+ggplot(df2[df2$Evaluation == "Model",], aes(x = Name, y = Prevalence, fill = Infection)) + #
+	geom_bar(position = position_dodge(), stat = "identity") + ylim(0, 0.8) + #
+	theme_bw() +  scale_fill_manual(values=c("steelblue", "orangered4")) +#
+	theme(axis.line.x = element_line(colour= "black"),#
+  		axis.line.y = element_line(colour= "black"),#
+  		axis.title.x = element_blank(),#element_text(size=16, vjust=-0.15),#
+        axis.title.y = element_text(size=16, vjust= 0.8),#
+        axis.text.x = element_text(size=14, vjust=-0.05),#
+        axis.text.y = element_text(size=14),#
+        panel.border = element_blank(), #
+		legend.position=c(0.8, 0.9),  #
+        legend.background= element_rect(fill="white", colour="white"),#
+        legend.key= element_blank(),#
+        legend.title= element_blank(),#
+        legend.text = element_text(size=12))  + #
+	geom_point(data = df2[df2$Evaluation == "Data",], colour = "black", #
+		position = position_dodge(width = 0.9), size = 2)   + #
+	geom_errorbar(limits, position = position_dodge(width = 0.9), width= 0.2)
+p1
+df<- readRDS("coinfection_pattern_results.rds")#
+f2 <- data.frame(Evaluation = c("Model", "Model", "Data", "Data"), #
+	Infection = c("Single infection", "Co-infection", "Single infection", "Co-infection"), #
+	BrucellosisPrevalence = c(df$prevBinS, df$prevBinT, 0.3035, 0.4524), #
+	TBPrevalence = c(df$prevTinS, df$prevTinB, 0.227, 0.3585), #
+	CILowB = c(NA, NA, 0.2654405, 0.3657982), #
+	CIHighB = c(NA, NA, 0.3451408, 0.5405985), #
+	CILowTB = c(NA, NA, 0.1781895, 0.2857143), #
+	CIHighTB = c(NA, NA, 0.2783505, 0.4313725))#
+df2 <- reshape(f2, varying = c("BrucellosisPrevalence", "TBPrevalence"), #
+	v.names = "Prevalence", timevar = "Name", times = c("Brucellosis", "bTB"), #
+	direction = "long")#
+df2$Infection <- relevel(df2$Infection, "Single infection")#
+df2$CILow <- c(NA, NA, 0.26544, 0.365798, NA, NA, 0.1781895, 0.2857)#
+df2$CIHigh <- c(NA, NA, 0.3451408, 0.540598, NA, NA, 0.27835, 0.43137)#
+#
+limits <- aes(ymax = df2$CIHigh[df2$Evaluation == "Data"], ymin= df2$CILow[df2$Evaluation == "Data"])#
+p1 <- #
+ggplot(df2[df2$Evaluation == "Model",], aes(x = Name, y = Prevalence, fill = Infection)) + #
+	geom_bar(position = position_dodge(), stat = "identity") + ylim(0, 0.8) + #
+	theme_bw() +  scale_fill_manual(values=c("steelblue", "orangered4")) +#
+	theme(axis.line.x = element_line(colour= "black"),#
+  		axis.line.y = element_line(colour= "black"),#
+  		axis.title.x = element_blank(),#element_text(size=16, vjust=-0.15),#
+        axis.title.y = element_text(size=16, vjust= 0.8),#
+        axis.text.x = element_text(size=14, vjust=-0.05),#
+        axis.text.y = element_text(size=14),#
+        panel.border = element_blank(), #
+		legend.position=c(0.8, 0.9),  #
+        legend.background= element_rect(fill="white", colour="white"),#
+        legend.key= element_blank(),#
+        legend.title= element_blank(),#
+        legend.text = element_text(size=12))  + #
+	geom_point(data = df2[df2$Evaluation == "Data",], colour = "black", #
+		position = position_dodge(width = 0.9), size = 3)   + #
+	geom_errorbar(limits, position = position_dodge(width = 0.9), width= 0.2)
+p1
+setwd("~/GitHub/bTB-bruc-co-infection-ms")
+df<- readRDS("coinfection_pattern_results.rds")#
+f2 <- data.frame(Evaluation = c("Model", "Model", "Data", "Data"), #
+	Infection = c("Single infection", "Co-infection", "Single infection", "Co-infection"), #
+	BrucellosisPrevalence = c(df$prevBinS, df$prevBinT, 0.3035, 0.4524), #
+	TBPrevalence = c(df$prevTinS, df$prevTinB, 0.227, 0.3585), #
+	CILowB = c(NA, NA, 0.2654405, 0.3657982), #
+	CIHighB = c(NA, NA, 0.3451408, 0.5405985), #
+	CILowTB = c(NA, NA, 0.1781895, 0.2857143), #
+	CIHighTB = c(NA, NA, 0.2783505, 0.4313725))#
+df2 <- reshape(f2, varying = c("BrucellosisPrevalence", "TBPrevalence"), #
+	v.names = "Prevalence", timevar = "Name", times = c("Brucellosis", "bTB"), #
+	direction = "long")#
+df2$Infection <- relevel(df2$Infection, "Single infection")#
+df2$CILow <- c(NA, NA, 0.26544, 0.365798, NA, NA, 0.1781895, 0.2857)#
+df2$CIHigh <- c(NA, NA, 0.3451408, 0.540598, NA, NA, 0.27835, 0.43137)#
+#
+limits <- aes(ymax = df2$CIHigh[df2$Evaluation == "Data"], ymin= df2$CILow[df2$Evaluation == "Data"])#
+p1 <- #
+ggplot(df2[df2$Evaluation == "Model",], aes(x = Name, y = Prevalence, fill = Infection)) + #
+	geom_bar(position = position_dodge(), stat = "identity") + ylim(0, 0.8) + #
+	theme_bw() +  scale_fill_manual(values=c("steelblue", "orangered4")) +#
+	theme(axis.line.x = element_line(colour= "black"),#
+  		axis.line.y = element_line(colour= "black"),#
+  		axis.title.x = element_blank(),#element_text(size=16, vjust=-0.15),#
+        axis.title.y = element_text(size=16, vjust= 0.8),#
+        axis.text.x = element_text(size=14, vjust=-0.05),#
+        axis.text.y = element_text(size=14),#
+        panel.border = element_blank(), #
+		legend.position=c(0.8, 0.9),  #
+        legend.background= element_rect(fill="white", colour="white"),#
+        legend.key= element_blank(),#
+        legend.title= element_blank(),#
+        legend.text = element_text(size=12))  + #
+	geom_point(data = df2[df2$Evaluation == "Data",], colour = "black", #
+		position = position_dodge(width = 0.9), size = 3)   + #
+	geom_errorbar(limits, position = position_dodge(width = 0.9), width= 0.2)      #
+# turn off dots in legend.  Add model/data to legend#
+#
+p1
+ggplot(df2[df2$Evaluation == "Model",], aes(x = Name, y = Prevalence, fill = Infection)) + #
+	geom_bar(position = position_dodge(), stat = "identity") + ylim(0, 0.8) + #
+	theme_bw() +  scale_fill_manual(values=c("steelblue", "orangered4")) +#
+	theme(axis.line.x = element_line(colour= "black"),#
+  		axis.line.y = element_line(colour= "black"),#
+  		axis.title.x = element_blank(),#element_text(size=16, vjust=-0.15),#
+        axis.title.y = element_text(size=16, vjust= 0.8),#
+        axis.text.x = element_text(size=14, vjust=-0.05),#
+        axis.text.y = element_text(size=14),#
+        panel.border = element_blank(), #
+		legend.position=c(0.8, 0.9),  #
+        legend.background= element_rect(fill="white", colour="white"),#
+        legend.key= element_blank(),#
+        legend.title= element_blank(),#
+        legend.text = element_text(size=12))  + #
+	geom_point(data = df2[df2$Evaluation == "Data",], colour = "black", #
+		position = position_dodge(width = 0.9), size = 3)   + #
+	geom_errorbar(limits, position = position_dodge(width = 0.9), width= 0.2)
 df2
-limits <- aes(ymax = df2$CIHigh[df2$Evaluation == "Data"] + df2$CILow[df2$Evaluation == "Data"])
-limits
-ggplot(df2[df2$Evaluation == "Model",], aes(x = Name, y = Prevalence, fill = Infection)) + #
+ggplot(df2[df2$Evaluation == "Model",], aes(x = Name, y = Prevalence, fill = id)) + #
 	geom_bar(position = position_dodge(), stat = "identity") + ylim(0, 0.8) + #
-	theme_bw() +  scale_fill_manual(values=c("steelblue", "orangered4")) +#
-	theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
+	theme_bw() +  #
+	scale_fill_manual(values=c("chartruse3", "chartruse4", "slateblue3", "slateblue4")) +#
+	theme(axis.line.x = element_line(colour= "black", size = 2),#
+  		axis.line.y = element_line(colour= "black", size = 2),#
+  		axis.title.x = element_blank(),#
+        axis.title.y = element_blank(),#
         axis.text.x = element_text(size=14, vjust=-0.05),#
         axis.text.y = element_text(size=14),#
         panel.border = element_blank(), #
+        panel.grid.major = element_blank(),#
+        panel.grid.minor = element_blank(),#
 		legend.position=c(0.8, 0.9),  #
         legend.background= element_rect(fill="white", colour="white"),#
         legend.key= element_blank(),#
         legend.title= element_blank(),#
-        legend.text = element_text(size=15))  + #
+        legend.text = element_text(size=12))  + #
 	geom_point(data = df2[df2$Evaluation == "Data",], colour = "black", #
-		position = position_dodge(width = 0.9))   + #
-	geom_errorbar(limits, position = dodge, width= 0.25)
-ggplot(df2[df2$Evaluation == "Model",], aes(x = Name, y = Prevalence, fill = Infection)) + #
+		position = position_dodge(width = 0.9), size = 3)   + #
+	geom_errorbar(limits, position = position_dodge(width = 0.9), width= 0.2)
+ggplot(df2[df2$Evaluation == "Model",], aes(x = Name, y = Prevalence, fill = as.character(id))) + #
 	geom_bar(position = position_dodge(), stat = "identity") + ylim(0, 0.8) + #
-	theme_bw() +  scale_fill_manual(values=c("steelblue", "orangered4")) +#
-	theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
+	theme_bw() +  #
+	scale_fill_manual(values=c("chartruse3", "chartruse4", "slateblue3", "slateblue4")) +#
+	theme(axis.line.x = element_line(colour= "black", size = 2),#
+  		axis.line.y = element_line(colour= "black", size = 2),#
+  		axis.title.x = element_blank(),#
+        axis.title.y = element_blank(),#
         axis.text.x = element_text(size=14, vjust=-0.05),#
         axis.text.y = element_text(size=14),#
         panel.border = element_blank(), #
+        panel.grid.major = element_blank(),#
+        panel.grid.minor = element_blank(),#
 		legend.position=c(0.8, 0.9),  #
         legend.background= element_rect(fill="white", colour="white"),#
         legend.key= element_blank(),#
         legend.title= element_blank(),#
-        legend.text = element_text(size=15))  + #
+        legend.text = element_text(size=12))  + #
 	geom_point(data = df2[df2$Evaluation == "Data",], colour = "black", #
-		position = position_dodge(width = 0.9))   + #
-	geom_errorbar(limits, position = position_dodge(width = 0.09), width= 0.25)
-?geom_errorbar
-limits <- aes(ymax = df2$CIHigh[df2$Evaluation == "Data"], ymin= df2$CILow[df2$Evaluation == "Data"])
-ggplot(df2[df2$Evaluation == "Model",], aes(x = Name, y = Prevalence, fill = Infection)) + #
+		position = position_dodge(width = 0.9), size = 3)   + #
+	geom_errorbar(limits, position = position_dodge(width = 0.9), width= 0.2)
+ggplot(df2[df2$Evaluation == "Model",], aes(x = Name, y = Prevalence, fill = as.character(id))) + #
 	geom_bar(position = position_dodge(), stat = "identity") + ylim(0, 0.8) + #
-	theme_bw() +  scale_fill_manual(values=c("steelblue", "orangered4")) +#
-	theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
+	theme_bw() +  #
+	scale_fill_manual(values=c("chartruse", "chartruse4", "slateblue3", "slateblue4")) +#
+	theme(axis.line.x = element_line(colour= "black", size = 2),#
+  		axis.line.y = element_line(colour= "black", size = 2),#
+  		axis.title.x = element_blank(),#
+        axis.title.y = element_blank(),#
         axis.text.x = element_text(size=14, vjust=-0.05),#
         axis.text.y = element_text(size=14),#
         panel.border = element_blank(), #
+        panel.grid.major = element_blank(),#
+        panel.grid.minor = element_blank(),#
 		legend.position=c(0.8, 0.9),  #
         legend.background= element_rect(fill="white", colour="white"),#
         legend.key= element_blank(),#
         legend.title= element_blank(),#
-        legend.text = element_text(size=15))  + #
+        legend.text = element_text(size=12))  + #
 	geom_point(data = df2[df2$Evaluation == "Data",], colour = "black", #
-		position = position_dodge(width = 0.9))   + #
-	geom_errorbar(limits, position = position_dodge(width = 0.09), width= 0.25)
-ggplot(df2[df2$Evaluation == "Model",], aes(x = Name, y = Prevalence, fill = Infection)) + #
+		position = position_dodge(width = 0.9), size = 3)   + #
+	geom_errorbar(limits, position = position_dodge(width = 0.9), width= 0.2)
+ggplot(df2[df2$Evaluation == "Model",], aes(x = Name, y = Prevalence, fill = as.character(id))) + #
 	geom_bar(position = position_dodge(), stat = "identity") + ylim(0, 0.8) + #
-	theme_bw() +  scale_fill_manual(values=c("steelblue", "orangered4")) +#
-	theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
+	theme_bw() +  #
+	scale_fill_manual(values=c("green", "chartruse4", "slateblue3", "slateblue4")) +#
+	theme(axis.line.x = element_line(colour= "black", size = 2),#
+  		axis.line.y = element_line(colour= "black", size = 2),#
+  		axis.title.x = element_blank(),#
+        axis.title.y = element_blank(),#
         axis.text.x = element_text(size=14, vjust=-0.05),#
         axis.text.y = element_text(size=14),#
         panel.border = element_blank(), #
+        panel.grid.major = element_blank(),#
+        panel.grid.minor = element_blank(),#
 		legend.position=c(0.8, 0.9),  #
         legend.background= element_rect(fill="white", colour="white"),#
         legend.key= element_blank(),#
         legend.title= element_blank(),#
-        legend.text = element_text(size=15))  + #
+        legend.text = element_text(size=12))  + #
 	geom_point(data = df2[df2$Evaluation == "Data",], colour = "black", #
-		position = position_dodge(width = 0.9))   + #
-	geom_errorbar(limits, position = position_dodge(width = 0.9), width= 0.25)
-ggplot(df2[df2$Evaluation == "Model",], aes(x = Name, y = Prevalence, fill = Infection)) + #
+		position = position_dodge(width = 0.9), size = 3)   + #
+	geom_errorbar(limits, position = position_dodge(width = 0.9), width= 0.2)
+ggplot(df2[df2$Evaluation == "Model",], aes(x = Name, y = Prevalence, fill = as.character(id))) + #
 	geom_bar(position = position_dodge(), stat = "identity") + ylim(0, 0.8) + #
-	theme_bw() +  scale_fill_manual(values=c("steelblue", "orangered4")) +#
-	theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
+	theme_bw() +  #
+	scale_fill_manual(values=c("chartreuse3", "chartreuse4", "slateblue3", "slateblue4")) +#
+	theme(axis.line.x = element_line(colour= "black", size = 2),#
+  		axis.line.y = element_line(colour= "black", size = 2),#
+  		axis.title.x = element_blank(),#
+        axis.title.y = element_blank(),#
         axis.text.x = element_text(size=14, vjust=-0.05),#
         axis.text.y = element_text(size=14),#
         panel.border = element_blank(), #
+        panel.grid.major = element_blank(),#
+        panel.grid.minor = element_blank(),#
 		legend.position=c(0.8, 0.9),  #
         legend.background= element_rect(fill="white", colour="white"),#
         legend.key= element_blank(),#
-        legend.title= "Model",#
-        legend.text = element_text(size=15))  + #
+        legend.title= element_blank(),#
+        legend.text = element_text(size=12))  + #
 	geom_point(data = df2[df2$Evaluation == "Data",], colour = "black", #
-		position = position_dodge(width = 0.9))   + #
-	geom_errorbar(limits, position = position_dodge(width = 0.9), width= 0.25)
-ggplot(df2[df2$Evaluation == "Model",], aes(x = Name, y = Prevalence, fill = Infection)) + #
+		position = position_dodge(width = 0.9), size = 3)   + #
+	geom_errorbar(limits, position = position_dodge(width = 0.9), width= 0.2)
+df2[df2$Evaluation == "Model",]
+df2$color <- seq(1,8,1)
+ggplot(df2[df2$Evaluation == "Model",], aes(x = Name, y = Prevalence, fill = as.character(color))) + #
 	geom_bar(position = position_dodge(), stat = "identity") + ylim(0, 0.8) + #
-	theme_bw() +  scale_fill_manual(values=c("steelblue", "orangered4")) +#
-	theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
+	theme_bw() +  #
+	scale_fill_manual(values=c("chartreuse3", "chartreuse4", "slateblue3", "slateblue4")) +#
+	theme(axis.line.x = element_line(colour= "black", size = 2),#
+  		axis.line.y = element_line(colour= "black", size = 2),#
+  		axis.title.x = element_blank(),#
+        axis.title.y = element_blank(),#
         axis.text.x = element_text(size=14, vjust=-0.05),#
         axis.text.y = element_text(size=14),#
         panel.border = element_blank(), #
+        panel.grid.major = element_blank(),#
+        panel.grid.minor = element_blank(),#
 		legend.position=c(0.8, 0.9),  #
         legend.background= element_rect(fill="white", colour="white"),#
         legend.key= element_blank(),#
         legend.title= element_blank(),#
-        legend.text = element_text(size=15))  + #
+        legend.text = element_text(size=12))  + #
 	geom_point(data = df2[df2$Evaluation == "Data",], colour = "black", #
-		position = position_dodge(width = 0.9))   + #
-	geom_errorbar(limits, position = position_dodge(width = 0.9), width= 0.25)
-?theme
-ggplot(df2[df2$Evaluation == "Model",], aes(x = Name, y = Prevalence, fill = Infection)) + #
+		position = position_dodge(width = 0.9), size = 3)   + #
+	geom_errorbar(limits, position = position_dodge(width = 0.9), width= 0.2)
+df2
+df2$color <- c(seq(1,4,1), seq(1,4,1))
+ggplot(df2[df2$Evaluation == "Model",], aes(x = Name, y = Prevalence, fill = as.character(color))) + #
 	geom_bar(position = position_dodge(), stat = "identity") + ylim(0, 0.8) + #
-	theme_bw() +  scale_fill_manual(values=c("steelblue", "orangered4")) +#
-	theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_blank(),#element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=18, vjust= 0.8),#
-        axis.text.x = element_text(size=18, vjust=-0.05),#
+	theme_bw() +  #
+	scale_fill_manual(values=c("chartreuse3", "chartreuse4", "slateblue3", "slateblue4")) +#
+	theme(axis.line.x = element_line(colour= "black", size = 2),#
+  		axis.line.y = element_line(colour= "black", size = 2),#
+  		axis.title.x = element_blank(),#
+        axis.title.y = element_blank(),#
+        axis.text.x = element_text(size=14, vjust=-0.05),#
         axis.text.y = element_text(size=14),#
         panel.border = element_blank(), #
+        panel.grid.major = element_blank(),#
+        panel.grid.minor = element_blank(),#
 		legend.position=c(0.8, 0.9),  #
         legend.background= element_rect(fill="white", colour="white"),#
         legend.key= element_blank(),#
         legend.title= element_blank(),#
-        legend.text = element_text(size=16))  + #
+        legend.text = element_text(size=12))  + #
 	geom_point(data = df2[df2$Evaluation == "Data",], colour = "black", #
-		position = position_dodge(width = 0.9))   + #
-	geom_errorbar(limits, position = position_dodge(width = 0.9), width= 0.25)
-ggplot(df2[df2$Evaluation == "Model",], aes(x = Name, y = Prevalence, fill = Infection)) + #
+		position = position_dodge(width = 0.9), size = 3)   + #
+	geom_errorbar(limits, position = position_dodge(width = 0.9), width= 0.2)
+df2$color <- c(1,2,0, 0, 3, 4, 0, 0)
+ggplot(df2[df2$Evaluation == "Model",], aes(x = Name, y = Prevalence, fill = as.character(color))) + #
 	geom_bar(position = position_dodge(), stat = "identity") + ylim(0, 0.8) + #
-	theme_bw() +  scale_fill_manual(values=c("steelblue", "orangered4")) +#
-	theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_blank(),#element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=18, vjust= 0.8),#
-        axis.text.x = element_text(size=18, vjust=-0.05),#
-        axis.text.y = element_text(size=18),#
+	theme_bw() +  #
+	scale_fill_manual(values=c("chartreuse3", "chartreuse4", "slateblue3", "slateblue4")) +#
+	theme(axis.line.x = element_line(colour= "black", size = 2),#
+  		axis.line.y = element_line(colour= "black", size = 2),#
+  		axis.title.x = element_blank(),#
+        axis.title.y = element_blank(),#
+        axis.text.x = element_text(size=14, vjust=-0.05),#
+        axis.text.y = element_text(size=14),#
         panel.border = element_blank(), #
+        panel.grid.major = element_blank(),#
+        panel.grid.minor = element_blank(),#
 		legend.position=c(0.8, 0.9),  #
         legend.background= element_rect(fill="white", colour="white"),#
         legend.key= element_blank(),#
         legend.title= element_blank(),#
-        legend.text = element_text(size=16))  + #
+        legend.text = element_text(size=12))  + #
 	geom_point(data = df2[df2$Evaluation == "Data",], colour = "black", #
-		position = position_dodge(width = 0.9))   + #
-	geom_errorbar(limits, position = position_dodge(width = 0.9), width= 0.25)
+		position = position_dodge(width = 0.9), size = 3)   + #
+	geom_errorbar(limits, position = position_dodge(width = 0.9), width= 0.2)
+df2
+df3<- df2[df2$Evaluatinon == "Model",]
+df3
+df3<- df2[df2$Evaluation == "Model",]
+df3
+str(df3)
+summary(data)
+geom_histogram(data=d, fill= "steelblue", alpha=0.3, #
+		colour = "steelblue4", stat="bin", binwidth= 1, linetype = 1, size = 2) + #
+	theme_bw()+ #
+	xlab("Age (years)")+ ylab("Number of buffalo")+#
+	theme(panel.border = element_blank(), #
+        panel.margin = element_blank(),#
+        panel.grid.major= element_blank(),#
+        panel.grid.minor= element_blank()) + #
+	theme(axis.line.x = element_line(colour= "black", size = 2), #
+		axis.line.y = element_line(colour= "black", size = 2))
+d <- data$age_yr
+geom_histogram(data=d, fill= "steelblue", alpha=0.3, #
+		colour = "steelblue4", stat="bin", binwidth= 1, linetype = 1, size = 2) + #
+	theme_bw()+ #
+	xlab("Age (years)")+ ylab("Number of buffalo")+#
+	theme(panel.border = element_blank(), #
+        panel.margin = element_blank(),#
+        panel.grid.major= element_blank(),#
+        panel.grid.minor= element_blank()) + #
+	theme(axis.line.x = element_line(colour= "black", size = 2), #
+		axis.line.y = element_line(colour= "black", size = 2))
+head(d)
+d <- data$age_sel/12
+geom_histogram(data=d, fill= "steelblue", alpha=0.3, #
+		colour = "steelblue4", stat="bin", binwidth= 1, linetype = 1, size = 2) + #
+	theme_bw()+ #
+	xlab("Age (years)")+ ylab("Number of buffalo")+#
+	theme(panel.border = element_blank(), #
+        panel.margin = element_blank(),#
+        panel.grid.major= element_blank(),#
+        panel.grid.minor= element_blank()) + #
+	theme(axis.line.x = element_line(colour= "black", size = 2), #
+		axis.line.y = element_line(colour= "black", size = 2))
+ggplot(d, aes(x=age)) + #
+	geom_histogram(data=d, fill= "steelblue", alpha=0.3, #
+		colour = "steelblue4", stat="bin", binwidth= 1, linetype = 1, size = 2) + #
+	theme_bw()+ #
+	xlab("Age (years)")+ ylab("Number of buffalo")+#
+	theme(panel.border = element_blank(), #
+        panel.margin = element_blank(),#
+        panel.grid.major= element_blank(),#
+        panel.grid.minor= element_blank()) + #
+	theme(axis.line.x = element_line(colour= "black", size = 2), #
+		axis.line.y = element_line(colour= "black", size = 2))
+data$age <- data$age_yr/12
+ggplot(data, aes(x=age)) + #
+	geom_histogram(data=d, fill= "steelblue", alpha=0.3, #
+		colour = "steelblue4", stat="bin", binwidth= 1, linetype = 1, size = 2) + #
+	theme_bw()+ #
+	xlab("Age (years)")+ ylab("Number of buffalo")+#
+	theme(panel.border = element_blank(), #
+        panel.margin = element_blank(),#
+        panel.grid.major= element_blank(),#
+        panel.grid.minor= element_blank()) + #
+	theme(axis.line.x = element_line(colour= "black", size = 2), #
+		axis.line.y = element_line(colour= "black", size = 2))
+#data<-read.csv("cross_sectional_data_withdz_cleandisease_nofinal_Feb2016_capturetime_forsurv.csv")#
+data<-read.csv("cross_sectional_data_withdz_cleandisease_nofinal_Feb2016_capturetime.csv")#
+#
 data_nofinal<-data[data$final_capture=="0",] #
 d<-data.frame(btb=data_nofinal$tb , bruc=as.character(data_nofinal$bruc), age=data_nofinal$age_sel/12, #
               id=data_nofinal$id)#
-d<-d[d$age<14,]#
-# make a dataframe with age prevalence in tbneg and tbpos, long format for ggplot#
-val<-NA#
-get_prev<-function(dat) {#
-  if(length(dat)==0){#
-    val<-0#
-  }#
-  if(length(dat>0)){#
-    val<-length(dat[dat=="1"])/length(dat)#
-  }#
-  return(val)#
-}#
-#
-binsize=2#
-agebins=c(seq(0, max(d$age), binsize), max(d$age+1))#
-agebins<- c(agebins[c(1:6)], 16.5)#
-d$bruc2<-NA#
-newdf<-data.frame(agebin=c(agebins, agebins), Brucprev=NA, #
-                  TB=c(rep("bTB-", length(agebins)),rep("bTB+", length(agebins)) ),#
-                  N=NA)  #
-for (i in 1:length(d$bruc)){#
-  ifelse(d$bruc[i]=="negative", d$bruc2[i]<-0, d$bruc2[i]<-1)#
-}#
-d$bruc<-as.numeric(d$bruc2)#
-for (i in 1:(length(agebins)-1)){#
-  neg<-d[d$btb==0,]#
-  pos<-d[d$btb==1,]#
-  d_neg<-d[d$age>=agebins[i] & d$age<agebins[i+1] & d$btb=="0",]#
-  d_pos<-d[d$age>=agebins[i] & d$age<agebins[i+1] & d$btb=="1",]#
-  newdf$Brucprev[i]<-get_prev(d_neg$bruc)#
-  newdf$Brucprev[i+length(agebins)]<-get_prev(d_pos$bruc)#
-  newdf$N[i]<- length(d_neg$bruc)#
-  newdf$N[i+length(agebins)]<- length(d_pos$bruc)#
-}#
-newdf<-newdf[newdf$agebin<16,]#
-newdf$se<-sqrt(newdf$Brucprev*(1-newdf$Brucprev)/newdf$N)#
-newdf$se[is.na(newdf$se)]<-0#
-#
-# remove 0-2 bin because no TB+#
-newdf2<-newdf[newdf$N>1,]; newdf<-newdf2
-head(d)
-ggplot(d, aes(x=age)) + #
-	geom_histogram(data=d, fill= "steelblue", alpha=0.3, stat="bin", binwidth= 1) + #
-	theme_bw()+ #
-  xlab("Age (years)")+ ylab("Count")+#
-  theme(panel.border = element_blank(), #
-        panel.margin = element_blank(),#
-        panel.grid.major= element_blank(),#
-        panel.grid.minor= element_blank()) + #
-  theme(axis.line.x = element_line(colour= "black"), #
-		axis.line.y = element_line(colour= "black")  )
-?geom_histogram
-ggplot(d, aes(x=age)) + #
-	geom_histogram(data=d, fill= "steelblue", alpha=0.3, colour = "black", stat="bin", binwidth= 1) + #
-	theme_bw()+ #
-  xlab("Age (years)")+ ylab("Count")+#
-  theme(panel.border = element_blank(), #
-        panel.margin = element_blank(),#
-        panel.grid.major= element_blank(),#
-        panel.grid.minor= element_blank()) + #
-  theme(axis.line.x = element_line(colour= "black"), #
-		axis.line.y = element_line(colour= "black")  )
-geom_histogram(data=d, fill= "steelblue", alpha=0.3, colour = "steelblue", stat="bin", binwidth= 1) +
-ggplot(d, aes(x=age)) + #
-	geom_histogram(data=d, fill= "steelblue", alpha=0.3, colour = "steelblue", stat="bin", binwidth= 1) + #
-	theme_bw()+ #
-  xlab("Age (years)")+ ylab("Count")+#
-  theme(panel.border = element_blank(), #
-        panel.margin = element_blank(),#
-        panel.grid.major= element_blank(),#
-        panel.grid.minor= element_blank()) + #
-  theme(axis.line.x = element_line(colour= "black"), #
-		axis.line.y = element_line(colour= "black")  )
-ggplot(d, aes(x=age)) + #
-	geom_histogram(data=d, fill= "steelblue", alpha=0.3, colour = "darkblue", stat="bin", binwidth= 1) + #
-	theme_bw()+ #
-  xlab("Age (years)")+ ylab("Count")+#
-  theme(panel.border = element_blank(), #
-        panel.margin = element_blank(),#
-        panel.grid.major= element_blank(),#
-        panel.grid.minor= element_blank()) + #
-  theme(axis.line.x = element_line(colour= "black"), #
-		axis.line.y = element_line(colour= "black")  )
-ggplot(d, aes(x=age)) + #
-	geom_histogram(data=d, fill= "steelblue", alpha=0.3, colour = "darkblue", stat="bin", binwidth= 1) + #
-	theme_bw()+ #
-	xlab("Age (years)")+ ylab("Count")+#
-	theme(panel.border = element_blank(), #
-        panel.margin = element_blank(),#
-        panel.grid.major= element_blank(),#
-        panel.grid.minor= element_blank()) + #
-	theme(axis.line.x = element_line(colour= "black"), #
-		axis.line.y = element_line(colour= "black")) + #
-	theme(axis.title.x=element_text(size=16), axis.title.y=element_text(16))
-?geom_histogram
-ggplot(d, aes(x=age)) + #
-	geom_histogram(data=d, fill= "steelblue", alpha=0.3, colour = "darkblue", stat="bin", binwidth= 1) + #
-	theme_bw()+ #
-	xlab("Age (years)")+ ylab("Count")+#
-	theme(panel.border = element_blank(), #
-        panel.margin = element_blank(),#
-        panel.grid.major= element_blank(),#
-        panel.grid.minor= element_blank()) + #
-	theme(axis.line.x = element_line(colour= "black"), #
-		axis.line.y = element_line(colour= "black")) + #
-	theme(axis.title = element_text(size=14), axis.text = element_text(size = 14))
-ggplot(d, aes(x=age)) + #
-	geom_histogram(data=d, fill= "steelblue", alpha=0.3, colour = "steelblue", stat="bin", binwidth= 1) + #
-	theme_bw()+ #
-	xlab("Age (years)")+ ylab("Count")+#
-	theme(panel.border = element_blank(), #
-        panel.margin = element_blank(),#
-        panel.grid.major= element_blank(),#
-        panel.grid.minor= element_blank()) + #
-	theme(axis.line.x = element_line(colour= "black"), #
-		axis.line.y = element_line(colour= "black")) + #
-	theme(axis.title = element_text(size=14), axis.text = element_text(size = 14))
-ggplot(d, aes(x=age)) + #
-	geom_histogram(data=d, fill= "steelblue", alpha=0.3, colour = "steelblue4", stat="bin", binwidth= 1) + #
-	theme_bw()+ #
-	xlab("Age (years)")+ ylab("Count")+#
-	theme(panel.border = element_blank(), #
-        panel.margin = element_blank(),#
-        panel.grid.major= element_blank(),#
-        panel.grid.minor= element_blank()) + #
-	theme(axis.line.x = element_line(colour= "black"), #
-		axis.line.y = element_line(colour= "black")) + #
-	theme(axis.title = element_text(size=14), axis.text = element_text(size = 14))
-ggplot(d, aes(x=age)) + #
-	geom_histogram(data=d, fill= "steelblue", alpha=0.3, colour = "steelblue4", stat="bin", binwidth= 1) + #
-	theme_bw()+ #
-	xlab("Age (years)")+ ylab("Count")+#
-	theme(panel.border = element_blank(), #
-        panel.margin = element_blank(),#
-        panel.grid.major= element_blank(),#
-        panel.grid.minor= element_blank()) + #
-	theme(axis.line.x = element_line(colour= "black"), #
-		axis.line.y = element_line(colour= "black")) + #
-	theme(axis.title = element_text(size=16), axis.text = element_text(size = 16))
-ggplot(d, aes(x=age)) + #
-	geom_histogram(data=d, fill= "steelblue", alpha=0.3, colour = "steelblue4", stat="bin", binwidth= 1) + #
-	theme_bw()+ #
-	xlab("Age (years)")+ ylab("Number of buffalo")+#
-	theme(panel.border = element_blank(), #
-        panel.margin = element_blank(),#
-        panel.grid.major= element_blank(),#
-        panel.grid.minor= element_blank()) + #
-	theme(axis.line.x = element_line(colour= "black"), #
-		axis.line.y = element_line(colour= "black")) + #
-	theme(axis.title = element_text(size=16), axis.text = element_text(size = 16))
-getwd()
-?png
-png("Age_histogram.png", width = 480, height = 480, units = "px")#
-ggplot(d, aes(x=age)) + #
-	geom_histogram(data=d, fill= "steelblue", alpha=0.3, colour = "steelblue4", stat="bin", binwidth= 1) + #
-	theme_bw()+ #
-	xlab("Age (years)")+ ylab("Number of buffalo")+#
-	theme(panel.border = element_blank(), #
-        panel.margin = element_blank(),#
-        panel.grid.major= element_blank(),#
-        panel.grid.minor= element_blank()) + #
-	theme(axis.line.x = element_line(colour= "black"), #
-		axis.line.y = element_line(colour= "black")) + #
-	theme(axis.title = element_text(size=16), axis.text = element_text(size = 16))#
-dev.off()
-require(stats)#
-## Tonga Trench Earthquakes#
-Depth <- equal.count(quakes$depth, number=8, overlap=.1)#
-xyplot(lat ~ long | Depth, data = quakes)
-library(lattic)
-library(lattice)
-require(stats)#
-## Tonga Trench Earthquakes#
-Depth <- equal.count(quakes$depth, number=8, overlap=.1)#
-xyplot(lat ~ long | Depth, data = quakes)
-p1 <- levelplot(bTBprev~rhoB*rhoT, data = epi, main = "bTB prevalence, no recovery", #
-	xlab = expression(paste(beta[B]^{"'"}, "/", beta[B]) ), #
-	ylab = expression(paste(beta[TB]^{"'"}, "/", beta[TB])), #
-	at = seq(0, max(epi$bTBprev, epi$rbTBprev), 0.02 ))
-epi <- read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/draft2/post-labmeeting/vary_rho/vary_rho.csv")#
-library(lattice)
-p1 <- levelplot(bTBprev~rhoB*rhoT, data = epi, main = "bTB prevalence, no recovery", #
-	xlab = expression(paste(beta[B]^{"'"}, "/", beta[B]) ), #
-	ylab = expression(paste(beta[TB]^{"'"}, "/", beta[TB])), #
-	at = seq(0, max(epi$bTBprev, epi$rbTBprev), 0.02 ))
-p1
-?epi
-head(epi)
-epi <- read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/draft2/post-labmeeting/vary_rho/vary_rho.csv")#
-library(lattice)#
-epi$bTBplot <- epi$bTBprev - 0.30#
-epi$brucplot <- epi$bTBprev - 0.30
-epi$bTBplot <- epi$bTBprev - 0.30#
-epi$brucplot <- epi$bTBprev - 0.30
-epi$bTBplot <- epi$bTBprev - 0.30#
-epi$brucplot <- epi$brucprev - 0.30#
-p1 <- levelplot(bTBplot~rhoB*rhoT, data = epi, main = "bTB prevalence, no recovery", #
-	xlab = expression(paste(beta[B]^{"'"}, "/", beta[B]) ), #
-	ylab = expression(paste(beta[TB]^{"'"}, "/", beta[TB])), #
-	at = seq(min(epi$bTBplot, epi$brucplotprev), max(epi$bTBplot, epi$brucplotprev), 0.02 ))
-p1
-levelplot(bTBprev~rhoB*rhoT, data = epi, main = "bTB prevalence, no recovery", #
-	xlab = expression(paste(beta[B]^{"'"}, "/", beta[B]) ), #
-	ylab = expression(paste(beta[TB]^{"'"}, "/", beta[TB])))
-# bTB prev should go from +5 to -30
-levelplot(brucprev~rhoB*rhoT, data = epi, main = "bruc prevalence, no recovery", #
-	xlab = expression(paste(beta[B]^{"'"}, "/", beta[B]) ), #
-	ylab = expression(paste(beta[TB]^{"'"}, "/", beta[TB])), #
-	at = seq(0, max(epi$brucprev, epi$rbrucprev), 0.02 ))
-# bruc prev from + 20 to -30
-levelplot(bTBplot~rhoB*rhoT, data = epi, main = "bTB prevalence, no recovery", #
-	xlab = expression(paste(beta[B]^{"'"}, "/", beta[B]) ), #
-	ylab = expression(paste(beta[TB]^{"'"}, "/", beta[TB])), #
-	at = seq(-0.30, +0.30, 0.02 ))
-levelplot(bTBplot~rhoB*rhoT, data = epi, main = "bTB prevalence, no recovery", #
-	xlab = expression(paste(beta[B]^{"'"}, "/", beta[B]) ), #
-	ylab = expression(paste(beta[TB]^{"'"}, "/", beta[TB])))
-levelplot(bTBplot~rhoB*rhoT, data = epi, main = "bTB prevalence, no recovery", #
-	xlab = expression(paste(beta[B]^{"'"}, "/", beta[B]) ), #
-	ylab = expression(paste(beta[TB]^{"'"}, "/", beta[TB])), #
-	at = seq(-0.30, +0.30, 0.02 ))
-levelplot(bTBplot~rhoB*rhoT, data = epi, main = "bTB prevalence, no recovery", #
-	xlab = expression(paste(beta[B]^{"'"}, "/", beta[B]) ), #
-	ylab = expression(paste(beta[TB]^{"'"}, "/", beta[TB])), #
-	at = seq(-0.32, +0.32, 0.02 ))
-p3 <- levelplot(brucplot~rhoB*rhoT, data = epi, main = "brucellosis prevalence", #
-	xlab = expression(paste(beta[B]^{"'"}, "/", beta[B]) ), #
-	ylab = expression(paste(beta[TB]^{"'"}, "/", beta[TB])))
-p3
-p3 <- levelplot(bTBplot~rhoB*rhoT, data = epi, main = "brucellosis prevalence", #
-	xlab = expression(paste(beta[B]^{"'"}, "/", beta[B]) ), #
-	ylab = expression(paste(beta[TB]^{"'"}, "/", beta[TB])))
-p3
-levelplot(brucplot~rhoB*rhoT, data = epi, main = "brucellosis prevalence", #
-	xlab = expression(paste(beta[B]^{"'"}, "/", beta[B]) ), #
-	ylab = expression(paste(beta[TB]^{"'"}, "/", beta[TB])))
-p3 <- levelplot(brucplot~rhoB*rhoT, data = epi, main = "brucellosis prevalence", #
-	xlab = expression(paste(beta[B]^{"'"}, "/", beta[B]) ), #
-	ylab = expression(paste(beta[TB]^{"'"}, "/", beta[TB])), #
-	at = seq(-0.30, +0.30, 0.02 ))
-p3
-p3 <- levelplot(brucplot~rhoB*rhoT, data = epi, main = "brucellosis prevalence", #
-	xlab = expression(paste(beta[B]^{"'"}, "/", beta[B]) ), #
-	ylab = expression(paste(beta[TB]^{"'"}, "/", beta[TB])), #
-	at = seq(-0.30, +0.10, 0.02 ))
-p3
-levelplot(bTBplot~rhoB*rhoT, data = epi, main = "bTB prevalence", #
-	xlab = expression(paste(beta[B]^{"'"}, "/", beta[B]) ), #
-	ylab = expression(paste(beta[TB]^{"'"}, "/", beta[TB]))
-)
-levelplot(brucplot~rhoB*rhoT, data = epi, main = "bTB prevalence", #
-	xlab = expression(paste(beta[B]^{"'"}, "/", beta[B]) ), #
-	ylab = expression(paste(beta[TB]^{"'"}, "/", beta[TB])))
-library(RColorBrewer)
-cols <- brewer.pal(11, "RdBu")#
-cols2 <- colorRampPalette(brewer.pal(11, "RdBu"))
-cols2
-?levelplot
-levelplot(bTBplot~rhoB*rhoT, data = epi, main = "bTB prevalence", #
-	xlab = expression(paste(beta[B]^{"'"}, "/", beta[B]) ), #
-	ylab = expression(paste(beta[TB]^{"'"}, "/", beta[TB])), #
-	at = seq(-0.30, +0.12, 0.02 ), #
-	col.regions = cols)
-?colorRampPalette
-cols2 <- colorRampPalette(brewer.pal(11, "RdBu"), 100)
-cols2
-levelplot(bTBplot~rhoB*rhoT, data = epi, main = "bTB prevalence", #
-	xlab = expression(paste(beta[B]^{"'"}, "/", beta[B]) ), #
-	ylab = expression(paste(beta[TB]^{"'"}, "/", beta[TB])), #
-	at = seq(-0.30, +0.12, 0.02 ), #
-	col.regions = cols)
-cols
-levelplot(bTBplot~rhoB*rhoT, data = epi, main = "bTB prevalence", #
-	xlab = expression(paste(beta[B]^{"'"}, "/", beta[B]) ), #
-	ylab = expression(paste(beta[TB]^{"'"}, "/", beta[TB])), #
-	at = seq(-0.30, +0.12, 0.02 ), #
-	col.regions = cols2)
-cols2 <- colorRampPalette(brewer.pal(11, "RdBu"))
-levelplot(bTBplot~rhoB*rhoT, data = epi, main = "bTB prevalence", #
-	xlab = expression(paste(beta[B]^{"'"}, "/", beta[B]) ), #
-	ylab = expression(paste(beta[TB]^{"'"}, "/", beta[TB])), #
-	at = seq(-0.30, +0.12, 0.02 ), #
-	col.regions = cols2)
-ggplot(epi, aes(rhoB, rhoT, brucplot)) + geom_title(aes(fill = brucplot)) + theme_bw()
-ggplot(epi, aes(rhoB, rhoT, brucplot)) + geom_title(aes(fill = brucplot)) + theme_bw()
-ggplot(epi, aes(rhoB, rhoT, brucplot)) + geom_tile(aes(fill = brucplot)) + theme_bw()
-seq(-0.30, +0.12, 0.02 )
-seq(-0.30, 0.30, 0.05)
-length(-0.30, 0.30, 0.05)
-length(seq(-0.30, 0.30, 0.05))
-length(seq(-0.30, 0.30, 0.02))
-cols2 <- colorRampPalette(brewer.pal(11, "RdBu"))(31)
-cols2
-plot(1:31, 1:31, pch = 19, cols = cols2)
-plot(1:31, 1:31, pch = 19, fill = cols2)
-?plot
-plot(1:31, 1:31, pch = 19, col = cols2)
-ggplot(epi, aes(rhoB, rhoT, brucplot)) + geom_tile(aes(fill = brucplot)) +#
-	theme_bw() + scale_fill_manual(values = cols2)
-cols2 <- colorRampPalette(brewer.pal(11, "RdBu"))
-ggplot(epi, aes(rhoB, rhoT, brucplot)) + geom_tile(aes(fill = brucplot)) +#
-	theme_bw() + scale_fill_manual(values = cols2)
-cols2
-length(unique(epi$bTBplot))
-cols2 <- colorRampPalette(brewer.pal(11, "RdBu"))(361)
-ggplot(epi, aes(rhoB, rhoT, brucplot)) + geom_tile(aes(fill = brucplot)) +#
-	theme_bw() + scale_fill_manual(values = cols2)
-?reshape
-head(epi)
-epi <- read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/draft2/post-labmeeting/vary_rho/vary_rho.csv")#
-cols <- brewer.pal(11, "RdBu")#
-cols2 <- colorRampPalette(brewer.pal(11, "RdBu"))#
-#
-epi$bTBplot <- epi$bTBprev - 0.30#
-epi$brucplot <- epi$brucprev - 0.30
-df <- reshape(epi, varying = c("bTBplot", "brucplot"), timevar = "infection", times = c("bTB", "brucellosis"))
-df <- reshape(epi, direction = "long", varying = c("bTBplot", "brucplot"), timevar = "infection", times = c("bTB", "brucellosis"))
-summary(Indometh)#
-wide <- reshape(Indometh, v.names = "conc", idvar = "Subject",#
-                timevar = "time", direction = "wide")#
-wide
-head(epi)
-df <- reshape(epi, direction = "long", varying = c("bTBplot", "brucplot"),#
-	v.names = "Difference", timevar = "infection", times = c("bTB", "brucellosis"))
-head(df)
-summary(df$Difference)
-p <- ggplot(data = df, aes(x = rhoB, y = rhoT))#
-p + theme_bw() + facet_wrap(~ infection) + geom_tile(aes(fill = Difference))
-p <- ggplot(data = df, aes(x = rhoB, y = rhoT))#
-p + theme_bw() + facet_wrap(~ infection) + #
-	theme(panel.grid.major = element_blank(), #
-	axis.title = element_text(size = 16), axis.text = element_text(size = 14)) + #
-	geom_tile(aes(fill = Difference)) + #
-	scale_fill_manual(name = "Change in prevalence with co-infection")
-p <- ggplot(data = df, aes(x = rhoB, y = rhoT))#
-p + theme_bw() + facet_wrap(~ infection) + #
-	theme(panel.grid.major = element_blank(), #
-	axis.title = element_text(size = 16), axis.text = element_text(size = 14)) + #
-	geom_tile(aes(fill = Difference))
-p <- ggplot(data = df, aes(x = rhoB, y = rhoT))#
-p + theme_bw() + facet_wrap(~ infection) + #
-	theme(panel.grid.major = element_blank(), #
-	axis.title = element_text(size = 16), axis.text = element_text(size = 14)) + #
-	geom_tile(aes(fill = Difference))
-p <- ggplot(data = df, aes(x = rhoB, y = rhoT))#
-p + theme_bw() + facet_wrap(~ infection) + #
-	theme(panel.grid.major = element_blank(), #
-	axis.title = element_text(size = 16), axis.text = element_text(size = 14)) + #
-	geom_tile(aes(fill = Difference))
-p <- ggplot(data = df, aes(x = rhoB, y = rhoT))#
-p + theme_bw() + facet_wrap(~ infection) + #
-	theme(panel.grid.major = element_blank(), #
-	axis.title = element_text(size = 16), axis.text = element_text(size = 14)) + #
-	geom_tile(aes(fill = Difference)) +#
-	scale_fill_gradient(name = "Change in prevalence with co-infection", limits = c(-0.3, 0.1), low = "red", high = "blue")
-p <- ggplot(data = df, aes(x = rhoB, y = rhoT))#
-p + theme_bw() + facet_wrap(~ infection) + #
-	theme(panel.grid.major = element_blank(), #
-	axis.title = element_text(size = 16), axis.text = element_text(size = 14)) + #
-	geom_tile(aes(fill = Difference)) +#
-	scale_fill_gradient(name = "Difference", limits = c(-0.3, 0.12), low = "red", high = "blue")
-?element_text
-?element_text
-?xlab
-p <- ggplot(data = df, aes(x = rhoB, y = rhoT))#
-p + theme_bw() + facet_wrap(~ infection) + #
-	xlab(expression(paste(beta[B]^{"'"}, "/", beta[B]) )) + #
-	theme(panel.grid.major = element_blank(), #
-	axis.title = element_text(size = 16), axis.text = element_text(size = 14), #
-	legend.text = element_text(size=15) ) + #
-	geom_tile(aes(fill = Difference)) +#
-	scale_fill_gradient(name = "Difference", limits = c(-0.3, 0.12), low = "red", high = "blue")
-p <- ggplot(data = df, aes(x = rhoB, y = rhoT))#
-p + theme_bw() + facet_wrap(~ infection) + #
-	xlab(paste("Proportional increase in brucellosis transmission with co-infection, ", expression(paste(beta[B]^{"'"}, "/", beta[B]) ))) + #
-	theme(panel.grid.major = element_blank(), #
-	axis.title = element_text(size = 16), axis.text = element_text(size = 14), #
-	legend.text = element_text(size=15) ) + #
-	geom_tile(aes(fill = Difference)) +#
-	scale_fill_gradient(name = "Difference", limits = c(-0.3, 0.12), low = "red", high = "blue")
-p <- ggplot(data = df, aes(x = rhoB, y = rhoT))#
-p + theme_bw() + facet_wrap(~ infection) + #
-	xlab("Proportional increase in brucellosis transmission with co-infection, " expression(paste(beta[B]^{"'"}, "/", beta[B]) )) + #
-	theme(panel.grid.major = element_blank(), #
-	axis.title = element_text(size = 12), axis.text = element_text(size = 12), #
-	legend.text = element_text(size=15) ) + #
-	geom_tile(aes(fill = Difference)) +#
-	scale_fill_gradient(name = "Difference", limits = c(-0.3, 0.12), low = "red", high = "blue")
-p <- ggplot(data = df, aes(x = rhoB, y = rhoT))#
-p + theme_bw() + facet_wrap(~ infection) + #
-	xlab(expression(paste(Proportional~increase~"in"~brucellosis~transmission~with~co-infection,~ beta[B]^{"'"}, "/", beta[B]) )) + #
-	theme(panel.grid.major = element_blank(), #
-	axis.title = element_text(size = 12), axis.text = element_text(size = 12), #
-	legend.text = element_text(size=15) ) + #
-	geom_tile(aes(fill = Difference)) +#
-	scale_fill_gradient(name = "Difference", limits = c(-0.3, 0.12), low = "red", high = "blue")
-p <- ggplot(data = df, aes(x = rhoB, y = rhoT))#
-p + theme_bw() + facet_wrap(~ infection) + #
-	xlab(expression(paste(Proportional~increase~"in"~brucellosis~#
-		transmission~with~"co-infection,"~ beta[B]^{"'"}, "/", beta[B]) )) + #
-	ylab(expression(paste(Proportional~increase~"in"~bTB~#
-		transmission~with~"co-infection,"~ beta[T]^{"'"}, "/", beta[T]) )) +#
-	theme(panel.grid.major = element_blank(), #
-	axis.title = element_text(size = 12), axis.text = element_text(size = 12), #
-	legend.text = element_text(size=15) ) + #
-	geom_tile(aes(fill = Difference)) +#
-	scale_fill_gradient(name = "Difference", limits = c(-0.3, 0.12), low = "red", high = "blue")
-?theme
-p <- ggplot(data = df, aes(x = rhoB, y = rhoT))#
-p + theme_bw() + facet_wrap(~ infection) + #
-	xlab(expression(paste(Proportional~increase~"in"~brucellosis~#
-		transmission~with~"co-infection,"~ beta[B]^{"'"}, "/", beta[B]) )) + #
-	ylab(expression(paste(Proportional~increase~"in"~bTB~#
-		transmission~with~"co-infection,"~ beta[T]^{"'"}, "/", beta[T]) )) +#
-	theme(panel.grid.major = element_blank(), #
-	plot.title = element_text(size = 14),#
-	axis.title = element_text(size = 12), axis.text = element_text(size = 12), #
-	legend.text = element_text(size=15) ) + #
-	geom_tile(aes(fill = Difference)) +#
-	scale_fill_gradient(name = "Difference", limits = c(-0.3, 0.12), low = "red", high = "blue")
-p <- ggplot(data = df, aes(x = rhoB, y = rhoT))#
-p + theme_bw() + facet_wrap(~ infection) + stat_contour()+#
-	xlab(expression(paste(Proportional~increase~"in"~brucellosis~#
-		transmission~with~"co-infection,"~ beta[B]^{"'"}, "/", beta[B]) )) + #
-	ylab(expression(paste(Proportional~increase~"in"~bTB~#
-		transmission~with~"co-infection,"~ beta[T]^{"'"}, "/", beta[T]) )) +#
-	theme(panel.grid.major = element_blank(), #
-	plot.title = element_text(size = 14),#
-	axis.title = element_text(size = 12), axis.text = element_text(size = 12), #
-	legend.text = element_text(size=15) ) + #
-	geom_tile(aes(fill = Difference)) +#
-	scale_fill_gradient(name = "Difference", limits = c(-0.3, 0.12), low = "red", high = "blue")
-p <- ggplot(data = df, aes(x = rhoB, y = rhoT))#
-p + theme_bw() + facet_wrap(~ infection)#
-	xlab(expression(paste(Proportional~increase~"in"~brucellosis~#
-		transmission~with~"co-infection,"~ beta[B]^{"'"}, "/", beta[B]) )) + #
-	ylab(expression(paste(Proportional~increase~"in"~bTB~#
-		transmission~with~"co-infection,"~ beta[T]^{"'"}, "/", beta[T]) )) +#
-	theme(panel.grid.major = element_blank(), #
-	plot.title = element_text(size = 14),#
-	axis.title = element_text(size = 12), axis.text = element_text(size = 12), #
-	legend.text = element_text(size=15) ) + #
-	geom_tile(aes(fill = Difference)) +#
-	scale_fill_gradient2(name = "Difference", limits = c(-0.3, 0.12), low = "red", mid = "white", high = "blue", midpoint = 0)
-p <- ggplot(data = df, aes(x = rhoB, y = rhoT))#
-p + theme_bw() + facet_wrap(~ infection) + #
-	xlab(expression(paste(Proportional~increase~"in"~brucellosis~#
-		transmission~with~"co-infection,"~ beta[B]^{"'"}, "/", beta[B]))) + #
-	ylab(expression(paste(Proportional~increase~"in"~bTB~#
-		transmission~with~"co-infection,"~ beta[T]^{"'"}, "/", beta[T]) )) +#
-	theme(panel.grid.major = element_blank(), #
-	plot.title = element_text(size = 14),#
-	axis.title = element_text(size = 12), axis.text = element_text(size = 12), #
-	legend.text = element_text(size=15) ) + #
-	geom_tile(aes(fill = Difference)) +#
-	scale_fill_gradient2(name = "Difference", limits = c(-0.3, 0.12), low = "red", mid = "white", high = "blue", midpoint = 0)
-p <- ggplot(data = df, aes(x = rhoB, y = rhoT))#
-p + theme_bw() + facet_wrap(~ infection) + #
-	xlab(expression(paste(Proportional~increase~"in"~brucellosis~#
-		transmission~with~"co-infection,"~ beta[B]^{"'"}, "/", beta[B]))) + #
-	ylab(expression(paste(Proportional~increase~"in"~bTB~#
-		transmission~with~"co-infection,"~ beta[T]^{"'"}, "/", beta[T]) )) +#
-	theme(panel.grid.major = element_blank(), #
-	plot.title = element_text(size = 14),#
-	axis.title = element_text(size = 12), axis.text = element_text(size = 12), #
-	legend.text = element_text(size=15) ) + #
-	geom_tile(aes(fill = Difference)) +#
-	scale_color_brewer(palette = "RdYlBu")
-p <- ggplot(data = df, aes(x = rhoB, y = rhoT))#
-p + theme_bw() + facet_wrap(~ infection) + #
-	xlab(expression(paste(Proportional~increase~"in"~brucellosis~#
-		transmission~with~"co-infection,"~ beta[B]^{"'"}, "/", beta[B]))) + #
-	ylab(expression(paste(Proportional~increase~"in"~bTB~#
-		transmission~with~"co-infection,"~ beta[T]^{"'"}, "/", beta[T]) )) +#
-	theme(panel.grid.major = element_blank(), #
-	plot.title = element_text(size = 14),#
-	axis.title = element_text(size = 12), axis.text = element_text(size = 12), #
-	legend.text = element_text(size=15) ) + #
-	geom_tile(aes(fill = Difference)) +#
-	scale_fill_brewer(palette = "RdYlBu")
-p <- ggplot(data = df, aes(x = rhoB, y = rhoT))#
-p + theme_bw() + facet_wrap(~ infection) + #
-	xlab(expression(paste(Proportional~increase~"in"~brucellosis~#
-		transmission~with~"co-infection,"~ beta[B]^{"'"}, "/", beta[B]))) + #
-	ylab(expression(paste(Proportional~increase~"in"~bTB~#
-		transmission~with~"co-infection,"~ beta[T]^{"'"}, "/", beta[T]) )) +#
-	theme(panel.grid.major = element_blank(), #
-	plot.title = element_text(size = 14),#
-	axis.title = element_text(size = 12), axis.text = element_text(size = 12), #
-	legend.text = element_text(size=15) ) + #
-	geom_tile(aes(fill = Difference)) +#
-	scale_fill_distiller(palette = "RdYlBu")
-p <- ggplot(data = df, aes(x = rhoB, y = rhoT))#
-p + theme_bw() + facet_wrap(~ infection) + #
-	xlab(expression(paste(Proportional~increase~"in"~brucellosis~#
-		transmission~with~"co-infection,"~ beta[B]^{"'"}, "/", beta[B]))) + #
-	ylab(expression(paste(Proportional~increase~"in"~bTB~#
-		transmission~with~"co-infection,"~ beta[T]^{"'"}, "/", beta[T]) )) +#
-	theme(panel.grid.major = element_blank(), #
-	plot.title = element_text(size = 14),#
-	axis.title = element_text(size = 12), axis.text = element_text(size = 12), #
-	legend.text = element_text(size=15) ) + #
-	geom_tile(aes(fill = Difference)) +#
-	scale_fill_distiller(palette = "RdYlBu", direction = -1)
-?scale_fill_distiller
-p <- ggplot(data = df, aes(x = rhoB, y = rhoT))#
-p + theme_bw() + facet_wrap(~ infection) + #
-	xlab(expression(paste(Proportional~increase~"in"~brucellosis~#
-		transmission~with~"co-infection,"~ beta[B]^{"'"}, "/", beta[B]))) + #
-	ylab(expression(paste(Proportional~increase~"in"~bTB~#
-		transmission~with~"co-infection,"~ beta[T]^{"'"}, "/", beta[T]) )) +#
-	theme(panel.grid.major = element_blank(), #
-	plot.title = element_text(size = 14),#
-	axis.title = element_text(size = 12), axis.text = element_text(size = 12), #
-	legend.text = element_text(size=15) ) + #
-	geom_tile(aes(fill = Difference)) +#
-	scale_fill_distiller(palette = "RdYlBu", direction = -1)
-p <- ggplot(data = df, aes(x = rhoB, y = rhoT))#
-p + theme_bw() + facet_wrap(~ infection) + #
-	xlab(expression(paste(Proportional~increase~"in"~brucellosis~#
-		transmission~with~"co-infection,"~ beta[B]^{"'"}, "/", beta[B]))) + #
-	ylab(expression(paste(Proportional~increase~"in"~bTB~#
-		transmission~with~"co-infection,"~ beta[T]^{"'"}, "/", beta[T]) )) +#
-	theme(panel.grid.major = element_blank(), #
-	plot.title = element_text(size = 14),#
-	axis.title = element_text(size = 12), axis.text = element_text(size = 12), #
-	legend.text = element_text(size=15) ) + #
-	geom_tile(aes(fill = Difference)) +#
-	scale_fill_distiller(palette = "RdYlBu", direction = -1, limits = c(-30, 30))
-p <- ggplot(data = df, aes(x = rhoB, y = rhoT))#
-p + theme_bw() + facet_wrap(~ infection) + #
-	xlab(expression(paste(Proportional~increase~"in"~brucellosis~#
-		transmission~with~"co-infection,"~ beta[B]^{"'"}, "/", beta[B]))) + #
-	ylab(expression(paste(Proportional~increase~"in"~bTB~#
-		transmission~with~"co-infection,"~ beta[T]^{"'"}, "/", beta[T]) )) +#
-	theme(panel.grid.major = element_blank(), #
-	plot.title = element_text(size = 14),#
-	axis.title = element_text(size = 12), axis.text = element_text(size = 12), #
-	legend.text = element_text(size=15) ) + #
-	geom_tile(aes(fill = Difference)) +#
-	scale_fill_distiller(palette = "RdYlBu", direction = -1, limits = c(-0.30, 0.30))
-head(df)
-summary(df$Difference[df$infection = "bTB"])
-summary(df$Difference[df$infection == "bTB"])
-summary(df$Difference[df$infection == "brucellosis"])
-p <- ggplot(data = df, aes(x = rhoB, y = rhoT))#
-p + theme_bw() + facet_wrap(~ infection) + #
-	xlab(expression(paste(Proportional~increase~"in"~brucellosis~#
-		transmission~with~"co-infection,"~ beta[B]^{"'"}, "/", beta[B]))) + #
-	ylab(expression(paste(Proportional~increase~"in"~bTB~#
-		transmission~with~"co-infection,"~ beta[T]^{"'"}, "/", beta[T]) )) +#
-	theme(panel.grid.major = element_blank(), #
-	plot.title = element_text(size = 14),#
-	axis.title = element_text(size = 12), axis.text = element_text(size = 12), #
-	legend.text = element_text(size=15), #
-	legend.text.align = 1, #
-	legend.key.size = unit(1, "cm") ) + #
-	geom_tile(aes(fill = Difference)) +#
-	scale_fill_distiller(palette = "RdYlBu", direction = -1, limits = c(-0.30, 0.30))
-p <- ggplot(data = df, aes(x = rhoB, y = rhoT))#
-p + theme_bw() + facet_wrap(~ infection) + #
-	xlab(expression(paste(Proportional~increase~"in"~brucellosis~#
-		transmission~with~"co-infection,"~ beta[B]^{"'"}, "/", beta[B]))) + #
-	ylab(expression(paste(Proportional~increase~"in"~bTB~#
-		transmission~with~"co-infection,"~ beta[T]^{"'"}, "/", beta[T]) )) +#
-	theme(panel.grid.major = element_blank(), #
-	plot.title = element_text(size = 14),#
-	axis.title = element_text(size = 12), axis.text = element_text(size = 12), #
-	legend.text = element_text(size=12), #
-	legend.text.align = 1, #
-	legend.key.size = unit(1, "cm") ) + #
-	geom_tile(aes(fill = Difference)) +#
-	scale_fill_distiller(palette = "RdYlBu", direction = -1, limits = c(-0.30, 0.30))
-ggplot(d, aes(x=age)) + #
-	geom_histogram(data=d, fill= "steelblue", alpha=0.3, #
-		colour = "steelblue4", stat="bin", binwidth= 1) + #
-	theme_bw()+ #
-	xlab("Age (years)")+ ylab("Number of buffalo")+#
-	theme(panel.border = element_blank(), #
-        panel.margin = element_blank(),#
-        panel.grid.major= element_blank(),#
-        panel.grid.minor= element_blank()) + #
-	theme(axis.line.x = element_line(colour= "black", size = 3), #
-		axis.line.y = element_line(colour= "black", size = 3)) + #
-	theme(axis.title = element_blank(), axis.text = element_blank())
-?axis.ticks()
-?axis.ticks
-??axis.ticks
-?theme
-?geom_bar
-ggplot(d, aes(x=age)) + #
-	geom_histogram(data=d, fill= "steelblue", alpha=0.3, #
-		colour = "steelblue4", stat="bin", binwidth= 1, linetype = 2) + #
-	theme_bw()+ #
-	xlab("Age (years)")+ ylab("Number of buffalo")+#
-	theme(panel.border = element_blank(), #
-        panel.margin = element_blank(),#
-        panel.grid.major= element_blank(),#
-        panel.grid.minor= element_blank()) + #
-	theme(axis.line.x = element_line(colour= "black", size = 2), #
-		axis.line.y = element_line(colour= "black", size = 2), #
-		axis.ticks = ) + #
-	theme(axis.title = element_blank(), axis.text = element_blank())
-ggplot(d, aes(x=age)) + #
-	geom_histogram(data=d, fill= "steelblue", alpha=0.3, #
-		colour = "steelblue4", stat="bin", binwidth= 1, linetype = 2) + #
-	theme_bw()+ #
-	xlab("Age (years)")+ ylab("Number of buffalo")+#
-	theme(panel.border = element_blank(), #
-        panel.margin = element_blank(),#
-        panel.grid.major= element_blank(),#
-        panel.grid.minor= element_blank()) + #
-	theme(axis.line.x = element_line(colour= "black", size = 2), #
-		axis.line.y = element_line(colour= "black", size = 2)) + #
-	theme(axis.title = element_blank(), axis.text = element_blank())
-?linetype
+d<-d[d$age<14,]
 ggplot(d, aes(x=age)) + #
 	geom_histogram(data=d, fill= "steelblue", alpha=0.3, #
 		colour = "steelblue4", stat="bin", binwidth= 1, linetype = 1, size = 2) + #
@@ -1402,12 +1040,208 @@ ggplot(d, aes(x=age)) + #
         panel.grid.major= element_blank(),#
         panel.grid.minor= element_blank()) + #
 	theme(axis.line.x = element_line(colour= "black", size = 2), #
+		axis.line.y = element_line(colour= "black", size = 2))
+d <- data.frame(Prevalence = c(0.27, 0.34, 0.27, 0.34), #
+	Infection = c("bTB", "brucellosis", "bTB", "brucellosis"), #
+	Color = c("one", "two", "three", "four"), #
+	Type = c("Model", "Model", "Data", "Data"))#
+#
+ggplot(d, aes(x = Type, y = Prevalence, fill = Color)) + #
+	geom_bar(position = position_dodge(), stat = "identity") + ylim(0, 0.5) + #
+	theme_bw() +  #
+	scale_fill_manual(values=c("chartreuse3", "chartreuse4", "slateblue3", "slateblue4"))
+d <- data.frame(Prevalence = c(0.27, 0.34, 0.27, 0.34), #
+	Infection = c("bTB", "brucellosis", "bTB", "brucellosis"), #
+	Color = c("a", "b", "c", "d"), #
+	Type = c("Model", "Model", "Data", "Data"))#
+#
+ggplot(d, aes(x = Type, y = Prevalence, fill = Color)) + #
+	geom_bar(position = position_dodge(), stat = "identity") + ylim(0, 0.5) + #
+	theme_bw() +  #
+	scale_fill_manual(values=c("chartreuse3", "chartreuse4", "slateblue3", "slateblue4"))
+str(d)
+d$Infection <- relevel(d$Infection, "bTB")
+ggplot(d, aes(x = Type, y = Prevalence, fill = Color)) + #
+	geom_bar(position = position_dodge(), stat = "identity") + ylim(0, 0.5) + #
+	theme_bw() +  #
+	scale_fill_manual(values=c("chartreuse3", "chartreuse4", "slateblue3", "slateblue4"))
+ggplot(d, aes(x = Type, y = Prevalence, fill = Color)) + #
+	geom_bar(position = position_dodge(), stat = "identity") + ylim(0, 0.5) + #
+	theme_bw() +  #
+	scale_fill_manual(values=c("chartreuse3", "slateblue3", "chartreuse4", "slateblue4"))
+ggplot(d, aes(x = Type, y = Prevalence, fill = Color)) + #
+	geom_bar(position = position_dodge(), stat = "identity") + ylim(0, 0.5) + #
+	theme_bw() +  #
+	scale_fill_manual(values=c("chartreuse3", "slateblue3", "chartreuse4", "slateblue4"))  + #
+	theme(panel.border = element_blank(), #
+        panel.margin = element_blank(),#
+        panel.grid.major= element_blank(),#
+        panel.grid.minor= element_blank()) + #
+	theme(axis.line.x = element_line(colour= "black", size = 2), #
 		axis.line.y = element_line(colour= "black", size = 2)) + #
 	theme(axis.title = element_blank(), axis.text = element_blank())
+ggplot(d, aes(x = Type, y = Prevalence, fill = Color)) + #
+	geom_bar(position = position_dodge(), stat = "identity") + ylim(0, 0.5) + #
+	theme_bw() +  #
+	scale_fill_manual(values=c("chartreuse3", "slateblue3", "chartreuse4", "slateblue4", guide = FALSE))  + #
+	theme(panel.border = element_blank(), #
+        panel.margin = element_blank(),#
+        panel.grid.major= element_blank(),#
+        panel.grid.minor= element_blank()) + #
+	theme(axis.line.x = element_line(colour= "black", size = 2), #
+		axis.line.y = element_line(colour= "black", size = 2)) + #
+	theme(axis.title = element_blank(), axis.text = element_blank())
+ggplot(d, aes(x = Type, y = Prevalence, fill = Color)) + #
+	geom_bar(position = position_dodge(), stat = "identity", guide = FALSE) + ylim(0, 0.5) + #
+	theme_bw() +  #
+	scale_fill_manual(values=c("chartreuse3", "slateblue3", "chartreuse4", "slateblue4", guide = FALSE))  + #
+	theme(panel.border = element_blank(), #
+        panel.margin = element_blank(),#
+        panel.grid.major= element_blank(),#
+        panel.grid.minor= element_blank()) + #
+	theme(axis.line.x = element_line(colour= "black", size = 2), #
+		axis.line.y = element_line(colour= "black", size = 2)) + #
+	theme(axis.title = element_blank(), axis.text = element_blank())
+ggplot(d, aes(x = Type, y = Prevalence, fill = Color)) + guides(fill = FALSE)#
+	geom_bar(position = position_dodge(), stat = "identity",) + ylim(0, 0.5) + #
+	theme_bw() +  #
+	scale_fill_manual(values=c("chartreuse3", "slateblue3", "chartreuse4", "slateblue4", guide = FALSE))  + #
+	theme(panel.border = element_blank(), #
+        panel.margin = element_blank(),#
+        panel.grid.major= element_blank(),#
+        panel.grid.minor= element_blank()) + #
+	theme(axis.line.x = element_line(colour= "black", size = 2), #
+		axis.line.y = element_line(colour= "black", size = 2)) + #
+	theme(axis.title = element_blank(), axis.text = element_blank())
+ggplot(d, aes(x = Type, y = Prevalence, fill = Color)) + guides(fill = FALSE) +#
+	geom_bar(position = position_dodge(), stat = "identity",) + ylim(0, 0.5) + #
+	theme_bw() +  #
+	scale_fill_manual(values=c("chartreuse3", "slateblue3", "chartreuse4", "slateblue4", guide = FALSE))  + #
+	theme(panel.border = element_blank(), #
+        panel.margin = element_blank(),#
+        panel.grid.major= element_blank(),#
+        panel.grid.minor= element_blank()) + #
+	theme(axis.line.x = element_line(colour= "black", size = 2), #
+		axis.line.y = element_line(colour= "black", size = 2)) + #
+	theme(axis.title = element_blank(), axis.text = element_blank())
+ggplot(d, aes(x = Type, y = Prevalence, fill = Color)) + guides(fill = FALSE) +#
+	geom_bar(position = position_dodge(), stat = "identity",) + ylim(0, 0.5) + #
+	theme_bw()
+ggplot(d, aes(x = Type, y = Prevalence, fill = Color)) + guides(fill = FALSE) +#
+	geom_bar(position = position_dodge(), stat = "identity",) + ylim(0, 0.5) + #
+	theme_bw() +  #
+	scale_fill_manual(values=c("chartreuse3", "slateblue3", "chartreuse4", "slateblue4"))  + #
+	theme(panel.border = element_blank(), #
+        panel.margin = element_blank(),#
+        panel.grid.major= element_blank(),#
+        panel.grid.minor= element_blank())
+ggplot(d, aes(x = Type, y = Prevalence, fill = Color)) + guides(fill = FALSE) +#
+	geom_bar(position = position_dodge(), stat = "identity",) + ylim(0, 0.5) + #
+	theme_bw() +  #
+	scale_fill_manual(values=c("chartreuse3", "slateblue3", "chartreuse4", "slateblue4"))  + #
+	theme(panel.border = element_blank(), #
+        panel.margin = element_blank(),#
+        panel.grid.major= element_blank(),#
+        panel.grid.minor= element_blank()) + #
+	theme(axis.line.x = element_line(colour= "black", size = 2), #
+		axis.line.y = element_line(colour= "black", size = 2))
+ggplot(d, aes(x = Type, y = Prevalence, fill = Color)) + guides(fill = FALSE) +#
+	geom_bar(position = position_dodge(), stat = "identity",) + ylim(0, 0.5) + #
+	theme_bw() +  #
+	scale_fill_manual(values=c("chartreuse3", "slateblue3", "chartreuse4", "slateblue4"))  + #
+	theme(panel.border = element_blank(), #
+        panel.margin = element_blank(),#
+        panel.grid.major= element_blank(),#
+        panel.grid.minor= element_blank()) + #
+	theme(axis.line.x = element_line(colour= "black", size = 2), #
+		axis.line.y = element_line(colour= "black", size = 2)) + #
+	theme(axis.title = element_blank())
+ggplot(d, aes(x = Type, y = Prevalence, fill = Color)) + guides(fill = FALSE) +#
+	geom_bar(position = position_dodge(), stat = "identity",) + ylim(0, 0.5) + #
+	theme_bw() +  #
+	scale_fill_manual(values=c("chartreuse3", "slateblue3", "chartreuse4", "slateblue4"))  + #
+	scale_colour_manual(values=c("black"))  + #
+	theme(panel.border = element_blank(), #
+        panel.margin = element_blank(),#
+        panel.grid.major= element_blank(),#
+        panel.grid.minor= element_blank()) + #
+	theme(axis.line.x = element_line(colour= "black", size = 2), #
+		axis.line.y = element_line(colour= "black", size = 2)) + #
+	theme(axis.title = element_blank())  #, axis.text = element_blank()
+d <- data.frame(Prevalence = c(0.27, 0.34, 0.27, 0.34), #
+	Infection = c("bTB", "brucellosis", "bTB", "brucellosis"), #
+	Color = c("a", "b", "c", "d"), #
+	Type = c("Model", "Model", "Data", "Data"))#
+d$Infection <- relevel(d$Infection, "bTB")
+ggplot(d, aes(x = Type, y = Prevalence, fill = Color)) + guides(fill = FALSE) +#
+	geom_bar(position = position_dodge(), stat = "identity",) + ylim(0, 0.5) + #
+	theme_bw() +  #
+	scale_fill_manual(values=c("slateblue3", "chartreuse3",  "slateblue4", "chartreuse4"))  + #
+	scale_colour_manual(values=c("black"))  + #
+	theme(panel.border = element_blank(), #
+        panel.margin = element_blank(),#
+        panel.grid.major= element_blank(),#
+        panel.grid.minor= element_blank()) + #
+	theme(axis.line.x = element_line(colour= "black", size = 2), #
+		axis.line.y = element_line(colour= "black", size = 2)) + #
+	theme(axis.title = element_blank())  #, axis.text = element_blank()
+geom_histogram(data=d, fill= "lightgray", alpha=0.3, #steelblue, steelblue4#
+		colour = "darkgray", stat="bin", binwidth= 1, linetype = 1, size = 2) + #
+	theme_bw()+ #
+	xlab("Age (years)")+ ylab("Number of buffalo")+#
+	theme(panel.border = element_blank(), #
+        panel.margin = element_blank(),#
+        panel.grid.major= element_blank(),#
+        panel.grid.minor= element_blank()) + #
+	theme(axis.line.x = element_line(colour= "black", size = 2), #
+		axis.line.y = element_line(colour= "black", size = 2)) + #
+	theme(axis.title = element_blank(), axis.text = element_blank())
+data<-read.csv("cross_sectional_data_withdz_cleandisease_nofinal_Feb2016_capturetime.csv")#
+#
+data_nofinal<-data[data$final_capture=="0",] #
+d<-data.frame(btb=data_nofinal$tb , bruc=as.character(data_nofinal$bruc), age=data_nofinal$age_sel/12, #
+              id=data_nofinal$id)#
+d<-d[d$age<14,]
+ggplot(d, aes(x=age)) + #
+	geom_histogram(data=d, fill= "lightgray", alpha=0.3, #steelblue, steelblue4#
+		colour = "darkgray", stat="bin", binwidth= 1, linetype = 1, size = 2) + #
+	theme_bw()+ #
+	xlab("Age (years)")+ ylab("Number of buffalo")+#
+	theme(panel.border = element_blank(), #
+        panel.margin = element_blank(),#
+        panel.grid.major= element_blank(),#
+        panel.grid.minor= element_blank()) + #
+	theme(axis.line.x = element_line(colour= "black", size = 2), #
+		axis.line.y = element_line(colour= "black", size = 2)) + #
+	theme(axis.title = element_blank(), axis.text = element_blank())
+geom_histogram(data=d, fill= "darkgray", alpha=0.3, #steelblue, steelblue4#
+		colour = "dimgray", stat="bin", binwidth= 1, linetype = 1, size = 2) + #
+	theme_bw()+ #
+	xlab("Age (years)")+ ylab("Number of buffalo")+#
+	theme(panel.border = element_blank(), #
+        panel.margin = element_blank(),#
+        panel.grid.major= element_blank(),#
+        panel.grid.minor= element_blank()) + #
+	theme(axis.line.x = element_line(colour= "black", size = 2), #
+		axis.line.y = element_line(colour= "black", size = 2)) + #
+	theme(axis.title = element_blank(), axis.text = element_blank())
+ggplot(d, aes(x=age)) + #
+	geom_histogram(data=d, fill= "gray", alpha=0.3, #steelblue, steelblue4#
+		colour = "dimgray", stat="bin", binwidth= 1, linetype = 1, size = 2) + #
+	theme_bw()+ #
+	xlab("Age (years)")+ ylab("Number of buffalo")+#
+	theme(panel.border = element_blank(), #
+        panel.margin = element_blank(),#
+        panel.grid.major= element_blank(),#
+        panel.grid.minor= element_blank()) + #
+	theme(axis.line.x = element_line(colour= "black", size = 2), #
+		axis.line.y = element_line(colour= "black", size = 2)) + #
+	theme(axis.title = element_blank(), axis.text = element_blank())
+setwd("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder")
 png("Age_histogram.png", width = 800, height = 800, units = "px")#
 ggplot(d, aes(x=age)) + #
-	geom_histogram(data=d, fill= "steelblue", alpha=0.3, #
-		colour = "steelblue4", stat="bin", binwidth= 1, linetype = 1, size = 2) + #
+	geom_histogram(data=d, fill= "gray", alpha=0.3, #steelblue, steelblue4#
+		colour = "dimgray", stat="bin", binwidth= 1, linetype = 1, size = 2) + #
 	theme_bw()+ #
 	xlab("Age (years)")+ ylab("Number of buffalo")+#
 	theme(panel.border = element_blank(), #
@@ -1418,4 +1252,914 @@ ggplot(d, aes(x=age)) + #
 		axis.line.y = element_line(colour= "black", size = 2)) + #
 	theme(axis.title = element_blank(), axis.text = element_blank())#
 dev.off()
-getwd()
+d <- data.frame(Prevalence = c(0.27, 0.34, 0.27, 0.34), #
+	Infection = c("bTB", "brucellosis", "bTB", "brucellosis"), #
+	Color = c("a", "b", "c", "d"), #
+	Type = c("Model", "Model", "Data", "Data"))#
+d$Infection <- relevel(d$Infection, "bTB")#
+#
+ggplot(d, aes(x = Type, y = Prevalence, fill = Color)) + guides(fill = FALSE) +#
+	geom_bar(position = position_dodge(), stat = "identity",) + ylim(0, 0.5) + #
+	theme_bw() +  #
+	scale_fill_manual(values=c("slateblue3", "chartreuse3",  "slateblue4", "chartreuse4"))  + #
+	scale_colour_manual(values=c("black"))  + #
+	theme(panel.border = element_blank(), #
+        panel.margin = element_blank(),#
+        panel.grid.major= element_blank(),#
+        panel.grid.minor= element_blank()) + #
+	theme(axis.line.x = element_line(colour= "black", size = 2), #
+		axis.line.y = element_line(colour= "black", size = 2)) + #
+	theme(axis.title = element_blank())  #, axis.text = element_blank()
+blue2 <- makeTransparent("slateblue4", 90)#
+green2 <- makeTransparent("chartreuse4", 90)
+d <- data.frame(Prevalence = c(0.27, 0.34, 0.27, 0.34), #
+	Infection = c("bTB", "brucellosis", "bTB", "brucellosis"), #
+	Color = c("a", "b", "c", "d"), #
+	Type = c("Model", "Model", "Data", "Data"))#
+d$Infection <- relevel(d$Infection, "bTB")#
+makeTransparent<-function(someColor, alpha=100)#
+{#
+  newColor<-someColor + alpha #I wish#
+  return(newColor)#
+}#
+#
+blue2 <- makeTransparent("slateblue4", 90)#
+green2 <- makeTransparent("chartreuse4", 90)
+makeTransparent<-function(someColor, alpha=100)#
+{#
+  newColor<-col2rgb(someColor)#
+  apply(newColor, 2, function(curcoldata){rgb(red=curcoldata[1], green=curcoldata[2],#
+    blue=curcoldata[3],alpha=alpha, maxColorValue=255)})#
+}#
+blue2 <- makeTransparent("slateblue4", 90)#
+green2 <- makeTransparent("chartreuse4", 90)
+blue2
+ggplot(d, aes(x = Type, y = Prevalence, fill = Color)) + guides(fill = FALSE) +#
+	geom_bar(position = position_dodge(), stat = "identity",) + ylim(0, 0.5) + #
+	theme_bw() +  #
+	scale_fill_manual(values=c("blue2", "green2",  "slateblue4", "chartreuse4"))  + #
+	scale_colour_manual(values=c("black"))  + #
+	theme(panel.border = element_blank(), #
+        panel.margin = element_blank(),#
+        panel.grid.major= element_blank(),#
+        panel.grid.minor= element_blank()) + #
+	theme(axis.line.x = element_line(colour= "black", size = 2), #
+		axis.line.y = element_line(colour= "black", size = 2)) + #
+	theme(axis.title = element_blank())  #, axis.text = element_blank()
+ggplot(d, aes(x = Type, y = Prevalence, fill = Color)) + guides(fill = FALSE) +#
+	geom_bar(position = position_dodge(), stat = "identity",) + ylim(0, 0.5) + #
+	theme_bw() +  #
+	scale_fill_manual(values=c(blue2, green2,  "slateblue4", "chartreuse4"))  + #
+	scale_colour_manual(values=c("black"))  + #
+	theme(panel.border = element_blank(), #
+        panel.margin = element_blank(),#
+        panel.grid.major= element_blank(),#
+        panel.grid.minor= element_blank()) + #
+	theme(axis.line.x = element_line(colour= "black", size = 2), #
+		axis.line.y = element_line(colour= "black", size = 2)) + #
+	theme(axis.title = element_blank())  #, axis.text = element_blank()
+blue2 <- makeTransparent("slateblue4", 20)#
+green2 <- makeTransparent("chartreuse4", 20)#
+#
+ggplot(d, aes(x = Type, y = Prevalence, fill = Color)) + guides(fill = FALSE) +#
+	geom_bar(position = position_dodge(), stat = "identity",) + ylim(0, 0.5) + #
+	theme_bw() +  #
+	scale_fill_manual(values=c(blue2, green2,  "slateblue4", "chartreuse4"))  + #
+	scale_colour_manual(values=c("black"))  + #
+	theme(panel.border = element_blank(), #
+        panel.margin = element_blank(),#
+        panel.grid.major= element_blank(),#
+        panel.grid.minor= element_blank()) + #
+	theme(axis.line.x = element_line(colour= "black", size = 2), #
+		axis.line.y = element_line(colour= "black", size = 2)) + #
+	theme(axis.title = element_blank())  #, axis.text = element_blank()
+blue2 <- makeTransparent("slateblue4", 95)#
+green2 <- makeTransparent("chartreuse4", 95)#
+#
+ggplot(d, aes(x = Type, y = Prevalence, fill = Color)) + guides(fill = FALSE) +#
+	geom_bar(position = position_dodge(), stat = "identity",) + ylim(0, 0.5) + #
+	theme_bw() +  #
+	scale_fill_manual(values=c(blue2, green2,  "slateblue4", "chartreuse4"))  + #
+	scale_colour_manual(values=c("black"))  + #
+	theme(panel.border = element_blank(), #
+        panel.margin = element_blank(),#
+        panel.grid.major= element_blank(),#
+        panel.grid.minor= element_blank()) + #
+	theme(axis.line.x = element_line(colour= "black", size = 2), #
+		axis.line.y = element_line(colour= "black", size = 2)) + #
+	theme(axis.title = element_blank())  #, axis.text = element_blank()
+blue2 <- makeTransparent("slateblue4", 98)#
+green2 <- makeTransparent("chartreuse4", 98)#
+#
+ggplot(d, aes(x = Type, y = Prevalence, fill = Color)) + guides(fill = FALSE) +#
+	geom_bar(position = position_dodge(), stat = "identity",) + ylim(0, 0.5) + #
+	theme_bw() +  #
+	scale_fill_manual(values=c(blue2, green2,  "slateblue4", "chartreuse4"))  + #
+	scale_colour_manual(values=c("black"))  + #
+	theme(panel.border = element_blank(), #
+        panel.margin = element_blank(),#
+        panel.grid.major= element_blank(),#
+        panel.grid.minor= element_blank()) + #
+	theme(axis.line.x = element_line(colour= "black", size = 2), #
+		axis.line.y = element_line(colour= "black", size = 2)) + #
+	theme(axis.title = element_blank())  #, axis.text = element_blank()
+blue2 <- makeTransparent("slateblue4", 200)#
+green2 <- makeTransparent("chartreuse4", 200)#
+#
+ggplot(d, aes(x = Type, y = Prevalence, fill = Color)) + guides(fill = FALSE) +#
+	geom_bar(position = position_dodge(), stat = "identity",) + ylim(0, 0.5) + #
+	theme_bw() +  #
+	scale_fill_manual(values=c(blue2, green2,  "slateblue4", "chartreuse4"))  + #
+	scale_colour_manual(values=c("black"))  + #
+	theme(panel.border = element_blank(), #
+        panel.margin = element_blank(),#
+        panel.grid.major= element_blank(),#
+        panel.grid.minor= element_blank()) + #
+	theme(axis.line.x = element_line(colour= "black", size = 2), #
+		axis.line.y = element_line(colour= "black", size = 2)) + #
+	theme(axis.title = element_blank())  #, axis.text = element_blank()
+blue2 <- makeTransparent("slateblue4", 180)#
+green2 <- makeTransparent("chartreuse4", 180)#
+#
+ggplot(d, aes(x = Type, y = Prevalence, fill = Color)) + guides(fill = FALSE) +#
+	geom_bar(position = position_dodge(), stat = "identity",) + ylim(0, 0.5) + #
+	theme_bw() +  #
+	scale_fill_manual(values=c(blue2, green2,  "slateblue4", "chartreuse4"))  + #
+	scale_colour_manual(values=c("black"))  + #
+	theme(panel.border = element_blank(), #
+        panel.margin = element_blank(),#
+        panel.grid.major= element_blank(),#
+        panel.grid.minor= element_blank()) + #
+	theme(axis.line.x = element_line(colour= "black", size = 2), #
+		axis.line.y = element_line(colour= "black", size = 2)) + #
+	theme(axis.title = element_blank())  #, axis.text = element_blank()
+blue2 <- makeTransparent("slateblue4", 150)#
+green2 <- makeTransparent("chartreuse4", 150)#
+#
+ggplot(d, aes(x = Type, y = Prevalence, fill = Color)) + guides(fill = FALSE) +#
+	geom_bar(position = position_dodge(), stat = "identity",) + ylim(0, 0.5) + #
+	theme_bw() +  #
+	scale_fill_manual(values=c(blue2, green2,  "slateblue4", "chartreuse4"))  + #
+	scale_colour_manual(values=c("black"))  + #
+	theme(panel.border = element_blank(), #
+        panel.margin = element_blank(),#
+        panel.grid.major= element_blank(),#
+        panel.grid.minor= element_blank()) + #
+	theme(axis.line.x = element_line(colour= "black", size = 2), #
+		axis.line.y = element_line(colour= "black", size = 2)) + #
+	theme(axis.title = element_blank())  #, axis.text = element_blank()
+blue2 <- makeTransparent("slateblue4", 130)#
+green2 <- makeTransparent("chartreuse4", 130)#
+#
+ggplot(d, aes(x = Type, y = Prevalence, fill = Color)) + guides(fill = FALSE) +#
+	geom_bar(position = position_dodge(), stat = "identity",) + ylim(0, 0.5) + #
+	theme_bw() +  #
+	scale_fill_manual(values=c(blue2, green2,  "slateblue4", "chartreuse4"))  + #
+	scale_colour_manual(values=c("black"))  + #
+	theme(panel.border = element_blank(), #
+        panel.margin = element_blank(),#
+        panel.grid.major= element_blank(),#
+        panel.grid.minor= element_blank()) + #
+	theme(axis.line.x = element_line(colour= "black", size = 2), #
+		axis.line.y = element_line(colour= "black", size = 2)) + #
+	theme(axis.title = element_blank())  #, axis.text = element_blank()
+ggplot(d, aes(x = Type, y = Prevalence, fill = Color)) + guides(fill = FALSE) +#
+	geom_bar(position = position_dodge(), stat = "identity",) + ylim(0, 0.5) + #
+	theme_bw() +  #
+	scale_fill_manual(values=c(blue2, green2,  "slateblue4", "chartreuse4"))  + #
+	scale_colour_manual(values=c("black"))  + #
+	theme(panel.border = element_blank(), #
+        panel.margin = element_blank(),#
+        panel.grid.major= element_blank(),#
+        panel.grid.minor= element_blank()) + #
+	theme(axis.line.x = element_line(colour= "black", size = 2), #
+		axis.line.y = element_line(colour= "black", size = 2)) + #
+	theme(axis.title = element_blank(), axis.text = element_blank())
+png("Evaluation.png", width = 800, height = 600, units = "px")#
+ggplot(d, aes(x = Type, y = Prevalence, fill = Color)) + guides(fill = FALSE) +#
+	geom_bar(position = position_dodge(), stat = "identity",) + ylim(0, 0.5) + #
+	theme_bw() +  #
+	scale_fill_manual(values=c(blue2, green2,  "slateblue4", "chartreuse4"))  + #
+	scale_colour_manual(values=c("black"))  + #
+	theme(panel.border = element_blank(), #
+        panel.margin = element_blank(),#
+        panel.grid.major= element_blank(),#
+        panel.grid.minor= element_blank()) + #
+	theme(axis.line.x = element_line(colour= "black", size = 2), #
+		axis.line.y = element_line(colour= "black", size = 2)) + #
+	theme(axis.title = element_blank(), axis.text = element_blank())#
+dev.off()
+ggplot(d, aes(x = Type, y = Prevalence, fill = Color)) + guides(fill = FALSE) +#
+	geom_bar(position = position_dodge(), stat = "identity",) + ylim(0, 0.5) + #
+	theme_bw() +  #
+	scale_fill_manual(values=c(blue2, green2,  "slateblue4", "chartreuse4"))  + #
+	scale_colour_manual(values=c("black"))  + #
+	theme(panel.border = element_blank(), #
+        panel.margin = element_blank(),#
+        panel.grid.major= element_blank(),#
+        panel.grid.minor= element_blank()) + #
+	theme(axis.line.x = element_line(colour= "black", size = 2), #
+		axis.line.y = element_line(colour= "black", size = 2)) + #
+	theme(axis.title = element_blank())
+library(deSolve)
+relageall = c(0.137, rep(0.368/4, 4), rep(0.185/4, 4),  # Jolles 2007, set max age at 20#
+	rep(0.235/6, 6), rep(0.075/5, 5))					# Also in Caron et al. from 2001 KNP	#
+relage = relageall#
+# Get stable age structure without dz#
+S0 = 400*relage; It0 = 0*relage; Ib0 = 0*relage; #
+Ic0 = 0*relage; R0 = 0 * relage; Rc0 = 0 * relage#
+x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)#
+times <- seq(0, 500, 1)#
+params.test_log = c(fixed.params.olddz, list(gamma=1/2, betaB = 0.01,#
+	betaT = 0.0001, rhoT = 1.2, rhoB = 4, theta= 4, K = 433))#
+sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params.test_log))#
+stable_age <- unname(unlist( sol[500, c(2:21)]/sum(sol[500, c(2:21)]) ))#
+# Add Brucellosis, get endemic age structure#
+S0 = 400* stable_age; It0 = 0 * stable_age; Ib0 = 20* stable_age; #
+Ic0 = 0* stable_age; R0 = 30 * stable_age; Rc0 = 0 * stable_age#
+x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)#
+times <- seq(0, 500, 1)#
+sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params.test_log))#
+endemic_agestructure <- unname(unlist( sol[500, c(2:121)] ))#
+# Introduce bTB#
+x0 = endemic_agestructure#
+x0[28] <- 5; x0[8] <- x0[8] - 5#
+sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params.test_log))
+source('~/GitHub/bTB-bruc-co-infection-ms/fixed_parameters_norecovery_agematrix.R', chdir = TRUE)#
+source('~/GitHub/bTB-bruc-co-infection-ms/rhs_age.R', chdir = TRUE)#
+s_index <- 1:20#
+it_index <- 21:40#
+ib_index <- 41:60#
+ic_index <- 61:80#
+r_index <- 81:100#
+rc_index <- 101:120#
+juveniles <- 1:3#
+subadult<- 4#
+adult <- 5:14#
+mature <- 15:20#
+#
+# Age structure information, used to calculate mortality rates in susceptibles. #
+relageall = c(0.137, rep(0.368/4, 4), rep(0.185/4, 4),  # Jolles 2007, set max age at 20#
+	rep(0.235/6, 6), rep(0.075/5, 5))					# Also in Caron et al. from 2001 KNP	#
+relage = relageall#
+# Get stable age structure without dz#
+S0 = 400*relage; It0 = 0*relage; Ib0 = 0*relage; #
+Ic0 = 0*relage; R0 = 0 * relage; Rc0 = 0 * relage#
+x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)#
+times <- seq(0, 500, 1)#
+params.test_log = c(fixed.params.olddz, list(gamma=1/2, betaB = 0.01,#
+	betaT = 0.0001, rhoT = 1.2, rhoB = 4, theta= 4, K = 433))#
+sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params.test_log))#
+stable_age <- unname(unlist( sol[500, c(2:21)]/sum(sol[500, c(2:21)]) ))#
+# Add Brucellosis, get endemic age structure#
+S0 = 400* stable_age; It0 = 0 * stable_age; Ib0 = 20* stable_age; #
+Ic0 = 0* stable_age; R0 = 30 * stable_age; Rc0 = 0 * stable_age#
+x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)#
+times <- seq(0, 500, 1)#
+sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params.test_log))#
+endemic_agestructure <- unname(unlist( sol[500, c(2:121)] ))#
+# Introduce bTB#
+x0 = endemic_agestructure#
+x0[28] <- 5; x0[8] <- x0[8] - 5#
+sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params.test_log))
+head(sol)
+sol$bTBoverall <- apply(sol[it_index+1], 1, sum)#
+sol$brucoverall <- apply(sol[ib_index+1], 1, sum) + apply(sol[r_index+1], 1, sum)#
+sol$co <- apply(sol[ic_index+1], 1, sum) + apply(sol[rc_index+1], 1, sum)#
+sol$Ib <- apply(sol[ib_index+1], 1, sum)#
+sol$It <- apply(sol[it_index+1], 1, sum)#
+sol$Ic <- apply(sol[ic_index+1], 1, sum)#
+sol$Rb <- apply(sol[r_index+1], 1, sum)#
+sol$Rc <- apply(sol[rc_index+1], 1, sum)
+plot(sol$Rc, sol$time)
+ggplot(sol[sol$time < 200,], aes(x = time, y = bTBoverall)) + #
+	geom_line() + ylim(0, 0.8) + #position = position_dodge(), stat = "identity"#
+	theme_bw()
+it_index
+ggplot(sol[sol$time < 200,], aes(x = time, y = bTBoverall)) + #
+	geom_line() + ylim(0, 400) + #position = position_dodge(), stat = "identity"#
+	theme_bw() + #
+	geom_line(sol[sol$time < 200,] aes(x = time, y = brucoverall))
+ggplot(sol[sol$time < 200,], aes(x = time, y = bTBoverall)) + #
+	geom_line() + ylim(0, 400) + #position = position_dodge(), stat = "identity"#
+	theme_bw() + #
+	geom_line(sol[sol$time < 200,], aes(x = time, y = brucoverall))
+summary(sol)
+rm(params.test_log)
+relageall = c(0.137, rep(0.368/4, 4), rep(0.185/4, 4),  # Jolles 2007, set max age at 20#
+	rep(0.235/6, 6), rep(0.075/5, 5))					# Also in Caron et al. from 2001 KNP	#
+relage = relageall#
+# Get stable age structure without dz#
+S0 = 400*relage; It0 = 0*relage; Ib0 = 0*relage; #
+Ic0 = 0*relage; R0 = 0 * relage; Rc0 = 0 * relage#
+x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)#
+times <- seq(0, 500, 1)#
+params <- c(fixed.params.olddz, list(gamma=1/2, betaB = 1.004592,   #
+	betaT = 12.833531/10000, rhoT = 1, rhoB = 2.1, theta= 4, K = 433))  #
+sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))
+head(sol)
+stable_age <- unname(unlist( sol[500, c(2:21)]/sum(sol[500, c(2:21)]) ))#
+# Add Brucellosis, get endemic age structure#
+S0 = 400* stable_age; It0 = 0 * stable_age; Ib0 = 20* stable_age; #
+Ic0 = 0* stable_age; R0 = 30 * stable_age; Rc0 = 0 * stable_age#
+x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)#
+times <- seq(0, 500, 1)#
+sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))#
+endemic_agestructure <- unname(unlist( sol[500, c(2:121)] ))#
+# Introduce bTB#
+x0 = endemic_agestructure#
+x0[28] <- 5; x0[8] <- x0[8] - 5#
+sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))#
+sol$bTBoverall <- apply(sol[it_index+1], 1, sum)#
+sol$brucoverall <- apply(sol[ib_index+1], 1, sum) + apply(sol[r_index+1], 1, sum)#
+sol$co <- apply(sol[ic_index+1], 1, sum) + apply(sol[rc_index+1], 1, sum)#
+sol$Ib <- apply(sol[ib_index+1], 1, sum)#
+sol$It <- apply(sol[it_index+1], 1, sum)#
+sol$Ic <- apply(sol[ic_index+1], 1, sum)#
+sol$Rb <- apply(sol[r_index+1], 1, sum)#
+sol$Rc <- apply(sol[rc_index+1], 1, sum)#
+#
+ggplot#
+ggplot(sol[sol$time < 200,], aes(x = time, y = bTBoverall)) + #
+	geom_line() + ylim(0, 400) + #position = position_dodge(), stat = "identity"#
+	theme_bw() + #
+	geom_line(sol[sol$time < 200,], aes(x = time, y = brucoverall))
+ggplot(sol[sol$time < 200,], aes(x = time, y = bTBoverall)) + #
+	geom_line() + ylim(0, 400) + #position = position_dodge(), stat = "identity"#
+	theme_bw()
+ggplot(sol[sol$time < 100,], aes(x = time, y = bTBoverall)) + #
+	geom_line() + ylim(0, 150) + #position = position_dodge(), stat = "identity"#
+	theme_bw() + xlab("Time (years)") + ylab("Number of buffalo")
+p + geom_line(sol[sol$time < 100,], aes(x = time, y = brucoverall))
+p <- ggplot(sol[sol$time < 100,], aes(x = time, y = bTBoverall)) + #
+	geom_line() + ylim(0, 150) + #position = position_dodge(), stat = "identity"#
+	theme_bw() + xlab("Time (years)") + ylab("Number of buffalo")#
+	p + geom_line(sol[sol$time < 100,], aes(x = time, y = brucoverall))
+summary(sol$brucoverall)
+head(sol)
+p <- ggplot(sol[sol$time < 100,], aes(x = time, y = bTBoverall)) + #
+	geom_line(color = "slateblue3") + ylim(0, 150) + #position = position_dodge(), stat = "identity"#
+	theme_bw() + xlab("Time (years)") + ylab("Number of buffalo")#
+	p + geom_line(sol$brucoverall[sol$time < 100,], color = "chartreuse4")
+p <- ggplot(bTB, aes(x = time, y = N)) + #
+	geom_line(color = "slateblue3") + ylim(0, 150) + #position = position_dodge(), stat = "identity"#
+	theme_bw() + xlab("Time (years)") + ylab("Number of buffalo")#
+p + geom_line(bruc, color = "chartreuse4") + geom_line(co, color = "tomato3")
+bTB <- data.frame(N = sol$bTBoverall[sol$time < 100], time <- sol$time[sol$time < 100])#
+bruc <- data.frame(N = sol$bruc[sol$time < 100], time <- sol$time[sol$time < 100])#
+co <- data.frame(N = sol$co[sol$time < 100], time <- sol$time[sol$time < 100])#
+#
+p <- ggplot(bTB, aes(x = time, y = N)) + #
+	geom_line(color = "slateblue3") + ylim(0, 150) + #position = position_dodge(), stat = "identity"#
+	theme_bw() + xlab("Time (years)") + ylab("Number of buffalo")#
+p + geom_line(bruc, color = "chartreuse4") + geom_line(co, color = "tomato3")
+p <- ggplot(bTB, aes(x = time, y = N)) + #
+	geom_line(color = "slateblue3") + ylim(0, 150) + #position = position_dodge(), stat = "identity"#
+	theme_bw() + xlab("Time (years)") + ylab("Number of buffalo")#
+p + geom_line(aes(x =bruc$time, y = bruc$N), color = "chartreuse4") + geom_line(aes(x =co$time, y = co$N), color = "tomato3")
+p3 <- p2 + geom_line(aes(x = bruc$time, y = bruc$N + co$N), color = "gray")
+p2 <- p + geom_line(aes(x =bruc$time, y = bruc$N), color = "chartreuse4") + geom_line(aes(x =co$time, y = co$N), color = "tomato3")#
+p3 <- p2 + geom_line(aes(x = bruc$time, y = bruc$N + co$N), color = "gray")
+p3
+df <- data.frame(N = c(bTB$N, bruc$N, co$N), time = rep(bTB$time, 3), label = rep("bTB", "bruc", "co"), each = length(bTB[,1]))
+head(df)
+head(bTB)
+bTB <- data.frame(N = sol$bTBoverall[sol$time < 100], time = sol$time[sol$time < 100])
+head(bTB)
+length(bTB[,1]
+)
+bTB <- data.frame(N = sol$bTBoverall[sol$time < 100], time = sol$time[sol$time < 100])#
+bruc <- data.frame(N = sol$bruc[sol$time < 100], time= sol$time[sol$time < 100])#
+co <- data.frame(N = sol$co[sol$time < 100], time = sol$time[sol$time < 100])#
+df <- data.frame(N = c(bTB$N, bruc$N, co$N), time = rep(bTB$time, 3), label = c(rep("bTB", "bruc", "co"), each = length(bTB[,1]))
+)
+N = c(bTB$N, bruc$N, co$N)
+head(N)
+tail(N)
+summary(N)
+time = rep(bTB$time, 3)
+length(N)
+length(time)
+t<- c(rep("bTB", "bruc", "co"), each = 100)
+?rep
+df <- data.frame(N = c(bTB$N, bruc$N, co$N), time = rep(bTB$time, 3), label = c(rep("bTB", "bruc", "co"), times = length(bTB$N)) )
+length(bTB$N)
+?rep
+df <- data.frame(N = c(bTB$N, bruc$N, co$N), time = rep(bTB$time, 3), label = rep(c("bTB", "bruc", "co"), times = length(bTB$N)) )
+df
+df <- data.frame(N = c(bTB$N, bruc$N, co$N), time = rep(bTB$time, 3), label = rep(c("bTB", "bruc", "co"), each = length(bTB$N)) )
+head(df, 50)
+ggplot(df, aes(x = time, y = N, colour = label)) + #
+	geom_line() + ylim(0, 150) + #position = position_dodge(), stat = "identity"#
+	theme_bw() + xlab("Time (years)") + ylab("Number of buffalo") + #
+	scale_colour_manual("slateblue3", "chartreuse4", "tomato3")
+?scale_colour_manual
+ggplot(df, aes(x = time, y = N, colour = label)) + #
+	geom_line() + ylim(0, 150) + #position = position_dodge(), stat = "identity"#
+	theme_bw() + xlab("Time (years)") + ylab("Number of buffalo") + #
+	scale_colour_manual(values = c("slateblue3", "chartreuse4", "tomato3"))
+p <- ggplot(df, aes(x = time, y = N, colour = label)) + #
+	geom_line() + ylim(0, 150) + #position = position_dodge(), stat = "identity"#
+	theme_bw() + xlab("Time (years)") + ylab("Number of buffalo") + #
+	scale_colour_manual(values = c("slateblue3", "chartreuse4", "tomato3")) +#
+	theme(axis.line.x = element_line(colour= "black"),#
+		axis.line.y = element_line(colour= "black"),#
+		axis.title.x = element_blank(),#element_text(size=16, vjust=-0.15),#
+		axis.title.y = element_text(size=16, vjust= 0.8),#
+		axis.text.x = element_text(size=14, vjust=-0.05),#
+       axis.text.y = element_text(size=14),#
+       panel.border = element_blank(), #
+		legend.position=c(0.8, 0.9),  #
+       legend.background= element_rect(fill="white", colour="white"),#
+       legend.key= element_blank(),#
+       legend.title= element_blank(),#
+       legend.text = element_text(size=12))
+p
+df$label <- relevel(df$label, "bTB")
+ggplot(df, aes(x = time, y = N, colour = label)) + #
+	geom_line() + ylim(0, 150) + #position = position_dodge(), stat = "identity"#
+	theme_bw() + xlab("Time (years)") + ylab("Number of buffalo") + #
+	scale_colour_manual(values = c("slateblue3", "chartreuse4", "tomato3")) +#
+	theme(axis.line.x = element_line(colour= "black"),#
+		axis.line.y = element_line(colour= "black"),#
+		axis.title.x = element_text(size=16, vjust=-0.15),#
+		axis.title.y = element_text(size=16, vjust= 0.8),#
+		axis.text.x = element_text(size=14, vjust=-0.05),#
+       axis.text.y = element_text(size=14),#
+       panel.border = element_blank(), #
+		legend.position=c(0.8, 0.9),  #
+       legend.background= element_rect(fill="white", colour="white"),#
+       legend.key= element_blank(),#
+       legend.title= element_blank(),#
+       legend.text = element_text(size=12))
+df <- data.frame(N = c(bTB$N, bruc$N, co$N), time = rep(bTB$time, 3), label = rep(c("bTB only", "brucellosis only", "co-infected"), each = length(bTB$N)) )#
+df$label <- relevel(df$label, "bTB")#
+p <- ggplot(df, aes(x = time, y = N, colour = label)) + #
+	geom_line() + ylim(0, 150) + #position = position_dodge(), stat = "identity"#
+	theme_bw() + xlab("Time (years)") + ylab("Number of buffalo") + #
+	scale_colour_manual(values = c("slateblue3", "chartreuse4", "tomato3")) +#
+	theme(axis.line.x = element_line(colour= "black"),#
+		axis.line.y = element_line(colour= "black"),#
+		axis.title.x = element_text(size=16, vjust=-0.15),#
+		axis.title.y = element_text(size=16, vjust= 0.8),#
+		axis.text.x = element_text(size=14, vjust=-0.05),#
+       axis.text.y = element_text(size=14),#
+       panel.border = element_blank(), #
+		legend.position=c(0.8, 0.9),  #
+       legend.background= element_rect(fill="white", colour="white"),#
+       legend.key= element_blank(),#
+       legend.title= element_blank(),#
+       legend.text = element_text(size=12))
+p
+p <- ggplot(df, aes(x = time, y = N, colour = label)) + #
+	geom_line(size = 1.5) + ylim(0, 150) + #position = position_dodge(), stat = "identity"#
+	theme_bw() + xlab("Time (years)") + ylab("Number of buffalo") + #
+	scale_colour_manual(values = c("slateblue3", "chartreuse4", "tomato3")) +#
+	theme(axis.line.x = element_line(colour= "black"),#
+		axis.line.y = element_line(colour= "black"),#
+		axis.title.x = element_text(size=16, vjust=-0.15),#
+		axis.title.y = element_text(size=16, vjust= 0.8),#
+		axis.text.x = element_text(size=14, vjust=-0.05),#
+       axis.text.y = element_text(size=14),#
+       panel.border = element_blank(), #
+		legend.position=c(0.8, 0.9),  #
+       legend.background= element_rect(fill="white", colour="white"),#
+       legend.key= element_blank(),#
+       legend.title= element_blank(),#
+       legend.text = element_text(size=12)) #
+p
+p <- ggplot(df, aes(x = time, y = N, colour = label)) + #
+	geom_line(size = 1.3) + ylim(0, 150) + #position = position_dodge(), stat = "identity"#
+	theme_bw() + xlab("Time (years)") + ylab("Number of buffalo") + #
+	scale_colour_manual(values = c("slateblue3", "chartreuse4", "tomato3")) +#
+	theme(axis.line.x = element_line(colour= "black"),#
+		axis.line.y = element_line(colour= "black"),#
+		axis.title.x = element_text(size=16, vjust=-0.15),#
+		axis.title.y = element_text(size=16, vjust= 0.8),#
+		axis.text.x = element_text(size=14, vjust=-0.05),#
+       axis.text.y = element_text(size=14),#
+       panel.border = element_blank(), #
+		legend.position=c(0.8, 0.9),  #
+       legend.background= element_rect(fill="white", colour="white"),#
+       legend.key= element_blank(),#
+       legend.title= element_blank(),#
+       legend.text = element_text(size=12)) #
+p
+########################################################
+setwd("~/GitHub/bTB-bruc-co-infection-ms")#
+df<- readRDS("coinfection_pattern_results.rds")#
+df2$color <- c(1,2,0, 0, 3, 4, 0, 0)#
+f2 <- data.frame(Evaluation = c("Model", "Model", "Data", "Data"), #
+	Infection = c("Single infection", "Co-infection", "Single infection", "Co-infection"), #
+	BrucellosisPrevalence = c(df$prevBinS, df$prevBinT, 0.3035, 0.4524), #
+	TBPrevalence = c(df$prevTinS, df$prevTinB, 0.227, 0.3585), #
+	CILowB = c(NA, NA, 0.2654405, 0.3657982), #
+	CIHighB = c(NA, NA, 0.3451408, 0.5405985), #
+	CILowTB = c(NA, NA, 0.1781895, 0.2857143), #
+	CIHighTB = c(NA, NA, 0.2783505, 0.4313725))#
+df2 <- reshape(f2, varying = c("BrucellosisPrevalence", "TBPrevalence"), #
+	v.names = "Prevalence", timevar = "Name", times = c("Brucellosis", "bTB"), #
+	direction = "long")#
+df2$Infection <- relevel(df2$Infection, "Single infection")#
+df2$CILow <- c(NA, NA, 0.26544, 0.365798, NA, NA, 0.1781895, 0.2857)#
+df2$CIHigh <- c(NA, NA, 0.3451408, 0.540598, NA, NA, 0.27835, 0.43137)#
+#
+limits <- aes(ymax = df2$CIHigh[df2$Evaluation == "Data"], ymin= df2$CILow[df2$Evaluation == "Data"])#
+p1 <- #
+ggplot(df2[df2$Evaluation == "Model",], aes(x = Name, y = Prevalence, fill = Infection)) + #
+	geom_bar(position = position_dodge(), stat = "identity") + ylim(0, 0.8) + #
+	theme_bw() +  scale_fill_manual(values=c("steelblue", "orangered4")) +#
+	theme(axis.line.x = element_line(colour= "black"),#
+  		axis.line.y = element_line(colour= "black"),#
+  		axis.title.x = element_blank(),#element_text(size=16, vjust=-0.15),#
+        axis.title.y = element_text(size=16, vjust= 0.8),#
+        axis.text.x = element_text(size=14, vjust=-0.05),#
+        axis.text.y = element_text(size=14),#
+        panel.border = element_blank(), #
+		legend.position=c(0.8, 0.9),  #
+        legend.background= element_rect(fill="white", colour="white"),#
+        legend.key= element_blank(),#
+        legend.title= element_blank(),#
+        legend.text = element_text(size=12))  + #
+	geom_point(data = df2[df2$Evaluation == "Data",], colour = "black", #
+		position = position_dodge(width = 0.9), size = 3)   + #
+	geom_errorbar(limits, position = position_dodge(width = 0.9), width= 0.2)
+p1
+multiplot(p, p1, cols = 2)
+df<- readRDS("coinfection_pattern_results.rds")#
+df2$color <- c(1,2,0, 0, 3, 4, 0, 0)#
+f2 <- data.frame(Evaluation = c("Model", "Model", "Data", "Data"), #
+	Infection = c("Single infection", "Co-infection", "Single infection", "Co-infection"), #
+	BrucellosisPrevalence = c(df$prevBinS, df$prevBinT, 0.3035, 0.4524), #
+	TBPrevalence = c(df$prevTinS, df$prevTinB, 0.227, 0.3585), #
+	CILowB = c(NA, NA, 0.2654405, 0.3657982), #
+	CIHighB = c(NA, NA, 0.3451408, 0.5405985), #
+	CILowTB = c(NA, NA, 0.1781895, 0.2857143), #
+	CIHighTB = c(NA, NA, 0.2783505, 0.4313725))#
+df2 <- reshape(f2, varying = c("BrucellosisPrevalence", "TBPrevalence"), #
+	v.names = "Prevalence", timevar = "Name", times = c("Brucellosis", "bTB"), #
+	direction = "long")#
+df2$Infection <- relevel(df2$Infection, "Single infection")#
+df2$CILow <- c(NA, NA, 0.26544, 0.365798, NA, NA, 0.1781895, 0.2857)#
+df2$CIHigh <- c(NA, NA, 0.3451408, 0.540598, NA, NA, 0.27835, 0.43137)
+df2
+df2[df2$Evaluation == "Data"]
+df2[df2$Evaluation == "Model"]
+df2[df2$Evaluation == "Model",]
+?rgb
+rgb(97, 139, 14, maxColorValue= 255)
+df3$Name <- relevel(df3$Name, "bTB")
+df<- readRDS("coinfection_pattern_results.rds")#
+df2$color <- c(1,2,0, 0, 3, 4, 0, 0)#
+f2 <- data.frame(Evaluation = c("Model", "Model", "Data", "Data"), #
+	Infection = c("Single infection", "Co-infection", "Single infection", "Co-infection"), #
+	BrucellosisPrevalence = c(df$prevBinS, df$prevBinT, 0.3035, 0.4524), #
+	TBPrevalence = c(df$prevTinS, df$prevTinB, 0.227, 0.3585), #
+	CILowB = c(NA, NA, 0.2654405, 0.3657982), #
+	CIHighB = c(NA, NA, 0.3451408, 0.5405985), #
+	CILowTB = c(NA, NA, 0.1781895, 0.2857143), #
+	CIHighTB = c(NA, NA, 0.2783505, 0.4313725))#
+df2 <- reshape(f2, varying = c("BrucellosisPrevalence", "TBPrevalence"), #
+	v.names = "Prevalence", timevar = "Name", times = c("brucellosis", "bTB"), #
+	direction = "long")#
+df2$Infection <- relevel(df2$Infection, "Single infection")#
+df2$CILow <- c(NA, NA, 0.26544, 0.365798, NA, NA, 0.1781895, 0.2857)#
+df2$CIHigh <- c(NA, NA, 0.3451408, 0.540598, NA, NA, 0.27835, 0.43137)#
+df3 <- df2[df2$Evaluation == "Model",]
+df3
+str(df3)
+df3$Name <- as.factor(df3$Name)#
+df3$Name <- relevel(df3$Name, "bTB")
+ggplot(df2[df2$Evaluation == "Model",], aes(x = Name, y = Prevalence, fill = Infection, colour = Name)) + #
+	geom_bar(position = position_dodge(), stat = "identity") + ylim(0, 0.8) + #
+	theme_bw() +  scale_fill_manual(values=c("steelblue", "orangered4")) +#
+	scale_colour_manual(fill = c("slateblue3", "chartruse4"))
+ggplot(df3, aes(x = Name, y = Prevalence, fill = Infection, colour = Name)) + #
+	geom_bar(position = position_dodge(), stat = "identity") + ylim(0, 0.8) + #
+	theme_bw() +  scale_fill_manual(values=c("steelblue", "orangered4")) +#
+	scale_colour_manual(fill = c("slateblue3", "chartruse4"))
+ggplot(df3, aes(x = Name, y = Prevalence, fill = Infection)) + #, colour = Name#
+	geom_bar(position = position_dodge(), stat = "identity") + ylim(0, 0.8) + #
+	theme_bw() +  scale_fill_manual(values=c("steelblue", "orangered4")) +#
+	theme(axis.line.x = element_line(colour= "black"),#
+  		axis.line.y = element_line(colour= "black"),#
+  		axis.title.x = element_blank(),#element_text(size=16, vjust=-0.15),#
+        axis.title.y = element_text(size=16, vjust= 0.8),#
+        axis.text.x = element_text(size=14, vjust=-0.05),#
+        axis.text.y = element_text(size=14),#
+        panel.border = element_blank(), #
+		legend.position=c(0.8, 0.9),  #
+        legend.background= element_rect(fill="white", colour="white"),#
+        legend.key= element_blank(),#
+        legend.title= element_blank(),#
+        legend.text = element_text(size=12))  + #
+	geom_point(data = df2[df2$Evaluation == "Data",], colour = "black", #
+		position = position_dodge(width = 0.9), size = 3)   + #
+	geom_errorbar(limits, position = position_dodge(width = 0.9), width= 0.2)
+ggplot(df3, aes(x = Name, y = Prevalence, fill = Infection)) + #, colour = Name#
+	geom_bar(position = position_dodge(), stat = "identity") + ylim(0, 0.8) + #
+	theme_bw() +  scale_fill_manual(values=c("steelblue", "orangered4")) +#
+	theme(axis.line.x = element_line(colour= "black"),#
+  		axis.line.y = element_line(colour= "black"),#
+  		axis.title.x = element_blank(),#element_text(size=16, vjust=-0.15),#
+        axis.title.y = element_text(size=16, vjust= 0.8),#
+        axis.text.x = element_text(size=14, vjust=-0.05),#
+        axis.text.y = element_text(size=14),#
+        panel.border = element_blank(), #
+		legend.position=c(0.8, 0.9),  #
+        legend.background= element_rect(fill="white", colour="white"),#
+        legend.key= element_blank(),#
+        legend.title= element_blank(),#
+        legend.text = element_text(size=12))  + #
+	geom_point(data = df2[df2$Evaluation == "Data",], colour = "black", #
+		position = position_dodge(width = 0.9), size = 3, guide = FALSE)   + #
+	geom_errorbar(limits, position = position_dodge(width = 0.9), width= 0.2, guide = FALSE)
+?geom_point
+ggplot(df3, aes(x = Name, y = Prevalence, fill = Infection)) + #, colour = Name#
+	geom_bar(position = position_dodge(), stat = "identity") + ylim(0, 0.8) + #
+	theme_bw() +  scale_fill_manual(values=c("steelblue", "orangered4")) +#
+	theme(axis.line.x = element_line(colour= "black"),#
+  		axis.line.y = element_line(colour= "black"),#
+  		axis.title.x = element_blank(),#element_text(size=16, vjust=-0.15),#
+        axis.title.y = element_text(size=16, vjust= 0.8),#
+        axis.text.x = element_text(size=14, vjust=-0.05),#
+        axis.text.y = element_text(size=14),#
+        panel.border = element_blank(), #
+		legend.position=c(0.8, 0.9),  #
+        legend.background= element_rect(fill="white", colour="white"),#
+        legend.key= element_blank(),#
+        legend.title= element_blank(),#
+        legend.text = element_text(size=12))  + #
+	geom_point(data = df2[df2$Evaluation == "Data",], colour = "black", #
+		position = position_dodge(width = 0.9), size = 3, guide = FALSE)   + #
+	geom_errorbar(limits, position = position_dodge(width = 0.9), width= 0.2)
+ggplot(df3, aes(x = Name, y = Prevalence, fill = Infection)) + #, colour = Name#
+	geom_bar(position = position_dodge(), stat = "identity") + ylim(0, 0.8) + #
+	theme_bw() +  scale_fill_manual(values=c("steelblue", "orangered4")) +#
+	theme(axis.line.x = element_line(colour= "black"),#
+  		axis.line.y = element_line(colour= "black"),#
+  		axis.title.x = element_blank(),#element_text(size=16, vjust=-0.15),#
+        axis.title.y = element_text(size=16, vjust= 0.8),#
+        axis.text.x = element_text(size=14, vjust=-0.05),#
+        axis.text.y = element_text(size=14),#
+        panel.border = element_blank(), #
+		legend.position=c(0.8, 0.9),  #
+        legend.background= element_rect(fill="white", colour="white"),#
+        legend.key= element_blank(),#
+        legend.title= element_blank(),#
+        legend.text = element_text(size=12))  + #
+	geom_point(data = df2[df2$Evaluation == "Data",], colour = "black", #
+		position = position_dodge(width = 0.9), size = 3)  +#
+	scale_shape_discrete(guide = FALSE) +  #
+	geom_errorbar(limits, position = position_dodge(width = 0.9), width= 0.2)
+ggplot(df3, aes(x = Name, y = Prevalence, fill = Infection)) + #, colour = Name#
+	geom_bar(position = position_dodge(), stat = "identity") + ylim(0, 0.8) + #
+	theme_bw() +  scale_fill_manual(values=c("steelblue", "orangered4")) +#
+	theme(axis.line.x = element_line(colour= "black"),#
+  		axis.line.y = element_line(colour= "black"),#
+  		axis.title.x = element_blank(),#element_text(size=16, vjust=-0.15),#
+        axis.title.y = element_text(size=16, vjust= 0.8),#
+        axis.text.x = element_text(size=14, vjust=-0.05),#
+        axis.text.y = element_text(size=14),#
+        panel.border = element_blank(), #
+		legend.position=c(0.8, 0.9),  #
+        legend.background= element_rect(fill="white", colour="white"),#
+        legend.key= element_blank(),#
+        legend.title= element_blank(),#
+        legend.text = element_text(size=12))  + #
+	geom_point(data = df2[df2$Evaluation == "Data",], colour = "black", #
+		position = position_dodge(width = 0.9), size = 3, guide = FALSE)  +#
+	geom_errorbar(limits, position = position_dodge(width = 0.9), width= 0.2)
+ggplot(df3, aes(x = Name, y = Prevalence, fill = Infection)) + #, colour = Name#
+	geom_bar(position = position_dodge(), stat = "identity") + ylim(0, 0.8) + #
+	theme_bw() +  scale_fill_manual(values=c("steelblue", "orangered4")) +#
+	theme(axis.line.x = element_line(colour= "black"),#
+  		axis.line.y = element_line(colour= "black"),#
+  		axis.title.x = element_blank(),#element_text(size=16, vjust=-0.15),#
+        axis.title.y = element_text(size=16, vjust= 0.8),#
+        axis.text.x = element_text(size=14, vjust=-0.05),#
+        axis.text.y = element_text(size=14),#
+        panel.border = element_blank(), #
+		legend.position=c(0.8, 0.9),  #
+        legend.background= element_rect(fill="white", colour="white"),#
+        legend.key= element_blank(),#
+        legend.title= element_blank(),#
+        legend.text = element_text(size=12))  + #
+	geom_point(data = df2[df2$Evaluation == "Data",], colour = "black", #
+		position = position_dodge(width = 0.9), size = 3, guides = FALSE)  +#
+	geom_errorbar(limits, position = position_dodge(width = 0.9), width= 0.2)      #
+# turn off dots in legend.  Add model/data to legend
+ggplot(df3, aes(x = Name, y = Prevalence, fill = Infection)) + #, colour = Name#
+	geom_bar(position = position_dodge(), stat = "identity", colour = "black") + ylim(0, 0.8) + #
+	theme_bw() +  scale_fill_manual(values=c("gray83", "gray47")) + #
+	theme(axis.line.x = element_line(colour= "black"),#
+  		axis.line.y = element_line(colour= "black"),#
+  		axis.title.x = element_blank(),#element_text(size=16, vjust=-0.15),#
+        axis.title.y = element_text(size=16, vjust= 0.8),#
+        axis.text.x = element_text(size=14, vjust=-0.05),#
+        axis.text.y = element_text(size=14),#
+        panel.border = element_blank(), #
+		legend.position=c(0.8, 0.9),  #
+        legend.background= element_rect(fill="white", colour="white"),#
+        legend.key= element_blank(),#
+        legend.title= element_blank(),#
+        legend.text = element_text(size=12))  + #
+	geom_point(data = df2[df2$Evaluation == "Data",], colour = "black", #
+		position = position_dodge(width = 0.9), size = 3)  +#
+	geom_errorbar(limits, position = position_dodge(width = 0.9), width= 0.2)
+p1 <- #
+ggplot(df3, aes(x = Name, y = Prevalence, fill = Infection)) + #, colour = Name#
+	geom_bar(position = position_dodge(), stat = "identity", colour = "black") +#
+	ylim(0, 0.8) + xlab("")#
+	theme_bw() +  scale_fill_manual(values=c("gray83", "gray47")) + #
+	theme(axis.line.x = element_line(colour= "black"),#
+  		axis.line.y = element_line(colour= "black"),#
+  		axis.title.x = element_text(size=16, vjust=-0.15),#
+        axis.title.y = element_text(size=16, vjust= 0.8),#
+        axis.text.x = element_text(size=14, vjust=-0.05),#
+        axis.text.y = element_text(size=14),#
+        panel.border = element_blank(), #
+		legend.position=c(0.8, 0.9),  #
+        legend.background= element_rect(fill="white", colour="white"),#
+        legend.key= element_blank(),#
+        legend.title= element_blank(),#
+        legend.text = element_text(size=12))  + #
+	geom_point(data = df2[df2$Evaluation == "Data",], colour = "black", #
+		position = position_dodge(width = 0.9), size = 3)  +#
+	geom_errorbar(limits, position = position_dodge(width = 0.9), width= 0.2)      #
+# turn off dots in legend.  Add model/data to legend#
+#
+p1
+p1 <- #
+ggplot(df3, aes(x = Name, y = Prevalence, fill = Infection)) + #, colour = Name#
+	geom_bar(position = position_dodge(), stat = "identity", colour = "black") +#
+	ylim(0, 0.8) + xlab("") +#
+	theme_bw() +  scale_fill_manual(values=c("gray83", "gray47")) + #
+	theme(axis.line.x = element_line(colour= "black"),#
+  		axis.line.y = element_line(colour= "black"),#
+  		axis.title.x = element_text(size=16, vjust=-0.15),#
+        axis.title.y = element_text(size=16, vjust= 0.8),#
+        axis.text.x = element_text(size=14, vjust=-0.05),#
+        axis.text.y = element_text(size=14),#
+        panel.border = element_blank(), #
+		legend.position=c(0.8, 0.9),  #
+        legend.background= element_rect(fill="white", colour="white"),#
+        legend.key= element_blank(),#
+        legend.title= element_blank(),#
+        legend.text = element_text(size=12))  + #
+	geom_point(data = df2[df2$Evaluation == "Data",], colour = "black", #
+		position = position_dodge(width = 0.9), size = 3)  +#
+	geom_errorbar(limits, position = position_dodge(width = 0.9), width= 0.2)      #
+# turn off dots in legend.  Add model/data to legend#
+#
+p1
+multiplot(p, p1, cols = 2)
+library(MASS)#
+#library(gmp)  # precision on matrix inverse calculation#
+#
+################################################
+# Ro of bTB in the absence of brucellosis, no age structure#
+################################################
+params = list(theta = 4, K = 400, betaT = 0.01, b = 0.5, bT = 1, muS = 0.05)#
+x = c(S = 500)#
+#
+Ro_bTB_single = function(params, x){#
+	####################################
+	# Input: #
+	# x = c(S = final S value at params)#
+	# params = parameter values()#
+	# Output: Ro for bTB alone#
+	####################################
+	with(as.list(c(x, params)), {#
+		v21 <- (-b*bT - b*bT*((S/K)^theta) + #
+			b*S*theta*((S/K)^(theta-1))/K)/(1+((S/K)^theta)) + betaT*S#
+		v22 <- (-b - b*((S/K)^theta) + b*S*theta*((S/K)^(theta-1))/K)/(1+((S/K)^theta)) - muS#
+		Fmat <- matrix(c(betaT*S,0,0,0), nrow = 2, byrow = T)#
+		Vmat <- matrix(c(muS, 0, v21, v22), nrow = 2, byrow = T)#
+		Vinv <- solve(Vmat)#
+		vals1 <- eigen(Fmat%*%Vinv)$values #??? matrix algebra?#
+		vals2 <- eigen(betaT*S/muS)$values#
+		return(list(Ro_longway = max(vals1), Ro_shortway = vals2, #
+			Vmatrix =Vmat, check1 = Vmat%*%Vinv))#
+		}#
+	)#
+}#
+Ro_bTB_single(params, x)
+relage = c(0.137, rep(0.368/4, 4), rep(0.185/4, 4),#
+		rep(0.235/6, 6), rep(0.075/5, 5))#
+	S0 = 400*relage; It0 = 0*relage; Ib0 = 0*relage; #
+	Ic0 = 0*relage; R0 = 0 * relage; Rc0 = 0 * relage#
+	x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)#
+	times <- seq(0, 500, 1)#
+	sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))
+S <- unname(unlist( sol[500, c(2:21)]))
+library(deSolve)
+relage = c(0.137, rep(0.368/4, 4), rep(0.185/4, 4),#
+		rep(0.235/6, 6), rep(0.075/5, 5))#
+	S0 = 400*relage; It0 = 0*relage; Ib0 = 0*relage; #
+	Ic0 = 0*relage; R0 = 0 * relage; Rc0 = 0 * relage#
+	x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)#
+	times <- seq(0, 500, 1)#
+	sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))
+source('~/GitHub/bTB-bruc-co-infection-ms/fixed_parameters_norecovery_agematrix.R', chdir = TRUE)#
+source('~/GitHub/bTB-bruc-co-infection-ms/rhs_age.R', chdir = TRUE)
+sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))
+params <- c(fixed.params.olddz, list(gamma=1/2, betaB = 1.004592,#
+	betaT = 12.833531/10000, rhoT = 1, rhoB = 2.1, theta= 4, K = 433))
+sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))
+S <- unname(unlist( sol[500, c(2:21)]))
+sum(S)
+S
+params = list(theta = 4, K = 400, betaT = 0.01, b = 0.5, bT = 1, muS = 0.05)#
+x = c(S = 541)#
+#
+Ro_bTB_single = function(params, x){#
+	####################################
+	# Input: #
+	# x = c(S = final S value at params)#
+	# params = parameter values()#
+	# Output: Ro for bTB alone#
+	####################################
+	with(as.list(c(x, params)), {#
+		v21 <- (-b*bT - b*bT*((S/K)^theta) + #
+			b*S*theta*((S/K)^(theta-1))/K)/(1+((S/K)^theta)) + betaT*S#
+		v22 <- (-b - b*((S/K)^theta) + b*S*theta*((S/K)^(theta-1))/K)/(1+((S/K)^theta)) - muS#
+		Fmat <- matrix(c(betaT*S,0,0,0), nrow = 2, byrow = T)#
+		Vmat <- matrix(c(muS, 0, v21, v22), nrow = 2, byrow = T)#
+		Vinv <- solve(Vmat)#
+		vals1 <- eigen(Fmat%*%Vinv)$values #??? matrix algebra?#
+		vals2 <- eigen(betaT*S/muS)$values#
+		return(list(Ro_longway = max(vals1), Ro_shortway = vals2, #
+			Vmatrix =Vmat, check1 = Vmat%*%Vinv))#
+		}#
+	)#
+}#
+Ro_bTB_single(params, x)
+12.833531/10000
+fixed.params.olddz
+params = list(theta = 4, K = 400, betaT = 0.0012, b = 0.5, bT = 0.86, muS = 0.06)#
+x = c(S = 541)#
+#
+Ro_bTB_single = function(params, x){#
+	####################################
+	# Input: #
+	# x = c(S = final S value at params)#
+	# params = parameter values()#
+	# Output: Ro for bTB alone#
+	####################################
+	with(as.list(c(x, params)), {#
+		v21 <- (-b*bT - b*bT*((S/K)^theta) + #
+			b*S*theta*((S/K)^(theta-1))/K)/(1+((S/K)^theta)) + betaT*S#
+		v22 <- (-b - b*((S/K)^theta) + b*S*theta*((S/K)^(theta-1))/K)/(1+((S/K)^theta)) - muS#
+		Fmat <- matrix(c(betaT*S,0,0,0), nrow = 2, byrow = T)#
+		Vmat <- matrix(c(muS, 0, v21, v22), nrow = 2, byrow = T)#
+		Vinv <- solve(Vmat)#
+		vals1 <- eigen(Fmat%*%Vinv)$values #??? matrix algebra?#
+		vals2 <- eigen(betaT*S/muS)$values#
+		return(list(Ro_longway = max(vals1), Ro_shortway = vals2, #
+			Vmatrix =Vmat, check1 = Vmat%*%Vinv))#
+		}#
+	)#
+}#
+Ro_bTB_single(params, x)
+Fmat = params$betaT* matrix(rep(S, each = 20), nrow = 20, byrow = T)
+Fmat
+fixed.params.olddz
+# Get stable age distribution in dz free conditions#
+	relage = c(0.137, rep(0.368/4, 4), rep(0.185/4, 4),#
+		rep(0.235/6, 6), rep(0.075/5, 5))#
+	S0 = 400*relage; It0 = 0*relage; Ib0 = 0*relage; #
+	Ic0 = 0*relage; R0 = 0 * relage; Rc0 = 0 * relage#
+	x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)#
+	times <- seq(0, 500, 1)#
+	sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))#
+	S <- unname(unlist( sol[500, c(2:21)]))
+params <- c(fixed.params.olddz, list(gamma=1/2, betaB = 1.004592,#
+	betaT = 12.833531/10000, rhoT = 1, rhoB = 2.1, theta= 4, K = 433))
+relage = c(0.137, rep(0.368/4, 4), rep(0.185/4, 4),#
+		rep(0.235/6, 6), rep(0.075/5, 5))#
+	S0 = 400*relage; It0 = 0*relage; Ib0 = 0*relage; #
+	Ic0 = 0*relage; R0 = 0 * relage; Rc0 = 0 * relage#
+	x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)#
+	times <- seq(0, 500, 1)#
+	sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))#
+	S <- unname(unlist( sol[500, c(2:21)]))
+S
+rep(S, each = 20)
+Fmat = params$betaT* matrix(rep(S, each = 20), nrow = 20, byrow = T)
+Fmat
+Vmat = diag(x = params$muT + 1)
+Vmat
+Vmat[row(Vmat) - col(Vmat) == 1] <- -1
+Vmat
+Vinv <- solve(Vmat)
+Vmat %*% Vinv
+vals <- eigen(Fmat %*% Vinv)$values
+eigen(Fmat %*% Vinv)
+eignen(2)
+eigen(2)
+max(eigen(Fmat %*% Vinv)$values)
+(eigen(Fmat %*% Vinv)$values)
+(eigen(Fmat %*% Vinv)$values)[1]
+params$betaT* matrix(rep(S, each = 20), nrow = 20, byrow = T)
+params

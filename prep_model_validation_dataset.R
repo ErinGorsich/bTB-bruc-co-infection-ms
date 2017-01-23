@@ -175,7 +175,7 @@ cCB[cCB$id == "R34b", c(7:9)] <- "M"	# died March 2011, date set as Mar2010
 # R34c- mortality after times here		# retrieved and last picked up on July 2012
 #cCB[cCB$id == "R35", c(7:9)] <- "M"  	# BOLUS
 cCB[cCB$id == "R39", c(7:9)] <- "M"	  	# last picked up Oct10, retrieved MArch 2011
-cCB[cCB$id == "R44", c(5:9)] <- "M" 	# date set as Oct 09, picked up by Neels Dec 2009
+cCB[cCB$id == "R44", c(5:9)] <- "M" 		# date set as Oct 09, picked up by Neels Dec 2009
 #cCB[cCB$id == "R45", c(7:9)] <- "M"  	# BOLUS - no date
 #cCB[cCB$id == "R45b", c(7:9)] <- "M"  	# BOLUS
 cCB[cCB$id == "R46", c(3:9)] <- "M"		# picked up June2009, (darted Oct 08)

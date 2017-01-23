@@ -135,6 +135,9 @@ test.mod<-coxph(Surv(start, stop, convert.time)~ TB_3*herd2+TB_3*testage+ cluste
 test.mod<-coxph(Surv(start, stop, convert.time)~ herd2+TB_3*testage+ cluster(animal), data=data); summary(test.mod) # 248.7528
 test.mod<-coxph(Surv(start, stop, convert.time)~ TB_3+herd2+testage+ cluster(animal), data=data); summary(test.mod) # 248.75
 
+# USE THIS ONE FOR AVERAGE!!!!!!!!!!!!
+test.mod<-coxph(Surv(start, stop, convert.time)~ TB_3+herd2+ testage + cluster(animal), data=data)
+
 data$age4<- NA
 data$age4[data$age_yr <4] <- "young"
 data$age4[data$age_yr >= 4] <- "old"
