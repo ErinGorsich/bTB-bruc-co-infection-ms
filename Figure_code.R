@@ -81,7 +81,6 @@ dev.off()
 # Evaluation take 2: 
 setwd("~/GitHub/bTB-bruc-co-infection-ms")
 df<- readRDS("coinfection_pattern_results.rds")
-df2$color <- c(1,2,0, 0, 3, 4, 0, 0)
 f2 <- data.frame(Evaluation = c("Model", "Model", "Data", "Data"), 
 	Infection = c("Single infection", "Co-infection", "Single infection", "Co-infection"), 
 	BrucellosisPrevalence = c(df$prevBinS, df$prevBinT, 0.3035, 0.4524), 
@@ -96,6 +95,7 @@ df2 <- reshape(f2, varying = c("BrucellosisPrevalence", "TBPrevalence"),
 df2$Infection <- relevel(df2$Infection, "Single infection")
 df2$CILow <- c(NA, NA, 0.26544, 0.365798, NA, NA, 0.1781895, 0.2857)
 df2$CIHigh <- c(NA, NA, 0.3451408, 0.540598, NA, NA, 0.27835, 0.43137)
+df2$color <- c(1,2,0, 0, 3, 4, 0, 0)
 df3 <- df2[df2$Evaluation == "Model",]
 df3$color <- c(rgb(97, 139, 14, maxColorValue= 255))
 df3$Name <- as.factor(df3$Name)
@@ -116,7 +116,7 @@ p1 <- ggplot(df3, aes(x = Name, y = Prevalence, fill = color)) + #, colour = Nam
 	geom_errorbar(limits, position = position_dodge(width = 0.9), width= 0.2, cex = 2 ) +
 	ylim(0, 0.8) + xlab("") + guides(fill = FALSE) +
 	theme_bw() +  
-	scale_fill_manual(values=c("#458b00", "#295300", "#6959cd", "#38306f")) +
+	scale_fill_manual(values=c("#52a500", "#387200", "#7b6dd3", "#5745c7")) +  ##458b00; #6959cd
 	theme(panel.border = element_blank(), 
         panel.margin = element_blank(),
         panel.grid.major= element_blank(),
@@ -880,6 +880,60 @@ inset <- ggplot(df2, aes(x = Infection, y = Incidence, colour = Infection, shape
 #multiplot(p6,  pincid, p10.2, p12 , cols = 2)
 
 
+#######################################################
+#######################################################
+# Figure 3- Ro and endemic prevalence figures
+#######################################################
+#######################################################
+
+df <- data.frame(Infection = c("brucellosis", "brucellosis", "bTB", "bTB"), 
+	Coinfection = c("single", "co-infection", "single", "co-infection"),
+	Prevalence = c(0.32, 0.37, 0.58, 0.29),
+	R = c(2, 2, 3.4, 1.4)) 
+df$color <- as.character(seq(1,4,1))
+df$Infection <- relevel(df$Infection, "bTB")
+df$Coinfection <- relevel(df$Coinfection, "single")
+
+p13 <- 
+ggplot(df, aes(x = Coinfection, y = Prevalence, colour = Infection, shape = Infection)) + #colour = color,
+	geom_point(stat = "identity", size =4) +   #position = position_dodge(0.3),
+	geom_line(aes(group =Infection)) +   # position = position_dodge(0.3)
+	ylim(0, 0.7) + 
+	xlab("") +
+	theme_bw() +
+	scale_colour_manual(values = c("slateblue3","chartreuse4")) +
+	theme(axis.line.x = element_line(colour= "black"),
+  		axis.line.y = element_line(colour= "black"),
+  		axis.title.x = element_text(size=16, vjust=-0.15),
+         axis.title.y = element_text(size=16, vjust= 0.8),
+         axis.text.x = element_text(size=14, vjust=-0.05),
+         axis.text.y = element_text(size=14),
+         panel.border = element_blank(), 
+	legend.position=c(0.85, 0.87),  
+        legend.background= element_rect(fill="white", colour="white"),
+        legend.key= element_blank(),
+        legend.title= element_blank(),
+        legend.text = element_text(size=12)) 
+
+p14 <- 
+ggplot(df, aes(x = Coinfection, y = R, colour = Infection, shape = Infection)) + #colour = color,
+	geom_point(stat = "identity", size =4) +   #position = position_dodge(0.3), 
+	geom_line(aes(group =Infection)) +  #position = position_dodge(0.3)
+	ylim(0.8, 4) + 
+	xlab("") +
+	ylab(expression(R[0])) + 
+	theme_bw() +
+	scale_colour_manual(values = c("slateblue3","chartreuse4"), guide = F) +
+	scale_shape_manual(values = c(19, 17), guide = FALSE) +
+	theme(axis.line.x = element_line(colour= "black"),
+  		axis.line.y = element_line(colour= "black"),
+  		axis.title.x = element_text(size=16, vjust=-0.15),
+         axis.title.y = element_text(size=16, vjust= 0.8),
+         axis.text.x = element_text(size=14, vjust=-0.05),
+         axis.text.y = element_text(size=14),
+         panel.border = element_blank()) 
+
+multiplot(p14, p13, cols = 2)
 
 #######################################################
 #######################################################
