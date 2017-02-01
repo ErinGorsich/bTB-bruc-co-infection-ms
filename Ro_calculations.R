@@ -1,4 +1,5 @@
 library(MASS)
+library(deSolve)
 #library(gmp)  # precision on matrix inverse calculation, not yet usnig
 
 ###############################################
@@ -177,3 +178,140 @@ Ro_bTB_co_age = function(params){
 }
 
 Ro_bTB_co_age(params)  # 0.96
+
+
+
+###############################################
+# Ro of brucellosis in the absence of bTB, age structure
+###############################################
+source('~/GitHub/bTB-bruc-co-infection-ms/fixed_parameters_norecovery_agematrix.R', chdir = TRUE)
+source('~/GitHub/bTB-bruc-co-infection-ms/rhs_age.R', chdir = TRUE)
+params <- c(fixed.params.olddz, list(gamma=1/2, betaB = 1.004592,
+	betaT = 12.833531/10000, rhoT = 1, rhoB = 2.1, theta= 4, K = 433))
+
+Ro_brucellosis_single_age = function(params){
+	###################################
+	# Input: paramter file
+	###################################
+	# Get stable age distribution in dz free conditions
+	relage = c(0.137, rep(0.368/4, 4), rep(0.185/4, 4),
+		rep(0.235/6, 6), rep(0.075/5, 5))
+	S0 = 400*relage; It0 = 0*relage; Ib0 = 0*relage; 
+	Ic0 = 0*relage; R0 = 0 * relage; Rc0 = 0 * relage
+	x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)
+	times <- seq(0, 500, 1)
+	sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))
+	S <- unname(unlist( sol[500, c(2:21)]))
+
+    betaB_age = c(params$betaB, rep(exp(0.0885) * params$betaB, 2), rep(params$betaB, 17))
+    
+	# Calculate next generation matrix
+	Fmat = params$betaB * matrix(rep(S/sum(S), each = 20), nrow = 20, byrow = T)
+	Fmat[2:3,] <- exp(0.0885) * Fmat[2:3,] # increased FOI in young
+	
+	Vmat = diag(x = params$muB + params$gamma + 1)
+	Vmat[row(Vmat) - col(Vmat) == 1] <- -1
+	Vinv <- solve(Vmat)
+	vals <- eigen(Fmat %*% Vinv)$values
+	return(max(Re(vals)))
+	#return(list(Ro =vals, Ro2 =vals2, Vmat = Vmat, Vmat2 = Vmat2, 
+	#	check = Vmat%*%Vinv, check2 = Vmat2 %*% V2inv, N = sum(S)))
+}
+
+Ro_brucellosis_single_age(params)  # 1.36
+
+
+
+###############################################
+# Ro of brucellosis in the presence of bTB, no age structure
+###############################################
+source('~/GitHub/bTB-bruc-co-infection-ms/fixed_parameters_norecovery_agematrix.R', chdir = TRUE)
+source('~/GitHub/bTB-bruc-co-infection-ms/rhs_age.R', chdir = TRUE)
+params <- c(fixed.params.olddz, list(gamma=1/2, betaB = 1.004592,
+	betaT = 12.833531/10000, rhoT = 1, rhoB = 2.1, theta= 4, K = 433))
+
+
+
+Ro_brucellosis_co  = function(params) {
+	# Generate guess at endemic conditions
+	relage = c(0.137, rep(0.368/4, 4), rep(0.185/4, 4),
+		rep(0.235/6, 6), rep(0.075/5, 5))
+	S0 = 400*relage; It0 = 2*relage; Ib0 = 0*relage; 
+	Ic0 = 0*relage; R0 = 0 * relage; Rc0 = 0 * relage
+	x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)
+	times <- seq(0, 500, 1)
+	sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))
+	S <- sum(unname(unlist( sol[500, c(2:21)])))
+	It <- sum(unname(unlist( sol[500, c(22:41)])))
+	N <- sum(S) + sum(It)
+	
+	Fmat = matrix(c(params$betaB * S / N, params$betaB * S / N, 
+		params$rhoB * params$betaB * It / N, params$rhoB * It / N), byrow = T, nrow = 2)	
+	Vmat = matrix(c(params$rhoT * params$betaT * It + params$gamma + mean(params$muB), 0,
+		-params$rhoT * params$betaT * It, params$gamma + mean(params$muB)	), byrow = T, nrow = 2)
+	Vinv <- solve(Vmat)
+	vals <- eigen(Fmat %*% Vinv)$values
+	return(max(Re(vals)))
+}
+Ro_brucellosis_co(params)  # 2.15
+
+
+###############################################
+# Ro of brucellosis in the presence of bTB, age structure
+###############################################
+source('~/GitHub/bTB-bruc-co-infection-ms/fixed_parameters_norecovery_agematrix.R', chdir = TRUE)
+source('~/GitHub/bTB-bruc-co-infection-ms/rhs_age.R', chdir = TRUE)
+params <- c(fixed.params.olddz, list(gamma=1/2, betaB = 1.004592,
+	betaT = 12.833531/10000, rhoT = 1, rhoB = 2.1, theta= 4, K = 433))
+
+Ro_brucellosis_co_age = function(params){
+	###################################
+	# Input: paramter file
+	###################################
+	# Get stable age distribution in TB only
+	relage = c(0.137, rep(0.368/4, 4), rep(0.185/4, 4),
+		rep(0.235/6, 6), rep(0.075/5, 5))
+	S0 = 400*relage; It0 = 2*relage; Ib0 = 0*relage; 
+	Ic0 = 0*relage; R0 = 0 * relage; Rc0 = 0 * relage
+	x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)
+	times <- seq(0, 500, 1)
+	sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))
+	S <- unname(unlist( sol[500, c(2:21)]))
+	It <- unname(unlist( sol[500, c(22:41)]))
+	N <- sum(S) + sum(It)
+	Sall <- sum(S)
+	Itall <- sum(It)
+	
+	# age specific FOI (a vector)
+	params$betaBm <- rep(params$betaB, length.out = 20)
+	params$betaBm[2:3] <- exp(0.0885) * params$betaB 
+	params$betaT <- rep(params$betaT, length.out = 20)
+
+	# Calculate next generation matrix, 1:40 columns, 1:40 rows
+	Fmat = rbind(matrix(rep(params$betaBm * S / N, each = 40), nrow = 20, byrow = T),
+		matrix(rep(params$rhoB * params$betaBm * It / N, each = 40), nrow = 20, byrow = T))
+
+	# Rows 1:20, cols 1:40
+	diag <- params$rhoT * params$betaT * Itall + params$muB + params$gamma + 1
+	M1 <- diag(x = diag)
+	M1[row(M1) - col(M1) == 1] <- -1
+	Vmat1 = cbind(M1, 		
+		matrix(0, nrow = 20, ncol = 20) )
+
+	# Rows 21:40, cols 1:40		 
+	diag <- - params$rhoT * params$betaT * Itall  
+	M4 <- diag(x = diag)
+	
+	diag <- params$gamma + params$muC + 1
+	M5 <- diag(x = diag)
+	M5[row(M5) - col(M5) == 1] <- -1
+	Vmat2 <- cbind(M4, M5)
+	
+	Vmat <- rbind(Vmat1, Vmat2)
+	Vinv <- solve(Vmat)
+	vals <- eigen(Fmat %*% Vinv)$values
+	return(max(Re(vals))) 
+}
+
+Ro_brucellosis_co_age(params)  
+

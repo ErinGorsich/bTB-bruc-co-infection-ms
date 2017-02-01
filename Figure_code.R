@@ -889,7 +889,7 @@ inset <- ggplot(df2, aes(x = Infection, y = Incidence, colour = Infection, shape
 df <- data.frame(Infection = c("brucellosis", "brucellosis", "bTB", "bTB"), 
 	Coinfection = c("single", "co-infection", "single", "co-infection"),
 	Prevalence = c(0.32, 0.37, 0.58, 0.29),
-	R = c(2, 2, 3.4, 1.4)) 
+	R = c(1.36, 1.9, 3.4, 1.4)) 
 df$color <- as.character(seq(1,4,1))
 df$Infection <- relevel(df$Infection, "bTB")
 df$Coinfection <- relevel(df$Coinfection, "single")
@@ -934,6 +934,61 @@ ggplot(df, aes(x = Coinfection, y = R, colour = Infection, shape = Infection)) +
          panel.border = element_blank()) 
 
 multiplot(p14, p13, cols = 2)
+
+
+df <- data.frame(Infection = c("brucellosis", "brucellosis", "bTB", "bTB"), 
+	X = c("bruc-single", "bruc-co-infection", "bTB-single", "bTB-co-infection"),
+	Coinfection = c("single", "co-infection", "single", "co-infection"),
+	Prevalence = c(0.32, 0.37, 0.58, 0.29),
+	Xindex = c(3, 3.5, 1, 1.5),
+	R = c(1.36, 1.9, 3.4, 1.4))
+df <- df[order(df$Xindex),]
+df$X <- factor(df$X, levels = c("bTB-single", "bTB-co-infection", "bruc-single", "bruc-co-infection"))
+df$color <- as.character(seq(1,4,1))
+df$Infection <- relevel(df$Infection, "bTB")
+df$Coinfection <- relevel(df$Coinfection, "single")
+
+
+p13 <- ggplot(df, aes(x = X, y = Prevalence, colour = Infection, shape = Coinfection)) + #colour = color,
+	geom_point(stat = "identity", size =4) +   #position = position_dodge(0.3),
+	geom_line(aes(group =Infection), lty = 2) +   # position = position_dodge(0.3)
+	ylim(0, 0.7) + 
+	xlab("") +
+	theme_bw() +
+	scale_colour_manual(values = c("slateblue3","chartreuse4"), guide = F) +
+	theme(axis.line.x = element_line(colour= "black"),
+  		axis.line.y = element_line(colour= "black"),
+  		axis.title.x = element_text(size=16, vjust=-0.15),
+         axis.title.y = element_text(size=16, vjust= 0.8),
+         axis.text.x = element_blank(), #element_text(size=14, vjust=-0.05),
+         axis.text.y = element_text(size=14),
+         panel.border = element_blank(), 
+	legend.position=c(0.85, 0.9),  
+        legend.background= element_rect(fill="white", colour="white"),
+        legend.key= element_blank(),
+        legend.title= element_blank(),
+        legend.text = element_text(size=12)) 
+
+p14 <- ggplot(df, aes(x = X, y = R, colour = Infection, shape = Coinfection)) + #colour = color,
+	geom_point(stat = "identity", size =4) +   #position = position_dodge(0.3), 
+	geom_line(aes(group =Infection), lty = 2) +  #position = position_dodge(0.3)
+	ylim(0.8, 4) + 
+	xlab("") +
+	ylab(expression(R[0])) + 
+	theme_bw() +
+	scale_colour_manual(values = c("slateblue3","chartreuse4"), guide = F) +
+	scale_shape_manual(values = c(19, 17), guide = FALSE) +
+	theme(axis.line.x = element_line(colour= "black"),
+  		axis.line.y = element_line(colour= "black"),
+  		axis.title.x = element_text(size=16, vjust=-0.15),
+         axis.title.y = element_text(size=16, vjust= 0.8),
+         axis.text.x = element_blank(),  #element_text(size=14, vjust=-0.05),
+         axis.text.y = element_text(size=14),
+         panel.border = element_blank()) 
+
+multiplot(p14, p13, cols = 2)
+
+
 
 #######################################################
 #######################################################
