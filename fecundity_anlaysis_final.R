@@ -28,8 +28,12 @@ data4$fec[data4$calf=="unknown" & data4$milk=="yes"] <- 1
 data4$fec[data4$calf=="unknown" & data4$milk=="unknown"] <- 0
 data4$fec[data4$calf=="unknown" & data4$milk=="no"] <- 0
 
-# overall rates: 
+# overall rates
 table(data4$fec, data4$tb, data4$bruc)
+# 19.4 in uninfected
+# 28% in bruc -; bTB + 
+# 20.7% in bruc +; bTB - 
+# 33% in co
 
 
 pregdata<- data2[!(data2$capturetime %in% calftime),]
@@ -85,6 +89,19 @@ for (age in ages){
 #Choose age category that is most appropriate
 ########################################################################
 d<- data4[data4$age_yr > 3 & data4$age_yr <= 9,]
+table(d$fec, d$tb, d$bruc)
+# uninfected: 31.4%
+# bTB only: 0.3
+# bruc : 24.4
+# co: 33%
+
+# with > 4
+# uninfected: 56%
+# bTB only: 30.4%
+# bruc only: 30%
+# co: 42.8%
+
+
 d$age5 <- "adult"; 
 d$age5[d$age_yr %in% c(4) ] <- "juvenile"
 d$age5[d$age_yr %in% c(8, 9) ] <- "mature"

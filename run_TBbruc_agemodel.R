@@ -483,9 +483,10 @@ get_prevalence(sol); #get_prevalence(sol.recov);   # almost no change in Bruc pr
 x0 = endemic_agestructure
 x0[28] <- 5; x0[8] <- x0[8] - 5
 
-rhoB_test <- seq(1, 10, 0.1)
-mort_test <- seq(1, 10, 0.1)
-rhoT_test <- seq(1, 10, 0.1)
+rhoB_test <- seq(0, 8, length.out = 101)
+rhoT_test <- seq(0, 8, length.out = 101)
+mort_test <- seq(0, 7.2, length.out = 101)  # specify as change from S, later make centered at single
+#mort_test <- seq(-5, 5, length.out = 101)
 
 # Data frame to hold results of changing bruc effects on bTB
 epiTB <- data.frame(
@@ -500,15 +501,16 @@ epiB <- data.frame(
 	mort = rep(mort_test, each = length(rhoB_test)),
 	bTBprev = NA, brucprev = NA, 	finalN = NA, 
 	bTB_inS = NA, bTB_inB = NA, bruc_inS = NA, bruc_inTB = NA)
-epiB<- epiB[epiB$mort < 7.2,]
-epiTB <- epiTB[epiTB$mort < 7.2, ]
-	
+
+imax <- c(length(epiTB[,1]))
+pb <- txtProgressBar(min = 0, max = imax, style = 3)	
 for (i in 1:length(epiTB[,1])){
-	print(i)
 	params.test_log = c(fixed.params.olddz, list(gamma=1/2, theta = 4, K = 433,
 		betaB = 1.025, betaT = 12.833531/10000, rhoT = epiTB$rhoT[i], rhoB = 1))
 	params.test_log$muC <- epiTB$mort[i] * params.test_log$muS
+	#params.test_log$muC[params.test_log$muC > 1] <- 1
 	params.test_log$muRC <- epiTB$mort[i] * params.test_log$muS
+	#params.test_log$muRC[params.test_log$muRC > 1] <- 1
 		
 	sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params.test_log))
 	temp <- get_prevalence(sol)
@@ -521,15 +523,22 @@ for (i in 1:length(epiTB[,1])){
 	epiTB$bruc_inS[i] = temp$prevBinS 
 	epiTB$bruc_inTB[i] = temp$prevBinT
 	rm(params.test_log, sol, temp)
+	setTxtProgressBar(pb, i)
 }
+cat("\n")
+
 write.csv(epiTB, "~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/draft2/post-labmeeting/epiT.csv")
 
+imax <- c(length(epiB[,1]))
+pb <- txtProgressBar(min = 0, max = imax, style = 3)	
 for (i in 1:length(epiB[,1])){
 	params.test_log = c(fixed.params.olddz, list(gamma=1/2, theta = 4, K = 433, 
 		betaB = 1.025, betaT = 12.833531/10000, rhoT = 2.1, rhoB = epiB$rhoB[i]))
 	params.test_log$muC <- epiB$mort[i] * params.test_log$muS
+	#params.test_log$muC[params.test_log$muC > 1] <- 1
 	params.test_log$muRC <- epiB$mort[i] * params.test_log$muS
-			
+	#params.test_log$muRC[params.test_log$muRC > 1] <- 1
+		
 	sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params.test_log))
 	temp <- get_prevalence(sol)
 	
@@ -541,15 +550,48 @@ for (i in 1:length(epiB[,1])){
 	epiB$bruc_inS[i] = temp$prevBinS 
 	epiB$bruc_inTB[i] = temp$prevBinT
 	rm(params.test_log, sol, temp)
-	print(i)
+	setTxtProgressBar(pb, i)
 }
+cat("\n")
 
 write.csv(epiB, "~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/draft2/post-labmeeting/epiB.csv")
 
+################################################
+# Again for epiB - but for when the rhoT = 1
+rhoB_test <- seq(0, 8, length.out = 30)
+rhoT_test <- seq(0, 8, length.out = 30)
+mort_test <- seq(0, 7.2, length.out = 30) 
 
+epib <- data.frame(
+	rhoB= rep(rhoB_test, length(rhoB_test)), 
+	mort = rep(mort_test, each = length(rhoB_test)),
+	bTBprev = NA, brucprev = NA, 	finalN = NA, 
+	bTB_inS = NA, bTB_inB = NA, bruc_inS = NA, bruc_inTB = NA)
 
-
-
+imax <- c(length(epib[,1]))
+pb <- txtProgressBar(min = 0, max = imax, style = 3)	
+for (i in 1:length(epib[,1])){
+	params.test_log = c(fixed.params.olddz, list(gamma=1/2, theta = 4, K = 433, 
+		betaB = 1.025, betaT = 12.833531/10000, rhoT = 1, rhoB = epib$rhoB[i]))
+	params.test_log$muC <- epib$mort[i] * params.test_log$muS
+	#params.test_log$muC[params.test_log$muC > 1] <- 1
+	params.test_log$muRC <- epib$mort[i] * params.test_log$muS
+	#params.test_log$muRC[params.test_log$muRC > 1] <- 1
+		
+	sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params.test_log))
+	temp <- get_prevalence(sol)
+	
+	epib$bTBprev[i] = temp$prevTB
+	epib$brucprev[i] = temp$prevB 	
+	epib$finalN[i] = sum(sol[length(sol), c(2:121)])
+	epib$bTB_inS[i] = temp$prevTinS 
+	epib$bTB_inB[i] = temp$prevTinB
+	epib$bruc_inS[i] = temp$prevBinS 
+	epib$bruc_inTB[i] = temp$prevBinT
+	rm(params.test_log, sol, temp)
+	setTxtProgressBar(pb, i)
+}
+write.csv(epib, "~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/draft2/post-labmeeting/epib_rhoT1.csv")
 
 
 

@@ -112,7 +112,7 @@ limits <- aes(ymax = df3$CIHigh, ymin= df3$CILow)
 p1 <- ggplot(df3, aes(x = Name, y = Prevalence, fill = color)) + #, colour = Name
 	geom_bar(position = position_dodge(), stat = "identity", colour = "black", cex = 2) +
 	geom_point(data = df3, aes(y = data, x = Name), 
-		position = position_dodge(width = 0.9), size = 6, colour = "black") +
+		position = position_dodge(width = 0.9), size = 10, colour = "black") +
 	geom_errorbar(limits, position = position_dodge(width = 0.9), width= 0.2, cex = 2 ) +
 	ylim(0, 0.8) + xlab("") + guides(fill = FALSE) +
 	theme_bw() +  
@@ -1128,8 +1128,8 @@ multiplot(p, p1, cols = 2)
 #######################################################
 epiT <- read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/draft2/post-labmeeting/epiT.csv")
 epiB <- read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/draft2/post-labmeeting/epiB.csv")
-epiB <- epiB[epiB$mort < 7,]
-epiT <- epiT[epiT$mort < 7,]
+#epiB <- epiB[epiB$mort < 7,]
+#epiT <- epiT[epiT$mort < 7,]
 cols <- brewer.pal(11, "RdBu")
 cols2 <- colorRampPalette(brewer.pal(11, "RdBu"))
 
@@ -1137,10 +1137,12 @@ epiT$bTBplot <- epiT$bTBprev - 0.58
 epiB$bTBplot <- epiB$bTBprev - 0.58
 epiT$brucplot <- epiT$brucprev - 0.318
 epiB$brucplot <- epiB$brucprev - 0.318
+epiT$mortT <- epiT$mort/3
+epiB$mortB <- epiB$mort/2.8
 
 # see range of data by self overall
 p1 <- ggplot(data = epiT, aes(x = mort, y = rhoT)) + geom_tile(aes(fill = bTBprev)) +
-	scale_fill_distiller(palette = "RdYlBu", direction = -1, limits = c(0, 0.8))
+	scale_fill_distiller(palette = "RdYlBu", direction = -1, limits = c(-0.01, 0.8))
 #p2<- ggplot(data = epiT, aes(x = mort, y = rhoB)) + geom_tile(aes(fill = bTBplot)) +
 #	scale_fill_distiller(palette = "RdYlBu", direction = -1, limits = c(-0.51, 0.51))	
 p3 <- ggplot(data = epiB, aes(x =mort, y = rhoB)) + geom_tile(aes(fill = brucprev)) +
@@ -1149,31 +1151,59 @@ p3 <- ggplot(data = epiB, aes(x =mort, y = rhoB)) + geom_tile(aes(fill = brucpre
 #	scale_fill_distiller(palette = "RdYlBu", direction = -1, limits = c(-0.51, 0.51))
 multiplot(p1, p3, cols= 2)
 
+# same even if rhoT = 1 or 1.2.
+pnew <- ggplot(data = epib, aes(x = mort, y = rhoB)) + geom_tile(aes(fill = brucprev)) +
++ 	scale_fill_distiller(palette = "RdYlBu", direction = -1, limits = c(-0.01, 0.8))
+multiplot(pnew, p3, cols= 2)
+
+
 
 # For publication
 df <- data.frame(Difference = c(epiT$bTBplot, epiB$brucplot), 
 	infection = c(rep("bTB", length(epiT[,1])), rep("brucellosis", length(epiB[,1]))), 
 	rho = c(epiT$rhoT, epiB$rhoB), mort = c(epiT$mort, epiB$mort))
-df2 <- rbind(df[df$infection == "brucellosis" & df$rho == 2.1 & df$mort == 5.8 , c("rho", "mort", "infection")], 
-	df[df$infection == "bTB" & df$rho == 1 & df$mort == 5.8 , c("rho", "mort", "infection"),])
+df2 <- data.frame(rho = c(2.1, 1.2), mort = c(5.8, 5.8), infection = c("brucellosis", "bTB"))
+#df2 <- rbind(df[df$infection == "brucellosis" & df$rho == 2.1 & df$mort == 5.8 , c("rho", "mort", "infection")], 
+#	df[df$infection == "bTB" & df$rho == 1.2 & df$mort == 5.8 , c("rho", "mort", "infection"),])
+df2$rho_seup <- c(3.2, 1.8)			# bTB 1.29 (CI 0.645 to 2.606)
+df2$rho_sedown <- c(1.42, 0.91)      #bruc trans (CI = 0.91 to 4.98)
+df2$mort_selow <- c(5.8 - 0.48, 5.8 - 0.48)
+df2$mort_seup <- c(5.8 + 0.48, 5.8 + 0.48)
 df$infection <- relevel(df$infection, "bTB")
 p <- ggplot(data = df, aes(x = mort, y = rho))
 p2 <- p + theme_bw() + facet_wrap(~ infection) + 
 	xlab(expression(paste(Proportional~increase~"in"~mortality~with~"co-infection,"~ mu[C], "/", mu[S]))) + 
 	ylab("Proportional increase in transmission with co-infection") +
 	theme(panel.grid.major = element_blank(), 
-	plot.title = element_text(size = 14),
-	axis.title = element_text(size = 12), axis.text = element_text(size = 12), 
-	legend.text = element_text(size=12), 
+	strip.text.x = element_text(size = 16),
+	plot.title = element_text(size = 14),  # 14 in pdf format
+	axis.title = element_text(size = 12), axis.text = element_text(size = 12), # 12 
+	legend.text = element_text(size=12),  # 12 
+	legend.title = element_text(size = 14),
 	legend.text.align = 1, 
 	legend.key.size = unit(1, "cm") ) + 
-	geom_tile(aes(fill = Difference)) +
-	scale_fill_distiller(palette = "RdYlBu", direction = -1, limits = c(-0.51, 0.51)) +
-	geom_point(data = df2, size = 2, pch = 8)
+	geom_raster(aes(fill = Difference), interpolate = TRUE) +  # was geom_tile
+	scale_fill_distiller(palette = "RdYlBu", direction = -1, 
+		limits = c(-0.6, 0.6)) +   
+	geom_point(data = df2, size = 2, pch = 8) + 
+	geom_errorbar(data = df2, aes(ymin = rho_sedown, ymax = rho_seup), width = 0.1 ) + 
+	geom_errorbarh(data = df2, aes(xmin = mort_selow, xmax = mort_seup), height = 0.1)	
 	#geom_rect(data = df2, aes(x = NULL, y = NULL, xmin = mort - 0.5, ymin = rho - 0.5, 
 	#	xmax = mort + 0.5, ymax = rho + 0.5), size = 1, fill = NA, 
 	#	colour = "black")
+df$Difference2 <- df$Difference - 0.1  # want contours to span -5 to +5 not 0 to 10
+df3 <- data.frame(Difference = c(0.10, -0.10, 0.50, 0.30, 0.10, -0.10), 
+	rho = c(7.8, 3, 7.8, 7.8, 7, 1.3), mort = c(2.2, 6.65, 1.35, 3.0, 6.6, 6.65), 
+	infection = c("bTB", "bTB", "brucellosis", "brucellosis", "brucellosis", "brucellosis"))
+p2 <- p2  + geom_contour(data = df, aes(x = mort, y = rho, z = Difference2, weight = ..level..),
+	binwidth = 0.2, color = "black", linetype = 3) + 
+	geom_text(data = df3, aes(z = NULL, label = Difference)) + facet_wrap(~infection); 
+	
+	
+tiff("Figure4.tif", width  = 9, height = 5, units = "in", res = 300)	
 p2
+dev.off()
+
 
 
 # Just realistic mortality (or mort with same as single to greater)

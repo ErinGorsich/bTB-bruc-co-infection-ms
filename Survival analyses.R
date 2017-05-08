@@ -328,6 +328,21 @@ final.mod<-coxph(Surv(start2, stop2, death.time)~brucella+TB_3+herd2+ age6+ clus
 #Wald test            = 34.51  on 4 df,   p=5.86e-07
 #Score (logrank) test = 32.82  on 4 df,   p=1.298e-06,   Robust = 15.46  p=0.00383
 
+vcov(final.mod)
+# se for bruc + bTB = 
+(0.121814 + 0.1186884 - 0.00993067)^0.5
+# CI: 
+exp(1.106+1.0370 + 1.96*0.480)
+exp(1.106+1.0370 - 1.96*0.480)
+
+###################################################
+data3$infection <- NA
+data3$infection[data3$TB_3 == 0 & data3$brucella == 0] <- "AS"
+data3$infection[data3$TB_3 == 1 & data3$brucella == 0] <- "TB"
+data3$infection[data3$TB_3 == 0 & data3$brucella == 1] <- "BR"
+data3$infection[data3$TB_3 == 1 & data3$brucella == 1] <- "C"
+test.mod <- coxph(Surv(start2, stop2, death.time)~infection+herd2+ age6+ cluster(animal), data=data3)
+
 
 ######!!!!!!!!  # SEE AGE-SPECIFIC PATTERN WITH BRUCELLOSIS!
 data3$age2.4 <- as.factor(data3$age2.4)
