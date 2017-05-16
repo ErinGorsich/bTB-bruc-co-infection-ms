@@ -128,259 +128,6 @@ p1
 dev.off()
 
 
-
-#SlateBlue3, Slateblue4
-
-
-#######################################################
-#######################################################
-# SUPPLEMENTAL FIGURE OR CUT- AGE PREVALENCE FIGURES (Old figure 1)
-#######################################################
-#######################################################
-# make a dataframe with age prevalence in tbneg and tbpos, long format for ggplot
-val<-NA
-get_prev<-function(dat) {
-  if(length(dat)==0){
-    val<-0
-  }
-  if(length(dat>0)){
-    val<-length(dat[dat=="1"])/length(dat)
-  }
-  return(val)
-}
-
-binsize=2
-agebins=c(seq(0, max(d$age), binsize), max(d$age+1))
-agebins<- c(agebins[c(1:6)], 16.5)
-d$bruc2<-NA
-newdf<-data.frame(agebin=c(agebins, agebins), Brucprev=NA, 
-                  TB=c(rep("bTB-", length(agebins)),rep("bTB+", length(agebins)) ),
-                  N=NA)  
-
-
-for (i in 1:length(d$bruc)){
-  ifelse(d$bruc[i]=="negative", d$bruc2[i]<-0, d$bruc2[i]<-1)
-}
-d$bruc<-as.numeric(d$bruc2)
-for (i in 1:(length(agebins)-1)){
-  neg<-d[d$btb==0,]
-  pos<-d[d$btb==1,]
-  d_neg<-d[d$age>=agebins[i] & d$age<agebins[i+1] & d$btb=="0",]
-  d_pos<-d[d$age>=agebins[i] & d$age<agebins[i+1] & d$btb=="1",]
-  newdf$Brucprev[i]<-get_prev(d_neg$bruc)
-  newdf$Brucprev[i+length(agebins)]<-get_prev(d_pos$bruc)
-  newdf$N[i]<- length(d_neg$bruc)
-  newdf$N[i+length(agebins)]<- length(d_pos$bruc)
-}
-newdf<-newdf[newdf$agebin<16,]
-newdf$se<-sqrt(newdf$Brucprev*(1-newdf$Brucprev)/newdf$N)
-newdf$se[is.na(newdf$se)]<-0
-
-# remove 0-2 bin because no TB+
-newdf2<-newdf[newdf$N>1,]; newdf<-newdf2
-
-# plot 1: 
-p<- ggplot(newdf, aes(x=agebin, y=Brucprev, group=TB, colour=TB)) + 
-  geom_line()+
-  geom_point(size=3, shape=19) + # colour="darkred", fill="darkred" +
-  scale_colour_manual(values=c("steelblue", "orangered4"))
-p2<- p+ geom_errorbar(aes(ymin= newdf$Brucprev-newdf$se, ymax=newdf$Brucprev+newdf$se ), width=0.3) + 
-  xlab("Age (years)") + ylab("Brucellosis prevalence") +
-  theme_bw() + # removes ugly gray.
-  scale_x_discrete(breaks=c("0", "2", "4", "6", "8", "10"), limits=seq(0, 10, 1), 
-                   labels=c("0-2", "2-4", "4-6", "6-8", "8-10", "10+")) +
-  scale_y_continuous(limits=c(0,1)) + 
-  theme(axis.line.x = element_line(colour= "black"),
-  		axis.line.y = element_line(colour= "black"),
-  		axis.title.x = element_text(size=16, vjust=-0.15),
-        axis.title.y = element_text(size=16, vjust= 0.8),
-        axis.text.x = element_text(size=14, vjust=-0.05),
-        axis.text.y = element_text(size=14),
-        panel.border = element_blank(), 
-        # legend information
-        legend.position=c(0.82, 0.9),  
-        legend.background= element_rect(fill="white", colour="white"),
-        legend.key= element_blank(),
-        legend.title= element_blank(),
-        legend.text = element_text(size=15)   )
-
-# inset plot
-d$btb2<-as.factor(d$btb)
-p3<-ggplot(d, aes(x=age)) + 
-  geom_histogram(data=subset(d, btb2=="0"), fill= "steelblue", alpha=0.3, stat="bin", binwidth= 1) + 
-  geom_histogram(data=subset(d, btb2=="1"), fill= "orangered", alpha=0.3, stat="bin", binwidth= 1) + 
-  theme_bw()+ 
-  xlab("Age (years)")+ ylab("Count")+
-  theme(panel.border = element_blank(), 
-        panel.margin = element_blank(),
-        panel.grid.major= element_blank(),
-        panel.grid.minor= element_blank()) + 
-  theme(axis.line.x = element_line(colour= "black"), 
-		axis.line.y = element_line(colour= "black")  )
-
-vp<- viewport(width=0.4, height=0.4, x=0.34, y=0.75)
-print(p2)
-print(p3, vp=vp)
-
-
-#############################################
-# By heard: 
-d<-data.frame(btb=data_nofinal$tb , bruc=as.character(data_nofinal$bruc), age=data_nofinal$age_sel/12, 
-              id=data_nofinal$id, herd=data_nofinal$herdorig)
-d<-d[d$age<14,]
-binsize=2
-agebins=c(seq(0, max(d$age), binsize), max(d$age+1))
-agebins<- c(agebins[c(1:6)], 16.5)
-d$bruc2<-NA
-
-# LS
-d<-d[d$herd=="LS",]
-newdf<-data.frame(agebin=c(agebins, agebins), Brucprev=NA, 
-                  TB=c(rep("bTB-", length(agebins)),rep("bTB+", length(agebins)) ),
-                  N=NA)  
-for (i in 1:length(d$bruc)){
-  ifelse(d$bruc[i]=="negative", d$bruc2[i]<-0, d$bruc2[i]<-1)
-}
-d$bruc<-as.numeric(d$bruc2)
-for (i in 1:(length(agebins)-1)){
-  neg<-d[d$btb==0,]
-  pos<-d[d$btb==1,]
-  d_neg<-d[d$age>=agebins[i] & d$age<agebins[i+1] & d$btb=="0",]
-  d_pos<-d[d$age>=agebins[i] & d$age<agebins[i+1] & d$btb=="1",]
-  newdf$Brucprev[i]<-get_prev(d_neg$bruc)
-  newdf$Brucprev[i+length(agebins)]<-get_prev(d_pos$bruc)
-  newdf$N[i]<- length(d_neg$bruc)
-  newdf$N[i+length(agebins)]<- length(d_pos$bruc)
-}
-newdf<-newdf[newdf$agebin<16,]
-newdf$se<-sqrt(newdf$Brucprev*(1-newdf$Brucprev)/newdf$N)
-newdf$se[is.na(newdf$se)]<-0
-
-# remove 0-2 bin because no TB+
-newdf2<-newdf[newdf$N>0,]; newdf<-newdf2
-
-# plot 1: 
-p4<- ggplot(newdf, aes(x=agebin, y=Brucprev, group=TB, colour=TB)) + 
-  geom_line()+
-  geom_point(size=3, shape=19) + # colour="darkred", fill="darkred" +
-  scale_colour_manual(values=c("steelblue", "orangered4"))
-p5<- p4+ 
-  geom_errorbar(limits=aes(ymin= newdf$Brucprev-newdf$se, ymax=newdf$Brucprev+newdf$se ), width=0.3) + 
-  xlab("Age (years)") + ylab("Brucellosis prevalence") +
-  theme_bw() + # removes ugly gray.
-  scale_x_discrete(breaks=c("0", "2", "4", "6", "8", "10"), limits=seq(0, 10, 1), 
-                   labels=c("0-2", "2-4", "4-6", "6-8", "8-10", "10+")) +
-  scale_y_continuous(limits=c(0,1)) + 
-  theme(axis.line = element_line(colour= "black"),
-  		axis.title.x = element_text(size=16, vjust=-0.15),
-        axis.title.y = element_text(size=16, vjust= 0.8),
-        axis.text.x = element_text(size=14, vjust=-0.05),
-        axis.text.y = element_text(size=14),
-        panel.border = element_blank(), 
-        # legend information
-        legend.position=c(0.82, 0.9),  
-        legend.background= element_rect(fill="white", colour="white"),
-        legend.key= element_blank(),
-        legend.title= element_blank(),
-        legend.text = element_text(size=15)   )
-
-# inset plot
-d$btb2<-as.factor(d$btb)
-p6<-ggplot(d, aes(x=age)) + 
-  geom_histogram(data=subset(d, btb2=="0"), fill= "steelblue", alpha=0.3, stat="bin", binwidth= 1) + 
-  geom_histogram(data=subset(d, btb2=="1"), fill= "orangered", alpha=0.3, stat="bin", binwidth= 1) + 
-  theme_bw()+ xlab("Age (years)")+ ylab("Count")+
-  theme(panel.border = element_blank(), 
-        panel.margin = element_blank(),
-        panel.grid.major= element_blank(),
-        panel.grid.minor= element_blank(),
-        axis.line = element_line(colour= "black"))
-
-vp<- viewport(width=0.4, height=0.4, x=0.34, y=0.75)
-print(p5)
-print(p6, vp=vp)
-
-#######################################################
-#######################################################
-# Figure S1
-#######################################################
-#######################################################
-###### SAME FIGURE BUT WITH Capture period effects
-newdf<-data.frame(captbin=c(seq(0.9,7.9,1), seq(1.1,8.1,1)),
-	prev=c(0.32, 0.284, 0.247, 0.2660, 0.34, 0.3696, 0.4300, 0.442, 
-			0.118, 0.1300, 0.3, 0.2980, 0.300, 0.3695, 0.387, 0.4155), 
-	dz = c(rep("Brucellosis", 8), rep("Tuberculosis", 8)),
-	N = c(59, 80, 93, 94, 50, 92, 92, 77, 59, 80, 93, 94, 50, 92, 92, 77), 
-	param = c(-0.7261, 0.10051 , 0.01135 , -0.231094, -1.9331 ,-0.87186 ,-1.1061 , -0.959), 
-	sep = c(0.689, 0.484 , 0.326 , 0.354, 0.81 , 0.455 ,0.485 , 0.424))  
-newdf$se<- sqrt(newdf$prev * (1 - newdf$prev) / newdf$N)
-
-p3<- ggplot(newdf, aes(x=captbin, y=prev, group=dz, colour=dz)) + 
-  geom_line()+
-  geom_point(size=3, shape=19) + # colour="darkred", fill="darkred" +
-  geom_errorbar(aes(ymin= newdf$prev-newdf$se, ymax=newdf$prev+newdf$se), width=0.2) + 
-  scale_colour_manual(values=c("darkslategray", "darkseagreen3"))
-p4<- p3 +
-  theme_bw() + # removes ugly gray.
-  xlab("Capture period (6 months)") + ylab("Sero-prevalence") +
-  scale_x_discrete(breaks=c("1", "2", "3", "4", "5", "6", "7", "8"), limits=seq(1, 8, 1), 
-                   labels=c("1", "2", "3", "4", "5", "6", "7", "8")) +
-  scale_y_continuous(limits=c(0,0.6)) + 
-  theme(axis.line.x = element_line(colour= "black"),
-  		axis.line.y = element_line(colour= "black"),
-  		axis.title.x = element_text(size=16, vjust=-0.15),
-        axis.title.y = element_text(size=16, vjust= 0.8),
-        axis.text.x = element_text(size=14, vjust=-0.05),
-        axis.text.y = element_text(size=14),
-        panel.border = element_blank(), 
-        # legend information
-        legend.position=c(0.82, 0.9),  
-        legend.background= element_rect(fill="white", colour="white"),
-        legend.key= element_blank(),
-        legend.title= element_blank(),
-        legend.text = element_text(size=15)   )
-
-
-p4<- p3 +
-  theme_bw() + # removes ugly gray.
-  xlab("Capture period (6 months)") + ylab("Sero-prevalence") +
-  scale_x_discrete(breaks=c("1", "2", "3", "4", "5", "6", "7", "8"), limits=seq(1, 8, 1), 
-                   labels=c("1", "2", "3", "4", "5", "6", "7", "8")) +
-  scale_y_continuous(limits=c(0,0.6)) + 
-  theme(axis.line.x = element_line(colour= "black"),
-  		axis.line.y = element_line(colour= "black"),
-  		axis.title.x = element_text(size=16, vjust=-0.15),
-        axis.title.y = element_text(size=16, vjust= 0.8),
-        axis.text.x = element_text(size=14, vjust=-0.05),
-        axis.text.y = element_text(size=14),
-        panel.border = element_blank(), 
-        # legend information
-        legend.position=c(0.82, 0.9),  
-        legend.background= element_rect(fill="white", colour="white"),
-        legend.key= element_blank(),
-        legend.title= element_blank(),
-        legend.text = element_text(size=15)   )
-
-
-newdf2<- newdf[newdf$dz=="Brucellosis",]
-p5<- ggplot(newdf2, aes(x=captbin, y= param, colour= dz, fill=dz)) + 
-  	xlab("Capture period (6 months)") + ylab("Effect size (TB by age interaction)") +
-	geom_bar(stat="identity", fill="darkseagreen3") + 
-	geom_errorbar(aes(ymin= newdf2$param - newdf2$sep, ymax = newdf2$param + newdf2$sep), 
-	width=0.2) + 
-	scale_colour_manual(values=c("darkslategray")) + 
-	scale_x_discrete(breaks=c("1", "2", "3", "4", "5", "6", "7", "8"), limits=seq(1, 8, 1), 
-                   labels=c("1", "2", "3", "4", "5", "6", "7", "8")) +
-    theme_bw() +
-    guides(fill=FALSE, colour= FALSE) +
-  	theme(axis.line.x = element_line(colour= "black"),
-  		axis.line.y = element_line(colour= "black"),
-  		axis.title.x = element_text(size=16, vjust=-0.15),
-        axis.title.y = element_text(size=16, vjust= 0.8),
-        axis.text.x = element_text(size=14, vjust=-0.05),
-        axis.text.y = element_text(size=14),
-        panel.border = element_blank() )
-
 #######################################################
 #######################################################
 # Figure 2- Survival plots
@@ -521,112 +268,14 @@ p6red <- ggplot(survlong[survlong$age < 13.2,], aes(x = age, y = estimate, colou
         	legend.text = element_text(size=14))
 
 
-
-# 2b- CUT - Effect size
-#######################################################
-df<- data.frame(name=c("Brucellosis", "Tuberculosis", "Site (LS)", "Age (< 3 yr)"), 
-	est= c(3.0, 2.81, 2.08, 3.26), 
-	lower= c(1.52, 1.43, 1.1, 1.70), 
-	upper= c(6.0, 5.58, 3.93, 6.28), 
-	order=c(1,2,3,4))
-df$name <- factor(df$name, levels= df$name[order(df$order, decreasing = TRUE)])
-
-p7 <- ggplot(df, aes(x=df$name, y=df$est)) + 
-	geom_point(df$estimate, size = 3, shape = 19)+ 
-	geom_errorbar(aes(ymin=df$lower, ymax=df$upper, width=0.1)) +  				
-    theme_bw() +
-    theme(panel.border= element_blank(), 
-          axis.title.x=element_text(size=14), axis.title.y=element_blank() ) + 
-    theme(axis.line.x = element_line(color="black"), 
-          axis.line.y = element_line(color="black")) + 
-	coord_flip() + 
-	ylab("Relative risk of mortality") +
-	geom_segment(aes(x=0, xend=4.3, y=1, yend=1), linetype=2, colour = "dark red")+ ylim(-0.01,6.5) + 
-	theme(
-		axis.title.x = element_text(size=16, vjust=-0.15),
-        axis.title.y = element_blank(), #element_text(size=16, vjust= 0.8),
-        axis.text.x = element_text(size=14, vjust=-0.05),
-        axis.text.y = element_text(size=14))
-
-
-
-
-
-#######################################################
-# Survival curves- not used but informative
-#######################################################
-# plot predicted survival time (same as before but good): 
-df<-data.frame(start=data3$start2, stop=data3$stop2, death.time=data3$death.time, TB=data3$TB_3, Br=data3$brucella, age=data3$age6, herd=data3$herd)
-# set at average herd value (0.53) so not LS or CB. 
-mort<-with(df, data.frame(tb=0, bruc=0, age=rep(mean(age=="adult"), 2), herd=rep(mean(herd=="LS"), 2)))
-mortTB<-with(df, data.frame(TB=1, Br=0, age=rep(mean(age=="adult"),2), herd=rep(mean(herd=="LS"), 2)))
-mortBr<-with(df, data.frame(Br=1, TB=0, age=rp(mean(age=="adult"),2), herd=rep(mean(herd=="LS"), 2)))
-mortco<-with(df, data.frame(Br=1, TB=1, age=rep(mean(age=="adult"),2), herd=rep(mean(herd=="LS"), 2)))
-mort<-with(df, data.frame(tb=0, bruc=0, age=0, herd=1))
-mortTB<-with(df, data.frame(tb=1, bruc=0, age=0, herd=1))
-mortBr<-with(df, data.frame(bruc=1, tb=0, age=0, herd=1))# herds = 0 or 1 (LS)
-mortco<-with(df, data.frame(bruc=1, tb=1, age=0, herd=1))
-
-plot_add.mod<-coxph(Surv(start, stop, death.time)~bruc+herd+tb+herd+age, data=df)
-m<-survfit(plot_add.mod, newdata=mort)  # adults, herd - CB
-mt<-survfit(plot_add.mod, newdata=mortTB)
-mb<-survfit(plot_add.mod, newdata=mortBr)
-mco<-survfit(plot_add.mod, newdata=mortco)
-
-
-plot(m, conf.int=FALSE, ylab="Survival", xlab="Time (months)", lty=c(1, 2),
-	ylim=c(0.1, 1), cex.lab=1.4, col="dark blue", bty="n")
-lines(mt, lty=c(5, 5), conf.int= FALSE, col="dark green")
-lines(mb, lty=c(4, 4), conf.int= FALSE, col="purple")
-lines(mco, lty=c(3,3), conf.int= FALSE, col="dark red")
-legend("bottomleft", legend=c("Uninfected", "Tuberculosis+", "Brucellosis +", "Co-infected"),
-	lty=c(1 ,5, 4, 3), inset=0.02, bty="n", col=c("dark blue", "dark green", "purple", "dark red"))
-
-
-df<- data.frame(name=c("bruc", "bTB", "site", "age (< 3 yr)"), 
-	est= c(3.0, 2.81, 2.08, 3.26), 
-	lower= c(1.52, 1.43, 1.1, 1.70), 
-	upper= c(6.0, 5.58, 3.93, 6.28), 
-	order=c(1,2,3,4))
-df$name <- factor(df$name, levels= df$name[order(df$order, decreasing = TRUE)])
-
-p2 <-ggplot(df, aes(x=df$name, y=df$est)) + 
-	geom_point(df$estimate)+ 
-	geom_errorbar(aes(ymin=df$lower, ymax=df$upper, width=0.1)) +  				
-	theme_bw() +
-	theme(panel.border= element_blank(), 
-	axis.title.x=element_text(size=14), axis.title.y=element_blank() ) + 
-	theme(axis.line.x = element_line(color="black"), 
-	axis.line.y = element_line(color="black")) + 
-	coord_flip() + 
-	ylab("Relative risk of mortality") +
-	geom_segment(aes(x=0, xend=4.3, y=1, yend=1), linetype=2, colour = "dark red")+ ylim(-0.01,6.5) + 
-	coord_flip() 
-p2
-
-
-########  OVERALL SURVIVAL ESTIMATES FOR OUR POPULATION
-df<-data.frame(start=data3$start2, stop=data3$stop2, death.time=data3$death.time, age=data3$age6, herd=data3$herd)
-mort<-with(df, data.frame(age=c("adult", "adult", "juvenile", "juvenile"), herd=c("LS", "CB", "LS", "CB")))
-plot_add.mod<-coxph(Surv(start, stop, death.time)~herd+age, data=df)
-m<-survfit(plot_add.mod, newdata=mort)
-summary(m)
-
-plot_add.mod<-coxph(Surv(start, stop, death.time)~age, data=df)
-m<-survfit(plot_add.mod, newdata=mort)
-summary(m)
-
-
-
-
 ########################################################################
 ########################################################################
-# Figure 2: Fecundity Figure
+# Figure B1: Fecundity Figure
 ########################################################################
 ########################################################################
 newdf<-data.frame(
-	Calf=c(14/25, 10/33, 7/23, 6/14, 2/26, 0/8, 2/7, 1/7), 
-	Agecategory = c(rep("Adult (age > 4)", 4), rep("Juvenile (age = 4)", 4)),
+	Calf=c(11/16, 7/24, 6/16, 4/7, 5/35, 3/17, 3/14, 3/14), 
+	Agecategory = c(rep("Adult (age > 4)", 4), rep("Sub-adult (age = 4)", 4)),
 	Infection = c("uninfected", "brucellosis", "bTB", "co-infected", "uninfected", "brucellosis", "bTB", "co-infected"),
 	N = c(25, 33, 23, 14, 26, 8, 7, 7))
 newdf$color <- as.factor(seq(1,8))
@@ -705,44 +354,16 @@ p10.2<- p9 +  theme_bw() + # removes ugly gray.
         axis.text.y = element_text(size=14),
         panel.border = element_blank(),
         # legend information
-        legend.position=c(0.8, 0.9),  
+        legend.position=c(0.85, 0.95),  
         legend.background= element_rect(fill="white", colour="white"),
         legend.key= element_blank(),
         legend.title= element_blank(),
         legend.text = element_text(size=12)) 
 
 
-
-# CUT - Fecundity Effect size
-#######################################################
-df2<- data.frame(name=c("Tuberculosis\n (LS)", "Tuberculosis\n (CB)", 
-	"Site (LS)", "Age (< 3 yr)"), 
-	est= c(4.32, 0.39, 0.49, 2.42), 
-	lower= c(1.51, 0.04062, 0.18, 1.04), 
-	upper= c(12.3, 3.69, 1.32, 5.62), 
-	order=c(1,2,3,4))
-	df2$name <- factor(df2$name, levels= df2$name[order(df2$order, decreasing = TRUE)])
-
-p11 <- ggplot(df2, aes(x=df2$name, y=df2$est)) + 
-	geom_point(df2$estimate, size = 3, shape = 19)+ 
-	geom_errorbar(aes(ymin=df2$lower, ymax=df2$upper, width=0.1)) +  				
-    theme_bw() +
-    theme(panel.border= element_blank(), 
-          axis.title.x=element_text(size=14), axis.title.y=element_blank() ) + 
-    theme(axis.line.x = element_line(color="black"), 
-          axis.line.y = element_line(color="black")) + 
-	coord_flip() + 
-	ylab("Relative risk of brucellosis infection") +
-	geom_segment(aes(x=0, xend=4.3, y=1, yend=1), linetype=2, colour = "dark red") +
-	ylim(-0.01,12.31) + 
-	theme(
-		axis.title.x = element_text(size=16, vjust=-0.15),
-        axis.title.y = element_blank(), #element_text(size=16, vjust= 0.8),
-        axis.text.x = element_text(size=14, vjust=-0.05),
-        axis.text.y = element_text(size=14))
-source('~/GitHub/bTB-bruc-co-infection-ms/multiplot.R', chdir = TRUE)
-
-
+png("Figure_B1_fecundity.png", width = 600, height = 450, units = "px")
+p10.2
+dev.off()
 
 ########################################################################
 ########################################################################
@@ -1264,6 +885,77 @@ multiplot(p2, p3, cols= 2)
 
 #######################################################
 #######################################################
+# Figure A1- GIS map of park and sample locations
+#######################################################
+#######################################################
+library(maptools)   # for geospatial services; also loads foreign and sp
+library(rgdal)      # for map projection work; also loads sp
+library(RgoogleMaps)
+library(dismo)		# basemaps
+makeTransparent<-function(someColor, alpha=100)
+{
+  newColor<-col2rgb(someColor)
+  apply(newColor, 2, function(curcoldata){rgb(red=curcoldata[1], green=curcoldata[2],
+    blue=curcoldata[3],alpha=alpha, maxColorValue=255)})
+}
+
+# Load Park boundary & rivers
+###########################################
+# To plot any shp file, you read them and then project them, this is the common projection
+# plot then the name plots them, you can use any of the normal commands to change things (fill, col to specify border and inside colors, lwd to specify line type ect.)
+boundary<-readShapePoly("~/Documents/GIS/KNP_data/kruger_boundary.shp")
+proj4string(boundary) <- "+proj=longlat +datum=WGS84"
+rivers<-readShapeLines("~/Documents/GIS/KNP_data/rivers_main.shp")
+proj4string(rivers) <- "+proj=longlat +datum=WGS84"
+sections <- readShapePoly("~/Documents/GIS/KNP_data/sections.shp")
+proj4string(sections) <- "+proj=longlat +datum=WGS84"
+waterways <- readShapeLines("~/Documents/GIS/KNP_data/s-africa-lesetho-waterways-shape/waterways.shp")
+proj4string(sections) <- "+proj=longlat +datum=WGS84"
+countries <- readShapePoly("~/Documents/GIS/KNP_data/AfricanCountries/AfricanCountires.shp")
+proj4string(sections) <- "+proj=longlat +datum=WGS84"
+
+# Load capture locations
+d <- read.csv("~/Documents/phd research/big datasheets_updated to March2013/Demogall_Jan2013dbupdate_annaages2.csv")
+df <- d[, colnames(d) %in% c('Animal.ID','capture.ID', 'capture.termination', 'x.cood.S.', 'y.cood.E.', 'Herd.captured.with')]
+colnames(df) <- c("ID", "capID", "Jocapt", "x", "y", "herd")
+df$x <- as.numeric(as.character(df$x))
+df$y <- as.numeric(as.character(df$y))
+df <- df[!is.na(df$x),]
+df <- df[!is.na(df$y),]
+#df <- df[df$Jocapt == 2,]
+df <- df[df$Jocapt == 3,]
+coordinates(df) <- c("y", "x")
+proj4string(df) <- CRS("+proj=longlat +datum=WGS84")
+
+# outside/overview figure
+plot(countries[countries@data$COUNTRY %in% c("South Africa", "Mozambique", "Botswana", "Namibia", "Zimbabwe"),])
+plot(countries[countries@data$COUNTRY %in% c("South Africa"),], col = "gray", add = TRUE)
+plot(boundary, axes=TRUE, border="black", col = "olivedrab", add = TRUE, lwd = 1.2, main = "") 
+text(25,-28,"South Africa")
+
+# Load base image; reproject 
+# Use RgoogleMaps AND the dismo package's basemap; specify Lat/Long range
+x = c(3400000, 3588000); y = c(-2549398, -2940755)
+xy = cbind(x, y)
+base.map <- gmap(xy, type = "satellite", scale = 2) # type = hybrid, terrain, satellite, roadmap
+#base.map <- gmap(boundary, type = "satellite", scale = 2) # type = hybrid, terrain, satellite, roadmap
+reprojected.boundary <- spTransform(boundary, base.map@crs)
+reprojected.sections <- spTransform(sections, base.map@crs)
+reprojected.df <- spTransform(df, base.map@crs)
+
+# inset google maps figure
+plot(base.map, axes = FALSE)
+plot(reprojected.boundary, add = TRUE, border = "black", 
+	col = makeTransparent("gray", 110), lwd = 1.2)
+plot(reprojected.sections[reprojected.sections@data$SECTION  
+	%in% c("Lower Sabie"),],  border = "yellow", add = TRUE, lwd = 1.2)
+plot(reprojected.sections[reprojected.sections@data$SECTION  
+	%in% c("Crocodile Bridge"),],  border = "gold", add = TRUE, lwd = 1.2)
+points(reprojected.df, pch = 21, col = "red", add = TRUE, cex = 0.2)
+
+
+#######################################################
+#######################################################
 # Figure 4 old- Levelplots, varying rho for both pathogens
 #######################################################
 #######################################################
@@ -1294,12 +986,104 @@ p + theme_bw() + facet_wrap(~ infection) +
 		legend.key.size = unit(1, "cm") )
 
 
+
+
+
+
+
+#######################################################
+# Survival curves- not used but informative
+#######################################################
+# plot predicted survival time (same as before but good): 
+df<-data.frame(start=data3$start2, stop=data3$stop2, death.time=data3$death.time, TB=data3$TB_3, Br=data3$brucella, age=data3$age6, herd=data3$herd)
+# set at average herd value (0.53) so not LS or CB. 
+mort<-with(df, data.frame(tb=0, bruc=0, age=rep(mean(age=="adult"), 2), herd=rep(mean(herd=="LS"), 2)))
+mortTB<-with(df, data.frame(TB=1, Br=0, age=rep(mean(age=="adult"),2), herd=rep(mean(herd=="LS"), 2)))
+mortBr<-with(df, data.frame(Br=1, TB=0, age=rp(mean(age=="adult"),2), herd=rep(mean(herd=="LS"), 2)))
+mortco<-with(df, data.frame(Br=1, TB=1, age=rep(mean(age=="adult"),2), herd=rep(mean(herd=="LS"), 2)))
+mort<-with(df, data.frame(tb=0, bruc=0, age=0, herd=1))
+mortTB<-with(df, data.frame(tb=1, bruc=0, age=0, herd=1))
+mortBr<-with(df, data.frame(bruc=1, tb=0, age=0, herd=1))# herds = 0 or 1 (LS)
+mortco<-with(df, data.frame(bruc=1, tb=1, age=0, herd=1))
+
+plot_add.mod<-coxph(Surv(start, stop, death.time)~bruc+herd+tb+herd+age, data=df)
+m<-survfit(plot_add.mod, newdata=mort)  # adults, herd - CB
+mt<-survfit(plot_add.mod, newdata=mortTB)
+mb<-survfit(plot_add.mod, newdata=mortBr)
+mco<-survfit(plot_add.mod, newdata=mortco)
+
+
+plot(m, conf.int=FALSE, ylab="Survival", xlab="Time (months)", lty=c(1, 2),
+	ylim=c(0.1, 1), cex.lab=1.4, col="dark blue", bty="n")
+lines(mt, lty=c(5, 5), conf.int= FALSE, col="dark green")
+lines(mb, lty=c(4, 4), conf.int= FALSE, col="purple")
+lines(mco, lty=c(3,3), conf.int= FALSE, col="dark red")
+legend("bottomleft", legend=c("Uninfected", "Tuberculosis+", "Brucellosis +", "Co-infected"),
+	lty=c(1 ,5, 4, 3), inset=0.02, bty="n", col=c("dark blue", "dark green", "purple", "dark red"))
+
+
+df<- data.frame(name=c("bruc", "bTB", "site", "age (< 3 yr)"), 
+	est= c(3.0, 2.81, 2.08, 3.26), 
+	lower= c(1.52, 1.43, 1.1, 1.70), 
+	upper= c(6.0, 5.58, 3.93, 6.28), 
+	order=c(1,2,3,4))
+df$name <- factor(df$name, levels= df$name[order(df$order, decreasing = TRUE)])
+
+p2 <-ggplot(df, aes(x=df$name, y=df$est)) + 
+	geom_point(df$estimate)+ 
+	geom_errorbar(aes(ymin=df$lower, ymax=df$upper, width=0.1)) +  				
+	theme_bw() +
+	theme(panel.border= element_blank(), 
+	axis.title.x=element_text(size=14), axis.title.y=element_blank() ) + 
+	theme(axis.line.x = element_line(color="black"), 
+	axis.line.y = element_line(color="black")) + 
+	coord_flip() + 
+	ylab("Relative risk of mortality") +
+	geom_segment(aes(x=0, xend=4.3, y=1, yend=1), linetype=2, colour = "dark red")+ ylim(-0.01,6.5) + 
+	coord_flip() 
+p2
+
+
+########  OVERALL SURVIVAL ESTIMATES FOR OUR POPULATION
+df<-data.frame(start=data3$start2, stop=data3$stop2, death.time=data3$death.time, age=data3$age6, herd=data3$herd)
+mort<-with(df, data.frame(age=c("adult", "adult", "juvenile", "juvenile"), herd=c("LS", "CB", "LS", "CB")))
+plot_add.mod<-coxph(Surv(start, stop, death.time)~herd+age, data=df)
+m<-survfit(plot_add.mod, newdata=mort)
+summary(m)
+
+plot_add.mod<-coxph(Surv(start, stop, death.time)~age, data=df)
+m<-survfit(plot_add.mod, newdata=mort)
+summary(m)
+
+
+# 2b- CUT - Effect size
+#######################################################
+df<- data.frame(name=c("Brucellosis", "Tuberculosis", "Site (LS)", "Age (< 3 yr)"), 
+	est= c(3.0, 2.81, 2.08, 3.26), 
+	lower= c(1.52, 1.43, 1.1, 1.70), 
+	upper= c(6.0, 5.58, 3.93, 6.28), 
+	order=c(1,2,3,4))
+df$name <- factor(df$name, levels= df$name[order(df$order, decreasing = TRUE)])
+
+p7 <- ggplot(df, aes(x=df$name, y=df$est)) + 
+	geom_point(df$estimate, size = 3, shape = 19)+ 
+	geom_errorbar(aes(ymin=df$lower, ymax=df$upper, width=0.1)) +  				
+    theme_bw() +
+    theme(panel.border= element_blank(), 
+          axis.title.x=element_text(size=14), axis.title.y=element_blank() ) + 
+    theme(axis.line.x = element_line(color="black"), 
+          axis.line.y = element_line(color="black")) + 
+	coord_flip() + 
+	ylab("Relative risk of mortality") +
+	geom_segment(aes(x=0, xend=4.3, y=1, yend=1), linetype=2, colour = "dark red")+ ylim(-0.01,6.5) + 
+	theme(
+		axis.title.x = element_text(size=16, vjust=-0.15),
+        axis.title.y = element_blank(), #element_text(size=16, vjust= 0.8),
+        axis.text.x = element_text(size=14, vjust=-0.05),
+        axis.text.y = element_text(size=14))
+
+
 	
-
-
-
-
-
 
 ########################################################################
 ########################################################################
@@ -1378,7 +1162,291 @@ p12
 
 
 
-# CUT FIGURES & INFORMATION
+# CUT - Fecundity Effect size
+#######################################################
+df2<- data.frame(name=c("Tuberculosis\n (LS)", "Tuberculosis\n (CB)", 
+	"Site (LS)", "Age (< 3 yr)"), 
+	est= c(4.32, 0.39, 0.49, 2.42), 
+	lower= c(1.51, 0.04062, 0.18, 1.04), 
+	upper= c(12.3, 3.69, 1.32, 5.62), 
+	order=c(1,2,3,4))
+	df2$name <- factor(df2$name, levels= df2$name[order(df2$order, decreasing = TRUE)])
+
+p11 <- ggplot(df2, aes(x=df2$name, y=df2$est)) + 
+	geom_point(df2$estimate, size = 3, shape = 19)+ 
+	geom_errorbar(aes(ymin=df2$lower, ymax=df2$upper, width=0.1)) +  				
+    theme_bw() +
+    theme(panel.border= element_blank(), 
+          axis.title.x=element_text(size=14), axis.title.y=element_blank() ) + 
+    theme(axis.line.x = element_line(color="black"), 
+          axis.line.y = element_line(color="black")) + 
+	coord_flip() + 
+	ylab("Relative risk of brucellosis infection") +
+	geom_segment(aes(x=0, xend=4.3, y=1, yend=1), linetype=2, colour = "dark red") +
+	ylim(-0.01,12.31) + 
+	theme(
+		axis.title.x = element_text(size=16, vjust=-0.15),
+        axis.title.y = element_blank(), #element_text(size=16, vjust= 0.8),
+        axis.text.x = element_text(size=14, vjust=-0.05),
+        axis.text.y = element_text(size=14))
+source('~/GitHub/bTB-bruc-co-infection-ms/multiplot.R', chdir = TRUE)
+
+
+
+
+
+
+#######################################################
+#######################################################
+# AGE PREVALENCE FIGURES (Old figure 1)
+#######################################################
+#######################################################
+# make a dataframe with age prevalence in tbneg and tbpos, long format for ggplot
+val<-NA
+get_prev<-function(dat) {
+  if(length(dat)==0){
+    val<-0
+  }
+  if(length(dat>0)){
+    val<-length(dat[dat=="1"])/length(dat)
+  }
+  return(val)
+}
+
+binsize=2
+agebins=c(seq(0, max(d$age), binsize), max(d$age+1))
+agebins<- c(agebins[c(1:6)], 16.5)
+d$bruc2<-NA
+newdf<-data.frame(agebin=c(agebins, agebins), Brucprev=NA, 
+                  TB=c(rep("bTB-", length(agebins)),rep("bTB+", length(agebins)) ),
+                  N=NA)  
+
+
+for (i in 1:length(d$bruc)){
+  ifelse(d$bruc[i]=="negative", d$bruc2[i]<-0, d$bruc2[i]<-1)
+}
+d$bruc<-as.numeric(d$bruc2)
+for (i in 1:(length(agebins)-1)){
+  neg<-d[d$btb==0,]
+  pos<-d[d$btb==1,]
+  d_neg<-d[d$age>=agebins[i] & d$age<agebins[i+1] & d$btb=="0",]
+  d_pos<-d[d$age>=agebins[i] & d$age<agebins[i+1] & d$btb=="1",]
+  newdf$Brucprev[i]<-get_prev(d_neg$bruc)
+  newdf$Brucprev[i+length(agebins)]<-get_prev(d_pos$bruc)
+  newdf$N[i]<- length(d_neg$bruc)
+  newdf$N[i+length(agebins)]<- length(d_pos$bruc)
+}
+newdf<-newdf[newdf$agebin<16,]
+newdf$se<-sqrt(newdf$Brucprev*(1-newdf$Brucprev)/newdf$N)
+newdf$se[is.na(newdf$se)]<-0
+
+# remove 0-2 bin because no TB+
+newdf2<-newdf[newdf$N>1,]; newdf<-newdf2
+
+# plot 1: 
+p<- ggplot(newdf, aes(x=agebin, y=Brucprev, group=TB, colour=TB)) + 
+  geom_line()+
+  geom_point(size=3, shape=19) + # colour="darkred", fill="darkred" +
+  scale_colour_manual(values=c("steelblue", "orangered4"))
+p2<- p+ geom_errorbar(aes(ymin= newdf$Brucprev-newdf$se, ymax=newdf$Brucprev+newdf$se ), width=0.3) + 
+  xlab("Age (years)") + ylab("Brucellosis prevalence") +
+  theme_bw() + # removes ugly gray.
+  scale_x_discrete(breaks=c("0", "2", "4", "6", "8", "10"), limits=seq(0, 10, 1), 
+                   labels=c("0-2", "2-4", "4-6", "6-8", "8-10", "10+")) +
+  scale_y_continuous(limits=c(0,1)) + 
+  theme(axis.line.x = element_line(colour= "black"),
+  		axis.line.y = element_line(colour= "black"),
+  		axis.title.x = element_text(size=16, vjust=-0.15),
+        axis.title.y = element_text(size=16, vjust= 0.8),
+        axis.text.x = element_text(size=14, vjust=-0.05),
+        axis.text.y = element_text(size=14),
+        panel.border = element_blank(), 
+        # legend information
+        legend.position=c(0.82, 0.9),  
+        legend.background= element_rect(fill="white", colour="white"),
+        legend.key= element_blank(),
+        legend.title= element_blank(),
+        legend.text = element_text(size=15)   )
+
+# inset plot
+d$btb2<-as.factor(d$btb)
+p3<-ggplot(d, aes(x=age)) + 
+  geom_histogram(data=subset(d, btb2=="0"), fill= "steelblue", alpha=0.3, stat="bin", binwidth= 1) + 
+  geom_histogram(data=subset(d, btb2=="1"), fill= "orangered", alpha=0.3, stat="bin", binwidth= 1) + 
+  theme_bw()+ 
+  xlab("Age (years)")+ ylab("Count")+
+  theme(panel.border = element_blank(), 
+        panel.margin = element_blank(),
+        panel.grid.major= element_blank(),
+        panel.grid.minor= element_blank()) + 
+  theme(axis.line.x = element_line(colour= "black"), 
+		axis.line.y = element_line(colour= "black")  )
+
+vp<- viewport(width=0.4, height=0.4, x=0.34, y=0.75)
+print(p2)
+print(p3, vp=vp)
+
+
+#############################################
+# By heard: 
+d<-data.frame(btb=data_nofinal$tb , bruc=as.character(data_nofinal$bruc), age=data_nofinal$age_sel/12, 
+              id=data_nofinal$id, herd=data_nofinal$herdorig)
+d<-d[d$age<14,]
+binsize=2
+agebins=c(seq(0, max(d$age), binsize), max(d$age+1))
+agebins<- c(agebins[c(1:6)], 16.5)
+d$bruc2<-NA
+
+# LS
+d<-d[d$herd=="LS",]
+newdf<-data.frame(agebin=c(agebins, agebins), Brucprev=NA, 
+                  TB=c(rep("bTB-", length(agebins)),rep("bTB+", length(agebins)) ),
+                  N=NA)  
+for (i in 1:length(d$bruc)){
+  ifelse(d$bruc[i]=="negative", d$bruc2[i]<-0, d$bruc2[i]<-1)
+}
+d$bruc<-as.numeric(d$bruc2)
+for (i in 1:(length(agebins)-1)){
+  neg<-d[d$btb==0,]
+  pos<-d[d$btb==1,]
+  d_neg<-d[d$age>=agebins[i] & d$age<agebins[i+1] & d$btb=="0",]
+  d_pos<-d[d$age>=agebins[i] & d$age<agebins[i+1] & d$btb=="1",]
+  newdf$Brucprev[i]<-get_prev(d_neg$bruc)
+  newdf$Brucprev[i+length(agebins)]<-get_prev(d_pos$bruc)
+  newdf$N[i]<- length(d_neg$bruc)
+  newdf$N[i+length(agebins)]<- length(d_pos$bruc)
+}
+newdf<-newdf[newdf$agebin<16,]
+newdf$se<-sqrt(newdf$Brucprev*(1-newdf$Brucprev)/newdf$N)
+newdf$se[is.na(newdf$se)]<-0
+
+# remove 0-2 bin because no TB+
+newdf2<-newdf[newdf$N>0,]; newdf<-newdf2
+
+# plot 1: 
+p4<- ggplot(newdf, aes(x=agebin, y=Brucprev, group=TB, colour=TB)) + 
+  geom_line()+
+  geom_point(size=3, shape=19) + # colour="darkred", fill="darkred" +
+  scale_colour_manual(values=c("steelblue", "orangered4"))
+p5<- p4+ 
+  geom_errorbar(limits=aes(ymin= newdf$Brucprev-newdf$se, ymax=newdf$Brucprev+newdf$se ), width=0.3) + 
+  xlab("Age (years)") + ylab("Brucellosis prevalence") +
+  theme_bw() + # removes ugly gray.
+  scale_x_discrete(breaks=c("0", "2", "4", "6", "8", "10"), limits=seq(0, 10, 1), 
+                   labels=c("0-2", "2-4", "4-6", "6-8", "8-10", "10+")) +
+  scale_y_continuous(limits=c(0,1)) + 
+  theme(axis.line = element_line(colour= "black"),
+  		axis.title.x = element_text(size=16, vjust=-0.15),
+        axis.title.y = element_text(size=16, vjust= 0.8),
+        axis.text.x = element_text(size=14, vjust=-0.05),
+        axis.text.y = element_text(size=14),
+        panel.border = element_blank(), 
+        # legend information
+        legend.position=c(0.82, 0.9),  
+        legend.background= element_rect(fill="white", colour="white"),
+        legend.key= element_blank(),
+        legend.title= element_blank(),
+        legend.text = element_text(size=15)   )
+
+# inset plot
+d$btb2<-as.factor(d$btb)
+p6<-ggplot(d, aes(x=age)) + 
+  geom_histogram(data=subset(d, btb2=="0"), fill= "steelblue", alpha=0.3, stat="bin", binwidth= 1) + 
+  geom_histogram(data=subset(d, btb2=="1"), fill= "orangered", alpha=0.3, stat="bin", binwidth= 1) + 
+  theme_bw()+ xlab("Age (years)")+ ylab("Count")+
+  theme(panel.border = element_blank(), 
+        panel.margin = element_blank(),
+        panel.grid.major= element_blank(),
+        panel.grid.minor= element_blank(),
+        axis.line = element_line(colour= "black"))
+
+vp<- viewport(width=0.4, height=0.4, x=0.34, y=0.75)
+print(p5)
+print(p6, vp=vp)
+
+#######################################################
+#######################################################
+# Figure S1
+#######################################################
+#######################################################
+###### SAME FIGURE BUT WITH Capture period effects
+newdf<-data.frame(captbin=c(seq(0.9,7.9,1), seq(1.1,8.1,1)),
+	prev=c(0.32, 0.284, 0.247, 0.2660, 0.34, 0.3696, 0.4300, 0.442, 
+			0.118, 0.1300, 0.3, 0.2980, 0.300, 0.3695, 0.387, 0.4155), 
+	dz = c(rep("Brucellosis", 8), rep("Tuberculosis", 8)),
+	N = c(59, 80, 93, 94, 50, 92, 92, 77, 59, 80, 93, 94, 50, 92, 92, 77), 
+	param = c(-0.7261, 0.10051 , 0.01135 , -0.231094, -1.9331 ,-0.87186 ,-1.1061 , -0.959), 
+	sep = c(0.689, 0.484 , 0.326 , 0.354, 0.81 , 0.455 ,0.485 , 0.424))  
+newdf$se<- sqrt(newdf$prev * (1 - newdf$prev) / newdf$N)
+
+p3<- ggplot(newdf, aes(x=captbin, y=prev, group=dz, colour=dz)) + 
+  geom_line()+
+  geom_point(size=3, shape=19) + # colour="darkred", fill="darkred" +
+  geom_errorbar(aes(ymin= newdf$prev-newdf$se, ymax=newdf$prev+newdf$se), width=0.2) + 
+  scale_colour_manual(values=c("darkslategray", "darkseagreen3"))
+p4<- p3 +
+  theme_bw() + # removes ugly gray.
+  xlab("Capture period (6 months)") + ylab("Sero-prevalence") +
+  scale_x_discrete(breaks=c("1", "2", "3", "4", "5", "6", "7", "8"), limits=seq(1, 8, 1), 
+                   labels=c("1", "2", "3", "4", "5", "6", "7", "8")) +
+  scale_y_continuous(limits=c(0,0.6)) + 
+  theme(axis.line.x = element_line(colour= "black"),
+  		axis.line.y = element_line(colour= "black"),
+  		axis.title.x = element_text(size=16, vjust=-0.15),
+        axis.title.y = element_text(size=16, vjust= 0.8),
+        axis.text.x = element_text(size=14, vjust=-0.05),
+        axis.text.y = element_text(size=14),
+        panel.border = element_blank(), 
+        # legend information
+        legend.position=c(0.82, 0.9),  
+        legend.background= element_rect(fill="white", colour="white"),
+        legend.key= element_blank(),
+        legend.title= element_blank(),
+        legend.text = element_text(size=15)   )
+
+
+p4<- p3 +
+  theme_bw() + # removes ugly gray.
+  xlab("Capture period (6 months)") + ylab("Sero-prevalence") +
+  scale_x_discrete(breaks=c("1", "2", "3", "4", "5", "6", "7", "8"), limits=seq(1, 8, 1), 
+                   labels=c("1", "2", "3", "4", "5", "6", "7", "8")) +
+  scale_y_continuous(limits=c(0,0.6)) + 
+  theme(axis.line.x = element_line(colour= "black"),
+  		axis.line.y = element_line(colour= "black"),
+  		axis.title.x = element_text(size=16, vjust=-0.15),
+        axis.title.y = element_text(size=16, vjust= 0.8),
+        axis.text.x = element_text(size=14, vjust=-0.05),
+        axis.text.y = element_text(size=14),
+        panel.border = element_blank(), 
+        # legend information
+        legend.position=c(0.82, 0.9),  
+        legend.background= element_rect(fill="white", colour="white"),
+        legend.key= element_blank(),
+        legend.title= element_blank(),
+        legend.text = element_text(size=15)   )
+
+
+newdf2<- newdf[newdf$dz=="Brucellosis",]
+p5<- ggplot(newdf2, aes(x=captbin, y= param, colour= dz, fill=dz)) + 
+  	xlab("Capture period (6 months)") + ylab("Effect size (TB by age interaction)") +
+	geom_bar(stat="identity", fill="darkseagreen3") + 
+	geom_errorbar(aes(ymin= newdf2$param - newdf2$sep, ymax = newdf2$param + newdf2$sep), 
+	width=0.2) + 
+	scale_colour_manual(values=c("darkslategray")) + 
+	scale_x_discrete(breaks=c("1", "2", "3", "4", "5", "6", "7", "8"), limits=seq(1, 8, 1), 
+                   labels=c("1", "2", "3", "4", "5", "6", "7", "8")) +
+    theme_bw() +
+    guides(fill=FALSE, colour= FALSE) +
+  	theme(axis.line.x = element_line(colour= "black"),
+  		axis.line.y = element_line(colour= "black"),
+  		axis.title.x = element_text(size=16, vjust=-0.15),
+        axis.title.y = element_text(size=16, vjust= 0.8),
+        axis.text.x = element_text(size=14, vjust=-0.05),
+        axis.text.y = element_text(size=14),
+        panel.border = element_blank() )
+
+
+
 #############################################
 #############################################
 Summary information, from cross sectional data
