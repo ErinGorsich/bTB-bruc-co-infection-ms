@@ -15,6 +15,7 @@ library(survival)
 library(lattice)
 library(RColorBrewer)
 library(deSolve)
+library(deSolve)
 
 # read in data prepared in cross_sectional_dataprep, groomed for my bTB statuses
 #data<-read.csv("cross_sectional_data_withdz_cleandisease_nofinal_Feb2016_capturetime_forsurv.csv")
@@ -495,11 +496,78 @@ inset <- ggplot(df2, aes(x = Infection, y = Incidence, colour = Infection, shape
 #vp<- viewport(width=0.21, height=0.17, x=0.66, y=0.89)
 #print(inset, vp=vp)
 
-
         
 # FIGURE 2 (Full)
 #multiplot(p6,  pincid, p10.2, p12 , cols = 2)
 
+#######################################################
+#######################################################
+# Figure C1- Beverton-Holt and stable age distribution
+#######################################################
+#######################################################
+#######################################################
+
+# Left Pannel, Beverton-Holt
+########################################################
+thetaL = seq(0.1, 0.9, by = 0.1)
+thetaH = seq(1.1, 1.9, by = 0.1)
+N = seq(1, 800, 1)
+f_N = function(N, theta){
+	0.5 / (1 + ((N/443)^theta))
+}
+
+# Right Pannel, stable age distribution with no disease
+########################################################
+# age divisions in rhs function
+s_index <- 1:20
+it_index <- 21:40
+ib_index <- 41:60
+ic_index <- 61:80
+r_index <- 81:100
+rc_index <- 101:120
+juveniles <- 1:3
+subadult<- 4
+adult <- 5:14
+mature <- 15:20
+
+# Parameters and initial conditions (disease params not used)
+relage <- c(0.137, rep(0.368/4, 4), rep(0.185/4, 4),  # initial guess, Jolles 2007, Caron et al. 2001
+	rep(0.235/6, 6), rep(0.075/5, 5))
+S0 <- 400*relage; It0 <- 0*relage; Ib0 <- 0*relage; 
+Ic0 <- 0*relage; R0 <- 0 * relage; Rc0 <- 0 * relage
+x0 <- c(S0, It0, Ib0, Ic0, R0, Rc0)
+times <- seq(0, 500, 1)
+source('~/GitHub/bTB-bruc-co-infection-ms/fixed_parameters_recovery_agematrix.R', chdir = TRUE)
+source('~/GitHub/bTB-bruc-co-infection-ms/rhs_age.R', chdir = TRUE)
+params <- c(fixed.params.recov, list(gamma=1/2, betaB = 0.01,
+	betaT = 0.0001, rhoT = 1.2, rhoB = 4, theta= 4, K = 433))
+sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))
+
+# Make plot
+########################################################
+png("FigureC1_BH_and_agestructure.png", width = 800, height = 400, units = "px")
+par(mfrow = c(1,2), mar = c(5,6,2,2))
+#par(mar = c(5,6,4,2))
+plot(x = N, y = f_N(N, theta = 4), type = "l", ylab = "Per captia birth rate, R(a, N)", 
+	xlab = "Population size, N", bty = "n", las = 1, cex.axis = 1.3, cex.lab = 1.5, 
+	ylim = c(0, 0.5))
+abline(v = 443, col = "dark red")
+lines(x = N, y = f_N(N, theta = 2), type = "l", col = "black", lty = 3)
+lines(x = N, y = f_N(N, theta = 6), type = "l", col = "black", lty = 5)
+legend("topright", bty = "n", 
+	legend = c(expression(phi == 2), expression(phi == 4), expression(phi == 6)),
+	lty = c(3, 1, 5) )
+
+# Plot final age structure! (WILL NEED UPDATED WITH FINAL PARAMS)
+x <- as.matrix(sol[101,c(2:121)])
+xcounts <- NA
+for(i in 1:20){
+ 	xcounts[i] <- (x[i] + x[20+i] + x[40+i] + x[60+i] + x[80+i] + x[100+i]) #/sum(x)
+}
+plot(y = xcounts, x = seq(1:20), ylab = "Number of buffalo", pch = 19,
+	xlab = "Age (years)", bty = "n", las = 1, cex.axis = 1.3,
+	xlim = c(0, 20), cex.lab = 1.5)
+dev.off()
 
 #######################################################
 #######################################################

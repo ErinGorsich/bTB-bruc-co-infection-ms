@@ -49,12 +49,12 @@ b[4] <- 0.45		# uninif age [4-5); raw data (2/26)
 b[16:20] <- max(b[5] * 0.7, 0)	# uninif age 15 +; raw data (14/25)
 #b <- b/2						# FEMALE calf
 # Proportional reductions
-b1 <- c(rep(1, 4), rep(0.86, 20-4))		# with bTB (from raw data)
-b2 <- c(1, 1, 1, 1, rep(0.8, 20-4))	# with brucellosis
-b3<- 1  								# chronic/recovered = S
-b4<- c(1, 1, 1, 1, rep(0.8, 20-4)) 		# coinfected
-b5 <- b1 								# chronic-co = bTB
-
+#b1 <- c(rep(1, 4), rep(0.86, 20-4))		# with bTB (from raw data)
+#b2 <- c(1, 1, 1, 1, rep(0.8, 20-4))	# with brucellosis
+#b3<- 1  								# chronic/recovered = S
+#b4<- c(1, 1, 1, 1, rep(0.8, 20-4)) 		# coinfected
+#b5 <- b1 								# chronic-co = bTB
+b1 <- b; b2 <- b; b3 <- b; b4 <- b; b5 <- b
 epsilon = 0.01
 
 fixed.params.recov = list(aging = aging, 

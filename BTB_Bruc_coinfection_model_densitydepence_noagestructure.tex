@@ -371,6 +371,27 @@ R(a) &= \begin{cases}
 
 
 
+%In document!
+\usepackage(amsmath)
+r(a, N) &= \begin{cases}
+R(a, N)^\intercal N(a) & \text{if $a = 1$},
+0 & \text{otherwise.},
+\end{cases} \\
+
+
+
+
+N & = \sum_{a=1}^{20} S(a) + I_{T}(a) + I_{B}(a) + R_{B}(a) + I_{C}(a) + R_{C}(a) \\
+T &=  \sum_{a=1}^{20} I_{T}(a) + I_{C}(a) + R_{C}(a) \\
+B &=  \sum_{a=1}^{20} I_{B}(a)+I_{C}(a) \\
+\frac{dS(a)}{dt} &= r(a, N) - \beta_{T}{(a)} T S(a) - \frac{\beta_B (a) B}{N} S(a) - (\mu_{S}(a) + \nu) S(a)  \\         
+\frac{dI_{T}(a)}{dt}&= \beta_T (a) T S(a) -  \frac{\beta'_{B}(a) B}{N} I_{T}(a) - (\mu_{T}(a) + \nu) I_{T}(a) \\
+\frac{dI_{B}(a)}{dt}&=  \frac{\beta_B (a) B}{N}S(a) - \beta'_{T}(a) T I_{B}(a) + \epsilon R_{B}(a)  - (\gamma + \mu_{B}(a) + \nu) I_{B}(a) \\
+\frac{dI_{C}(a)}{dt}&=  \beta'_{T}(a) T I_{B}(a) + \frac{\beta'_{B}(a) B}{N} I_{T}(a) + \epsilon R_{C}(a)  - (\gamma + \mu_{C}(a) + \nu)I_{C}(a)\\  
+\frac{dR_{B}(a)}{dt}&=  \gamma I_{B}(a) - (\epsilon + \mu_{RB}(a) + \nu) R_{B}(a) \\            
+\frac{dR_{C}(a)}{dt}&=  \beta'_{T}(a) T R_{B}(a) + \gamma I_{C}(a) - (\epsilon + \mu_{RC}(a) + \nu) R_{C}(a) \\     
+
+
 
 \section*{Citations}
 
