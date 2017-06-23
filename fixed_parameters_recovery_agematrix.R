@@ -24,16 +24,10 @@ muS[3:15]<-  1- 0.94 # mortality rate in adults
 muS[16:20]<-  1- 0.86 # mortality rate in adults 15+  (1/yr)
 
 # mortality, TB, and Brucellosis positive animals
-muT <- 3.12 * muS
-muB <- 0
-muB[1:2] <- 4.9 * muS[1:2]
-muB[3:6] <- muS[3:6]
-muB[7:20] <- 4.5 * muS[7:20]
-
-muC <- 0
-muC[1:2] <- (3.12 + 4.9) * muS[1:2]
-muC[3:6] <- (3.12) * muS[3:6]
-muC[7:20] <- (3.12 + 4.5) * muS[7:20]
+muT <- 2.8 * muS
+muB <- 3.03 * muS
+muC <- 8.56 * muS
+muC[muC > 1] <- 1
 muRC <- muT
 muR <- muS
 
@@ -41,12 +35,18 @@ muR <- muS
 # births
 #############################################################
 # NOTES: data informing birts are from ages 4-10.  Age 4 is the youngest sucessful mom with calf.
-b <- NA; b1 <- NA; b2<- NA; b3 <- NA; b4 <- NA; b5 <- NA
+
+b <- c(0,0,0,0, rep(0.5, 16))
+b1 <- 1; b2 <- 1; b3 <- 1; b4 <- 1; b5 <- 1
+epsilon = 0.01
+
+# Old birth parameters
+#b <- NA; b1 <- NA; b2<- NA; b3 <- NA; b4 <- NA; b5 <- NA
 # Birth rate in uninfecteds
-b[1:3] <- 0						# [1-4)
-b[5:15] <- 0.5 #0.56/2				# uninif age [5-15); raw data (14/25)
-b[4] <- 0.45		# uninif age [4-5); raw data (2/26)
-b[16:20] <- max(b[5] * 0.7, 0)	# uninif age 15 +; raw data (14/25)
+#b[1:3] <- 0						# [1-4)
+#b[5:15] <- 0.5 #0.56/2				# uninif age [5-15); raw data (14/25)
+#b[4] <- 0.45		# uninif age [4-5); raw data (2/26)
+#b[16:20] <- max(b[5] * 0.7, 0)	# uninif age 15 +; raw data (14/25)
 #b <- b/2						# FEMALE calf
 # Proportional reductions
 #b1 <- c(rep(1, 4), rep(0.86, 20-4))		# with bTB (from raw data)
@@ -54,29 +54,10 @@ b[16:20] <- max(b[5] * 0.7, 0)	# uninif age 15 +; raw data (14/25)
 #b3<- 1  								# chronic/recovered = S
 #b4<- c(1, 1, 1, 1, rep(0.8, 20-4)) 		# coinfected
 #b5 <- b1 								# chronic-co = bTB
-b1 <- b; b2 <- b; b3 <- b; b4 <- b; b5 <- b
-epsilon = 0.01
+
 
 fixed.params.recov = list(aging = aging, 
 	b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, b = b, 
 	muS = muS, muB = muB, muT = muT, muC = muC,
 	muR = muR, muRC = muRC, epsilon = epsilon)
 # missing: gamma, betaT = betaT, betaB = betaB, betapT = betapT, betapB = betapB
-
-
-
-
-muS <- NA; muT <- NA; muB <- NA; muC <- NA
-muS[1:2]<- 1- 0.86 # mortality rate in yearlings 
-muS[3:15]<-  1- 0.94 # mortality rate in adults 
-muS[16:20]<-  1- 0.86 # mortality rate in adults 15+  (1/yr)
-muT <- 2.8 * muS
-muB <- 3 * muS
-muC <- (2.8 + 3) * muS
-muRC <- muT
-muR <- muS
-fixed.params.recov.olddz = list(aging = aging, 
-	b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, b = b, 
-	muS = muS, muB = muB, muT = muT, muC = muC,
-	muR = muR, muRC = muRC, epsilon = epsilon)
-

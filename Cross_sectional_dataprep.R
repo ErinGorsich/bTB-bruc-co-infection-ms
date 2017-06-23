@@ -53,7 +53,7 @@ d3<-d2[!(d2$id %in% rm),]
 d3$bolus_problem<-NA
 prob<-c("Y2", "O47b", "O10")
 for (i in 1:length(d3[,1])){
-ifelse(d3$id[i] %in% prob, d3$bolus_problem[i]<-TRUE, d3$bolus_problem[i]<-FALSE)
+    ifelse(d3$id[i] %in% prob, d3$bolus_problem[i]<-TRUE, d3$bolus_problem[i]<-FALSE)
 }
 data<-d3
 #write.csv(d3, "~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/cross_sectional_data_Feb2016.csv")
@@ -152,6 +152,34 @@ summary(as.data.frame(table(cross3$id)))
 length(cross3[,1]); length(unique(cross3$id))   # 145 animals sampled a total of 834 times, with a median of 6 recaptures (range from 1-9 recaptures).
 
 write.csv(cross3, "cross_sectional_data_withdz_cleandisease_withfinal_Feb2016.csv")
+
+###################################################
+###################################################
+###################################################
+# Summary stats before buffalo removed for disease
+data <- read.csv("cross_sectional_data_Feb2016.csv")
+length(unique(data$id)) # 151
+test <- data[data$n == 1 & data$yr == 2008, c(2:6)]
+length(test[,1]) #99  
+# 53 initial in LS (70 total LS, 17 ids with b or c)
+# 51 initial in CB (81 total in CB, 30 ids with b or c)
+151-53 -51
+
+# summary stats after buffalo with missing disease removed
+data<-read.csv("cross_sectional_data_withdz_cleandisease_nofinal_Feb2016.csv")
+data$test <- as.Date(data$date, "%d-%b-%y")
+LS <- data[data$herdorig == "LS" & data$n == 1 & data$yr == 2008, c(2:6)]
+length(LS[,1]) # 49
+CB <- data[data$herdorig == "CB" & data$n == 1 & data$yr == 2008, c(2:6)]
+length(CB[,1]) # 46
+length(LS[,1]) + length(CB[,1]) # 95
+length(unique(data$id)) #146
+
+
+###################################################
+###################################################
+###################################################
+
 
 ###################################################
 # final groom for incidence analysis

@@ -19,9 +19,6 @@
 # King & Wearing, Age Structured Models
 #############################################################
 
-STOP- THIS CODE NEEDS UPDATED MAKE SURE USING PARAMETERS 
-WITHOUT AGE SPECIFIC EFFECTS OF INFECTION
-
 #############################################################
 #############################################################
 #1) Load fixed parameters, model
@@ -185,8 +182,6 @@ plot_ageprevalence = function(sol){
 
 #############################################################
 
-
-
 #############################################################
 #############################################################
 # 3) Getz / Generalized Beverton-Holt form of density dependence
@@ -209,21 +204,19 @@ for (i in 1:length(thetaL)){
 	lines(x = N, y = f_N(N, theta = thetaH[i]), type = "l", col = "light gray", lty = 5)
 }
 
-
-# params and inits
+# params and inits (no dz check, none takes off!)
 S0 = 400*relage; It0 = 0*relage; Ib0 = 0*relage; 
 Ic0 = 0*relage; R0 = 0 * relage; Rc0 = 0 * relage
 x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)
 times <- seq(0, 500, 1)
 
-
-params.test_log = c(fixed.params.olddz, list(gamma=1/2, betaB = 0.01,
-	betaT = 0.0001, rhoT = 1.2, rhoB = 4, theta= 4, K = 433))
-params.test.recov_log = c(fixed.params.recov.olddz, list(gamma=1/2, 
-	betaB = 0.0001, betaT = 0.001, rhoT = 1.2, rhoB = 4, theta = 4, K = 433))
-
-sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params.test_log))
-sol.recov<- as.data.frame(ode(x0, times, rhs_age_matrix, params.test.recov_log))
+# parameters
+params= c(fixed.params, list(gamma=1/2, betaB = 0.6087396,
+	betaT = 0.0012974553, rhoT = 1, rhoB = 2.1, theta= 4, K = 433))
+#params.recov = c(fixed.params.recov, list(gamma=1/2, 
+#	betaB = 1.128788, betaT = 0.0009585864, rhoT = 1, rhoB = 2.1, theta = 4, K = 433))
+sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))
+#sol.recov<- as.data.frame(ode(x0, times, rhs_age_matrix, params.recov))
 
 par(mfrow = c(2,2))
 plot(x = sol$time, y = apply(sol[c(2:120)], 1, sum), 
@@ -239,13 +232,12 @@ stable_age <- unname(unlist( sol[500, c(2:21)]/sum(sol[500, c(2:21)]) ))
 theta_temp = seq(1, 10, 1)
 plot(NA, ylim = c(600, 1500), xlim = c(0, 500), xlab = "Time", ylab = "N")
 for (i in 1:length(theta_temp)){
-	params.test_log = c(fixed.params.olddz, list(gamma=1/2, betaB = 0.01,
-		betaT = 0.0001, rhoT = 1.2, rhoB = 4, theta= theta_temp[i], K = 1000))
-	sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params.test_log))
+	params.test = c(fixed.params, list(gamma=1/2, betaB = 0.01,
+		betaT = 2.833531/10000, rhoT = 1, rhoB = 2.1, theta= theta_temp[i], K = 1000))
+	sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params.test))
 	lines(x = sol$time, y = apply(sol[c(2:120)], 1, sum), type = "l",
 		 col = i, lty = 3)
 }
-
 
 # Test 2: Add brucellosis, only get brucellosis 
 #############################################################
@@ -256,93 +248,102 @@ betaB_temp <- seq(0.5, 1.5, 0.01) # slow
 betaB_temp <- betaB_temp[1:75]
 prevB <- NA; prevBrecov <- NA
 for (i in 1:length(betaB_temp)){
-	params.test_log = c(fixed.params.olddz, list(gamma=1/2, theta = 4, K = 433,
-		betaB = betaB_temp[i], betaT = 0.001, rhoT = 1, rhoB = 4))
-	params.test.recov_log = c(fixed.params.recov.olddz, list(gamma=1/2, theta = 4, K = 433,
-		betaB = betaB_temp[i], betaT = 0.001, rhoT = 1.2, rhoB = 4))
-	sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params.test_log))
-	sol.recov<- as.data.frame(ode(x0, times, rhs_age_matrix, params.test.recov_log))
+	params.test = c(fixed.params, list(gamma=1/2, theta = 4, K = 433,
+		betaB = betaB_temp[i], betaT = 2.833531/10000, rhoT = 1, rhoB = 4))
+	#params.test.recov = c(fixed.params.recov, list(gamma=1/2, theta = 4, K = 433,
+	#	betaB = betaB_temp[i], betaT = 0.0009585864, rhoT = 1.2, rhoB = 4))
+	sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params.test))
+	#sol.recov<- as.data.frame(ode(x0, times, rhs_age_matrix, params.test.recov))
 	prevB[i]<- get_prevalence(sol)$prevB
-	prevBrecov[i] <- get_prevalence(sol.recov)$prevB
-	rm(sol, sol.recov, params.test_log, params.test.recov_log)
+	#prevBrecov[i] <- get_prevalence(sol.recov)$prevB
+	rm(sol, params.test)
+	#rm(sol, sol.recov, params.test_log, params.test.recov_log)
 }
 plot(x = betaB_temp, y = prevB, type = "l", xlab = expression(beta), ylab = "Brucellosis prevalence", main = "Single disease")
 #lines(x = betaB_temp, y = prevB, type = "l", col = "dark blue") # same pattern
 abline(h = c(0.1, 0.2, 0.3, 0.4), col = "dark red")
 # Beta value at:
-betaB_temp[which(prevB < 0.06 & prevB > 0.04)]  		# 0.79
-betaB_temp[which(prevB < 0.11 & prevB > 0.09)]		# 0.825
-betaB_temp[which(prevB < 0.21 & prevB > 0.19)]		# 0.915
-betaB_temp[which(prevB < 0.31 & prevB > 0.29)]		# 1.025
-betaB_temp[which(prevB < 0.405 & prevB > 0.395)]	# 1.185
+betaB_temp[which(prevB < 0.06 & prevB > 0.04)]  		
+betaB_temp[which(prevB < 0.11 & prevB > 0.09)]		
+betaB_temp[which(prevB < 0.21 & prevB > 0.19)]		
+betaB_temp[which(prevB < 0.31 & prevB > 0.29)]		
+betaB_temp[which(prevB < 0.405 & prevB > 0.395)]	
 
 # set at 30% Brucellosis prevalence wihtout bTB, betaB = 1.025 --> SET TO 34% WITH bTB.. from fitting
-params.test_log = c(fixed.params.olddz, list(gamma=1/2, theta = 4, K = 433,
-	betaB = 1.004592, betaT = 0.001, rhoT = 1, rhoB = 2))
-params.test.recov_log = c(fixed.params.recov.olddz, list(gamma=1/2, theta = 4, K = 433,
-	betaB = 1.004592, betaT = 0.001, rhoT = 1, rhoB = 4))
+#params.test_log = c(fixed.params.olddz, list(gamma=1/2, theta = 4, K = 433,
+#	betaB = 1.004592, betaT = 0.001, rhoT = 1, rhoB = 2))
+#params.test.recov_log = c(fixed.params.recov.olddz, list(gamma=1/2, theta = 4, K = 433,
+#	betaB = 1.004592, betaT = 0.001, rhoT = 1, rhoB = 4))
+#times <- seq(0, 500, 1)
+#sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params.test_log))
+#sol.recov<- as.data.frame(ode(x0, times, rhs_age_matrix, params.test.recov_log))
 
-times <- seq(0, 500, 1)
-sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params.test_log))
-sol.recov<- as.data.frame(ode(x0, times, rhs_age_matrix, params.test.recov_log))
-
-par(mfrow = c(2,2))
-plot(x = sol$time, y = apply(sol[c(2:120)], 1, sum), 
-	pch = 19, main = "Density Dependent, no Recovery")
-plot(x = sol.recov$time, y = apply(sol.recov[c(2:120)], 1, sum), 
-	pch = 19, main = "Density Dependent, Recovery")
+#par(mfrow = c(2,2))
+#plot(x = sol$time, y = apply(sol[c(2:120)], 1, sum), 
+#	pch = 19, main = "Density Dependent, no Recovery")
+#plot(x = sol.recov$time, y = apply(sol.recov[c(2:120)], 1, sum), 
+#	pch = 19, main = "Density Dependent, Recovery")
 #plot_age_prev_by_coinfection(sol)
-plot_raw_numbers(sol)
-plot_raw_numbers(sol.recov)
-get_prevalence(sol); 
+#plot_raw_numbers(sol)
+#plot_raw_numbers(sol.recov)
+#get_prevalence(sol); 
 ################
-get_prevalence(sol.recov)
-plot_agestructure(as.matrix(sol[101,c(2:121)])) 
-plot_ageprevalence(sol)
+#get_prevalence(sol.recov)
+#plot_agestructure(as.matrix(sol[101,c(2:121)])) 
+#plot_ageprevalence(sol)
+
+# set at estimated transmission rate for brucellosis
+times <- seq(0, 500, 1)
+params= c(fixed.params, list(gamma=1/2, betaB = 0.6087396,
+	betaT = 0.0012974553, rhoT = 1, rhoB = 2.1, theta= 4, K = 433))
+#params.recov = c(fixed.params.recov, list(gamma=1/2, 
+#	betaB = 1.128788, betaT = 0.0009585864, rhoT = 1, rhoB = 2.1, theta = 4, K = 433))
+sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))
+#sol.recov<- as.data.frame(ode(x0, times, rhs_age_matrix, params.recov))
 
 # proportions
 endemic_agestructure_p <- unname(unlist( sol[500, c(2:121)]/sum(sol[500, c(2:121)]) ))
-endemic_agestructure_recov_p <- unname(unlist( sol.recov[500, c(2:121)]/sum(sol.recov[500, c(2:121)]) ))
+#endemic_agestructure_recov_p <- unname(unlist( sol.recov[500, c(2:121)]/sum(sol.recov[500, c(2:121)]) ))
 #raw numbers
 endemic_agestructure <- unname(unlist( sol[500, c(2:121)] ))
-endemic_agestructure_recov <- unname(unlist( sol.recov[500, c(2:121)]))
+#endemic_agestructure_recov <- unname(unlist( sol.recov[500, c(2:121)]))
 
 
 # Test 3: Add bTB, only get bTB --> works! 
 #############################################################
-S0 = 400* stable_age; It0 = 20 * stable_age; Ib0 = 0* stable_age; 
-Ic0 = 0* stable_age; R0 = 0 * stable_age; Rc0 = 0 * stable_age
-x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)
+#S0 = 400* stable_age; It0 = 20 * stable_age; Ib0 = 0* stable_age; 
+#Ic0 = 0* stable_age; R0 = 0 * stable_age; Rc0 = 0 * stable_age
+#x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)
 
-betaT_temp <- seq(0.0001, 0.0009, 0.00001) 
-prevT <- NA; prevTrecov <- NA
-for (i in 1:length(betaT_temp)){
-	params.test_log = c(fixed.params, list(gamma=1/2, theta = 4, K = 433,
-		betaB = 1.025, betaT = betaT_temp[i], rhoT = 1, rhoB = 4))
-	sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params.test_log))
-	prevT[i]<- get_prevalence(sol)$prevTB
-	rm(sol,  params.test_log)
-}
-plot(x = betaT_temp, y = prevT, type = "l", xlab = expression(beta), ylab = "bTB prevalence", main = "Single disease")
-abline(h = c(0.1, 0.2, 0.3, 0.4), col = "dark red")
+#betaT_temp <- seq(0.0001, 0.0009, 0.00001) 
+#prevT <- NA; prevTrecov <- NA
+#for (i in 1:length(betaT_temp)){
+#	params.test_log = c(fixed.params, list(gamma=1/2, theta = 4, K = 433,
+#		betaB = 1.025, betaT = betaT_temp[i], rhoT = 1, rhoB = 4))
+#	sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params.test_log))
+#	prevT[i]<- get_prevalence(sol)$prevTB
+#	rm(sol,  params.test_log)
+#}
+#plot(x = betaT_temp, y = prevT, type = "l", xlab = expression(beta), ylab = "bTB prevalence", main = "Single disease")
+#abline(h = c(0.1, 0.2, 0.3, 0.4), col = "dark red")
 # BetaT value at:
-betaT_temp[which(prevT < 0.12 & prevT > 0.08)]		# 0.000395
-betaT_temp[which(prevT < 0.21 & prevT > 0.19)]	 	# 0.00044
-betaT_temp[which(prevT < 0.31 & prevT > 0.29)] 	# 0.000505
-betaT_temp[which(prevT < 0.405 & prevT > 0.395)]	# 0.00059
+#betaT_temp[which(prevT < 0.12 & prevT > 0.08)]		# 0.000395
+#betaT_temp[which(prevT < 0.21 & prevT > 0.19)]	 	# 0.00044
+#betaT_temp[which(prevT < 0.31 & prevT > 0.29)] 	# 0.000505
+#betaT_temp[which(prevT < 0.405 & prevT > 0.395)]	# 0.00059
 
 # set to give 30% ??????
-params.test_log = c(fixed.params, list(gamma=1/2, theta = 4, K = 433,
-	betaB = 1.025, betaT = 0.000223, rhoT = 1, rhoB = 4))
-sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params.test_log))
-par(mfrow = c(1,3))
-plot(x = sol$time, y = apply(sol[c(2:120)], 1, sum), 
-	pch = 19, main = "Density Dependent, no Recovery")
+#params.test_log = c(fixed.params, list(gamma=1/2, theta = 4, K = 433,
+#	betaB = 1.025, betaT = 0.000223, rhoT = 1, rhoB = 4))
+#sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params.test_log))
+#par(mfrow = c(1,3))
+#plot(x = sol$time, y = apply(sol[c(2:120)], 1, sum), 
+#	pch = 19, main = "Density Dependent, no Recovery")
 #plot_age_prev_by_coinfection(sol)
-plot_raw_numbers(sol)
-get_prevalence(sol); 
+#plot_raw_numbers(sol)
+#get_prevalence(sol); 
 ################
-plot_agestructure(as.matrix(sol[101,c(2:121)])) 
+#plot_agestructure(as.matrix(sol[101,c(2:121)])) 
 
 
 #############################################################
@@ -351,13 +352,16 @@ plot_agestructure(as.matrix(sol[101,c(2:121)]))
 #############################################################
 # endemic_agestructure is set to final prevalence/age structure in bruc only model
 x0 = endemic_agestructure
+#x0r = endemic_agestructure_recov
 x0[28] <- 5; x0[8] <- x0[8] - 5
+#x0r[28] <- 5; x0r[8] <- x0r[8] - 5
+
 times <- seq(0, 500, 1)
 
 # CHOSEN PARAMETERS IN FITTING
-params.test_log = c(fixed.params.olddz, list(gamma=1/2, theta = 4, K = 433,
-	betaB = 1.004592, betaT = 12.833531/10000, rhoT = 1, rhoB = 2))
-sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params.test_log))
+params
+sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))
+#sol.recov <- as.data.frame(ode(x0, times, rhs_age_matrix, params.recov))
 
 par(mfrow = c(1,2))
 plot_raw_numbers(sol)
@@ -365,98 +369,88 @@ plot_raw_numbers(sol.recov)
 get_prevalence(sol); #get_prevalence(sol.recov);   # almost no change in Bruc prev, no bTB!
 
 # Make Summary Plots
-x0 = endemic_agestructure
-x0[28] <- 5; x0[8] <- x0[8] - 5
-
-rhoB_test <- seq(1, 10, 0.5)
-rhoT_test <- seq(1, 10, 0.5)
-epi <- data.frame(
-	rhoB= rep(rhoB_test, length(rhoB_test)), 
-	rhoT = rep(rhoT_test, each = length(rhoB_test)), 
-	bTBprev = NA, brucprev = NA, 	finalN = NA, 
-	bTB_inS = NA, bTB_inB = NA, bruc_inS = NA, bruc_inTB = NA)
+#rhoB_test <- seq(1, 10, 0.5)
+#rhoT_test <- seq(1, 10, 0.5)
+#epi <- data.frame(
+#	rhoB= rep(rhoB_test, length(rhoB_test)), 
+#	rhoT = rep(rhoT_test, each = length(rhoB_test)), 
+#	bTBprev = NA, brucprev = NA, 	finalN = NA, 
+#	bTB_inS = NA, bTB_inB = NA, bruc_inS = NA, bruc_inTB = NA)
 	
-for (i in 1:length(epi[,1])){
-	params.test_log = c(fixed.params.olddz, list(gamma=1/2, theta = 4, K = 433, # vs. 0.00044 before
-		betaB = 1.025, betaT = 12.833531/10000, rhoT = epi$rhoT[i], rhoB = epi$rhoB[i]))
-	sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params.test_log))
-	temp <- get_prevalence(sol)
-	
-	epi$bTBprev[i] = temp$prevTB
-	epi$brucprev[i] = temp$prevB 	
-	epi$finalN[i] = sum(sol[length(sol), c(2:121)])
-	epi$bTB_inS[i] = temp$prevTinS 
-	epi$bTB_inB[i] = temp$prevTinB
-	epi$bruc_inS[i] = temp$prevBinS 
-	epi$bruc_inTB[i] = temp$prevBinT
-	rm(params.test_log, sol, temp)
-}
+#for (i in 1:length(epi[,1])){
+#	params.test = c(fixed.params, list(gamma=1/2, theta = 4, K = 433, # vs. 0.00044 before
+#		betaB = 0.6087, betaT = 0.0012974, rhoT = epi$rhoT[i], rhoB = epi$rhoB[i]))	
+#	sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params.test))
+#	temp <- get_prevalence(sol)
+#	
+#	epi$bTBprev[i] = temp$prevTB
+#	epi$brucprev[i] = temp$prevB 	
+#	epi$finalN[i] = sum(sol[length(sol), c(2:121)])
+#	epi$bTB_inS[i] = temp$prevTinS 
+#	epi$bTB_inB[i] = temp$prevTinB
+#	epi$bruc_inS[i] = temp$prevBinS 
+#	epi$bruc_inTB[i] = temp$prevBinT
+#	rm(params.test_log, sol, temp)
+#}
 
-write.csv(epi, "~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/draft2/post-labmeeting/vary_rho.csv")
+#write.csv(epi, "~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/draft2/post-labmeeting/vary_rho.csv")
 
 # Add lines for what it looks like without brucellosis around
 # choose diverging palette (... but needs turned into range...col.region = brewer.pal(8, "RdYlBu")), centered on non-co-infected values
-params.test_log = c(fixed.params.olddz, list(gamma=1/2, theta = 4, K = 433, # vs. 0.00044 before
-	betaB = 1.025, betaT = 12.833531/10000, rhoT = epi$rhoT[i], rhoB = epi$rhoB[i]))
-x0 = endemic_agestructure
-params.test_log = c(fixed.params.olddz, list(gamma=1/2, theta = 4, K = 433, # vs. 0.00044 before
-	betaB = 1.025, betaT = 12.833531/10000, rhoT = epi$rhoT[i], rhoB = epi$rhoB[i]))
-sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params.test_log))
-get_prevalence(sol) # 0.318564 without bTB
-S0 = 400* stable_age; It0 = 20 * stable_age; Ib0 = 0* stable_age; 
-Ic0 = 0* stable_age; R0 = 0 * stable_age; Rc0 = 0 * stable_age
-x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)
-sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params.test_log))
-get_prevalence(sol) # 0.5810836 without bTB
+#params.test_log = c(fixed.params.olddz, list(gamma=1/2, theta = 4, K = 433, # vs. 0.00044 before
+#	betaB = 1.025, betaT = 12.833531/10000, rhoT = epi$rhoT[i], rhoB = epi$rhoB[i]))
+#x0 = endemic_agestructure
+#params.test_log = c(fixed.params.olddz, list(gamma=1/2, theta = 4, K = 433, # vs. 0.00044 before
+#	betaB = 1.025, betaT = 12.833531/10000, rhoT = epi$rhoT[i], rhoB = epi$rhoB[i]))
+#sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params.test_log))
+#get_prevalence(sol) # 0.318564 without bTB
+#S0 = 400* stable_age; It0 = 20 * stable_age; Ib0 = 0* stable_age; 
+#Ic0 = 0* stable_age; R0 = 0 * stable_age; Rc0 = 0 * stable_age
+#x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)
+#sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params.test_log))
+#get_prevalence(sol) # 0.5810836 without bTB
 
 
-
-epi <- read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/draft2/post-labmeeting/vary_rho/vary_rho.csv") 
+#epi <- read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/draft2/post-labmeeting/vary_rho/vary_rho.csv") 
 
 # bTB prevalence (vs. 30% alone)
-p1 <- levelplot(bTBprev~rhoB*rhoT, data = epi, main = "bTB prevalence, no recovery", 
-	xlab = expression(paste(beta[B]^{"'"}, "/", beta[B]) ), 
-	ylab = expression(paste(beta[TB]^{"'"}, "/", beta[TB])), 
-	at = seq(0, max(epi$bTBprev, epi$rbTBprev), 0.02 ))
+#p1 <- levelplot(bTBprev~rhoB*rhoT, data = epi, main = "bTB prevalence, no recovery", 
+#	xlab = expression(paste(beta[B]^{"'"}, "/", beta[B]) ), 
+#	ylab = expression(paste(beta[TB]^{"'"}, "/", beta[TB])), 
+#	at = seq(0, max(epi$bTBprev, epi$rbTBprev), 0.02 ))
 # better than: frac(beta[B], beta[b]) )) )
 
-p2 <- levelplot(rbTBprev~rhoB*rhoT, data = epi,  main = "bTB prevalence, recovery", 
-	xlab = expression(paste(beta[B]^{"'"}, "/", beta[B]) ), 
-	ylab = expression(paste(beta[TB]^{"'"}, "/", beta[TB])), 
-	at = seq(0, max(epi$bTBprev, epi$rbTBprev), 0.02 ))
-grid.arrange(p1, p2, ncol = 2)
+#p2 <- levelplot(rbTBprev~rhoB*rhoT, data = epi,  main = "bTB prevalence, recovery", 
+#	xlab = expression(paste(beta[B]^{"'"}, "/", beta[B]) ), 
+#	ylab = expression(paste(beta[TB]^{"'"}, "/", beta[TB])), 
+#	at = seq(0, max(epi$bTBprev, epi$rbTBprev), 0.02 ))
+#grid.arrange(p1, p2, ncol = 2)
 
 # brucellosis prevalence (vs 30% alone)
-p3 <- levelplot(brucprev~rhoB*rhoT, data = epi, main = "bruc prevalence, no recovery", 
-	xlab = expression(paste(beta[B]^{"'"}, "/", beta[B]) ), 
-	ylab = expression(paste(beta[TB]^{"'"}, "/", beta[TB])), 
-	at = seq(0, max(epi$brucprev, epi$rbrucprev), 0.02 ))
+#p3 <- levelplot(brucprev~rhoB*rhoT, data = epi, main = "bruc prevalence, no recovery", 
+#	xlab = expression(paste(beta[B]^{"'"}, "/", beta[B]) ), 
+#	ylab = expression(paste(beta[TB]^{"'"}, "/", beta[TB])), 
+#	at = seq(0, max(epi$brucprev, epi$rbrucprev), 0.02 ))
 	
-p4 <- levelplot(rbrucprev ~rhoB*rhoT, data = epi,  main = "bruc prevalence, recovery", 
-	xlab = expression(paste(beta[B]^{"'"}, "/", beta[B]) ), 
-	ylab = expression(paste(beta[TB]^{"'"}, "/", beta[TB])), 
-	at = seq(0, max(epi$brucprev, epi$rbrucprev), 0.02))
-grid.arrange(p3, p4, ncol = 2)
+#p4 <- levelplot(rbrucprev ~rhoB*rhoT, data = epi,  main = "bruc prevalence, recovery", 
+#	xlab = expression(paste(beta[B]^{"'"}, "/", beta[B]) ), 
+#	ylab = expression(paste(beta[TB]^{"'"}, "/", beta[TB])), 
+#	at = seq(0, max(epi$brucprev, epi$rbrucprev), 0.02))
+#grid.arrange(p3, p4, ncol = 2)
 
 
 # final N  ( )
-p5 <- levelplot(finalN~rhoB*rhoT, data = epi, main = "Final N, no recovery", 
-	xlab = expression(paste(beta[B]^{"'"}, "/", beta[B]) ), 
-	ylab = expression(paste(beta[TB]^{"'"}, "/", beta[TB])), 
-	at = seq(350, max(epi$finalN, epi$rfinalN), 5) )
-p6<- levelplot(rfinalN~rhoB*rhoT, data = epi,  main = "Final N, recovery", 
-	xlab = expression(paste(beta[B]^{"'"}, "/", beta[B]) ), 
-	ylab = expression(paste(beta[TB]^{"'"}, "/", beta[TB])), 
-	at = seq(350, max(epi$finalN, epi$rfinalN), 5) )
-grid.arrange(p5, p6, ncol = 2)
-
-
-
+#p5 <- levelplot(finalN~rhoB*rhoT, data = epi, main = "Final N, no recovery", 
+#	xlab = expression(paste(beta[B]^{"'"}, "/", beta[B]) ), 
+#	ylab = expression(paste(beta[TB]^{"'"}, "/", beta[TB])), 
+#	at = seq(350, max(epi$finalN, epi$rfinalN), 5) )
+#p6<- levelplot(rfinalN~rhoB*rhoT, data = epi,  main = "Final N, recovery", 
+#	xlab = expression(paste(beta[B]^{"'"}, "/", beta[B]) ), 
+#	ylab = expression(paste(beta[TB]^{"'"}, "/", beta[TB])), 
+#	at = seq(350, max(epi$finalN, epi$rfinalN), 5) )
+#grid.arrange(p5, p6, ncol = 2)
 
 library(RColorBrewer)
-
-
-
 
 
 #############################################################
@@ -471,21 +465,16 @@ x0[28] <- 5; x0[8] <- x0[8] - 5
 times <- seq(0, 500, 1)
 
 # CHOSEN PARAMETERS IN FITTING
-params.test_log = c(fixed.params.olddz, list(gamma=1/2, theta = 4, K = 433,
-	betaB = 1.004592, betaT = 12.833531/10000, rhoT = 1, rhoB = 2))
-sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params.test_log))
+params.test = c(fixed.params, list(gamma=1/2, theta = 4, K = 433,
+	betaB = 0.6087396, betaT = 0.0012974553, rhoT = 1, rhoB = 2.1))
+sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params.test))
 
-par(mfrow = c(1,2))
 plot_raw_numbers(sol)
-plot_raw_numbers(sol.recov)
 get_prevalence(sol); #get_prevalence(sol.recov);   # almost no change in Bruc prev, no bTB!
-
-x0 = endemic_agestructure
-x0[28] <- 5; x0[8] <- x0[8] - 5
 
 rhoB_test <- seq(0, 8, length.out = 101)
 rhoT_test <- seq(0, 8, length.out = 101)
-mort_test <- seq(0, 7.2, length.out = 101)  # specify as change from S, later make centered at single
+mort_test <- seq(0, 15, length.out = 101)  # specify as change from S, later make centered at single
 #mort_test <- seq(-5, 5, length.out = 101)
 
 # Data frame to hold results of changing bruc effects on bTB
@@ -499,20 +488,20 @@ epiTB <- data.frame(
 epiB <- data.frame(
 	rhoB= rep(rhoB_test, length(rhoB_test)), 
 	mort = rep(mort_test, each = length(rhoB_test)),
-	bTBprev = NA, brucprev = NA, 	finalN = NA, 
+	bTBprev = NA, brucprev = NA, finalN = NA, 
 	bTB_inS = NA, bTB_inB = NA, bruc_inS = NA, bruc_inTB = NA)
 
 imax <- c(length(epiTB[,1]))
 pb <- txtProgressBar(min = 0, max = imax, style = 3)	
 for (i in 1:length(epiTB[,1])){
-	params.test_log = c(fixed.params.olddz, list(gamma=1/2, theta = 4, K = 433,
-		betaB = 1.025, betaT = 12.833531/10000, rhoT = epiTB$rhoT[i], rhoB = 1))
-	params.test_log$muC <- epiTB$mort[i] * params.test_log$muS
-	#params.test_log$muC[params.test_log$muC > 1] <- 1
-	params.test_log$muRC <- epiTB$mort[i] * params.test_log$muS
-	#params.test_log$muRC[params.test_log$muRC > 1] <- 1
+	params.test = c(fixed.params, list(gamma=1/2, theta = 4, K = 433,
+		betaB = 0.6087396, betaT = 0.0012974553, rhoT = epiTB$rhoT[i], rhoB = 2.1))
+	params.test$muC <- epiTB$mort[i] * params.test$muS
+	params.test$muC[params.test$muC > 1] <- 1
+	params.test$muRC <- epiTB$mort[i] * params.test$muS
+	params.test$muRC[params.test$muRC > 1] <- 1
 		
-	sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params.test_log))
+	sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params.test))
 	temp <- get_prevalence(sol)
 	
 	epiTB$bTBprev[i] = temp$prevTB
@@ -522,24 +511,25 @@ for (i in 1:length(epiTB[,1])){
 	epiTB$bTB_inB[i] = temp$prevTinB
 	epiTB$bruc_inS[i] = temp$prevBinS 
 	epiTB$bruc_inTB[i] = temp$prevBinT
-	rm(params.test_log, sol, temp)
+	rm(params.test, sol, temp)
 	setTxtProgressBar(pb, i)
 }
 cat("\n")
+summary(epiTB)
 
 write.csv(epiTB, "~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/draft2/post-labmeeting/epiT.csv")
 
 imax <- c(length(epiB[,1]))
 pb <- txtProgressBar(min = 0, max = imax, style = 3)	
 for (i in 1:length(epiB[,1])){
-	params.test_log = c(fixed.params.olddz, list(gamma=1/2, theta = 4, K = 433, 
-		betaB = 1.025, betaT = 12.833531/10000, rhoT = 2.1, rhoB = epiB$rhoB[i]))
-	params.test_log$muC <- epiB$mort[i] * params.test_log$muS
-	#params.test_log$muC[params.test_log$muC > 1] <- 1
-	params.test_log$muRC <- epiB$mort[i] * params.test_log$muS
-	#params.test_log$muRC[params.test_log$muRC > 1] <- 1
+	params.test = c(fixed.params, list(gamma=1/2, theta = 4, K = 433, 
+		betaB = 0.6087, betaT = 0.0012974553, rhoT = 1, rhoB = epiB$rhoB[i]))
+	params.test$muC <- epiB$mort[i] * params.test$muS
+	params.test$muC[params.test$muC > 1] <- 1
+	params.test$muRC <- epiB$mort[i] * params.test$muS
+	params.test$muRC[params.test$muRC > 1] <- 1
 		
-	sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params.test_log))
+	sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params.test))
 	temp <- get_prevalence(sol)
 	
 	epiB$bTBprev[i] = temp$prevTB
@@ -549,12 +539,29 @@ for (i in 1:length(epiB[,1])){
 	epiB$bTB_inB[i] = temp$prevTinB
 	epiB$bruc_inS[i] = temp$prevBinS 
 	epiB$bruc_inTB[i] = temp$prevBinT
-	rm(params.test_log, sol, temp)
+	rm(params.test, sol, temp)
 	setTxtProgressBar(pb, i)
 }
 cat("\n")
 
 write.csv(epiB, "~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/draft2/post-labmeeting/epiB.csv")
+
+
+# baseline prevalence in bTB only model = 0.6427103
+S0 = 400* stable_age; It0 = 20 * stable_age; Ib0 = 0* stable_age; 
+Ic0 = 0* stable_age; R0 = 0 * stable_age; Rc0 = 0 * stable_age
+x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)
+params
+sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))
+get_prevalence(sol)
+
+# baseline prevalence in bruc only model = 0.2256427
+S0 = 400* stable_age; It0 = 0 * stable_age; Ib0 = 20* stable_age; 
+Ic0 = 0* stable_age; R0 = 0 * stable_age; Rc0 = 0 * stable_age
+x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)
+sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))
+get_prevalence(sol)
+
 
 ################################################
 # Again for epiB - but for when the rhoT = 1
@@ -588,7 +595,7 @@ for (i in 1:length(epib[,1])){
 	epib$bTB_inB[i] = temp$prevTinB
 	epib$bruc_inS[i] = temp$prevBinS 
 	epib$bruc_inTB[i] = temp$prevBinT
-	rm(params.test_log, sol, temp)
+	rm(params.test, sol, temp)
 	setTxtProgressBar(pb, i)
 }
 write.csv(epib, "~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/draft2/post-labmeeting/epib_rhoT1.csv")
@@ -597,7 +604,19 @@ write.csv(epib, "~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/draft2/
 
 
 
-
+#############################################################
+#############################################################
+#############################################################
+#############################################################
+#############################################################
+# Extra stuff
+#############################################################
+#############################################################
+#############################################################
+#############################################################
+#############################################################
+#############################################################
+#############################################################
 
 
 

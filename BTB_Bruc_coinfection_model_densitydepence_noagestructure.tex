@@ -390,6 +390,15 @@ B &=  \sum_{a=1}^{20} I_{B}(a)+I_{C}(a) \\
 \frac{dI_{C}(a)}{dt}&=  \beta'_{T}(a) T I_{B}(a) + \frac{\beta'_{B}(a) B}{N} I_{T}(a) + \epsilon R_{C}(a)  - (\gamma + \mu_{C}(a) + \nu)I_{C}(a)\\  
 \frac{dR_{B}(a)}{dt}&=  \gamma I_{B}(a) - (\epsilon + \mu_{RB}(a) + \nu) R_{B}(a) \\            
 \frac{dR_{C}(a)}{dt}&=  \beta'_{T}(a) T R_{B}(a) + \gamma I_{C}(a) - (\epsilon + \mu_{RC}(a) + \nu) R_{C}(a) \\     
+% In document with aging in...
+T &=  \sum_{a=1}^{20} I_{T}(a) + I_{C}(a) + R_{C}(a) \\
+B &=  \sum_{a=1}^{20} I_{B}(a)+I_{C}(a) \\
+\frac{dS(a)}{dt} &= r(a, N) - \beta_{T} T S(a) - \frac{\beta_B (a) B}{N} S(a) - (\mu_{S}(a) + \nu(a)) S(a) + l(a) S(a-1) \\         
+\frac{dI_{T}(a)}{dt}&= \beta_T T S(a) -  \frac{\beta'_{B}(a) B}{N} I_{T}(a) - (\mu_{T}(a) + \nu(a)) I_{T}(a) + l(a) I_{T}(a-1)\\
+\frac{dI_{B}(a)}{dt}&=  \frac{\beta_B (a) B}{N}S(a) - \beta'_{T} T I_{B}(a) + \epsilon R_{B}(a)  - (\gamma + \mu_{B}(a) + \nu(a)) I_{B}(a) + l(a) I_{B}(a-1) \\
+\frac{dI_{C}(a)}{dt}&=  \beta'_{T} T I_{B}(a) + \frac{\beta'_{B}(a) B}{N} I_{T}(a) + \epsilon R_{C}(a)  - (\gamma + \mu_{C}(a) + \nu(a))I_{C}(a) + l(a) I_{C}(a-1)\\  
+\frac{dR_{B}(a)}{dt}&=  \gamma I_{B}(a) - (\epsilon + \mu_{RB}(a) + \nu(a)) R_{B}(a) + l(a) R_{B}(a-1) \\            
+\frac{dR_{C}(a)}{dt}&=  \beta'_{T} T R_{B}(a) + \gamma I_{C}(a) - (\epsilon + \mu_{RC}(a) + \nu(a)) R_{C}(a) + l(a) R_{C}(a) \\ 
 
 
 

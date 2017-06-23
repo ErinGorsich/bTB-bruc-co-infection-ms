@@ -26,7 +26,7 @@ d<-data.frame(btb=data_nofinal$tb , bruc=as.character(data_nofinal$bruc), age=da
               id=data_nofinal$id)
 d<-d[d$age<14,]
 
-
+setwd("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/draft2/post-labmeeting/post-labmeeting2/figures")
 #######################################################
 #######################################################
 # Figure 1- AGE HISTOGRAM FOR THE CONCEPTUAL FIGURE
@@ -49,39 +49,9 @@ ggplot(d, aes(x=age)) +
 dev.off()
 
 
-d <- data.frame(Prevalence = c(0.27, 0.34, 0.27, 0.34), 
-	Infection = c("bTB", "brucellosis", "bTB", "brucellosis"), 
-	Color = c("a", "b", "c", "d"), 
-	Type = c("Model", "Model", "Data", "Data"))
-d$Infection <- relevel(d$Infection, "bTB")
-makeTransparent<-function(someColor, alpha=100)
-{
-  newColor<-col2rgb(someColor)
-  apply(newColor, 2, function(curcoldata){rgb(red=curcoldata[1], green=curcoldata[2],
-    blue=curcoldata[3],alpha=alpha, maxColorValue=255)})
-}
-blue2 <- makeTransparent("slateblue4", 130)
-green2 <- makeTransparent("chartreuse4", 130)
-
-png("Evaluation.png", width = 800, height = 600, units = "px")
-ggplot(d, aes(x = Type, y = Prevalence, fill = Color)) + guides(fill = FALSE) +
-	geom_bar(position = position_dodge(), stat = "identity",) + ylim(0, 0.5) + 
-	theme_bw() +  
-	scale_fill_manual(values=c(blue2, green2,  "slateblue4", "chartreuse4"))  + 
-	scale_colour_manual(values=c("black"))  + 
-	theme(panel.border = element_blank(), 
-        panel.margin = element_blank(),
-        panel.grid.major= element_blank(),
-        panel.grid.minor= element_blank()) + 
-	theme(axis.line.x = element_line(colour= "black", size = 2), 
-		axis.line.y = element_line(colour= "black", size = 2)) + 
-	theme(axis.title = element_blank(), axis.text = element_blank())
-dev.off()
-
-
 # Evaluation take 2: 
 setwd("~/GitHub/bTB-bruc-co-infection-ms")
-df<- readRDS("coinfection_pattern_results.rds")
+df <- data.frame(prevBinS = 0.298, prevBinT = 0.452, prevTinS = 0.224, prevTinB = 0.359)
 f2 <- data.frame(Evaluation = c("Model", "Model", "Data", "Data"), 
 	Infection = c("Single infection", "Co-infection", "Single infection", "Co-infection"), 
 	BrucellosisPrevalence = c(df$prevBinS, df$prevBinT, 0.3035, 0.4524), 
@@ -140,18 +110,6 @@ bolus <- c("R22", "R24", "R27", "R35", "R45", "R45b", "R50", "R6", "Y20", "Y31c"
 data3<- data2[!(data2$animal %in% bolus),]
 data3<- data3[data3$animal!= "O10",]
 
-# V1
-#final.mod<-coxph(Surv(start, stop, death.time)~brucella+TB_3+herd2+ age6+ cluster(animal), data=data3); summary(final.mod)
-#full.mod<-test.mod
-
-# V2
-# 0-2, 3-5, 6+
-#data3$age2.4 <- data3$age2.3
-#data3$age2.4[data3$age_yr2 == 6] <- "matureadult"
-#data3$age2.4[data3$age_yr2 == 3] <- "subadult"
-#data3$age2.4 <- as.character(data3$age2.4)
-#final.mod<-coxph(Surv(start, stop, death.time)~brucella*age2.4+TB_3+herd2+ cluster(animal), data=data3); summary(final.mod)
-
 
 #######################################################
 # Age and infection specific survival rates 
@@ -181,16 +139,9 @@ survivaldf <- data.frame(age = seq(1, 15, 1),
 	SurvUn = c(NA, 0.86, rep(0.94, 10), NA, NA, NA),
 	SurvTB = c(NA, 0.608, rep(0.832, 10), NA, NA, NA), 
 	SurvBR =  c(NA, 0.58, rep(0.82, 10), NA, NA, NA),
-	SurvCo = c(NA, 0.188, rep(0.652, 10), NA, NA, NA)
+	SurvCo = c(NA, 0, rep(0.486, 10), NA, NA, NA)
 )
 
-# age specific effects of brucellosis... not using
-#survivaldf <- data.frame(age = seq(1, 15, 1), 
-#	SurvUn = c(NA, 0.86, rep(0.94, 10), NA, NA, NA),
-#	SurvTB = c(NA, 0.7186, rep(0.8794, 10), NA, NA, NA), 
-#	SurvBR =  c(NA, 0.314, rep(0.940, 3), rep(0.730, 7), NA, NA, NA),
-#	SurvCo = c(NA, 0.0326, rep(0.8794, 3), rep(0.6094, 7), NA, NA, NA)
-#)
 #original dataframe with outside sources compiled
 #survivaldf <- data.frame(age = seq(1, 15, 1), 
 	#Cross2009female = c(0.9, 0.9, rep(0.95, 5), rep(0.85, 5), rep(0.9, 3)),
@@ -233,15 +184,16 @@ p6 <- ggplot(survlong, aes(x = age, y = estimate, colour = colour,
 		axis.title.x = element_text(size=16, vjust=-0.15),
         axis.title.y = element_text(size=16, vjust= 0.8),
         axis.text.x = element_text(size=14, vjust=-0.05),
-        axis.text.y = element_text(size=14)) + 
+        axis.text.y = element_text(size=14)) +  
+        #panel.grid.major = element_line(colour = "gray")) +
         theme(axis.line.x = element_line(colour= "black"),
   			axis.line.y = element_line(colour= "black"),   
 			#legend information
-        	legend.position=c(0.85, 0.2),  
-        	legend.background= element_rect(fill="white", colour="white"),
-        	legend.key= element_blank(),
-        	legend.title= element_blank(),
-        	legend.text = element_text(size=14))
+        		legend.position=c(0.85, 0.2),  
+        		legend.background= element_rect(fill="white", colour="white"),
+        		legend.key= element_blank(),
+        		legend.title= element_blank(),
+        		legend.text = element_text(size=14))
 
 p6red <- ggplot(survlong[survlong$age < 13.2,], aes(x = age, y = estimate, colour = colour, 
 	size = colour, shape = colour, group = dataset)) + 
@@ -251,22 +203,22 @@ p6red <- ggplot(survlong[survlong$age < 13.2,], aes(x = age, y = estimate, colou
 	scale_x_continuous(breaks=seq(1, 13, 2)) + 
 	theme_bw() + 
 	scale_colour_manual(values = c("goldenrod1", "slateblue3", "chartreuse4","tomato3")) +
-	scale_size_manual(values = c(2, 2, 2, 2)) +
+	scale_size_manual(values = c(3, 3, 3, 3)) +
 	scale_shape_manual(values = c(18, 17, 17, 19)) +
 	scale_linetype_manual(values = c('longdash', 'dotdash', 'dashed', 'twodash')) +
 	theme(panel.border = element_blank(), 
-		axis.title.x = element_text(size=16, vjust=-0.15),
-        axis.title.y = element_text(size=16, vjust= 0.8),
-        axis.text.x = element_text(size=14, vjust=-0.05),
-        axis.text.y = element_text(size=14)) + 
+		axis.title.x = element_text(size=18, vjust=-0.15),
+        axis.title.y = element_text(size=18, vjust= 0.8),
+        axis.text.x = element_text(size=16, vjust=-0.05),
+        axis.text.y = element_text(size=16)) + 
         theme(axis.line.x = element_line(colour= "black"),
   			axis.line.y = element_line(colour= "black"),   
 			#legend information
-        	legend.position=c(0.85, 0.2),  
+        	legend.position=c(0.8, 0.2),  
         	legend.background= element_rect(fill="white", colour="white"),
         	legend.key= element_blank(),
         	legend.title= element_blank(),
-        	legend.text = element_text(size=14))
+        	legend.text = element_text(size=15))
 
 
 ########################################################################
@@ -411,8 +363,7 @@ df2$color <- as.character(seq(1,4,1))
 df2$Infection <- relevel(df2$Infection, "bTB")
 df2$Coinfection <- relevel(df2$Coinfection, "uninfected")
 
-p12 <- 
-ggplot(df2, aes(x = Infection, y = Incidence, colour = color, shape = Coinfection)) + #colour = color,
+p12 <- ggplot(df2, aes(x = Infection, y = Incidence, colour = color, shape = Coinfection)) +
 	geom_point(position = position_dodge(0.3), stat = "identity", size =4) +
 	geom_errorbar(aes(ymin=df2$Incidence - df2$SE, ymax= df2$Incidence + df2$SE, width=0.1), 
 		position = position_dodge(0.3)) +
@@ -420,85 +371,59 @@ ggplot(df2, aes(x = Infection, y = Incidence, colour = color, shape = Coinfectio
 	ylim(0, 0.13) + 
 	xlab("") +
 	theme_bw() +
-	scale_colour_manual(values = c("goldenrod1","slateblue3","goldenrod1","chartreuse4"), guide = FALSE) +
-	#scale_fill_manual(values=c("goldenrod1","slateblue3","goldenrod1","chartreuse4"), guide = FALSE) +  			#"slateblue4","darkgreen"
-	#scale_colour_manual(values = c("goldenrod3","slateblue4","goldenrod3","darkgreen"), guide = FALSE) +
+	scale_colour_manual(values = c("goldenrod1","slateblue3",
+		"goldenrod1","chartreuse4"), guide = FALSE) +
+	#scale_fill_manual(values=c("goldenrod1","slateblue3",
+	#	"goldenrod1","chartreuse4"), guide = FALSE) +  	#"slateblue4","darkgreen"
+	#scale_colour_manual(values = c("goldenrod3","slateblue4",
+	#	"goldenrod3","darkgreen"), guide = FALSE) +
 	theme(axis.line.x = element_line(colour= "black"),
   		axis.line.y = element_line(colour= "black"),
   		axis.title.x = element_text(size=16, vjust=-0.15),
-         axis.title.y = element_text(size=16, vjust= 0.8),
-         axis.text.x = element_text(size=14, vjust=-0.05),
-         axis.text.y = element_text(size=14),
-         panel.border = element_blank(), 
-	legend.position=c(0.15, 0.9),  
+        axis.title.y = element_text(size=16, vjust= 0.8),
+        axis.text.x = element_text(size=14, vjust=-0.05),
+        axis.text.y = element_text(size=14),
+        panel.border = element_blank(), 
+		legend.position=c(0.15, 0.9),  
         legend.background= element_rect(fill="white", colour="white"),
         legend.key= element_blank(),
         legend.title= element_blank(),
         legend.text = element_text(size=12)) 
         
 # With effect size (95% CI)
-df = data.frame(infection = c("bTB", "brucellosis"), y = c(1.3, 2.13), ymin = c(0.65, 0.91), ymax = c(2.6, 4.9))
+df = data.frame(infection = c("bTB infection risk", "brucellosis infection risk"), y = c(1.3, 2.13), ymin = c(0.65, 0.91), ymax = c(2.6, 4.9))
 # SE
-df = data.frame(infection = c("bTB", "brucellosis"), y = c(1.3, 2.13), ymin = c(0.91, 1.38), ymax = c(1.85, 3.29))
-df$infection<- relevel(df$infection, "bTB")
+df = data.frame(infection = c("Risk of bTB", "Risk of brucellosis"), y = c(1.3, 2.13), ymin = c(0.91, 1.38), ymax = c(1.85, 3.29))
+df$infection<- relevel(df$infection, "Risk of bTB")
 p13 <- ggplot(df, aes(x = infection, y = y, colour = infection)) +
 	geom_point(stat = "identity", size = 4, shape = 15) + 
-	geom_errorbar(aes(ymin = ymin, ymax = ymax), width = 0.1)+
+	geom_errorbar(aes(ymin = ymin, ymax = ymax), width = 0)+
 	scale_colour_manual(values = c("slateblue3","chartreuse4"), guide = FALSE) + 
 	theme_bw() +
-	xlab("") +
+	xlab("(risk with second infection / risk in susceptibles)") +
 	ylim(0, 6)+
 	geom_hline(yintercept = 0.98, linetype = 2) +
-	#ylab("Proportional change in infection risk") +
-	ylab("Change in infection risk") +
+	ylab("Proportional change in infection risk") +
 	theme(axis.line.x = element_line(colour= "black"),
   		axis.line.y = element_line(colour= "black"),
-  		axis.title.x = element_text(size=16, vjust=-0.15),
-         axis.title.y = element_text(size=16, vjust= 0.8),
-         axis.text.x = element_text(size=14, vjust= -0.05),
-         axis.text.y = element_text(size=14, vjust = 0.05),
-         panel.border = element_blank())
-
-
-# inset plot
-inset <- ggplot(df2, aes(x = Infection, y = Incidence, colour = Infection, shape = Coinfection)) + #colour = color,
-	geom_point(position = position_dodge(0.4), stat = "identity", size = 3) +
-	ylim(0, 0.11) + 
-	xlab("") +
-	theme_bw() +
-	scale_colour_manual(values = c("slateblue3","chartreuse4"), guide = FALSE) +
-	theme(axis.line.x = element_line(colour= "black"),
-  		axis.line.y = element_line(colour= "black"),
-  		axis.title.x = element_blank(),
-         	axis.title.y = element_text(size=16, vjust= 0.8),
-         	axis.text.x = element_blank(),
-         	axis.text.y = element_text(size=14),
-         	panel.border = element_blank(), 
-		panel.margin = element_blank(),
-        	panel.grid.major= element_blank(),
-        	panel.grid.minor= element_blank()) + 
-        	guides(colour = FALSE, shape = FALSE)
-		#legend.position=c(0.15, 0.9),  
-        	#legend.background= element_rect(fill="white", colour="white"),
-        	#legend.key= element_blank(),
-        	#legend.title= element_blank(),
-        	#legend.text = element_text(size=12)) 
-
-
+  		axis.title.x = element_text(size=14, vjust=-0.15),
+        axis.title.y = element_text(size=18, vjust= 0.8),
+        axis.text.x = element_text(size=16, vjust= -0.05),
+        axis.text.y = element_text(size=16, vjust = 0.05),
+        panel.border = element_blank())
+p13
 	
-2.13 (95% CI 0.91 - 4.98)  # bTB on brucellosis 
-1.30  (95% CI 0.65 - 2.61)
+#2.13 (95% CI 0.91 - 4.98)  # bTB on brucellosis 
+#1.30  (95% CI 0.65 - 2.61)
  
- # Figure 2, take 2
- multiplot(p6red, pincid, p13, p10.2, cols =2)
- multiplot(p6red, p13, cols =2)
+# Figure 2, take 2
+png("Figure2.png", width = 900, height = 450, units = "px")
+multiplot(p6red, p13, cols =2)
+dev.off()
 
-#vp<- viewport(width=0.21, height=0.17, x=0.66, y=0.89)
-#print(inset, vp=vp)
-
-        
-# FIGURE 2 (Full)
-#multiplot(p6,  pincid, p10.2, p12 , cols = 2)
+tiff("Figure2.tiff", width = 1000, height = 450, units = "px")
+multiplot(p6red, p13, cols =2)
+dev.off()
 
 #######################################################
 #######################################################
@@ -569,60 +494,195 @@ plot(y = xcounts, x = seq(1:20), ylab = "Number of buffalo", pch = 19,
 	xlim = c(0, 20), cex.lab = 1.5)
 dev.off()
 
+
 #######################################################
 #######################################################
 # Figure 3- Ro and endemic prevalence figures
 #######################################################
 #######################################################
+d <- readRDS("~/GitHub/bTB-bruc-co-infection-ms/Ro_confidence_interval_simulation_results.rds")
 
-df <- data.frame(Infection = c("brucellosis", "brucellosis", "bTB", "bTB"), 
-	Coinfection = c("single", "co-infection", "single", "co-infection"),
-	Prevalence = c(0.32, 0.37, 0.58, 0.29),
-	R = c(1.36, 1.9, 3.4, 1.4)) 
-df$color <- as.character(seq(1,4,1))
-df$Infection <- relevel(df$Infection, "bTB")
-df$Coinfection <- relevel(df$Coinfection, "single")
+# test figure with violin plots
+n = length(d$Ro_brucellosis_single_list2)
+df <- data.frame(Ro = c(d$Ro_bTB_single_list2, d$Ro_bTB_co_list2, 
+	d$Ro_brucellosis_single_list2, d$Ro_brucellosis_co2),
+	meanRo = c(rep(mean(d$Ro_bTB_single_list2),n), 
+		rep(mean(d$Ro_bTB_co_list2),n),
+		rep(mean(d$Ro_brucellosis_single_list2),n), 
+		rep(mean(d$Ro_brucellosis_co2),n)),
+	sdRo = c(rep(sd(d$Ro_bTB_single_list2),n), 
+		rep(sd(d$Ro_bTB_co_list2),n),
+		rep(sd(d$Ro_brucellosis_single_list2),n), 
+		rep(sd(d$Ro_brucellosis_co2),n)),
+	Prevalence = NA,
+	infection = c(rep("bTB", 2*n), rep("brucellosis", 2*n)) , 
+	singleco = rep(c("single", "co-infection", "single",
+		"co-infection"), each = n),
+	X = rep(c("bTB-single", "bTB-co-infection", "bruc-single", 
+		"bruc-co-infection"), each = n), 
+	Xindex = rep(c(1.1, 1.4, 3.1, 3.4), each = n) )
+df$X <- factor(df$X, levels = c("bTB-single",
+	"bTB-co-infection", "bruc-single", "bruc-co-infection"))
+df$infection <- relevel(as.factor(df$infection), "bTB")
+df$singleco <- relevel(as.factor(df$singleco), "single")
+tapply(df$Ro, df$X, mean)
+data_summary <- function(x) {
+   m <- mean(x)
+   ymin <- m-sd(x)
+   ymax <- m+sd(x)
+   return(c(y=m,ymin=ymin,ymax=ymax))
+}
 
-p13 <- 
-ggplot(df, aes(x = Coinfection, y = Prevalence, colour = Infection, shape = Infection)) + #colour = color,
-	geom_point(stat = "identity", size =4) +   #position = position_dodge(0.3),
-	geom_line(aes(group =Infection)) +   # position = position_dodge(0.3)
-	ylim(0, 0.7) + 
+# Dot and error plots for Ro
+pR <- ggplot(df, aes(x = infection, y = Ro, colour = infection, shape = singleco)) + 	#colour = color,
+	#stat_summary(fun.data = data_summary) +
+	geom_point(aes(x = infection, y = meanRo), size = 3,
+		position= position_dodge(width = 0.9)) +
+	geom_errorbar(aes(x = infection, ymin = meanRo - sdRo, ymax = meanRo + sdRo),
+		width = 0, position= position_dodge(width = 0.9)) +
+	ylim(0.8, 6) +
 	xlab("") +
+	ylab(expression(R[0])) +
 	theme_bw() +
-	scale_colour_manual(values = c("slateblue3","chartreuse4")) +
+	scale_colour_manual(values = c("slateblue3","chartreuse4"), guide = F) +
+	scale_shape_manual(values = c(19, 17)) +
 	theme(axis.line.x = element_line(colour= "black"),
   		axis.line.y = element_line(colour= "black"),
   		axis.title.x = element_text(size=16, vjust=-0.15),
-         axis.title.y = element_text(size=16, vjust= 0.8),
-         axis.text.x = element_text(size=14, vjust=-0.05),
-         axis.text.y = element_text(size=14),
-         panel.border = element_blank(), 
-	legend.position=c(0.85, 0.87),  
+        axis.title.y = element_text(size=16, vjust= 0.8),
+        axis.text.x = element_text(size=16, vjust=-0.05),
+        axis.text.y = element_text(size=14),
+        panel.border = element_blank(), 
+		legend.position=c(0.85, 0.9),  
+		legend.text = element_text(size = 10),
         legend.background= element_rect(fill="white", colour="white"),
         legend.key= element_blank(),
-        legend.title= element_blank(),
-        legend.text = element_text(size=12)) 
+        legend.title= element_blank())
 
-p14 <- 
-ggplot(df, aes(x = Coinfection, y = R, colour = Infection, shape = Infection)) + #colour = color,
-	geom_point(stat = "identity", size =4) +   #position = position_dodge(0.3), 
-	geom_line(aes(group =Infection)) +  #position = position_dodge(0.3)
-	ylim(0.8, 4) + 
+
+
+# Dot and error plots for Endemic Prevlanece
+d2 <- readRDS("~/GitHub/bTB-bruc-co-infection-ms/EE_confidence_interval_simulation_results2.rds")
+df$Prevalence <- c(d2$EE_bTB_single_list, d2$EE_bTB_co_list, d2$EE_brucellosis_single_list, d2$EE_brucellosis_co)
+df <- df[!is.na(df$Prevalence),]
+df$meanprev <- c(rep(mean(df$Prevalence[df$X == "bTB-single"]),
+	length(df$X[df$X == "bTB-single"])), 
+	rep(mean(df$Prevalence[df$X == "bTB-co-infection"]), 
+	length(df$X[df$X == "bTB-co-infection"])),
+	rep(mean(df$Prevalence[df$X == "bruc-single"]), 
+	length(df$X[df$X == "bruc-single"])),
+	rep(mean(df$Prevalence[df$X == "bruc-co-infection"]), 
+	length(df$X[df$X == "bruc-co-infection"])) )
+df$sd <- c(rep(sd(df$Prevalence[df$X == "bTB-single"]), 
+	length(df$X[df$X == "bTB-single"])), 
+	rep(sd(df$Prevalence[df$X == "bTB-co-infection"]), 
+	length(df$X[df$X == "bTB-co-infection"])),
+	rep(sd(df$Prevalence[df$X == "bruc-single"]), 
+	length(df$X[df$X == "bruc-single"])),
+	rep(sd(df$Prevalence[df$X == "bruc-co-infection"]), 
+	length(df$X[df$X == "bruc-co-infection"])) )
+
+pEE <- ggplot(df, aes(x = infection, y = Prevalence, colour = infection, 
+	shape = singleco, dodge = singleco)) + #colour = color,
+	#stat_summary(fun.data = data_summary) +
+	geom_point(aes(x = infection, y = meanprev), size = 3, 
+		position= position_dodge(width = 0.9)) +
+	geom_errorbar(aes(x = infection, ymin = meanprev - sd, ymax = meanprev + sd),
+		width = 0, position= position_dodge(width = 0.9)) +
+	ylim(0, 0.8) + 
 	xlab("") +
-	ylab(expression(R[0])) + 
+	ylab("Prevalence") + 
 	theme_bw() +
 	scale_colour_manual(values = c("slateblue3","chartreuse4"), guide = F) +
 	scale_shape_manual(values = c(19, 17), guide = FALSE) +
 	theme(axis.line.x = element_line(colour= "black"),
   		axis.line.y = element_line(colour= "black"),
   		axis.title.x = element_text(size=16, vjust=-0.15),
-         axis.title.y = element_text(size=16, vjust= 0.8),
-         axis.text.x = element_text(size=14, vjust=-0.05),
-         axis.text.y = element_text(size=14),
-         panel.border = element_blank()) 
+        axis.title.y = element_text(size=16, vjust= 0.8),
+        axis.text.x = element_text(size=16, vjust=-0.05),
+        axis.text.y = element_text(size=14),
+        panel.border = element_blank()) 
 
-multiplot(p14, p13, cols = 2)
+# Histograms for Ro
+TB <- d$Ro_bTB_co_list2 - d$Ro_bTB_single_list2
+bruc <- d$Ro_brucellosis_co2 - d$Ro_brucellosis_single_list2
+df <- data.frame(Ro = c(TB, bruc), 
+	infection = c(rep("bTB", length(TB)), rep("brucellosis", length(bruc))))
+df$infection <- as.factor(df$infection)
+df$infection <- relevel(as.factor(df$infection), "bTB")
+mu <- data.frame(infection = c("TB", "bruc"), r.mean = c(mean(TB), mean(bruc)) )
+phist <- ggplot(df, aes(x = Ro, colour = infection, fill = infection)) + 
+	geom_histogram(aes(y = ..density..), position = "identity", alpha = 0.5, bins = 30) + 
+	#geom_histogram(position = "identity", alpha = 0.5, bins = 30) + 
+	scale_colour_manual(values = c("slateblue3","chartreuse4"), guide = F) + 
+	scale_fill_manual(values = c("slateblue3","chartreuse4"), guide = F) + 
+	xlab(expression(paste(Change~"in"~ R[o]))) + #"~with~"co-infection 
+	ylab("Density") + 
+	#geom_vline(data = mu, aes(xintercept= r.mean), linetype="dashed") +
+	theme_bw() +
+	theme(axis.line.x = element_line(colour= "black"),
+  		axis.line.y = element_line(colour= "black"),
+  		axis.title.x = element_text(size=16, vjust=-0.15),
+        axis.title.y = element_text(size=16, vjust= 0.8),
+        axis.text.x = element_text(size=14, vjust=-0.05),
+        axis.text.y = element_text(size=14),
+        panel.border = element_blank(), 
+        plot.margin = unit(c(5.5, 5.5, 5.5, 5.5), "points"))  
+
+
+# Histograms for Endemic Prevlanece
+TB <-d2$EE_bTB_co_list - d2$EE_bTB_single_list
+Bruc <- d2$EE_brucellosis_co - d2$EE_brucellosis_single_list
+df <- data.frame(Prevalence = c(TB, Bruc), 
+	infection = c(rep("bTB", length(d2$EE_bTB_single_list)), 
+	rep("brucellosis", length(d2$EE_brucellosis_single_list) )))
+#df <- df[d2$EE_brucellosis_single_list > 0.05,]
+#df <- df[d2$EE_bTB_single_list > 0.05,]
+df <- df[!is.na(df$Prevalence),]
+df$infection <- as.factor(df$infection)
+df$infection <- relevel(as.factor(df$infection), "bTB")
+#mu <- data.frame(infection = c("TB", "bruc"), 
+#	r.mean = c(mean(df$Prevalence[df$infection == "bTB"]), mean(df$Prevalence[df$infection == "brucellosis"])))
+	
+phistEE <- ggplot(df, aes(x = Prevalence, colour = infection, fill = infection)) + 
+	geom_histogram(aes(y = ..density..), 
+		position = "identity", alpha = 0.5, bins = 30) + 
+	scale_colour_manual(values = c("slateblue3","chartreuse4"), guide = F) + 
+	scale_fill_manual(values = c("slateblue3","chartreuse4"), guide = F) + 
+	xlab("Change in prevalence") + 
+	ylab("Density") + 
+	theme_bw() +
+	theme(axis.line.x = element_line(colour= "black"),
+  		axis.line.y = element_line(colour= "black"),
+  		axis.title.x = element_text(size=16, vjust=-0.15),
+        axis.title.y = element_text(size=16, vjust= 0.8),
+        axis.text.x = element_text(size=14, vjust=-0.05),
+        axis.text.y = element_text(size=14),
+        panel.border = element_blank(), 
+        plot.margin = unit(c(5.5, 5.5, 5.5, 15), "points"))  
+
+library("grid")
+grid.newpage()
+pushViewport(viewport(layout = grid.layout(2,3)))
+define_region = function(row, col){
+	viewport(layout.pos.row = row, layout.pos.col = col)
+}
+print(pR, vp = define_region(1:2,1))
+print(pEE, vp = define_region(1:2, 2))
+print(phist, vp = define_region(1, 3))
+print(phistEE, vp = define_region(2, 3))
+
+
+
+# OLD FIGURE WIHTOUT ERRORBARS...
+df <- data.frame(Infection = c("brucellosis", "brucellosis", "bTB", "bTB"), 
+	Coinfection = c("single", "co-infection", "single", "co-infection"),
+	Prevalence = c(0.32, 0.37, 0.58, 0.29),
+	R = c(1.16535, 1.584, 3.903, 1.9156)) 
+df$color <- as.character(seq(1,4,1))
+df$Infection <- relevel(df$Infection, "bTB")
+df$Coinfection <- relevel(df$Coinfection, "single")
+
 
 
 df <- data.frame(Infection = c("brucellosis", "brucellosis", "bTB", "bTB"), 
@@ -630,7 +690,8 @@ df <- data.frame(Infection = c("brucellosis", "brucellosis", "bTB", "bTB"),
 	Coinfection = c("single", "co-infection", "single", "co-infection"),
 	Prevalence = c(0.32, 0.37, 0.58, 0.29),
 	Xindex = c(3, 3.5, 1, 1.5),
-	R = c(1.36, 1.9, 3.4, 1.4))
+	R = c(1.165354, 1.584019, 3.903531, 1.9156))
+	#R = c(1.36, 1.9, 3.4, 1.4))
 df <- df[order(df$Xindex),]
 df$X <- factor(df$X, levels = c("bTB-single", "bTB-co-infection", "bruc-single", "bruc-co-infection"))
 df$color <- as.character(seq(1,4,1))
@@ -648,11 +709,11 @@ p13 <- ggplot(df, aes(x = X, y = Prevalence, colour = Infection, shape = Coinfec
 	theme(axis.line.x = element_line(colour= "black"),
   		axis.line.y = element_line(colour= "black"),
   		axis.title.x = element_text(size=16, vjust=-0.15),
-         axis.title.y = element_text(size=16, vjust= 0.8),
-         axis.text.x = element_blank(), #element_text(size=14, vjust=-0.05),
-         axis.text.y = element_text(size=14),
-         panel.border = element_blank(), 
-	legend.position=c(0.85, 0.9),  
+        axis.title.y = element_text(size=16, vjust= 0.8),
+        axis.text.x = element_blank(), #element_text(size=14, vjust=-0.05),
+        axis.text.y = element_text(size=14),
+        panel.border = element_blank(), 
+		legend.position=c(0.85, 0.9),  
         legend.background= element_rect(fill="white", colour="white"),
         legend.key= element_blank(),
         legend.title= element_blank(),
@@ -670,10 +731,10 @@ p14 <- ggplot(df, aes(x = X, y = R, colour = Infection, shape = Coinfection)) + 
 	theme(axis.line.x = element_line(colour= "black"),
   		axis.line.y = element_line(colour= "black"),
   		axis.title.x = element_text(size=16, vjust=-0.15),
-         axis.title.y = element_text(size=16, vjust= 0.8),
-         axis.text.x = element_blank(),  #element_text(size=14, vjust=-0.05),
-         axis.text.y = element_text(size=14),
-         panel.border = element_blank()) 
+        axis.title.y = element_text(size=16, vjust= 0.8),
+        axis.text.x = element_blank(),  #element_text(size=14, vjust=-0.05),
+        axis.text.y = element_text(size=14),
+        panel.border = element_blank()) 
 
 multiplot(p14, p13, cols = 2)
 
@@ -817,47 +878,41 @@ multiplot(p, p1, cols = 2)
 #######################################################
 epiT <- read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/draft2/post-labmeeting/epiT.csv")
 epiB <- read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/draft2/post-labmeeting/epiB.csv")
-#epiB <- epiB[epiB$mort < 7,]
-#epiT <- epiT[epiT$mort < 7,]
+#epiB <- epiB[epiB$mort < 10.01,]
+#epiT <- epiT[epiT$mort < 10.01,]
 cols <- brewer.pal(11, "RdBu")
 cols2 <- colorRampPalette(brewer.pal(11, "RdBu"))
 
-epiT$bTBplot <- epiT$bTBprev - 0.58
-epiB$bTBplot <- epiB$bTBprev - 0.58
-epiT$brucplot <- epiT$brucprev - 0.318
-epiB$brucplot <- epiB$brucprev - 0.318
-epiT$mortT <- epiT$mort/3
-epiB$mortB <- epiB$mort/2.8
+epiT$bTBplot <- epiT$bTBprev - 0.6427103
+epiB$bTBplot <- epiB$bTBprev - 0.6427103
+epiT$brucplot <- epiT$brucprev - 0.2256427
+epiB$brucplot <- epiB$brucprev - 0.2256427
 
 # see range of data by self overall
 p1 <- ggplot(data = epiT, aes(x = mort, y = rhoT)) + geom_tile(aes(fill = bTBprev)) +
-	scale_fill_distiller(palette = "RdYlBu", direction = -1, limits = c(-0.01, 0.8))
+	scale_fill_distiller(palette = "RdYlBu", direction = -1, limits = c(-0.01, 1))
 #p2<- ggplot(data = epiT, aes(x = mort, y = rhoB)) + geom_tile(aes(fill = bTBplot)) +
 #	scale_fill_distiller(palette = "RdYlBu", direction = -1, limits = c(-0.51, 0.51))	
 p3 <- ggplot(data = epiB, aes(x =mort, y = rhoB)) + geom_tile(aes(fill = brucprev)) +
-	scale_fill_distiller(palette = "RdYlBu", direction = -1, limits = c(0, 0.8))
+	scale_fill_distiller(palette = "RdYlBu", direction = -1, limits = c(0, 1))
 #p4 <- ggplot(data = epiB, aes(x =mort, y = rhoT)) + geom_tile(aes(fill = bTBplot)) +
 #	scale_fill_distiller(palette = "RdYlBu", direction = -1, limits = c(-0.51, 0.51))
 multiplot(p1, p3, cols= 2)
-
-# same even if rhoT = 1 or 1.2.
-pnew <- ggplot(data = epib, aes(x = mort, y = rhoB)) + geom_tile(aes(fill = brucprev)) +
-+ 	scale_fill_distiller(palette = "RdYlBu", direction = -1, limits = c(-0.01, 0.8))
-multiplot(pnew, p3, cols= 2)
-
 
 
 # For publication
 df <- data.frame(Difference = c(epiT$bTBplot, epiB$brucplot), 
 	infection = c(rep("bTB", length(epiT[,1])), rep("brucellosis", length(epiB[,1]))), 
 	rho = c(epiT$rhoT, epiB$rhoB), mort = c(epiT$mort, epiB$mort))
-df2 <- data.frame(rho = c(2.1, 1.2), mort = c(5.8, 5.8), infection = c("brucellosis", "bTB"))
-#df2 <- rbind(df[df$infection == "brucellosis" & df$rho == 2.1 & df$mort == 5.8 , c("rho", "mort", "infection")], 
-#	df[df$infection == "bTB" & df$rho == 1.2 & df$mort == 5.8 , c("rho", "mort", "infection"),])
-df2$rho_seup <- c(3.2, 1.8)			# bTB 1.29 (CI 0.645 to 2.606)
-df2$rho_sedown <- c(1.42, 0.91)      #bruc trans (CI = 0.91 to 4.98)
-df2$mort_selow <- c(5.8 - 0.48, 5.8 - 0.48)
-df2$mort_seup <- c(5.8 + 0.48, 5.8 + 0.48)
+df2 <- data.frame(rho = c(2.1, 1.2), mort = c(8.5, 8.5), infection = c("brucellosis", "bTB"))  # 5.8 in old
+
+# incid rhoB = 2.1 (1.38 - 3.28)
+# incid rhoT = 1.30 (0.91 - 1.85)
+# mort = 8.52 (5.2 - 14)
+df2$rho_seup <- c(3.28, 1.85)			# bTB 1.29 (CI 0.645 to 2.606)
+df2$rho_sedown <- c(1.38, 0.91)      #bruc trans (CI = 0.91 to 4.98)
+df2$mort_selow <- c(5.2, 5.2) # was 5.8
+df2$mort_seup <- c(14.06, 14.06)
 df$infection <- relevel(df$infection, "bTB")
 p <- ggplot(data = df, aes(x = mort, y = rho))
 p2 <- p + theme_bw() + facet_wrap(~ infection) + 
@@ -873,7 +928,7 @@ p2 <- p + theme_bw() + facet_wrap(~ infection) +
 	legend.key.size = unit(1, "cm") ) + 
 	geom_raster(aes(fill = Difference), interpolate = TRUE) +  # was geom_tile
 	scale_fill_distiller(palette = "RdYlBu", direction = -1, 
-		limits = c(-0.6, 0.6)) +   
+		limits = c(-0.67, 0.67)) +   
 	geom_point(data = df2, size = 2, pch = 8) + 
 	geom_errorbar(data = df2, aes(ymin = rho_sedown, ymax = rho_seup), width = 0.1 ) + 
 	geom_errorbarh(data = df2, aes(xmin = mort_selow, xmax = mort_seup), height = 0.1)	
@@ -881,18 +936,17 @@ p2 <- p + theme_bw() + facet_wrap(~ infection) +
 	#	xmax = mort + 0.5, ymax = rho + 0.5), size = 1, fill = NA, 
 	#	colour = "black")
 df$Difference2 <- df$Difference - 0.1  # want contours to span -5 to +5 not 0 to 10
-df3 <- data.frame(Difference = c(0.10, -0.10, 0.50, 0.30, 0.10, -0.10), 
-	rho = c(7.8, 3, 7.8, 7.8, 7, 1.3), mort = c(2.2, 6.65, 1.35, 3.0, 6.6, 6.65), 
-	infection = c("bTB", "bTB", "brucellosis", "brucellosis", "brucellosis", "brucellosis"))
+df3 <- data.frame(Difference = c(0.10, -0.10, -0.3, 0.50, 0.30, 0.10, -0.10), 
+	rho = c(7.8, 7.8, 3.8, 7.8, 7.8, 7.8, 1.8), 
+	mort = c(1.9, 4.5, 14.45, 1.39, 4.1, 12, 14.45), 
+	infection = c("bTB", "bTB", "bTB", "brucellosis", "brucellosis", "brucellosis", "brucellosis"))
 p2 <- p2  + geom_contour(data = df, aes(x = mort, y = rho, z = Difference2, weight = ..level..),
-	binwidth = 0.2, color = "black", linetype = 3) + 
-	geom_text(data = df3, aes(z = NULL, label = Difference)) + facet_wrap(~infection); 
-	
-	
+	binwidth = 0.2, color = "black", linetype = 3) +
+	geom_text(data = df3, aes(z = NULL, label = Difference)) + facet_wrap(~infection)
+
 tiff("Figure4.tif", width  = 9, height = 5, units = "in", res = 300)	
 p2
 dev.off()
-
 
 
 # Just realistic mortality (or mort with same as single to greater)

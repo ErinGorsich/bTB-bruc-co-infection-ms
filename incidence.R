@@ -3,7 +3,7 @@
 # Incidence analyses
 #########################################
 #########################################
-library(ggplots2)
+library(ggplot2)
 library(lme4)
 library(pbkrtest)
 library("JM")
@@ -88,6 +88,9 @@ data$animal<-as.character(data$animal)
 data$age_yr2<- floor(data$age_yr)
 table(data$age_yr2[data$capture.time==1])
 
+# test age distribution
+test <- data[!duplicated(data$animal),]
+table(test$age_yr2)
 data$testage<- NA
 data$testage[data$age_yr <3] <- "young"
 data$testage[data$age_yr >= 3] <- "old"
@@ -125,19 +128,20 @@ data$agelate <- as.factor(data$agelate)
 data$agelate <- relevel(data$agelate, "young")
 
 data$ageearly <- NA
-data$ageearly[data$age_yr <=1.9] <- "young"
-data$ageearly[data$age_yr <= 4.9 & data$age_yr > 1.9] <- "subadult"
+data$ageearly[data$age_yr <=1.99] <- "young"
+data$ageearly[data$age_yr <= 4.9 & data$age_yr > 1.99] <- "subadult"
 data$ageearly[data$age_yr >= 5] <- "mature"
 data$ageearly <- as.factor(data$ageearly)
 data$ageearly <- relevel(data$ageearly, "young")
 
 # Model selection for age category alone!
 ###############################################
-# age1 (NA)
+table(data$age_yr2, data$age2, data$convert.time)
+# age1 (NA) - no seroconversions in oldest age category
 test.mod<-coxph(Surv(start, stop, convert.time)~ agelate + cluster(animal), data=data); summary(test.mod); logLik(test.mod); extractAIC(test.mod)
 # age2 (LL = -123.015, AIC = 248.0299)
 test.mod<-coxph(Surv(start, stop, convert.time)~ testage + cluster(animal), data=data); summary(test.mod); logLik(test.mod); extractAIC(test.mod)
-# age3 (LL = -123.018, AIC = 250.0364)
+# age3 (LL = -123.018, AIC = 250.2849)
 test.mod<-coxph(Surv(start, stop, convert.time)~ ageearly + cluster(animal), data=data); summary(test.mod); logLik(test.mod); extractAIC(test.mod)
 #age4 (LL = -124.8141, AIC = 251.63)
 test.mod<-coxph(Surv(start, stop, convert.time)~ age2 + cluster(animal), data=data); summary(test.mod); logLik(test.mod);extractAIC(test.mod) 
