@@ -1,1302 +1,3 @@
-df = data.frame(rhoB = exp(rnorm(n = n, mean = 0.75579, sd = 0.40714)), #
-	muB = params$muS * exp(rnorm(n = n, mean = 1.1060, sd = 0.3505)),#
-	muT = params$muS * exp(rnorm(n = n, mean = 1.0370, sd = 0.3483 )),#
-	muC = params$muS * exp(rnorm(n = n, mean = 2.1430, sd = 0.5004329)),#
-	EE_bTB_alone = NA,#
-	EE_bTB_co = NA,#
-	EE_bruc_alone = NA,#
-	EE_bruc_co = NA,#
-)
-n = 1000#
-set.seed(1)#
-df = data.frame(rhoB = exp(rnorm(n = n, mean = 0.75579, sd = 0.40714)), #
-	muB = params$muS * exp(rnorm(n = n, mean = 1.1060, sd = 0.3505)),#
-	muT = params$muS * exp(rnorm(n = n, mean = 1.0370, sd = 0.3483 )),#
-	muC = params$muS * exp(rnorm(n = n, mean = 2.1430, sd = 0.5004329)),#
-	EE_bTB_alone = NA,#
-	EE_bTB_co = NA,#
-	EE_bruc_alone = NA,#
-	EE_bruc_co = NA)
-head(df)
-df[1,c(5:8)]
-for(i in 1:n){#
-	params$rhoB<- df$rhoB[i]#
-	params$muB <- df$muB[i]#
-	params$muT <- df$muT[i]#
-	params$muC <- df$muC[i]#
-	params$muR <- df$muT[i]#
-	params$muRC <- df$muC[i]#
-	df[i, c(5:8)] <- getEE(params)#
-}
-for(i in 1:n){#
-	params$rhoB<- df$rhoB[i]#
-	params$muB <- df$muB[i]#
-	params$muT <- df$muT[i]#
-	params$muC <- df$muC[i]#
-	params$muR <- df$muT[i]#
-	params$muRC <- df$muC[i]#
-	df[i, c(5:8)] <- getEE(params)#
-print(i)}
-summary(df)
-df[is.na(df)]
-df[is.na(df$EE_bTB_co),]
-saveRDS(df, file = "~/GitHub/bTB-bruc-co-infection-ms/EE_confidence_interval_simulation_results.rds")
-d <- readRDS("~/GitHub/bTB-bruc-co-infection-ms/EE_confidence_interval_simulation_results.rds")
-head(d)
-# Histograms for Endemic Prevlanece#
-df <- data.frame(Prevalence = c(df$EE_bTB_co - df$EE_bTB_alone, df$EE_bruc_co - df$bTB_alone), #
-	infection = c(rep("bTB", length(df[,1])), rep("brucellosis", length(df[,1]))))#
-mu <- data.frame(infection = c("TB", "bruc"), #
-	r.mean = c(mean(df$EE_bTB_co - df$EE_bTB_alone), mean(df$EE_bruc_co - df$bTB_alone)))
-df <- data.frame(Prevalence = c(df$EE_bTB_co - df$EE_bTB_alone, df$EE_bruc_co - df$bTB_alone), #
-	infection = c(rep("bTB", length(df[,1])), rep("brucellosis", length(df[,1]))))#
-mu <- data.frame(infection = c("TB", "bruc"), #
-	r.mean = c(mean(df$EE_bTB_co - df$EE_bTB_alone), mean(df$EE_bruc_co - df$bTB_alone)))#
-phistEE <- ggplot(df, aes(x = Prevalence, colour = infection, fill = infection)) + #
-	geom_histogram(aes(y = ..density..), position = "identity", alpha = 0.5, bins = 30) + #
-	#geom_histogram(position = "identity", alpha = 0.5, bins = 30) + #
-	scale_colour_manual(values = c("slateblue3","chartreuse4"), guide = F) + #
-	scale_fill_manual(values = c("slateblue3","chartreuse4"), guide = F) + #
-	xlab(expression(paste(Change~"in"~ R[o]~with~"co-infection"))) + #
-	ylab("Density") + #
-	geom_vline(data = mu, aes(xintercept= r.mean), linetype="dashed") +#
-	theme_bw() +#
-	theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank())
-phistEE
-TB <- na.exclude(df$EE_bTB_co - df$EE_bTB_alone)
-Bruc <- na.exclude(df$EE_bruc_co - df$bTB_alone)
-head(TB)
-TB
-test <- (df$EE_bruc_co - df$bTB_alone)
-summary(test)
-df <- data.frame(Prevalence = c(d$EE_bTB_co - d$EE_bTB_alone, d$EE_bruc_co - d$bTB_alone), #
-	infection = c(rep("bTB", length(d[,1]), rep("brucellosis", length(d[,1])))
-)
-df <- data.frame(Prevalence = c(d$EE_bTB_co - d$EE_bTB_alone, d$EE_bruc_co - d$bTB_alone), #
-	infection = c(rep("bTB", length(d[,1])), rep("brucellosis", length(d[,1])))
-)
-head(df)
-summary(df)
-df <- df[!is.na(df$Prevalence),]
-mu <- data.frame(infection = c("TB", "bruc"), #
-	r.mean = c(mean(df$Prevalence[df$infection == "bTB"]), mean(df$Prevalence[df$infection == "brucellosis"])))
-phistEE <- ggplot(df, aes(x = Prevalence, colour = infection, fill = infection)) + #
-	geom_histogram(aes(y = ..density..), position = "identity", alpha = 0.5, bins = 30) + #
-	#geom_histogram(position = "identity", alpha = 0.5, bins = 30) + #
-	scale_colour_manual(values = c("slateblue3","chartreuse4"), guide = F) + #
-	scale_fill_manual(values = c("slateblue3","chartreuse4"), guide = F) + #
-	xlab(expression(paste(Change~"in"~ R[o]~with~"co-infection"))) + #
-	ylab("Density") + #
-	geom_vline(data = mu, aes(xintercept= r.mean), linetype="dashed") +#
-	theme_bw() +#
-	theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank()) #
-phistEE
-summary(df)
-hist(df$Prevalence)
-hist(df$Prevalence[df$infection == "bTB"])
-hist(df$Prevalence[df$infection == "brucellosis"])
-df$infection <- as.factor(df$infection)
-ggplot(df, aes(x = Prevalence, colour = infection, fill = infection))
-ggplot(df, aes(x = Prevalence, colour = infection, fill = infection)) + #
-	geom_histogram(aes(y = ..density..), position = "identity", alpha = 0.5, bins = 30) + #
-	#geom_histogram(position = "identity", alpha = 0.5, bins = 30) + #
-	scale_colour_manual(values = c("slateblue3","chartreuse4"), guide = F) + #
-	scale_fill_manual(values = c("slateblue3","chartreuse4"), guide = F) + #
-	xlab("Change in prevalence with co-infection") + #
-	ylab("Density") + #
-	geom_vline(data = mu, aes(xintercept= r.mean), linetype="dashed") +#
-	theme_bw() +#
-	theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank())
-temp <- df[df$infection == "brucellosis",]
-ggplot(df, aes(x = Prevalence, colour = infection, fill = infection)) + #
-	geom_histogram(aes(y = ..density..), position = "identity", alpha = 0.5, bins = 30)
-ggplot(temp, aes(x = Prevalence, colour = infection, fill = infection)) + #
-	geom_histogram(aes(y = ..density..), position = "identity", alpha = 0.5, bins = 30)
-head(df)
-tail(df)
-TB <-d$EE_bTB_co - df$EE_bTB_alone#
-Bruc <- df$EE_bruc_co - df$bTB_alone
-summary(TB)
-TB <-d$EE_bTB_co - d$EE_bTB_alone#
-Bruc <- d$EE_bruc_co - d$bTB_alone
-summary(TB)
-summary(Bruc)
-TB <-d$EE_bTB_co - d$EE_bTB_alone#
-Bruc <- d$EE_bruc_co - d$bruc_alone
-summary(Bruc)
-head(d)
-df$X <- factor(df$X, levels = c("bTB-single", "bTB-co-infection", "bruc-single", "bruc-co-infection"))#
-df$infection <- relevel(as.factor(df$infection), "bTB")#
-df$singleco <- relevel(as.factor(df$singleco), "single")
-d <- readRDS("~/GitHub/bTB-bruc-co-infection-ms/Ro_confidence_interval_simulation_results.rds")#
-#
-# test figure with violin plots#
-n = length(d$Ro_brucellosis_single_list2)#
-df <- data.frame(Ro = c(d$Ro_bTB_single_list2, d$Ro_bTB_co_list2, #
-	d$Ro_brucellosis_single_list2, d$Ro_brucellosis_co2),#
-	meanRo = c(rep(mean(d$Ro_bTB_single_list2),n), rep(mean(d$Ro_bTB_co_list2),n),#
-		rep(mean(d$Ro_brucellosis_single_list2),n), rep(mean(d$Ro_brucellosis_co2),n)),#
-	Prevalence = NA,#
-	infection = c(rep("bTB", 2*n), rep("brucellosis", 2*n)) , #
-	singleco = rep(c("single", "co-infection", "single", "co-infection"), each = n),#
-	X = rep(c("bTB-single", "bTB-co-infection", "bruc-single", "bruc-co-infection"), each = n), #
-	Xindex = rep(c(1.1, 1.4, 3.1, 3.4), each = n) )#
-df$X <- factor(df$X, levels = c("bTB-single", "bTB-co-infection", "bruc-single", "bruc-co-infection"))#
-df$infection <- relevel(as.factor(df$infection), "bTB")#
-df$singleco <- relevel(as.factor(df$singleco), "single")#
-#
-data_summary <- function(x) {#
-   m <- mean(x)#
-   ymin <- m-sd(x)#
-   ymax <- m+sd(x)#
-   return(c(y=m,ymin=ymin,ymax=ymax))#
-}#
-#
-# Dot and error plots for Ro#
-pR <- ggplot(df, aes(x = X, y = Ro, colour = infection, shape = singleco)) + #colour = color,#
-	stat_summary(fun.data = data_summary) +#
-	geom_point(aes(x = X, y = meanRo), size = 4) +#
-	ylim(0.8, 6) + #
-	xlab("") +#
-	ylab(expression(R[0])) + #
-	theme_bw() +#
-	scale_colour_manual(values = c("slateblue3","chartreuse4"), guide = F) +#
-	scale_shape_manual(values = c(19, 17), guide = FALSE) +#
-	theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_blank(),  #element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank())
-pR
-df$Prevalence <- c(d$EE_bTB_alone, d$EE_bTB_co, d$EE_bruc_alone, d$EE_bruc_co)
-summary(df)
-n = length(d$Ro_brucellosis_single_list2)#
-df <- data.frame(Ro = c(d$Ro_bTB_single_list2, d$Ro_bTB_co_list2, #
-	d$Ro_brucellosis_single_list2, d$Ro_brucellosis_co2),#
-	meanRo = c(rep(mean(d$Ro_bTB_single_list2),n), rep(mean(d$Ro_bTB_co_list2),n),#
-		rep(mean(d$Ro_brucellosis_single_list2),n), rep(mean(d$Ro_brucellosis_co2),n)),#
-	Prevalence = NA,#
-	infection = c(rep("bTB", 2*n), rep("brucellosis", 2*n)) , #
-	singleco = rep(c("single", "co-infection", "single", "co-infection"), each = n),#
-	X = rep(c("bTB-single", "bTB-co-infection", "bruc-single", "bruc-co-infection"), each = n), #
-	Xindex = rep(c(1.1, 1.4, 3.1, 3.4), each = n) )#
-df$X <- factor(df$X, levels = c("bTB-single", "bTB-co-infection", "bruc-single", "bruc-co-infection"))#
-df$infection <- relevel(as.factor(df$infection), "bTB")#
-df$singleco <- relevel(as.factor(df$singleco), "single")
-summary(df)
-df$Prevalence <- c(d2$EE_bTB_alone, d2$EE_bTB_co, d2$EE_bruc_alone, d2$EE_bruc_co)
-d2 <- readRDS("~/GitHub/bTB-bruc-co-infection-ms/EE_confidence_interval_simulation_results.rds")#
-df$Prevalence <- c(d2$EE_bTB_alone, d2$EE_bTB_co, d2$EE_bruc_alone, d2$EE_bruc_co)
-summary(df)
-df <- df[!is.na(df$Prevalence),]
-df$meanprev <- c(rep(mean(df$Prevalence[df$X == "bTB-single"]) , length(df$X[df$X == "bTB-single"])), #
-	rep(mean(df$Prevalence[df$X == "bTB-co-infection"]) , length(df$X[df$X == "bTB-co-infection"])),#
-	rep(mean(df$Prevalence[df$X == "bruc-single"]) , length(df$X[df$X == "bruc-single"])),#
-	rep(mean(df$Prevalence[df$X == "bruc-co-infection"]) , length(df$X[df$X == "bruc-co-infection"])) )
-summary(df)
-apply(df$Prevalence, df$X, mean)
-tapply(df$Prevalence, df$X, mean)
-tapply(df$meanprev, df$X, mean)
-pEE <- ggplot(df, aes(x = X, y = Prevalence, colour = infection, shape = singleco)) + #colour = color,#
-	stat_summary(fun.data = data_summary) +#
-	geom_point(aes(x = X, y = meanprev), size = 4) +#
-	ylim(0, 0.8) + #
-	xlab("") +#
-	ylab("Prevalence") + #
-	theme_bw() +#
-	scale_colour_manual(values = c("slateblue3","chartreuse4"), guide = F) +#
-	scale_shape_manual(values = c(19, 17), guide = FALSE) +#
-	theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_blank(),  #element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank()) #
-pEE
-data_summary
-rm(m, x)
-pEE <- ggplot(df, aes(x = X, y = Prevalence, colour = infection, shape = singleco)) + #colour = color,#
-	#stat_summary(fun.data = data_summary) +#
-	geom_point(aes(x = X, y = meanprev), size = 4) +#
-	ylim(0, 0.8) + #
-	xlab("") +#
-	ylab("Prevalence") + #
-	theme_bw() +#
-	scale_colour_manual(values = c("slateblue3","chartreuse4"), guide = F) +#
-	scale_shape_manual(values = c(19, 17), guide = FALSE) +#
-	theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_blank(),  #element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank()) #
-pEE
-head(df$meanprev)
-df$meanprev[1001]
-pEE <- ggplot(df, aes(x = X, y = meanprev, colour = infection, shape = singleco)) + #colour = color,#
-	#stat_summary(fun.data = data_summary) +#
-	geom_point(aes(x = X, y = meanprev), size = 4)
-pEE
-ggplot(df, aes(x = X, y = meanprev, colour = infection, shape = singleco)) + #colour = color,#
-	#stat_summary(fun.data = data_summary) +#
-	geom_point(aes(x = X, y = meanprev), size = 4) +#
-	ylim(0, 0.8) + #
-	xlab("") +#
-	ylab("Prevalence")
-ggplot(df, aes(x = X, y = Prevalence, colour = infection, shape = singleco)) + #colour = color,#
-	#stat_summary(fun.data = data_summary) +#
-	geom_point(aes(x = X, y = meanprev), size = 4) +#
-	ylim(0, 0.8) + #
-	xlab("") +#
-	ylab("Prevalence") + #
-	theme_bw() +#
-	scale_colour_manual(values = c("slateblue3","chartreuse4"), guide = F) +#
-	scale_shape_manual(values = c(19, 17), guide = FALSE) +#
-	theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_blank(),  #element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank())
-df$sd <- c(rep(sd(df$Prevalence[df$X == "bTB-single"]) , length(df$X[df$X == "bTB-single"])), #
-	rep(sd(df$Prevalence[df$X == "bTB-co-infection"]) , length(df$X[df$X == "bTB-co-infection"])),#
-	rep(sd(df$Prevalence[df$X == "bruc-single"]) , length(df$X[df$X == "bruc-single"])),#
-	rep(sd(df$Prevalence[df$X == "bruc-co-infection"]) , length(df$X[df$X == "bruc-co-infection"])) )
-ggplot(df, aes(x = X, y = Prevalence, colour = infection, shape = singleco)) + #colour = color,#
-	#stat_summary(fun.data = data_summary) +#
-	geom_point(aes(x = X, y = meanprev), size = 4) +#
-	geom_errorbar(aes(ymin = meanprev - sd, ymax = meanprev + sd), widdth = 0)#
-	ylim(0, 0.8) + #
-	xlab("") +#
-	ylab("Prevalence") + #
-	theme_bw() +#
-	scale_colour_manual(values = c("slateblue3","chartreuse4"), guide = F) +#
-	scale_shape_manual(values = c(19, 17), guide = FALSE) +#
-	theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_blank(),  #element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank())
-ggplot(df, aes(x = X, y = Prevalence, colour = infection, shape = singleco)) + #colour = color,#
-	#stat_summary(fun.data = data_summary) +#
-	geom_point(aes(x = X, y = meanprev), size = 4) +#
-	geom_errorbar(aes(ymin = meanprev - sd, ymax = meanprev + sd), width = 0)#
-	ylim(0, 0.8) + #
-	xlab("") +#
-	ylab("Prevalence") + #
-	theme_bw() +#
-	scale_colour_manual(values = c("slateblue3","chartreuse4"), guide = F) +#
-	scale_shape_manual(values = c(19, 17), guide = FALSE) +#
-	theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_blank(),  #element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank())
-ggplot(df, aes(x = X, y = Prevalence, colour = infection, shape = singleco)) + #colour = color,#
-	#stat_summary(fun.data = data_summary) +#
-	geom_point(aes(x = X, y = meanprev), size = 4) +#
-	geom_errorbar(aes(ymin = meanprev - sd, ymax = meanprev + sd), width = 0) +#
-	ylim(0, 0.8) + #
-	xlab("") +#
-	ylab("Prevalence") + #
-	theme_bw() +#
-	scale_colour_manual(values = c("slateblue3","chartreuse4"), guide = F) +#
-	scale_shape_manual(values = c(19, 17), guide = FALSE) +#
-	theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_blank(),  #element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank())
-head(df)
-table(df$sd, df$X, mean)
-tapply(df$sd, df$X, mean)
-df$sd[df$X == "bruc-co-infection"] <- 0
-pEE <- ggplot(df, aes(x = X, y = Prevalence, colour = infection, shape = singleco)) + #colour = color,#
-	#stat_summary(fun.data = data_summary) +#
-	geom_point(aes(x = X, y = meanprev), size = 4) +#
-	geom_errorbar(aes(ymin = meanprev - sd, ymax = meanprev + sd), width = 0) +#
-	ylim(0, 0.8) + #
-	xlab("") +#
-	ylab("Prevalence") + #
-	theme_bw() +#
-	scale_colour_manual(values = c("slateblue3","chartreuse4"), guide = F) +#
-	scale_shape_manual(values = c(19, 17), guide = FALSE) +#
-	theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_blank(),  #element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank()) #
-pEE
-pEE <- ggplot(df, aes(x = infection, y = Prevalence, colour = infection, shape = singleco)) + #colour = color,#
-	#stat_summary(fun.data = data_summary) +#
-	geom_point(aes(x = X, y = meanprev), size = 4) +#
-	geom_errorbar(aes(ymin = meanprev - sd, ymax = meanprev + sd), width = 0) +#
-	ylim(0, 0.8) + #
-	xlab("") +#
-	ylab("Prevalence") + #
-	theme_bw() +#
-	scale_colour_manual(values = c("slateblue3","chartreuse4"), guide = F) +#
-	scale_shape_manual(values = c(19, 17), guide = FALSE) +#
-	theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_blank(),  #element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank()) #
-pEE
-pEE <- ggplot(df, aes(x = infection, y = Prevalence, colour = infection, shape = singleco)) + #colour = color,#
-	#stat_summary(fun.data = data_summary) +#
-	geom_point(aes(x = infection, y = meanprev), size = 4) +#
-	geom_errorbar(aes(ymin = meanprev - sd, ymax = meanprev + sd), width = 0) +#
-	ylim(0, 0.8) + #
-	xlab("") +#
-	ylab("Prevalence") + #
-	theme_bw() +#
-	scale_colour_manual(values = c("slateblue3","chartreuse4"), guide = F) +#
-	scale_shape_manual(values = c(19, 17), guide = FALSE) +#
-	theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_blank(),  #element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank()) #
-pEE
-pEE <- ggplot(df, aes(x = infection, y = Prevalence, colour = infection, shape = singleco)) + #colour = color,#
-	#stat_summary(fun.data = data_summary) +#
-	geom_point(aes(x = infection, y = meanprev), size = 4, position= position_dodge(width = 0.9)) +#
-	geom_errorbar(aes(ymin = meanprev - sd, ymax = meanprev + sd), width = 0) +#
-	ylim(0, 0.8) + #
-	xlab("") +#
-	ylab("Prevalence") + #
-	theme_bw() +#
-	scale_colour_manual(values = c("slateblue3","chartreuse4"), guide = F) +#
-	scale_shape_manual(values = c(19, 17), guide = FALSE) +#
-	theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_blank(),  #element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank()) #
-pEE
-pEE <- ggplot(df, aes(x = infection, y = Prevalence, colour = infection, shape = singleco, dodge = singleco)) + #colour = color,#
-	#stat_summary(fun.data = data_summary) +#
-	geom_point(aes(x = infection, y = meanprev), size = 4, position= position_dodge(width = 0.9)) +#
-	geom_errorbar(aes(ymin = meanprev - sd, ymax = meanprev + sd), width = 0) +#
-	ylim(0, 0.8) + #
-	xlab("") +#
-	ylab("Prevalence") + #
-	theme_bw() +#
-	scale_colour_manual(values = c("slateblue3","chartreuse4"), guide = F) +#
-	scale_shape_manual(values = c(19, 17), guide = FALSE) +#
-	theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_blank(),  #element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank()) #
-pEE
-pEE <- ggplot(df, aes(x = infection, y = Prevalence, colour = infection, #
-	shape = singleco, dodge = singleco)) + #colour = color,#
-	#stat_summary(fun.data = data_summary) +#
-	geom_point(aes(x = infection, y = meanprev), size = 4, position= position_dodge(width = 0.9)) +#
-	geom_errorbar(aes(x = infection, ymin = meanprev - sd, ymax = meanprev + sd), width = 0) +#
-	ylim(0, 0.8) + #
-	xlab("") +#
-	ylab("Prevalence") + #
-	theme_bw() +#
-	scale_colour_manual(values = c("slateblue3","chartreuse4"), guide = F) +#
-	scale_shape_manual(values = c(19, 17), guide = FALSE) +#
-	theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_blank(),  #element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank()) #
-pEE
-pEE <- ggplot(df, aes(x = infection, y = Prevalence, colour = infection, #
-	shape = singleco, dodge = singleco)) + #colour = color,#
-	#stat_summary(fun.data = data_summary) +#
-	geom_point(aes(x = infection, y = meanprev), size = 4, position= position_dodge(width = 0.9)) +#
-	geom_errorbar(aes(x = infection, ymin = meanprev - sd, ymax = meanprev + sd),#
-		width = 0, position= position_dodge(width = 0.9)) +#
-	ylim(0, 0.8) + #
-	xlab("") +#
-	ylab("Prevalence") + #
-	theme_bw() +#
-	scale_colour_manual(values = c("slateblue3","chartreuse4"), guide = F) +#
-	scale_shape_manual(values = c(19, 17), guide = FALSE) +#
-	theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_blank(),  #element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank()) #
-pEE
-pEE <- ggplot(df, aes(x = infection, y = Prevalence, colour = infection, #
-	shape = singleco, dodge = singleco)) + #colour = color,#
-	#stat_summary(fun.data = data_summary) +#
-	geom_point(aes(x = infection, y = meanprev), size = 4, position= position_dodge(width = 0.9)) +#
-	geom_errorbar(aes(x = infection, ymin = meanprev - sd, ymax = meanprev + sd),#
-		width = 0, position= position_dodge(width = 0.9)) +#
-	ylim(0, 0.8) + #
-	#xlab("") +#
-	ylab("Prevalence") + #
-	theme_bw() +#
-	scale_colour_manual(values = c("slateblue3","chartreuse4"), guide = F) +#
-	scale_shape_manual(values = c(19, 17), guide = FALSE) +#
-	theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_blank(),  #element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank()) #
-pEE
-pEE <- ggplot(df, aes(x = infection, y = Prevalence, colour = infection, #
-	shape = singleco, dodge = singleco)) + #colour = color,#
-	#stat_summary(fun.data = data_summary) +#
-	geom_point(aes(x = infection, y = meanprev), size = 4, position= position_dodge(width = 0.9)) +#
-	geom_errorbar(aes(x = infection, ymin = meanprev - sd, ymax = meanprev + sd),#
-		width = 0, position= position_dodge(width = 0.9)) +#
-	ylim(0, 0.8) + #
-	xlab("") +#
-	ylab("Prevalence") + #
-	theme_bw() +#
-	scale_colour_manual(values = c("slateblue3","chartreuse4"), guide = F) +#
-	scale_shape_manual(values = c(19, 17), guide = FALSE) +#
-	theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank()) #
-pEE
-d <- readRDS("~/GitHub/bTB-bruc-co-infection-ms/Ro_confidence_interval_simulation_results.rds")#
-#
-# test figure with violin plots#
-n = length(d$Ro_brucellosis_single_list2)#
-df <- data.frame(Ro = c(d$Ro_bTB_single_list2, d$Ro_bTB_co_list2, #
-	d$Ro_brucellosis_single_list2, d$Ro_brucellosis_co2),#
-	meanRo = c(rep(mean(d$Ro_bTB_single_list2),n), rep(mean(d$Ro_bTB_co_list2),n),#
-		rep(mean(d$Ro_brucellosis_single_list2),n), rep(mean(d$Ro_brucellosis_co2),n)),#
-	sdRo = c(rep(sd(d$Ro_bTB_single_list2),n), rep(sd(d$Ro_bTB_co_list2),n),#
-		rep(sd(d$Ro_brucellosis_single_list2),n), rep(sd(d$Ro_brucellosis_co2),n))#
-	Prevalence = NA,#
-	infection = c(rep("bTB", 2*n), rep("brucellosis", 2*n)) , #
-	singleco = rep(c("single", "co-infection", "single", "co-infection"), each = n),#
-	X = rep(c("bTB-single", "bTB-co-infection", "bruc-single", "bruc-co-infection"), each = n), #
-	Xindex = rep(c(1.1, 1.4, 3.1, 3.4), each = n) )#
-df$X <- factor(df$X, levels = c("bTB-single", "bTB-co-infection", "bruc-single", "bruc-co-infection"))#
-df$infection <- relevel(as.factor(df$infection), "bTB")#
-df$singleco <- relevel(as.factor(df$singleco), "single")#
-#
-data_summary <- function(x) {#
-   m <- mean(x)#
-   ymin <- m-sd(x)#
-   ymax <- m+sd(x)#
-   return(c(y=m,ymin=ymin,ymax=ymax))#
-}#
-#
-# Dot and error plots for Ro#
-pR <- ggplot(df, aes(x = infection, y = Ro, colour = infection, shape = singleco)) + #colour = color,#
-	#stat_summary(fun.data = data_summary) +#
-	geom_point(aes(x = infection, y = meanRo), size = 4, position= position_dodge(width = 0.9)) +#
-	geom_errorbar(aes(x = infection, ymin = meanRo - sdRo, ymax = meanRo + sdRo),#
-		width = 0, position= position_dodge(width = 0.9)) +#
-	ylim(0.8, 6) + #
-	xlab("") +#
-	ylab(expression(R[0])) + #
-	theme_bw() +#
-	scale_colour_manual(values = c("slateblue3","chartreuse4"), guide = F) +#
-	scale_shape_manual(values = c(19, 17), guide = FALSE) +#
-	theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_blank(),  #element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank()) #
-# Dot and error plots for Endemic Prevlanece#
-d2 <- readRDS("~/GitHub/bTB-bruc-co-infection-ms/EE_confidence_interval_simulation_results.rds")#
-df$Prevalence <- c(d2$EE_bTB_alone, d2$EE_bTB_co, d2$EE_bruc_alone, d2$EE_bruc_co)#
-df <- df[!is.na(df$Prevalence),]#
-df$meanprev <- c(rep(mean(df$Prevalence[df$X == "bTB-single"]) , length(df$X[df$X == "bTB-single"])), #
-	rep(mean(df$Prevalence[df$X == "bTB-co-infection"]) , length(df$X[df$X == "bTB-co-infection"])),#
-	rep(mean(df$Prevalence[df$X == "bruc-single"]) , length(df$X[df$X == "bruc-single"])),#
-	rep(mean(df$Prevalence[df$X == "bruc-co-infection"]) , length(df$X[df$X == "bruc-co-infection"])) )#
-df$sd <- c(rep(sd(df$Prevalence[df$X == "bTB-single"]) , length(df$X[df$X == "bTB-single"])), #
-	rep(sd(df$Prevalence[df$X == "bTB-co-infection"]) , length(df$X[df$X == "bTB-co-infection"])),#
-	rep(sd(df$Prevalence[df$X == "bruc-single"]) , length(df$X[df$X == "bruc-single"])),#
-	rep(sd(df$Prevalence[df$X == "bruc-co-infection"]) , length(df$X[df$X == "bruc-co-infection"])) )#
-# fix this#
-df$sd[df$X == "bruc-co-infection"] <- 0#
-pEE <- ggplot(df, aes(x = infection, y = Prevalence, colour = infection, #
-	shape = singleco, dodge = singleco)) + #colour = color,#
-	#stat_summary(fun.data = data_summary) +#
-	geom_point(aes(x = infection, y = meanprev), size = 4, position= position_dodge(width = 0.9)) +#
-	geom_errorbar(aes(x = infection, ymin = meanprev - sd, ymax = meanprev + sd),#
-		width = 0, position= position_dodge(width = 0.9)) +#
-	ylim(0, 0.8) + #
-	xlab("") +#
-	ylab("Prevalence") + #
-	theme_bw() +#
-	scale_colour_manual(values = c("slateblue3","chartreuse4"), guide = F) +#
-	scale_shape_manual(values = c(19, 17), guide = FALSE) +#
-	theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank()) #
-pEE
-pR
-d <- readRDS("~/GitHub/bTB-bruc-co-infection-ms/Ro_confidence_interval_simulation_results.rds")#
-#
-# test figure with violin plots#
-n = length(d$Ro_brucellosis_single_list2)#
-df <- data.frame(Ro = c(d$Ro_bTB_single_list2, d$Ro_bTB_co_list2, #
-	d$Ro_brucellosis_single_list2, d$Ro_brucellosis_co2),#
-	meanRo = c(rep(mean(d$Ro_bTB_single_list2),n), rep(mean(d$Ro_bTB_co_list2),n),#
-		rep(mean(d$Ro_brucellosis_single_list2),n), rep(mean(d$Ro_brucellosis_co2),n)),#
-	sdRo = c(rep(sd(d$Ro_bTB_single_list2),n), rep(sd(d$Ro_bTB_co_list2),n),#
-		rep(sd(d$Ro_brucellosis_single_list2),n), rep(sd(d$Ro_brucellosis_co2),n))#
-	Prevalence = NA,#
-	infection = c(rep("bTB", 2*n), rep("brucellosis", 2*n)) , #
-	singleco = rep(c("single", "co-infection", "single", "co-infection"), each = n),#
-	X = rep(c("bTB-single", "bTB-co-infection", "bruc-single", "bruc-co-infection"), each = n), #
-	Xindex = rep(c(1.1, 1.4, 3.1, 3.4), each = n) )#
-df$X <- factor(df$X, levels = c("bTB-single", "bTB-co-infection", "bruc-single", "bruc-co-infection"))#
-df$infection <- relevel(as.factor(df$infection), "bTB")#
-df$singleco <- relevel(as.factor(df$singleco), "single")#
-#
-data_summary <- function(x) {#
-   m <- mean(x)#
-   ymin <- m-sd(x)#
-   ymax <- m+sd(x)#
-   return(c(y=m,ymin=ymin,ymax=ymax))#
-}#
-#
-# Dot and error plots for Ro#
-pR <- ggplot(df, aes(x = infection, y = Ro, colour = infection, shape = singleco)) + #colour = color,#
-	#stat_summary(fun.data = data_summary) +#
-	geom_point(aes(x = infection, y = meanRo), size = 4, position= position_dodge(width = 0.9)) +#
-	geom_errorbar(aes(x = infection, ymin = meanRo - sdRo, ymax = meanRo + sdRo),#
-		width = 0, position= position_dodge(width = 0.9)) +#
-	ylim(0.8, 6) + #
-	xlab("") +#
-	ylab(expression(R[0])) + #
-	theme_bw() +#
-	scale_colour_manual(values = c("slateblue3","chartreuse4"), guide = F) +#
-	scale_shape_manual(values = c(19, 17), guide = FALSE) +#
-	theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_blank(),  #element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank())
-pR
-head(df)
-d <- readRDS("~/GitHub/bTB-bruc-co-infection-ms/Ro_confidence_interval_simulation_results.rds")#
-#
-# test figure with violin plots#
-n = length(d$Ro_brucellosis_single_list2)#
-df <- data.frame(Ro = c(d$Ro_bTB_single_list2, d$Ro_bTB_co_list2, #
-	d$Ro_brucellosis_single_list2, d$Ro_brucellosis_co2),#
-	meanRo = c(rep(mean(d$Ro_bTB_single_list2),n), rep(mean(d$Ro_bTB_co_list2),n),#
-		rep(mean(d$Ro_brucellosis_single_list2),n), rep(mean(d$Ro_brucellosis_co2),n)),#
-	sdRo = c(rep(sd(d$Ro_bTB_single_list2),n), rep(sd(d$Ro_bTB_co_list2),n),#
-		rep(sd(d$Ro_brucellosis_single_list2),n), rep(sd(d$Ro_brucellosis_co2),n)),#
-	Prevalence = NA,#
-	infection = c(rep("bTB", 2*n), rep("brucellosis", 2*n)) , #
-	singleco = rep(c("single", "co-infection", "single", "co-infection"), each = n),#
-	X = rep(c("bTB-single", "bTB-co-infection", "bruc-single", "bruc-co-infection"), each = n), #
-	Xindex = rep(c(1.1, 1.4, 3.1, 3.4), each = n) )#
-df$X <- factor(df$X, levels = c("bTB-single", "bTB-co-infection", "bruc-single", "bruc-co-infection"))#
-df$infection <- relevel(as.factor(df$infection), "bTB")#
-df$singleco <- relevel(as.factor(df$singleco), "single")#
-#
-data_summary <- function(x) {#
-   m <- mean(x)#
-   ymin <- m-sd(x)#
-   ymax <- m+sd(x)#
-   return(c(y=m,ymin=ymin,ymax=ymax))#
-}#
-#
-# Dot and error plots for Ro#
-pR <- ggplot(df, aes(x = infection, y = Ro, colour = infection, shape = singleco)) + #colour = color,#
-	#stat_summary(fun.data = data_summary) +#
-	geom_point(aes(x = infection, y = meanRo), size = 4, position= position_dodge(width = 0.9)) +#
-	geom_errorbar(aes(x = infection, ymin = meanRo - sdRo, ymax = meanRo + sdRo),#
-		width = 0, position= position_dodge(width = 0.9)) +#
-	ylim(0.8, 6) + #
-	xlab("") +#
-	ylab(expression(R[0])) + #
-	theme_bw() +#
-	scale_colour_manual(values = c("slateblue3","chartreuse4"), guide = F) +#
-	scale_shape_manual(values = c(19, 17), guide = FALSE) +#
-	theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_blank(),  #element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank())
-pR
-# Dot and error plots for Ro#
-pR <- ggplot(df, aes(x = infection, y = Ro, colour = infection, shape = singleco)) + #colour = color,#
-	#stat_summary(fun.data = data_summary) +#
-	geom_point(aes(x = infection, y = meanRo), size = 4, position= position_dodge(width = 0.9)) +#
-	geom_errorbar(aes(x = infection, ymin = meanRo - sdRo, ymax = meanRo + sdRo),#
-		width = 0, position= position_dodge(width = 0.9)) +#
-	ylim(0.8, 6) + #
-	xlab("") +#
-	ylab(expression(R[0])) + #
-	theme_bw() +#
-	scale_colour_manual(values = c("slateblue3","chartreuse4"), guide = F) +#
-	scale_shape_manual(values = c(19, 17), guide = FALSE) +#
-	theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank())
-pR
-pR <- ggplot(df, aes(x = infection, y = Ro, colour = infection, shape = singleco)) + #colour = color,#
-	#stat_summary(fun.data = data_summary) +#
-	geom_point(aes(x = infection, y = meanRo), size = 4, position= position_dodge(width = 0.9)) +#
-	geom_errorbar(aes(x = infection, ymin = meanRo - sdRo, ymax = meanRo + sdRo),#
-		width = 0, position= position_dodge(width = 0.9)) +#
-	ylim(0.8, 6) + #
-	xlab("") +#
-	ylab(expression(R[0])) + #
-	theme_bw() +#
-	scale_colour_manual(values = c("slateblue3","chartreuse4"), guide = F) +#
-	scale_shape_manual(values = c(19, 17), guide = FALSE) +#
-	theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_text(size=16, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank())
-# Dot and error plots for Endemic Prevlanece#
-d2 <- readRDS("~/GitHub/bTB-bruc-co-infection-ms/EE_confidence_interval_simulation_results.rds")#
-df$Prevalence <- c(d2$EE_bTB_alone, d2$EE_bTB_co, d2$EE_bruc_alone, d2$EE_bruc_co)#
-df <- df[!is.na(df$Prevalence),]#
-df$meanprev <- c(rep(mean(df$Prevalence[df$X == "bTB-single"]) , length(df$X[df$X == "bTB-single"])), #
-	rep(mean(df$Prevalence[df$X == "bTB-co-infection"]) , length(df$X[df$X == "bTB-co-infection"])),#
-	rep(mean(df$Prevalence[df$X == "bruc-single"]) , length(df$X[df$X == "bruc-single"])),#
-	rep(mean(df$Prevalence[df$X == "bruc-co-infection"]) , length(df$X[df$X == "bruc-co-infection"])) )#
-df$sd <- c(rep(sd(df$Prevalence[df$X == "bTB-single"]) , length(df$X[df$X == "bTB-single"])), #
-	rep(sd(df$Prevalence[df$X == "bTB-co-infection"]) , length(df$X[df$X == "bTB-co-infection"])),#
-	rep(sd(df$Prevalence[df$X == "bruc-single"]) , length(df$X[df$X == "bruc-single"])),#
-	rep(sd(df$Prevalence[df$X == "bruc-co-infection"]) , length(df$X[df$X == "bruc-co-infection"])) )#
-# fix this#
-df$sd[df$X == "bruc-co-infection"] <- 0#
-pEE <- ggplot(df, aes(x = infection, y = Prevalence, colour = infection, #
-	shape = singleco, dodge = singleco)) + #colour = color,#
-	#stat_summary(fun.data = data_summary) +#
-	geom_point(aes(x = infection, y = meanprev), size = 4, position= position_dodge(width = 0.9)) +#
-	geom_errorbar(aes(x = infection, ymin = meanprev - sd, ymax = meanprev + sd),#
-		width = 0, position= position_dodge(width = 0.9)) +#
-	ylim(0, 0.8) + #
-	xlab("") +#
-	ylab("Prevalence") + #
-	theme_bw() +#
-	scale_colour_manual(values = c("slateblue3","chartreuse4"), guide = F) +#
-	scale_shape_manual(values = c(19, 17), guide = FALSE) +#
-	theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank())
-pEE
-# Histograms for Ro#
-TB <- d$Ro_bTB_co_list2 - d$Ro_bTB_single_list2#
-bruc <- d$Ro_brucellosis_co2 - d$Ro_brucellosis_single_list2#
-df <- data.frame(Ro = c(TB, bruc), #
-	infection = c(rep("bTB", length(TB)), rep("brucellosis", length(bruc))))#
-mu <- data.frame(infection = c("TB", "bruc"), r.mean = c(mean(TB), mean(bruc)) )#
-phist <- ggplot(df, aes(x = Ro, colour = infection, fill = infection)) + #
-	geom_histogram(aes(y = ..density..), position = "identity", alpha = 0.5, bins = 30) + #
-	#geom_histogram(position = "identity", alpha = 0.5, bins = 30) + #
-	scale_colour_manual(values = c("slateblue3","chartreuse4"), guide = F) + #
-	scale_fill_manual(values = c("slateblue3","chartreuse4"), guide = F) + #
-	xlab(expression(paste(Change~"in"~ R[o]~with~"co-infection"))) + #
-	ylab("Density") + #
-	geom_vline(data = mu, aes(xintercept= r.mean), linetype="dashed") +#
-	theme_bw() +#
-	theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank())
-phist
-pR
-# Histograms for Ro#
-TB <- d$Ro_bTB_co_list2 - d$Ro_bTB_single_list2#
-bruc <- d$Ro_brucellosis_co2 - d$Ro_brucellosis_single_list2#
-df <- data.frame(Ro = c(TB, bruc), #
-	infection = c(rep("bTB", length(TB)), rep("brucellosis", length(bruc))))#
-df$infection <- as.factor(df$infection)#
-df$infection <- relevel(as.factor(df$infection), "bTB")#
-mu <- data.frame(infection = c("TB", "bruc"), r.mean = c(mean(TB), mean(bruc)) )#
-phist <- ggplot(df, aes(x = Ro, colour = infection, fill = infection)) + #
-	geom_histogram(aes(y = ..density..), position = "identity", alpha = 0.5, bins = 30) + #
-	#geom_histogram(position = "identity", alpha = 0.5, bins = 30) + #
-	scale_colour_manual(values = c("slateblue3","chartreuse4"), guide = F) + #
-	scale_fill_manual(values = c("slateblue3","chartreuse4"), guide = F) + #
-	xlab(expression(paste(Change~"in"~ R[o]~with~"co-infection"))) + #
-	ylab("Density") + #
-	geom_vline(data = mu, aes(xintercept= r.mean), linetype="dashed") +#
-	theme_bw() +#
-	theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank())
-phist
-# Histograms for Ro#
-TB <- d$Ro_bTB_co_list2 - d$Ro_bTB_single_list2#
-bruc <- d$Ro_brucellosis_co2 - d$Ro_brucellosis_single_list2#
-df <- data.frame(Ro = c(TB, bruc), #
-	infection = c(rep("bTB", length(TB)), rep("brucellosis", length(bruc))))#
-df$infection <- as.factor(df$infection)#
-df$infection <- relevel(as.factor(df$infection), "bTB")#
-mu <- data.frame(infection = c("TB", "bruc"), r.mean = c(mean(TB), mean(bruc)) )#
-phist <- ggplot(df, aes(x = Ro, colour = infection, fill = infection)) + #
-	geom_histogram(aes(y = ..density..), position = "identity", alpha = 0.5, bins = 30) + #
-	#geom_histogram(position = "identity", alpha = 0.5, bins = 30) + #
-	scale_colour_manual(values = c("slateblue3","chartreuse4"), guide = F) + #
-	scale_fill_manual(values = c("slateblue3","chartreuse4"), guide = F) + #
-	xlab(expression(paste(Change~"in"~ R[o]~with~"co-infection"))) + #
-	ylab("Density") + #
-	#geom_vline(data = mu, aes(xintercept= r.mean), linetype="dashed") +#
-	theme_bw() +#
-	theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank())
-phist
-TB <-d$EE_bTB_co - d$EE_bTB_alone#
-Bruc <- d$EE_bruc_co - d$EE_bruc_alone
-summary(TB)
-head(d)
-TB <- d2$Ro_bTB_co_list2 - d2$Ro_bTB_single_list2#
-bruc <- d2$Ro_brucellosis_co2 - d2$Ro_brucellosis_single_list2
-summary(TB)
-head(d2)
-TB <-d2$EE_bTB_co - d2$EE_bTB_alone#
-Bruc <- d2$EE_bruc_co - d2$EE_bruc_alone
-summary(TB)
-summary(bruc)
-head(EE_bruc_co)
-head(d2$EE_bruc_co)
-summary(Bruc)
-# Histograms for Endemic Prevlanece#
-TB <-d2$EE_bTB_co - d2$EE_bTB_alone#
-Bruc <- d2$EE_bruc_co - d2$EE_bruc_alone#
-df <- data.frame(Prevalence = c(TB, Bruc), #
-	infection = c(rep("bTB", length(d2[,1])), rep("brucellosis", length(d2[,1]))) )#
-df <- df[!is.na(df$Prevalence),]#
-df$infection <- as.factor(df$infection)#
-df$infection <- relevel(as.factor(df$infection), "bTB")
-head(df)
-phistEE <- ggplot(df, aes(x = Prevalence, colour = infection, fill = infection)) + #
-	geom_histogram(aes(y = ..density..), position = "identity", alpha = 0.5, bins = 30) + #
-	#geom_histogram(position = "identity", alpha = 0.5, bins = 30) + #
-	scale_colour_manual(values = c("slateblue3","chartreuse4"), guide = F) + #
-	scale_fill_manual(values = c("slateblue3","chartreuse4"), guide = F) + #
-	xlab("Change in prevalence with co-infection") + #
-	ylab("Density") + #
-	theme_bw() +#
-	theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank()) #
-phistEE
-hist(df$Prevalence[df$infection=="bTB"])
-hist(df$Prevalence[df$infection=="bruc"])
-hist(df$Prevalence[df$infection=="brucellosis"])
-hist(df$Prevalence[df$infection=="bTB"])
-df$Prevalence[df$infection=="brucellosis"] <- runif(0.5, 1, length(df$Prevalence[df$infection=="brucellosis"]))
-df$Prevalence[df$infection=="brucellosis"] <- 0.5
-phistEE <- ggplot(df, aes(x = Prevalence, colour = infection, fill = infection)) + #
-	geom_histogram(aes(y = ..density..), position = "identity", alpha = 0.5, bins = 30) + #
-	#geom_histogram(position = "identity", alpha = 0.5, bins = 30) + #
-	scale_colour_manual(values = c("slateblue3","chartreuse4"), guide = F) + #
-	scale_fill_manual(values = c("slateblue3","chartreuse4"), guide = F) + #
-	xlab("Change in prevalence with co-infection") + #
-	ylab("Density") + #
-	theme_bw() +#
-	theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank()) #
-phistEE
-install.packages("grid")
-library("grid")
-grid.newpage()#
-pushViewport(vewport(layout = grid.layout(2,3)))#
-define_region = function(row, col){#
-	viewport(layout.pos.row = row, layout.pos.col = col)#
-}
-print(pR, vp = define_region(1:2,1))#
-print(pEE, vp = define_region(1:2, 2))#
-print(phist, vp = define_region(1, 3))#
-print(phistEE, vp = define_region(2, 3))
-library("grid")#
-grid.newpage()#
-pushViewport(viewport(layout = grid.layout(2,3)))#
-define_region = function(row, col){#
-	viewport(layout.pos.row = row, layout.pos.col = col)#
-}
-print(pR, vp = define_region(1:2,1))#
-print(pEE, vp = define_region(1:2, 2))#
-print(phist, vp = define_region(1, 3))#
-print(phistEE, vp = define_region(2, 3))
-summary(df)
-phistEE <- ggplot(df, aes(x = Prevalence, colour = infection, fill = infection)) + #
-	geom_histogram(aes(y = ..density..), position = "identity", alpha = 0.5, bins = 30) + #
-	scale_colour_manual(values = c("slateblue3","chartreuse4"), guide = F) + #
-	scale_fill_manual(values = c("slateblue3","chartreuse4"), guide = F) + #
-	xlab("Change in prevalence") + #
-	ylab("Density") + #
-	theme_bw() +#
-	theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank())
-phistEE
-?geom_histogram
-phistEE <- ggplot(df, aes(x = Prevalence, colour = infection, fill = infection)) + #
-	geom_histogram(aes(y = density), position = "identity", alpha = 0.5, bins = 30) + #
-	scale_colour_manual(values = c("slateblue3","chartreuse4"), guide = F) + #
-	scale_fill_manual(values = c("slateblue3","chartreuse4"), guide = F) + #
-	xlab("Change in prevalence") + #
-	ylab("Density") + #
-	theme_bw() +#
-	theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank());phistEE
-phistEE <- ggplot(df, aes(x = Prevalence, colour = infection)) + #
-	geom_histogram(aes(y = ..density..), position = "identity", alpha = 0.5, bins = 30) + #
-	scale_colour_manual(values = c("slateblue3","chartreuse4"), guide = F) + #
-	scale_fill_manual(values = c("slateblue3","chartreuse4"), guide = F) + #
-	xlab("Change in prevalence") + #
-	ylab("Density") + #
-	theme_bw() +#
-	theme(axis.line.x = element_line(colour= "black"),#
-  		axis.line.y = element_line(colour= "black"),#
-  		axis.title.x = element_text(size=16, vjust=-0.15),#
-        axis.title.y = element_text(size=16, vjust= 0.8),#
-        axis.text.x = element_text(size=14, vjust=-0.05),#
-        axis.text.y = element_text(size=14),#
-        panel.border = element_blank())
-phistEE
-pR
-pEE
-rm(list = ls())#
-library(MASS)#
-library(deSolve)#
-#library(gmp)  # precision on matrix inverse calculation, not yet usnig#
-setwd("~/GitHub/bTB-bruc-co-infection-ms")#
-################################################
-# Ro of bTB in the absence of brucellosis, with age structure#
-################################################
-source('~/GitHub/bTB-bruc-co-infection-ms/fixed_parameters_norecovery_agematrix.R', chdir = TRUE)#
-source('~/GitHub/bTB-bruc-co-infection-ms/rhs_age.R', chdir = TRUE)#
-params <- c(fixed.params, list(gamma=1/2, betaB = 0.6087,#
-	betaT = 0.0012974, rhoT = 1, rhoB = 2.1, theta= 4, K = 433))#
-#
-Ro_bTB_single_age = function(params){#
-	####################################
-	# Input: x = c(S = final, 1*20 S vector at params)#
-	# Output: Ro#
-	####################################
-	# Get stable age distribution in dz free conditions#
-	relage = c(0.137, rep(0.368/4, 4), rep(0.185/4, 4),#
-		rep(0.235/6, 6), rep(0.075/5, 5))#
-	S0 = 400*relage; It0 = 0*relage; Ib0 = 0*relage; #
-	Ic0 = 0*relage; R0 = 0 * relage; Rc0 = 0 * relage#
-	x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)#
-	times <- seq(0, 1000, 1)#
-	sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))#
-	S <- unname(unlist( sol[length(sol[,1]), c(2:21)]))#
-#
-	# Calculate next generation matrix#
-	Fmat = params$betaT* matrix(rep(S, each = 20), nrow = 20, byrow = T)#
-	Vmat = diag(x = params$muT + 1)#
-	Vmat[row(Vmat) - col(Vmat) == 1] <- -1#
-	Vinv <- solve(Vmat)#
-	vals <- eigen(Fmat %*% Vinv)$values#
-#
-	Vmat2 <- diag(x = params$muT)#
-	V2inv <- solve(Vmat2)#
-	vals2 <- eigen(Fmat %*% V2inv)$values#
-	return(max(Re(vals2)))#
-	#return(list(Ro =vals, Ro2 =vals2, Vmat = Vmat, Vmat2 = Vmat2, #
-	#	check = Vmat%*%Vinv, check2 = Vmat2 %*% V2inv, N = sum(S)))#
-}#
-################################################
-# Ro of bTB in the absence of brucellosis, with age structure (and age sp. FOI, brucellosis)#
-################################################
-#
-Ro_bTB_co_age = function(params){#
-	####################################
-	# Input: x = c(S = final, 1*20 S vector at params)#
-	# Output: Ro#
-	####################################
-	# Get stable age distribution in dz free conditions#
-	relage = c(0.137, rep(0.368/4, 4), rep(0.185/4, 4),#
-		rep(0.235/6, 6), rep(0.075/5, 5))#
-	S0 = 400*relage; It0 = 0*relage; Ib0 = 2*relage; #
-	Ic0 = 0*relage; R0 = 2 * relage; Rc0 = 0 * relage#
-	x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)#
-	times <- seq(0, 1000, 1)#
-	sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))#
-	S <- unname(unlist( sol[length(sol[,1]), c(2:21)]))#
-	Ib <- unname(unlist( sol[length(sol[,1]), c(42:61)]))#
-	R <- unname(unlist( sol[length(sol[,1]), c(82:101)]))#
-	N <- sum(S) + sum(Ib) + sum(R)#
-	Sall <- sum(S)#
-	Iball <- sum(Ib)#
-	Rall <- sum(R)#
-	#  age specific FOI#
-	params$betaBm <- rep(params$betaB, length.out = 20)#
-	params$betaBm[2:5] <- exp(0.885) * params$betaB #
-#
-	# Calculate next generation matrix, 1:60 columns, 1:60 rows#
-	Fmat = rbind(params$betaT * matrix(rep(S, each = 60), nrow = 20, byrow = T),#
-		params$rhoT * params$betaT * matrix(rep(Ib, each = 60), nrow = 20, byrow = T),#
-		params$rhoT * params$betaT * matrix(rep(R, each = 60), nrow = 20, byrow = T))#
-	# rows 1:20, cols 1:60#
-	diag <- (params$rhoB * params$betaBm * Iball / N) + params$muT + 1#
-	M1 <- diag(x = diag)#
-	M1[row(M1) - col(M1) == 1] <- -1#
-	Vmat1 = cbind(M1, 		#
-		matrix(0, nrow = 20, ncol = 40) )#
-#
-	# rows 21:40, cols 1:60		 #
-	diag <- - params$rhoB * params$betaBm * Iball / N   #
-	M4 <- diag(x =diag)#
-	diag <- params$gamma + params$muC + 1#
-	M5 <- diag(x = diag)#
-	M5[row(M5) - col(M5) == 1] <- -1#
-	M6 <- diag(x = rep(- params$epsilon), 20)#
-	Vmat2 <- cbind(M4, M5, M6)#
-	# rows 41:60, cols 1:60		 #
-	M7 <- matrix(0, nrow = 20, ncol = 20)#
-	M8 <- diag(x = rep(-params$gamma, 20))#
-	M9 <- diag(x = params$epsilon + params$muRC + 1)#
-	M9[row(M9 - col(M9) == 1)] <- 1#
-	Vmat3 <- cbind(M7, M8, M9)#
-	Vmat <- rbind(Vmat1, Vmat2, Vmat3)#
-	Vinv <- solve(Vmat)#
-	vals <- eigen(Fmat %*% Vinv)$values#
-	return(max(Re(vals)))   # 0.9634113#
-}#
-################################################
-# Ro of brucellosis in the absence of bTB, age structure#
-################################################
-#
-Ro_brucellosis_single_age = function(params){#
-	####################################
-	# Input: paramter file#
-	####################################
-	# Get stable age distribution in dz free conditions#
-	relage = c(0.137, rep(0.368/4, 4), rep(0.185/4, 4),#
-		rep(0.235/6, 6), rep(0.075/5, 5))#
-	S0 = 400*relage; It0 = 0*relage; Ib0 = 0*relage; #
-	Ic0 = 0*relage; R0 = 0 * relage; Rc0 = 0 * relage#
-	x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)#
-	times <- seq(0, 1000, 1)#
-	sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))#
-	S <- unname(unlist( sol[length(sol[,1]), c(2:21)]))#
-#
-    betaB_age = c(params$betaB, rep(exp(0.885) * params$betaB, 4), rep(params$betaB, 15))#
-	# Calculate next generation matrix#
-	Fmat = params$betaB * matrix(rep(S/sum(S), each = 20), nrow = 20, byrow = T)#
-	Fmat[2:5,] <- exp(0.885) * Fmat[2:5,] # increased FOI in young#
-	Vmat = diag(x = params$muB + params$gamma + 1)#
-	Vmat[row(Vmat) - col(Vmat) == 1] <- -1#
-	Vinv <- solve(Vmat)#
-	vals <- eigen(Fmat %*% Vinv)$values#
-	return(max(Re(vals)))#
-	#return(list(Ro =vals, Ro2 =vals2, Vmat = Vmat, Vmat2 = Vmat2, #
-	#	check = Vmat%*%Vinv, check2 = Vmat2 %*% V2inv, N = sum(S)))#
-}#
-################################################
-# Ro of brucellosis in the presence of bTB, age structure#
-################################################
-#
-Ro_brucellosis_co_age = function(params){#
-	####################################
-	# Input: paramter file#
-	####################################
-	# Get stable age distribution in TB only#
-	relage = c(0.137, rep(0.368/4, 4), rep(0.185/4, 4),#
-		rep(0.235/6, 6), rep(0.075/5, 5))#
-	S0 = 400*relage; It0 = 2*relage; Ib0 = 0*relage; #
-	Ic0 = 0*relage; R0 = 0 * relage; Rc0 = 0 * relage#
-	x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)#
-	times <- seq(0, 1000, 1)#
-	sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))#
-	S <- unname(unlist( sol[length(sol[,1]), c(2:21)]))#
-	It <- unname(unlist( sol[length(sol[,1]), c(22:41)]))#
-	N <- sum(S) + sum(It)#
-	Sall <- sum(S)#
-	Itall <- sum(It)#
-	# age specific FOI (a vector)#
-	params$betaBm <- rep(params$betaB, length.out = 20)#
-	params$betaBm[2:5] <- exp(0.885) * params$betaB #
-	params$betaT <- rep(params$betaT, length.out = 20)#
-#
-	# Calculate next generation matrix, 1:40 columns, 1:40 rows#
-	Fmat = rbind(matrix(rep(params$betaBm * S / N, each = 40), nrow = 20, byrow = T),#
-		matrix(rep(params$rhoB * params$betaBm * It / N, each = 40), nrow = 20, byrow = T))#
-#
-	# Rows 1:20, cols 1:40#
-	diag <- params$rhoT * params$betaT * Itall + params$muB + params$gamma + 1#
-	M1 <- diag(x = diag)#
-	M1[row(M1) - col(M1) == 1] <- -1#
-	Vmat1 = cbind(M1, 		#
-		matrix(0, nrow = 20, ncol = 20) )#
-#
-	# Rows 21:40, cols 1:40		 #
-	diag <- - params$rhoT * params$betaT * Itall  #
-	M4 <- diag(x = diag)#
-	diag <- params$gamma + params$muC + 1#
-	M5 <- diag(x = diag)#
-	M5[row(M5) - col(M5) == 1] <- -1#
-	Vmat2 <- cbind(M4, M5)#
-	Vmat <- rbind(Vmat1, Vmat2)#
-	Vinv <- solve(Vmat)#
-	vals <- eigen(Fmat %*% Vinv)$values#
-	return(max(Re(vals))) #
-}
-pR0
-pRp
-pRo
-########################################################################
-########################################################################
-params <- c(fixed.params, list(gamma=1/2, betaB = 0.6087,#
-	betaT = 0.0012974, rhoT = 1, rhoB = 2.1, theta= 4, K = 433))#
-s_index <- 1:20#
-it_index <- 21:40#
-ib_index <- 41:60#
-ic_index <- 61:80#
-r_index <- 81:100#
-rc_index <- 101:120#
-times <- seq(0, 1000, 1)
-####################################
-	# Get stable age distribution in dz free conditions#
-	relage = c(0.137, rep(0.368/4, 4), rep(0.185/4, 4),#
-		rep(0.235/6, 6), rep(0.075/5, 5))#
-	S0 = 400*relage; It0 = 0*relage; Ib0 = 0*relage; #
-	Ic0 = 0*relage; R0 = 0 * relage; Rc0 = 0 * relage#
-	x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)#
-	times <- seq(0, 1000, 1)#
-	sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))#
-	stable_age <- unname(unlist( sol[length(sol[,1]), c(2:21)]/sum(sol[length(sol[,1]), c(2:21)]) ))#
-	S0 = 400 * stable_age; It0 = 0 * stable_age; Ib0 = 0* stable_age; #
-	Ic0 = 0* stable_age; R0 = 0 * stable_age; Rc0 = 0 * stable_age#
-	x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)
-x_singleTB = x0#
-	x_singleTB[22:24] <- x_singleTB[22:24] + 1#
-	x_singleTB[2:4] <- x_singleTB[2:4] - 1#
-	sol <- as.data.frame(ode(x_singleTB, times, rhs_age_matrix, params))#
-	S <-sum(sol[length(sol[,1]) , s_index+1])#
-	It <- sum(sol[length(sol[,1]) , it_index +1])#
-	Ic <- sum(sol[length(sol[,1]) , ic_index +1])#
-	Ib <- sum(sol[length(sol[,1]) , ib_index +1])#
-	Ic <- sum(sol[length(sol[,1]) , ic_index +1])#
-	R <- sum(sol[length(sol[,1]) , r_index +1])#
-	Rc <-sum(sol[length(sol[,1]) , rc_index +1])#
-	N <- sum(sol[length(sol[,1]), 2:121])	#
-	EE_bTB_alone <- (It + Ic + Rc) / N#
-#
-	# run single infection EE, bruc#
-	####################################
-	x_singleBruc = x0#
-	x_singleBruc[42:44] <- x_singleBruc[42:44] + 1#
-	x_singleBruc[2:4] <- x_singleBruc[2:4] - 1#
-	sol <- as.data.frame(ode(x_singleBruc, times, rhs_age_matrix, params))
-x_singleBruc
-S <-sum(sol[length(sol[,1]) , s_index+1])#
-	It <- sum(sol[length(sol[,1]) , it_index +1])#
-	Ic <- sum(sol[length(sol[,1]) , ic_index +1])#
-	Ib <- sum(sol[length(sol[,1]) , ib_index +1])#
-	Ic <- sum(sol[length(sol[,1]) , ic_index +1])#
-	R <- sum(sol[length(sol[,1]) , r_index +1])#
-	Rc <-sum(sol[length(sol[,1]) , rc_index +1])#
-	N <- sum(S + It + Ib + Ic + R + Rc)#
-	EE_bruc_alone <- (Ib + Ic + R + Rc) / N
-EE_bruc_alone
-x_endB <- unname(unlist(sol[length(sol[,1]), 2:121] ))
-x_endB
-x_endB[22:24] <- x_endB[22:24] + 1#
-	if(x_endB[2] > 1){x_endB[2] <- x_endB[2] - 1 }#
-	if(x_endB[3] > 1){x_endB[3] <- x_endB[3] - 1 }#
-	if(x_endB[4] > 1){x_endB[4] <- x_endB[4] - 1 }
-x_endB
-getEE = function(params){#
-	####################################
-	# Input: x = c(S = final, 1*20 S vector at params)#
-	# Output: Ro#
-	####################################
-	# Get stable age distribution in dz free conditions#
-	relage = c(0.137, rep(0.368/4, 4), rep(0.185/4, 4),#
-		rep(0.235/6, 6), rep(0.075/5, 5))#
-	S0 = 400*relage; It0 = 0*relage; Ib0 = 0*relage; #
-	Ic0 = 0*relage; R0 = 0 * relage; Rc0 = 0 * relage#
-	x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)#
-	times <- seq(0, 1000, 1)#
-	sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))#
-	stable_age <- unname(unlist( sol[length(sol[,1]), c(2:21)]/sum(sol[length(sol[,1]), c(2:21)]) ))#
-	S0 = 400 * stable_age; It0 = 0 * stable_age; Ib0 = 0* stable_age; #
-	Ic0 = 0* stable_age; R0 = 0 * stable_age; Rc0 = 0 * stable_age#
-	x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)#
-	# run single infection EE, bTB#
-	####################################
-	x_singleTB = x0#
-	x_singleTB[22:24] <- x_singleTB[22:24] + 1#
-	x_singleTB[2:4] <- x_singleTB[2:4] - 1#
-	sol <- as.data.frame(ode(x_singleTB, times, rhs_age_matrix, params))#
-	S <-sum(sol[length(sol[,1]) , s_index+1])#
-	It <- sum(sol[length(sol[,1]) , it_index +1])#
-	Ic <- sum(sol[length(sol[,1]) , ic_index +1])#
-	Ib <- sum(sol[length(sol[,1]) , ib_index +1])#
-	Ic <- sum(sol[length(sol[,1]) , ic_index +1])#
-	R <- sum(sol[length(sol[,1]) , r_index +1])#
-	Rc <-sum(sol[length(sol[,1]) , rc_index +1])#
-	N <- sum(sol[length(sol[,1]), 2:121])	#
-	EE_bTB_alone <- (It + Ic + Rc) / N#
-#
-	# run single infection EE, bruc#
-	####################################
-	x_singleBruc = x0#
-	x_singleBruc[42:44] <- x_singleBruc[42:44] + 1#
-	x_singleBruc[2:4] <- x_singleBruc[2:4] - 1#
-	sol <- as.data.frame(ode(x_singleBruc, times, rhs_age_matrix, params))#
-	S <-sum(sol[length(sol[,1]) , s_index+1])#
-	It <- sum(sol[length(sol[,1]) , it_index +1])#
-	Ic <- sum(sol[length(sol[,1]) , ic_index +1])#
-	Ib <- sum(sol[length(sol[,1]) , ib_index +1])#
-	Ic <- sum(sol[length(sol[,1]) , ic_index +1])#
-	R <- sum(sol[length(sol[,1]) , r_index +1])#
-	Rc <-sum(sol[length(sol[,1]) , rc_index +1])#
-	N <- sum(S + It + Ib + Ic + R + Rc)#
-	EE_bruc_alone <- (Ib + Ic + R + Rc) / N#
-#
-	x_endB <- unname(unlist(sol[length(sol[,1]), 2:121] ))#
-#
-	# introduce both...#
-	####################################
-	x_endB[22:24] <- x_endB[22:24] + 1#
-	if(x_endB[2] > 1){x_endB[2] <- x_endB[2] - 1 }#
-	if(x_endB[3] > 1){x_endB[3] <- x_endB[3] - 1 }#
-	if(x_endB[4] > 1){x_endB[4] <- x_endB[4] - 1 }#
-#
-	sol <- as.data.frame(ode(x_endB, times, rhs_age_matrix, params))#
-	S <-sum(sol[length(sol[,1]) , s_index+1])#
-	It <- sum(sol[length(sol[,1]) , it_index +1])#
-	Ic <- sum(sol[length(sol[,1]) , ic_index +1])#
-	Ib <- sum(sol[length(sol[,1]) , ib_index +1])#
-	Ic <- sum(sol[length(sol[,1]) , ic_index +1])#
-	R <- sum(sol[length(sol[,1]) , r_index +1])#
-	Rc <-sum(sol[length(sol[,1]) , rc_index +1])#
-	N <- sum(S + It + Ib + Ic + R + Rc)#
-#
-	EE_bTB_co <- (It + Ic + Rc) / N#
-	EE_bruc_co <- (Ib + Ic + R + Rc) / N#
-	return(c(EE_bTB_alone, EE_bTB_co, EE_bruc_alone, EE_bruc_co))#
-}#
-#
-# generate n random samples #
-n = 1000#
-set.seed(1)#
-df = data.frame(rhoB = exp(rnorm(n = n, mean = 0.75579, sd = 0.40714)), #
-	muB = params$muS * exp(rnorm(n = n, mean = 1.1060, sd = 0.3505)),#
-	muT = params$muS * exp(rnorm(n = n, mean = 1.0370, sd = 0.3483 )),#
-	muC = params$muS * exp(rnorm(n = n, mean = 2.1430, sd = 0.5004329)),#
-	EE_bTB_alone = NA,#
-	EE_bTB_co = NA,#
-	EE_bruc_alone = NA,#
-	EE_bruc_co = NA)#
-for(i in 1:n){#
-	params$rhoB<- df$rhoB[i]#
-	params$muB <- df$muB[i]#
-	params$muT <- df$muT[i]#
-	params$muC <- df$muC[i]#
-	params$muR <- df$muT[i]#
-	params$muRC <- df$muC[i]#
-	df[i, c(5:8)] <- getEE(params)#
-}
-summary(df)
 hist(df$EE_bTB_alone)
 hist(df$EE_bruc_alone)
 hist(df$EE_bTB_alone)
@@ -2042,3 +743,2115 @@ p2 <- p2  + geom_contour(data = df, aes(x = mort, y = rho, z = Difference2, weig
 p2
 summary(epiB)
 summary(epiT)
+###########################################################
+###########################################################
+# Outline#
+# 1) Run with other form of density dependence (logistic)#
+# 2) Do whole process with longer infection duraiton (1/gamma = 3 yr; 4 yr)#
+# 2) Latin hypercube PRCC#
+###########################################################
+#
+###########################################################
+###########################################################
+# 1) Run with other form of density dependence (logistic)#
+###########################################################
+###########################################################
+rm(list = ls())#
+require("deSolve")#
+#
+source('~/GitHub/bTB-bruc-co-infection-ms/fixed_parameters_norecovery_agematrix.R', chdir = TRUE)#
+source('~/GitHub/bTB-bruc-co-infection-ms/rhs_age.R', chdir = TRUE)#
+#
+# Run B-H model with no disease (endemic population size = 609)#
+s_index <- 1:20#
+it_index <- 21:40#
+ib_index <- 41:60#
+ic_index <- 61:80#
+r_index <- 81:100#
+rc_index <- 101:120#
+relageall = c(0.137, rep(0.368/4, 4), rep(0.185/4, 4),  #
+	rep(0.235/6, 6), rep(0.075/5, 5))					#
+relage = relageall#
+S0 = 400*relage; It0 = 0*relage; Ib0 = 0*relage; #
+Ic0 = 0*relage; R0 = 0 * relage; Rc0 = 0 * relage#
+x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)#
+times <- seq(0, 1000, 1)  #
+params.test <- c(fixed.params, list(gamma=1/2, theta = 4, K = 433,#
+	betaB = 1.025, betaT = 0.000223, rhoT = 1, rhoB = 2.1))#
+sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params.test))#
+stable_age <- unname(unlist( sol[1000, c(2:21)]/sum(sol[500, c(2:21)]) ))#
+#
+plot_raw_numbers = function(sol){#
+	plot(sol$time, apply(sol[s_index+1], 1, sum), col= "black",#
+		type= 'l', ylim = c(0, 800), ylab = "Number of animals", #
+		xlab = "Time (in years)")#
+	lines(sol$time, apply(sol[it_index+1], 1, sum), col= "red")#
+	lines(sol$time, apply(sol[ib_index+1], 1, sum), col= "blue")#
+	lines(sol$time, apply(sol[ic_index+1], 1, sum), col= "green")#
+	lines(sol$time, apply(sol[r_index+1], 1, sum), col = "orange")#
+	lines(sol$time, apply(sol[rc_index+1], 1, sum), col = "pink")#
+	legend("topright", legend = c("S", "It", "Ib", "Ic", "R", "Rc"),#
+		col = c("black", "red", "blue", "green", "orange", "pink"), #
+		bty="n", lty = 1)#
+}
+# Set K s.t. get same popuation size/age structure (endemic population size = 609.0097)#
+K <- seq(1030, 1090, 1)#
+S0 = 400*relage; It0 = 0*relage; Ib0 = 0*relage; #
+Ic0 = 0*relage; R0 = 0 * relage; Rc0 = 0 * relage#
+x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)#
+times <- seq(0, 1000, 1)  #
+val <- NA#
+for (i in 1:length(K)){#
+	params.test <- c(fixed.params, list(gamma=1/2, theta = 4, K = K[i],#
+		betaB = 1.025, betaT = 0.000223, rhoT = 1, rhoB = 2.1))#
+	sol <- as.data.frame(ode(x0, times,  rhs_age_logistic, params.test))#
+	val[i] <- sum(sol[1001,c(2:length(sol))])	#
+}#
+plot(x = K, y = val, type = "b", pch = 19)#
+abline(h = 609.0097)
+plot(x = K, y = val, type = "b", pch = 19)#
+abline(h = 609.0097)
+K <- seq(1030, 1038, 0.02)
+S0 = 400*relage; It0 = 0*relage; Ib0 = 0*relage; #
+Ic0 = 0*relage; R0 = 0 * relage; Rc0 = 0 * relage#
+x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)#
+times <- seq(0, 1000, 1)  #
+val <- NA#
+for (i in 1:length(K)){#
+	params.test <- c(fixed.params, list(gamma=1/2, theta = 4, K = K[i],#
+		betaB = 1.025, betaT = 0.000223, rhoT = 1, rhoB = 2.1))#
+	sol <- as.data.frame(ode(x0, times,  rhs_age_logistic, params.test))#
+	val[i] <- sum(sol[1001,c(2:length(sol))])	#
+}#
+plot(x = K, y = val, type = "b", pch = 19)#
+abline(h = 609.0097)
+val
+K[250:251]
+EE_bTB_single_list <- NA; EE_bTB_co_list <- NA#
+EE_brucellosis_single_list <- NA; EE_brucellosis_co <- NA#
+rEE_bTB_single_list <- NA; rEE_bTB_co_list <- NA#
+rEE_brucellosis_single_list <- NA; rEE_brucellosis_co <- NA#
+lEE_bTB_single_list <- NA; lEE_bTB_co_list <- NA#
+lEE_brucellosis_single_list <- NA; lEE_brucellosis_co <- NA#
+#
+rhoB <- NA; mortB <- NA; mortT <- NA; mortC <- NA#
+pb <- txtProgressBar(min = 0, max = n, style = 3, char = "=")
+n = 100
+pb <- txtProgressBar(min = 0, max = n, style = 3, char = "=")
+EE_bTB_single_list <- NA; EE_bTB_co_list <- NA#
+EE_brucellosis_single_list <- NA; EE_brucellosis_co <- NA#
+rEE_bTB_single_list <- NA; rEE_bTB_co_list <- NA#
+rEE_brucellosis_single_list <- NA; rEE_brucellosis_co <- NA#
+lEE_bTB_single_list <- NA; lEE_bTB_co_list <- NA#
+lEE_brucellosis_single_list <- NA; lEE_brucellosis_co <- NA#
+#
+rhoB <- NA; mortB <- NA; mortT <- NA; mortC <- NA#
+pb <- txtProgressBar(min = 0, max = n, style = 3, char = "=")#
+#
+for(i in 1:n){#
+	if(i %% 5 == 0){#
+		setTxtProgressBar(pb, i)#
+	}#
+	params$rhoB<- exp(rnorm(n = 1, mean = 0.75579, sd = 0.40714))#
+	rhoB[i] <- params$rhoB#
+	mortB[i] <- exp(rnorm(n = 1, mean = 1.1060, sd = 0.3505))#
+	mortT[i] <- exp(rnorm(n = 1, mean = 1.0370, sd = 0.3483 ))#
+	mortC[i] <- exp(rnorm(n = 1, mean = 2.1430, sd = 0.5004329))#
+	params$muB <- params$muS * mortB[i]#
+	params$muT <- params$muS * mortT[i]#
+	params$muC <- params$muS * mortC[i]#
+	params$muB[params$muB < 0] <- 0#
+	params$muT[params$muT < 0] <- 0#
+	params$muC[params$muC < 0] <- 0#
+	params$muR <- params$muT#
+	params$muRC <- params$muC#
+	val <- getEE(params)#
+#
+	paramslog <- params; paramslog$K <- 1034.99#
+	vallog <- getEE(paramslog)#
+	paramsricker <- params; paramsricker$K <- 382.6#
+	valricker <- getEE(paramsricker)#
+#
+	EE_bTB_single_list[i] <- val[1]; EE_bTB_co_list[i] <- val[2]#
+	EE_brucellosis_single_list[i] <- val[3]; 	EE_brucellosis_co[i] <- val[4]#
+	rEE_bTB_single_list[i] <- val[1]; rEE_bTB_co_list[i] <- val[2]#
+	rEE_brucellosis_single_list[i] <- val[3]; rEE_brucellosis_co[i] <- val[4]#
+	lEE_bTB_single_list[i] <- val[1]; lEE_bTB_co_list[i] <- val[2]#
+	lEE_brucellosis_single_list[i] <- val[3]; lEE_brucellosis_co[i] <- val[4]#
+}
+# Make plots#
+################################
+n = 100#
+params <- c(fixed.params, list(gamma=1/2, theta = 4, K = 433,#
+		betaB = 1.025, betaT = 0.000223, rhoT = 1, rhoB = 2.1))#
+#
+source('~/GitHub/bTB-bruc-co-infection-ms/get_EE.R', chdir = TRUE)#
+set.seed(1)#
+#
+EE_bTB_single_list <- NA; EE_bTB_co_list <- NA#
+EE_brucellosis_single_list <- NA; EE_brucellosis_co <- NA#
+rEE_bTB_single_list <- NA; rEE_bTB_co_list <- NA#
+rEE_brucellosis_single_list <- NA; rEE_brucellosis_co <- NA#
+lEE_bTB_single_list <- NA; lEE_bTB_co_list <- NA#
+lEE_brucellosis_single_list <- NA; lEE_brucellosis_co <- NA#
+#
+rhoB <- NA; mortB <- NA; mortT <- NA; mortC <- NA#
+pb <- txtProgressBar(min = 0, max = n, style = 3, char = "=")#
+#
+for(i in 1:n){#
+	if(i %% 5 == 0){#
+		setTxtProgressBar(pb, i)#
+	}#
+	params$rhoB<- exp(rnorm(n = 1, mean = 0.75579, sd = 0.40714))#
+	rhoB[i] <- params$rhoB#
+	mortB[i] <- exp(rnorm(n = 1, mean = 1.1060, sd = 0.3505))#
+	mortT[i] <- exp(rnorm(n = 1, mean = 1.0370, sd = 0.3483 ))#
+	mortC[i] <- exp(rnorm(n = 1, mean = 2.1430, sd = 0.5004329))#
+	params$muB <- params$muS * mortB[i]#
+	params$muT <- params$muS * mortT[i]#
+	params$muC <- params$muS * mortC[i]#
+	params$muB[params$muB < 0] <- 0#
+	params$muT[params$muT < 0] <- 0#
+	params$muC[params$muC < 0] <- 0#
+	params$muR <- params$muT#
+	params$muRC <- params$muC#
+	val <- getEE(params)#
+#
+	paramslog <- params; paramslog$K <- 1034.99#
+	vallog <- getEE(paramslog)#
+	paramsricker <- params; paramsricker$K <- 382.6#
+	valricker <- getEE(paramsricker)#
+#
+	EE_bTB_single_list[i] <- val[1]; EE_bTB_co_list[i] <- val[2]#
+	EE_brucellosis_single_list[i] <- val[3]; 	EE_brucellosis_co[i] <- val[4]#
+	rEE_bTB_single_list[i] <- val[1]; rEE_bTB_co_list[i] <- val[2]#
+	rEE_brucellosis_single_list[i] <- val[3]; rEE_brucellosis_co[i] <- val[4]#
+	lEE_bTB_single_list[i] <- val[1]; lEE_bTB_co_list[i] <- val[2]#
+	lEE_brucellosis_single_list[i] <- val[3]; lEE_brucellosis_co[i] <- val[4]#
+}
+senslist <- list(#
+	EE_bTB_single_list = EE_bTB_single_list, #
+	EE_bTB_co_list = EE_bTB_co_list,#
+	EE_brucellosis_single_list = EE_brucellosis_single_list, #
+	EE_brucellosis_co = EE_brucellosis_co,#
+	rEE_bTB_single_list = rEE_bTB_single_list, #
+	rEE_bTB_co_list = rEE_bTB_co_list,#
+	rEE_brucellosis_single_list = rEE_brucellosis_single_list, #
+	rEE_brucellosis_co = rEE_brucellosis_co,	#
+	lEE_bTB_single_list = lEE_bTB_single_list, #
+	lEE_bTB_co_list = lEE_bTB_co_list,#
+	lEE_brucellosis_single_list = lEE_brucellosis_single_list, #
+	lEE_brucellosis_co = lEE_brucellosis_co)
+str(senslist)
+saverds(senslist, "~/GitHub/bTB-bruc-co-infection-ms/sensitivity_densitydependence_simulation_results.rds")
+saveRDS(senslist, "~/GitHub/bTB-bruc-co-infection-ms/sensitivity_densitydependence_simulation_results.rds")
+hist(EE_bTB_single_list)
+fixed.params
+load("/Users/gorsich/GitHub/bTB-bruc-co-infection-ms/Ro_confidence_interval_simulation_results.rds")
+###################################################################################################
+###################################################################################################
+#1) Load fixed parameters, model#
+###################################################################################################
+###################################################################################################
+# Accessory functions for fitting: #
+rm(list = ls())#
+require("deSolve")#
+library("gridExtra")#
+library("ggplot2")#
+# get fixed.params & fixed.params.recov#
+source('~/GitHub/bTB-bruc-co-infection-ms/fixed_parameters_norecovery_agematrix.R', chdir = TRUE)#
+source('~/GitHub/bTB-bruc-co-infection-ms/fixed_parameters_recovery_agematrix.R', chdir = TRUE)#
+# rhs function, determinitic model, age structure#
+source('~/GitHub/bTB-bruc-co-infection-ms/rhs_age.R', chdir = TRUE)#
+#
+# age divisions in rhs function (age= 1-3.9, 4-4.9, 5-14.9, 15+)#
+s_index <- 1:20#
+it_index <- 21:40#
+ib_index <- 41:60#
+ic_index <- 61:80#
+r_index <- 81:100#
+rc_index <- 101:120#
+juveniles <- 1:3#
+subadult<- 4#
+adult <- 5:14#
+mature <- 15:20#
+#
+# Stating age structure information #
+relageall = c(0.137, rep(0.368/4, 4), rep(0.185/4, 4),  #
+	rep(0.235/6, 6), rep(0.075/5, 5))					#
+relage = relageall#
+S0 = 400*relage; It0 = 0*relage; Ib0 = 0*relage; #
+Ic0 = 0*relage; R0 = 0 * relage; Rc0 = 0 * relage#
+x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)#
+times <- seq(0, 1000, 1)  #
+params.test <- c(fixed.params, list(gamma=1/2, theta = 4, K = 433,#
+	betaB = 1.025, betaT = 0.000223, rhoT = 1, rhoB = 2.1))#
+sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params.test))#
+stable_age <- unname(unlist( sol[1000, c(2:21)]/sum(sol[500, c(2:21)]) ))#
+#
+plot_agestructure = function(x){ # true based on Jolles et al. 2007#
+	 xcounts <- NA#
+	 if (length(x) != 120){#
+	 	print("The age structure should include 20 ages,#
+	 		for 6 disease classes, giving 120 columns")#
+	 }#
+	 for(i in 1:20){#
+	 	xcounts[i] <- (x[i] + x[20+i] + x[40+i] + x[60+i] + x[80+i] + x[100+i])/sum(x)#
+	 }#
+	 d<-matrix(c(relageall, #
+	 	xcounts), nrow=2, byrow=TRUE, #
+	 	dimnames=list(c("Observed", "Predicted"), #
+	 	c(seq(1:20))))#
+	barplot(d, beside = TRUE, col = c("light gray", "dark gray"), ylab = "Frequency (%)")#
+	box(	)#
+	legend("topleft", legend = c("Observed", "Predicted"), fill = c("light gray", "dark gray"))#
+}#
+#
+plot_ageprevalence = function(sol){#
+	S <- rep(0, 20); It <- rep(0, 20); Ib <- rep(0, 20);#
+	Ic <- rep(0, 20); R <- rep(0, 20); Rc <- rep(0, 20)#
+	N <- rep(0, 20)#
+	for (i in 1:20){#
+		S[i] <- sum(sol[length(sol) , i + 1])#
+		It[i] <- sum(sol[length(sol) , i + 21])#
+		Ib[i] <- sum(sol[length(sol) , 41 +i])#
+		Ic[i] <- sum(sol[length(sol) , 61 +i])#
+		R[i] <- sum(sol[length(sol) , 81 +i])#
+		Rc[i] <- sum(sol[length(sol) , 101 +i])#
+		N[i] <- sum(sol[length(sol), c(1+i, 21+i, 41+i, 61 + i, 81+i, 101+i)])#
+	}#
+	prevB <- (Ib + Ic + R + Rc) / N#
+	prevT <- (It + Ic + Rc)/ N#
+	prevBinS <- (Ib + R) / (S + Ib + R)#
+	prevBinT <- (Ic + Rc) / (It + Ic + Rc) #
+	overall_prevB <- (sum(Ib) + sum(Ic) + sum(R) + sum(Rc)) / sum(N)#
+	overall_prevT <- (sum(It) + sum(Ic) + sum(Rc)) / sum(N)#
+	overall_prevBinS <- (sum(Ib) + sum(R)) / (sum(S) + sum(Ib) + sum(R))#
+	overall_prevBinT <- (sum(Ic) + sum(Rc)) / (sum(It) + sum(Ic) + sum(Rc))#
+	overallN = sum(N) #
+	#par(mfrow = c(1,2))#
+	#plot(y = prevB, x= seq(1, 20, 1), type = "b", col = "dark blue", ylim = c(0, 0.8),#
+	#	ylab = "Prevalence", xlab = "Age", pch = 19, #
+	#	main = paste("Overall prevalences, Br =", round(overall_prevB, 3), #
+	#	" TB = ", round(overall_prevT, 3) ))#
+	#points(y = prevT, x = seq(1,20,1), type = "b", col = "dark red", pch = 19)#
+	#legend("bottomright", bty = "n", legend = c("Bruc", "TB"), #
+	#	pch = c(19, 19), col = c("dark blue", "dark red"))#
+	plot(y = prevBinS, x = seq(1,20,1), type = "b", col = "dark blue", pch = 19, #
+		ylab = "Brucellosis prevalence", xlab = "Age", ylim = c(0, 0.8), #
+		main = paste("Br|S =", round(overall_prevBinS, 3), #
+		" Br|Co = ", round(overall_prevBinT, 3) )#
+		)#
+	text(x = 10, y = 0.55, labels = paste("Final N = ", round(overallN, 2)))#
+	points(y = prevBinT, x = seq(1,20,1), type = "b", col = "dark red", pch = 19)#
+}#
+#
+plot_raw_numbers = function(sol){#
+	plot(sol$time, apply(sol[s_index+1], 1, sum), col= "black",#
+		type= 'l', ylim = c(0, 800), ylab = "Number of animals", #
+		xlab = "Time (in years)")#
+	lines(sol$time, apply(sol[it_index+1], 1, sum), col= "red")#
+	lines(sol$time, apply(sol[ib_index+1], 1, sum), col= "blue")#
+	lines(sol$time, apply(sol[ic_index+1], 1, sum), col= "green")#
+	lines(sol$time, apply(sol[r_index+1], 1, sum), col = "orange")#
+	lines(sol$time, apply(sol[rc_index+1], 1, sum), col = "pink")#
+	legend("topright", legend = c("S", "It", "Ib", "Ic", "R", "Rc"),#
+		col = c("black", "red", "blue", "green", "orange", "pink"), #
+		bty="n", lty = 1)#
+}#
+#
+# use params or params_recov based on assumptions#
+get_starting_eqbruc = function(params){#
+	S0 = 400* stable_age; It0 = 0 * stable_age; Ib0 = 20* stable_age; #
+	Ic0 = 0* stable_age; R0 = 30 * stable_age; Rc0 = 0 * stable_age#
+	x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)#
+	times <- seq(0, 1000, 1)#
+	sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))#
+	out <- unname(unlist( sol[1000, c(2:121)] ))#
+	return(out)#
+}#
+test <- get_starting_eqbruc(params.test_log); sum(test[21:120])/sum(test)#
+#
+get_prevalence = function(sol){#
+	S <- sum(sol[length(sol[,1]) , s_index+1])#
+	It <- sum(sol[length(sol[,1]) , it_index +1])#
+	Ib <- sum(sol[length(sol[,1]) , ib_index +1])#
+	Ic <- sum(sol[length(sol[,1]) , ic_index +1])#
+	R <- sum(sol[length(sol[,1]) , r_index +1])#
+	Rc <- sum(sol[length(sol[,1]) , rc_index +1])#
+	N <- sum(sol[length(sol[,1]), 2:121])#
+	prevTB <- (It + Ic + Rc) / N #
+	prevB <- (Ib + Ic + R + Rc) / N#
+	prevBinS <- (Ib + R) / (S + Ib + R)#
+	prevBinT <- (Ic + Rc) / (It + Ic + Rc)#
+	prevTinS <- (It) / (S + It)#
+	prevTinB <- (Ic + Rc) / (Ib + Ic + R + Rc)#
+	return(list(prevTB = prevTB, prevB = prevB,#
+		prevBinS = prevBinS, prevBinT = prevBinT, #
+		prevTinS = prevTinS, prevTinB = prevTinB))#
+}#
+#
+make_summary_plots = function(sol){#
+	df <- get_prevalence(sol)#
+	df2 <- data.frame(Evaluation = c("Model", "Model", "Data", "Data"), #
+		Infection = c("Single", "Co", "Single", "Co"), #
+		BrucellosisPrevalence = c(df$prevBinS, df$prevBinT, 0.3035, 0.4524), #
+		TBPrevalence = c(df$prevTinS, df$prevTinB, 0.227, 0.3585))#
+	p1 <- ggplot(df2, aes(x = Evaluation, y = BrucellosisPrevalence, fill = Infection)) + #
+		geom_bar(position = position_dodge(), stat = "identity") + ylim(0, 0.8)#
+	p2 <- ggplot(df2, aes(x = Evaluation, y = TBPrevalence, fill = Infection)) + #
+		geom_bar(position = position_dodge(), stat = "identity") + ylim(0, 0.8)#
+	grid.arrange(p1, p2, ncol = 2)#
+}#
+#
+make_structured_summary_plots = function(sol){#
+	df <- get_structured_prevalence(sol)#
+	df2 <- data.frame(Evaluation = c("Model", "Model", "Data", "Data"), #
+		Infection = c("Single", "Co", "Single", "Co"), #
+		BrucellosisPrevalence = c(df$prevBinS, df$prevBinT, 0.3035, 0.4524), #
+		TBPrevalence = c(df$prevTinS, df$prevTinB, 0.227, 0.3585))#
+	p1 <- ggplot(df2, aes(x = Evaluation, y = BrucellosisPrevalence, fill = Infection)) + #
+		geom_bar(position = position_dodge(), stat = "identity") + ylim(0, 0.8)#
+	p2 <- ggplot(df2, aes(x = Evaluation, y = TBPrevalence, fill = Infection)) + #
+		geom_bar(position = position_dodge(), stat = "identity") + ylim(0, 0.8)#
+	grid.arrange(p1, p2, ncol = 2)#
+}#
+#
+# no infections...#
+plot_raw_numbers(sol)#
+plot_ageprevalence(sol)
+###################################################################################################
+###################################################################################################
+# Test 2: Fit model to overall bTB and bruc prevalences (estimate betaB, betaT)#
+# subsample model output to match age structure#
+###################################################################################################
+###################################################################################################
+prevTBobs <- 0.27  # for test- bootstrap estimate of overall prevalence#
+prevBobs <- 0.34#
+data <- read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/cross_sectional_data_withdz_cleandisease_nofinal_Feb2016_capturetime_forsurv.csv")#
+counts<- hist(data$age_sel/12, plot = FALSE)$counts  # youngest = 1.4 so aged 1-2#
+agestructure<- counts/sum(counts)#
+data_agestructure = c(agestructure, 0, 0, 0, 0, 0)#
+#
+get_structured_prevalence = function(sol){#
+	S <-sum(sol[length(sol[,1]) , s_index+1] * data_agestructure)  # should give a scalar#
+	It <- sum(sol[length(sol[,1]) , it_index +1] * data_agestructure)#
+	Ib <- sum(sol[length(sol[,1]) , ib_index +1] * data_agestructure)#
+	Ic <- sum(sol[length(sol[,1]) , ic_index +1] * data_agestructure)#
+	R <- sum(sol[length(sol[,1]) , r_index +1] * data_agestructure)#
+	Rc <-sum(sol[length(sol[,1]) , rc_index +1] * data_agestructure)#
+	N <- sum(S + It + Ib + Ic + R + Rc)#
+	prevTB <- (It + Ic + Rc) / N #
+	prevB <- (Ib + Ic + R + Rc) / N#
+	prevBinS <- (Ib + R) / (S + Ib + R)#
+	prevBinT <- (Ic + Rc) / (It + Ic + Rc)#
+	prevTinS <- (It) / (S + It)#
+	prevTinB <- (Ic + Rc) / (Ib + Ic + R + Rc)#
+	return(list(prevTB = prevTB, prevB = prevB,#
+		prevBinS = prevBinS, prevBinT = prevBinT, #
+		prevTinS = prevTinS, prevTinB = prevTinB))#
+}#
+#
+objective = function(params.est){#
+	# params.est = 2 long = c(betaB, betaT)#
+	params <- c(fixed.params, list(gamma=1/2, betaB = params.est[1],#
+		betaT = params.est[2]/1000, rhoT = 1, rhoB = 2.1, theta= 4, K = 433))#
+	# seed from endemic brucellosis conditions, 10 bTB positive buffalo#
+	x0 = get_starting_eqbruc(params = c(params))#
+	x0[[25]] <- x0[[25]] + 2#
+	if(x0[[5]] > 2){#
+		x0[[5]] <- x0[[5]] - 2}  #
+	sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))#
+	df <- get_structured_prevalence(sol)#
+	error <- sqrt(((prevTBobs - df$prevTB)^2 + (prevBobs - df$prevB)^2))#
+	return (error)#
+}#
+#
+objective_recov = function(params.est){#
+	# params.est = 2 long = c(betaB, betaT)#
+	params <- c(fixed.params.recov, list(gamma=1/2, betaB = params.est[1],#
+	betaT = params.est[2]/1000, rhoT = 1, rhoB = 2.1, theta= 4, K = 433))#
+	# seed from endemic brucellosis conditions, 10 bTB positive buffalo#
+	x0 = get_starting_eqbruc(params = c(params))#
+	x0[[25]] <- x0[[25]] + 2#
+	if(x0[[5]] > 2){#
+		x0[[5]] <- x0[[5]] - 2}  #
+	sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))#
+	df <- get_structured_prevalence(sol)#
+	error <- sqrt(((prevTBobs - df$prevTB)^2 + (prevBobs - df$prevB)^2))#
+	return (error)#
+}
+#betaB =  0.6087396; betaT =1.2974554  #  with gamma = 1/2#
+params <- c(fixed.params, list(gamma=1/2, betaB = 0.6087396,#
+	betaT = 1.2974554/1000, rhoT = 1, rhoB = 2.1, theta= 4, K = 433))#
+#params <- c(fixed.params, list(gamma=1/2, betaB = par$par[1],#
+#	betaT = par$par[2]/1000, rhoT = 1, rhoB = 2.1, theta= 4, K = 433))#
+x0 = get_starting_eqbruc(params = c(params))#
+x0[[25]] <- x0[[25]] + 2#
+x0[[5]] <- x0[[5]] - 2#
+sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))#
+get_prevalence(sol) #
+get_structured_prevalence(sol)#
+make_structured_summary_plots(sol)#
+sum(sol[length(sol),]) # final population size#
+par(mfrow = c(1, 2))#
+plot_raw_numbers(sol)#
+plot_ageprevalence(sol)
+par <- optim(c(1.025, 0.00094*1000), objective)  # starting vals=30% prev w/out co-infection
+par
+rm(list = ls())#
+require("deSolve")#
+#
+source('~/GitHub/bTB-bruc-co-infection-ms/fixed_parameters_norecovery_agematrix.R', chdir = TRUE)#
+source('~/GitHub/bTB-bruc-co-infection-ms/rhs_age.R', chdir = TRUE)#
+#
+# Run B-H model with no disease (endemic population size = 609)#
+s_index <- 1:20#
+it_index <- 21:40#
+ib_index <- 41:60#
+ic_index <- 61:80#
+r_index <- 81:100#
+rc_index <- 101:120#
+relageall = c(0.137, rep(0.368/4, 4), rep(0.185/4, 4),  #
+	rep(0.235/6, 6), rep(0.075/5, 5))					#
+relage = relageall#
+S0 = 400*relage; It0 = 0*relage; Ib0 = 0*relage; #
+Ic0 = 0*relage; R0 = 0 * relage; Rc0 = 0 * relage#
+x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)#
+times <- seq(0, 1000, 1)  #
+params.test <- c(fixed.params, list(gamma=1/2, theta = 4, K = 433,#
+	betaB = 0.6087396, betaT = 1.2974554/1000, rhoT = 1, rhoB = 2.1))#
+sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params.test))#
+stable_age <- unname(unlist( sol[1000, c(2:21)]/sum(sol[500, c(2:21)]) ))
+plot_raw_numbers = function(sol){#
+	plot(sol$time, apply(sol[s_index+1], 1, sum), col= "black",#
+		type= 'l', ylim = c(0, 800), ylab = "Number of animals", #
+		xlab = "Time (in years)")#
+	lines(sol$time, apply(sol[it_index+1], 1, sum), col= "red")#
+	lines(sol$time, apply(sol[ib_index+1], 1, sum), col= "blue")#
+	lines(sol$time, apply(sol[ic_index+1], 1, sum), col= "green")#
+	lines(sol$time, apply(sol[r_index+1], 1, sum), col = "orange")#
+	lines(sol$time, apply(sol[rc_index+1], 1, sum), col = "pink")#
+	legend("topright", legend = c("S", "It", "Ib", "Ic", "R", "Rc"),#
+		col = c("black", "red", "blue", "green", "orange", "pink"), #
+		bty="n", lty = 1)#
+}#
+#
+plot_raw_numbers(sol)#
+sum(sol[1001,c(2:length(sol))])#
+#
+# Set K s.t. get same popuation size/age structure (endemic population size = 609.0097)#
+K <- seq(1030, 1038, 0.02)#
+S0 = 400*relage; It0 = 0*relage; Ib0 = 0*relage; #
+Ic0 = 0*relage; R0 = 0 * relage; Rc0 = 0 * relage#
+x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)#
+times <- seq(0, 1000, 1)  #
+val <- NA
+n = 100#
+source('~/GitHub/bTB-bruc-co-infection-ms/get_EE.R', chdir = TRUE)#
+set.seed(1)#
+#
+EE_bTB_single_list <- NA; EE_bTB_co_list <- NA#
+EE_brucellosis_single_list <- NA; EE_brucellosis_co <- NA#
+rEE_bTB_single_list <- NA; rEE_bTB_co_list <- NA#
+rEE_brucellosis_single_list <- NA; rEE_brucellosis_co <- NA#
+lEE_bTB_single_list <- NA; lEE_bTB_co_list <- NA#
+lEE_brucellosis_single_list <- NA; lEE_brucellosis_co <- NA#
+#
+rhoB <- NA; mortB <- NA; mortT <- NA; mortC <- NA#
+pb <- txtProgressBar(min = 0, max = n, style = 3, char = "=")
+n = 2#
+source('~/GitHub/bTB-bruc-co-infection-ms/get_EE.R', chdir = TRUE)#
+set.seed(1)#
+#
+EE_bTB_single_list <- NA; EE_bTB_co_list <- NA#
+EE_brucellosis_single_list <- NA; EE_brucellosis_co <- NA#
+rEE_bTB_single_list <- NA; rEE_bTB_co_list <- NA#
+rEE_brucellosis_single_list <- NA; rEE_brucellosis_co <- NA#
+lEE_bTB_single_list <- NA; lEE_bTB_co_list <- NA#
+lEE_brucellosis_single_list <- NA; lEE_brucellosis_co <- NA#
+#
+rhoB <- NA; mortB <- NA; mortT <- NA; mortC <- NA#
+pb <- txtProgressBar(min = 0, max = n, style = 3, char = "=")#
+#
+for(i in 1:n){#
+	if(i %% 5 == 0){#
+		setTxtProgressBar(pb, i)#
+	}#
+	params <- c(fixed.params, list(gamma=1/2, theta = 4, K = K[i],#
+		betaB = 0.6087396, betaT = 1.2974554/1000, rhoT = 1, rhoB = 2.1))#
+	params$rhoB<- exp(rnorm(n = 1, mean = 0.75579, sd = 0.40714))#
+	rhoB[i] <- params$rhoB#
+	mortB[i] <- exp(rnorm(n = 1, mean = 1.1060, sd = 0.3505))#
+	mortT[i] <- exp(rnorm(n = 1, mean = 1.0370, sd = 0.3483 ))#
+	mortC[i] <- exp(rnorm(n = 1, mean = 2.1430, sd = 0.5004329))#
+	params$muB <- params$muS * mortB[i]#
+	params$muT <- params$muS * mortT[i]#
+	params$muC <- params$muS * mortC[i]#
+	params$muB[params$muB < 0] <- 0#
+	params$muT[params$muT < 0] <- 0#
+	params$muC[params$muC < 0] <- 0#
+	params$muR <- params$muT#
+	params$muRC <- params$muC#
+	val <- getEE(params)#
+#
+	paramslog <- params; paramslog$K <- 1034.99#
+	vallog <- getEE(paramslog)#
+	paramsricker <- params; paramsricker$K <- 382.6#
+	valricker <- getEE(paramsricker)#
+#
+	EE_bTB_single_list[i] <- val[1]; EE_bTB_co_list[i] <- val[2]#
+	EE_brucellosis_single_list[i] <- val[3]; 	EE_brucellosis_co[i] <- val[4]#
+	rEE_bTB_single_list[i] <- val[1]; rEE_bTB_co_list[i] <- val[2]#
+	rEE_brucellosis_single_list[i] <- val[3]; rEE_brucellosis_co[i] <- val[4]#
+	lEE_bTB_single_list[i] <- val[1]; lEE_bTB_co_list[i] <- val[2]#
+	lEE_brucellosis_single_list[i] <- val[3]; lEE_brucellosis_co[i] <- val[4]#
+}#
+senslist <- list(#
+	EE_bTB_single_list = EE_bTB_single_list, #
+	EE_bTB_co_list = EE_bTB_co_list,#
+	EE_brucellosis_single_list = EE_brucellosis_single_list, #
+	EE_brucellosis_co = EE_brucellosis_co,#
+	rEE_bTB_single_list = rEE_bTB_single_list, #
+	rEE_bTB_co_list = rEE_bTB_co_list,#
+	rEE_brucellosis_single_list = rEE_brucellosis_single_list, #
+	rEE_brucellosis_co = rEE_brucellosis_co,	#
+	lEE_bTB_single_list = lEE_bTB_single_list, #
+	lEE_bTB_co_list = lEE_bTB_co_list,#
+	lEE_brucellosis_single_list = lEE_brucellosis_single_list, #
+	lEE_brucellosis_co = lEE_brucellosis_co)
+str(senslist)
+params <- c(fixed.params, list(gamma=1/2, theta = 4, K = K[i],#
+		betaB = 0.6087396, betaT = 1.2974554/1000, rhoT = 1, rhoB = 2.1))
+val <- getEE(params)
+val
+getEE_params
+getEE
+# Make plots#
+################################
+n = 2#
+source('~/GitHub/bTB-bruc-co-infection-ms/get_EE.R', chdir = TRUE)#
+set.seed(1)#
+#
+EE_bTB_single_list <- NA; EE_bTB_co_list <- NA#
+EE_brucellosis_single_list <- NA; EE_brucellosis_co <- NA#
+rEE_bTB_single_list <- NA; rEE_bTB_co_list <- NA#
+rEE_brucellosis_single_list <- NA; rEE_brucellosis_co <- NA#
+lEE_bTB_single_list <- NA; lEE_bTB_co_list <- NA#
+lEE_brucellosis_single_list <- NA; lEE_brucellosis_co <- NA#
+#
+rhoB <- NA; mortB <- NA; mortT <- NA; mortC <- NA#
+pb <- txtProgressBar(min = 0, max = n, style = 3, char = "=")#
+#
+for(i in 1:n){#
+	if(i %% 5 == 0){#
+		setTxtProgressBar(pb, i)#
+	}#
+	params <- c(fixed.params, list(gamma=1/2, theta = 4, K = 433,#
+		betaB = 0.6087396, betaT = 1.2974554/1000, rhoT = 1, rhoB = 2.1))#
+	params$rhoB<- exp(rnorm(n = 1, mean = 0.75579, sd = 0.40714))#
+	rhoB[i] <- params$rhoB#
+	mortB[i] <- exp(rnorm(n = 1, mean = 1.1060, sd = 0.3505))#
+	mortT[i] <- exp(rnorm(n = 1, mean = 1.0370, sd = 0.3483 ))#
+	mortC[i] <- exp(rnorm(n = 1, mean = 2.1430, sd = 0.5004329))#
+	params$muB <- params$muS * mortB[i]#
+	params$muT <- params$muS * mortT[i]#
+	params$muC <- params$muS * mortC[i]#
+	params$muB[params$muB < 0] <- 0#
+	params$muT[params$muT < 0] <- 0#
+	params$muC[params$muC < 0] <- 0#
+	params$muR <- params$muT#
+	params$muRC <- params$muC#
+	val <- getEE(params)#
+#
+	paramslog <- params; paramslog$K <- 1034.99#
+	vallog <- getEE(paramslog)#
+	paramsricker <- params; paramsricker$K <- 382.6#
+	valricker <- getEE(paramsricker)#
+#
+	EE_bTB_single_list[i] <- val[1]; EE_bTB_co_list[i] <- val[2]#
+	EE_brucellosis_single_list[i] <- val[3]; 	EE_brucellosis_co[i] <- val[4]#
+	rEE_bTB_single_list[i] <- val[1]; rEE_bTB_co_list[i] <- val[2]#
+	rEE_brucellosis_single_list[i] <- val[3]; rEE_brucellosis_co[i] <- val[4]#
+	lEE_bTB_single_list[i] <- val[1]; lEE_bTB_co_list[i] <- val[2]#
+	lEE_brucellosis_single_list[i] <- val[3]; lEE_brucellosis_co[i] <- val[4]#
+}#
+senslist <- list(#
+	EE_bTB_single_list = EE_bTB_single_list, #
+	EE_bTB_co_list = EE_bTB_co_list,#
+	EE_brucellosis_single_list = EE_brucellosis_single_list, #
+	EE_brucellosis_co = EE_brucellosis_co,#
+	rEE_bTB_single_list = rEE_bTB_single_list, #
+	rEE_bTB_co_list = rEE_bTB_co_list,#
+	rEE_brucellosis_single_list = rEE_brucellosis_single_list, #
+	rEE_brucellosis_co = rEE_brucellosis_co,	#
+	lEE_bTB_single_list = lEE_bTB_single_list, #
+	lEE_bTB_co_list = lEE_bTB_co_list,#
+	lEE_brucellosis_single_list = lEE_brucellosis_single_list, #
+	lEE_brucellosis_co = lEE_brucellosis_co)#
+str(senslist)
+# Make plots#
+################################
+n = 500#
+source('~/GitHub/bTB-bruc-co-infection-ms/get_EE.R', chdir = TRUE)#
+set.seed(1)#
+#
+EE_bTB_single_list <- NA; EE_bTB_co_list <- NA#
+EE_brucellosis_single_list <- NA; EE_brucellosis_co <- NA#
+rEE_bTB_single_list <- NA; rEE_bTB_co_list <- NA#
+rEE_brucellosis_single_list <- NA; rEE_brucellosis_co <- NA#
+lEE_bTB_single_list <- NA; lEE_bTB_co_list <- NA#
+lEE_brucellosis_single_list <- NA; lEE_brucellosis_co <- NA#
+#
+rhoB <- NA; mortB <- NA; mortT <- NA; mortC <- NA#
+pb <- txtProgressBar(min = 0, max = n, style = 3, char = "=")#
+#
+for(i in 1:n){#
+	if(i %% 5 == 0){#
+		setTxtProgressBar(pb, i)#
+	}#
+	params <- c(fixed.params, list(gamma=1/2, theta = 4, K = 433,#
+		betaB = 0.6087396, betaT = 1.2974554/1000, rhoT = 1, rhoB = 2.1))#
+	params$rhoB<- exp(rnorm(n = 1, mean = 0.75579, sd = 0.40714))#
+	rhoB[i] <- params$rhoB#
+	mortB[i] <- exp(rnorm(n = 1, mean = 1.1060, sd = 0.3505))#
+	mortT[i] <- exp(rnorm(n = 1, mean = 1.0370, sd = 0.3483 ))#
+	mortC[i] <- exp(rnorm(n = 1, mean = 2.1430, sd = 0.5004329))#
+	params$muB <- params$muS * mortB[i]#
+	params$muT <- params$muS * mortT[i]#
+	params$muC <- params$muS * mortC[i]#
+	params$muB[params$muB < 0] <- 0#
+	params$muT[params$muT < 0] <- 0#
+	params$muC[params$muC < 0] <- 0#
+	params$muR <- params$muT#
+	params$muRC <- params$muC#
+	val <- getEE(params)#
+#
+	paramslog <- params; paramslog$K <- 1034.99#
+	vallog <- getEE(paramslog)#
+	paramsricker <- params; paramsricker$K <- 382.6#
+	valricker <- getEE(paramsricker)#
+#
+	EE_bTB_single_list[i] <- val[1]; EE_bTB_co_list[i] <- val[2]#
+	EE_brucellosis_single_list[i] <- val[3]; 	EE_brucellosis_co[i] <- val[4]#
+	rEE_bTB_single_list[i] <- val[1]; rEE_bTB_co_list[i] <- val[2]#
+	rEE_brucellosis_single_list[i] <- val[3]; rEE_brucellosis_co[i] <- val[4]#
+	lEE_bTB_single_list[i] <- val[1]; lEE_bTB_co_list[i] <- val[2]#
+	lEE_brucellosis_single_list[i] <- val[3]; lEE_brucellosis_co[i] <- val[4]#
+}#
+senslist <- list(#
+	EE_bTB_single_list = EE_bTB_single_list, #
+	EE_bTB_co_list = EE_bTB_co_list,#
+	EE_brucellosis_single_list = EE_brucellosis_single_list, #
+	EE_brucellosis_co = EE_brucellosis_co,#
+	rEE_bTB_single_list = rEE_bTB_single_list, #
+	rEE_bTB_co_list = rEE_bTB_co_list,#
+	rEE_brucellosis_single_list = rEE_brucellosis_single_list, #
+	rEE_brucellosis_co = rEE_brucellosis_co,	#
+	lEE_bTB_single_list = lEE_bTB_single_list, #
+	lEE_bTB_co_list = lEE_bTB_co_list,#
+	lEE_brucellosis_single_list = lEE_brucellosis_single_list, #
+	lEE_brucellosis_co = lEE_brucellosis_co)#
+str(senslist)
+getEE()
+getEE
+###########################################################
+rm(list = ls())#
+require("deSolve")#
+#
+source('~/GitHub/bTB-bruc-co-infection-ms/fixed_parameters_norecovery_agematrix.R', chdir = TRUE)#
+source('~/GitHub/bTB-bruc-co-infection-ms/rhs_age.R', chdir = TRUE)#
+#
+# Run B-H model with no disease (endemic population size = 609)#
+s_index <- 1:20#
+it_index <- 21:40#
+ib_index <- 41:60#
+ic_index <- 61:80#
+r_index <- 81:100#
+rc_index <- 101:120#
+relageall = c(0.137, rep(0.368/4, 4), rep(0.185/4, 4),  #
+	rep(0.235/6, 6), rep(0.075/5, 5))					#
+relage = relageall#
+S0 = 400*relage; It0 = 0*relage; Ib0 = 0*relage; #
+Ic0 = 0*relage; R0 = 0 * relage; Rc0 = 0 * relage#
+x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)#
+times <- seq(0, 1000, 1)  #
+params.test <- c(fixed.params, list(gamma=1/2, theta = 4, K = 433,#
+	betaB = 0.6087396, betaT = 1.2974554/1000, rhoT = 1, rhoB = 2.1))#
+sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params.test))#
+stable_age <- unname(unlist( sol[1000, c(2:21)]/sum(sol[500, c(2:21)]) ))#
+#
+plot_raw_numbers = function(sol){#
+	plot(sol$time, apply(sol[s_index+1], 1, sum), col= "black",#
+		type= 'l', ylim = c(0, 800), ylab = "Number of animals", #
+		xlab = "Time (in years)")#
+	lines(sol$time, apply(sol[it_index+1], 1, sum), col= "red")#
+	lines(sol$time, apply(sol[ib_index+1], 1, sum), col= "blue")#
+	lines(sol$time, apply(sol[ic_index+1], 1, sum), col= "green")#
+	lines(sol$time, apply(sol[r_index+1], 1, sum), col = "orange")#
+	lines(sol$time, apply(sol[rc_index+1], 1, sum), col = "pink")#
+	legend("topright", legend = c("S", "It", "Ib", "Ic", "R", "Rc"),#
+		col = c("black", "red", "blue", "green", "orange", "pink"), #
+		bty="n", lty = 1)#
+}#
+#
+plot_raw_numbers(sol)#
+sum(sol[1001,c(2:length(sol))])
+# Set K s.t. get same popuation size/age structure (endemic population size = 609.0097)#
+K <- seq(1033, 1035, 0.01)#
+S0 = 400*relage; It0 = 0*relage; Ib0 = 0*relage; #
+Ic0 = 0*relage; R0 = 0 * relage; Rc0 = 0 * relage#
+x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)#
+times <- seq(0, 1000, 1)  #
+val <- NA#
+for (i in 1:length(K)){#
+	params.test <- c(fixed.params, list(gamma=1/2, theta = 4, K = K[i],#
+		betaB = 0.6087396, betaT = 1.2974554/1000, rhoT = 1, rhoB = 2.1))#
+	sol <- as.data.frame(ode(x0, times,  rhs_age_logistic, params.test))#
+	val[i] <- sum(sol[1001,c(2:length(sol))])	#
+}#
+plot(x = K, y = val, type = "b", pch = 19)#
+abline(h = 609.0097)
+K <- seq(1034.7, 1035.1, 0.01)#
+S0 = 400*relage; It0 = 0*relage; Ib0 = 0*relage; #
+Ic0 = 0*relage; R0 = 0 * relage; Rc0 = 0 * relage#
+x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)#
+times <- seq(0, 1000, 1)  #
+val <- NA#
+for (i in 1:length(K)){#
+	params.test <- c(fixed.params, list(gamma=1/2, theta = 4, K = K[i],#
+		betaB = 0.6087396, betaT = 1.2974554/1000, rhoT = 1, rhoB = 2.1))#
+	sol <- as.data.frame(ode(x0, times,  rhs_age_logistic, params.test))#
+	val[i] <- sum(sol[1001,c(2:length(sol))])	#
+}#
+plot(x = K, y = val, type = "b", pch = 19)#
+abline(h = 609.0097) # K = 1034.99
+# Set K s.t. get same popuation size/age structure (endemic population size = 609.0097)#
+K <- seq(1034, 1035, 0.1)#
+S0 = 400*relage; It0 = 0*relage; Ib0 = 0*relage; #
+Ic0 = 0*relage; R0 = 0 * relage; Rc0 = 0 * relage#
+x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)#
+times <- seq(0, 1000, 1)  #
+val <- NA#
+for (i in 1:length(K)){#
+	params.test <- c(fixed.params, list(gamma=1/2, theta = 4, K = K[i],#
+		betaB = 0.6087396, betaT = 1.2974554/1000, rhoT = 1, rhoB = 2.1))#
+	sol <- as.data.frame(ode(x0, times,  rhs_age_logistic, params.test))#
+	val[i] <- sum(sol[1001,c(2:length(sol))])	#
+}#
+plot(x = K, y = val, type = "b", pch = 19)#
+abline(h = 609.0097) # K = 1034.99
+# Run B-H model with no disease (endemic population size = 609)#
+s_index <- 1:20#
+it_index <- 21:40#
+ib_index <- 41:60#
+ic_index <- 61:80#
+r_index <- 81:100#
+rc_index <- 101:120#
+relageall = c(0.137, rep(0.368/4, 4), rep(0.185/4, 4),  #
+	rep(0.235/6, 6), rep(0.075/5, 5))					#
+relage = relageall#
+S0 = 400*relage; It0 = 0*relage; Ib0 = 0*relage; #
+Ic0 = 0*relage; R0 = 0 * relage; Rc0 = 0 * relage#
+x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)#
+times <- seq(0, 1000, 1)  #
+params.test <- c(fixed.params, list(gamma=1/2, theta = 4, K = 433,#
+	betaB = 0.6087396, betaT = 1.2974554/1000, rhoT = 1, rhoB = 2.1))#
+sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params.test))#
+stable_age <- unname(unlist( sol[1000, c(2:21)]/sum(sol[500, c(2:21)]) ))#
+#
+plot_raw_numbers = function(sol){#
+	plot(sol$time, apply(sol[s_index+1], 1, sum), col= "black",#
+		type= 'l', ylim = c(0, 800), ylab = "Number of animals", #
+		xlab = "Time (in years)")#
+	lines(sol$time, apply(sol[it_index+1], 1, sum), col= "red")#
+	lines(sol$time, apply(sol[ib_index+1], 1, sum), col= "blue")#
+	lines(sol$time, apply(sol[ic_index+1], 1, sum), col= "green")#
+	lines(sol$time, apply(sol[r_index+1], 1, sum), col = "orange")#
+	lines(sol$time, apply(sol[rc_index+1], 1, sum), col = "pink")#
+	legend("topright", legend = c("S", "It", "Ib", "Ic", "R", "Rc"),#
+		col = c("black", "red", "blue", "green", "orange", "pink"), #
+		bty="n", lty = 1)#
+}#
+#
+plot_raw_numbers(sol)#
+sum(sol[1001,c(2:length(sol))])
+plot(x = K, y = val, type = "b", pch = 19)
+K <- seq(1032, 1034, 0.5)#
+S0 = 400*relage; It0 = 0*relage; Ib0 = 0*relage; #
+Ic0 = 0*relage; R0 = 0 * relage; Rc0 = 0 * relage#
+x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)#
+times <- seq(0, 1000, 1)  #
+val <- NA#
+for (i in 1:length(K)){#
+	params.test <- c(fixed.params, list(gamma=1/2, theta = 4, K = K[i],#
+		betaB = 0.6087396, betaT = 1.2974554/1000, rhoT = 1, rhoB = 2.1))#
+	sol <- as.data.frame(ode(x0, times,  rhs_age_logistic, params.test))#
+	val[i] <- sum(sol[1001,c(2:length(sol))])	#
+}#
+plot(x = K, y = val, type = "b", pch = 19)#
+abline(h = 609.0097) # K = 1034.99#
+#
+val <- NA#
+K <- seq(382.5, 382.9, 0.01)#
+for (i in 1:length(K)){#
+	params.test <- c(fixed.params, list(gamma=1/2, theta = 4, K = K[i],#
+		betaB = 0.6087396, betaT = 1.2974554/1000, rhoT = 1, rhoB = 2.1))#
+	sol <- as.data.frame(ode(x0, times,  rhs_age_matrix_ricker, params.test))#
+	val[i] <- sum(sol[1001,c(2:length(sol))])	#
+}#
+plot(x = K, y = val[1:length(K)], type = "b", pch = 19)#
+abline(h = 609.0097) # K = 382.6
+# Set K s.t. get same popuation size/age structure (endemic population size = 609.0097)#
+K <- seq(1033, 1033.5, 0.1)#
+S0 = 400*relage; It0 = 0*relage; Ib0 = 0*relage; #
+Ic0 = 0*relage; R0 = 0 * relage; Rc0 = 0 * relage#
+x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)#
+times <- seq(0, 1000, 1)  #
+val <- NA#
+for (i in 1:length(K)){#
+	params.test <- c(fixed.params, list(gamma=1/2, theta = 4, K = K[i],#
+		betaB = 0.6087396, betaT = 1.2974554/1000, rhoT = 1, rhoB = 2.1))#
+	sol <- as.data.frame(ode(x0, times,  rhs_age_logistic, params.test))#
+	val[i] <- sum(sol[1001,c(2:length(sol))])	#
+}#
+plot(x = K, y = val, type = "b", pch = 19)#
+abline(h = 609.0097) # K = 1034.99
+K <- seq(1033.2, 1033.35, 0.01)#
+S0 = 400*relage; It0 = 0*relage; Ib0 = 0*relage; #
+Ic0 = 0*relage; R0 = 0 * relage; Rc0 = 0 * relage#
+x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)#
+times <- seq(0, 1000, 1)  #
+val <- NA#
+for (i in 1:length(K)){#
+	params.test <- c(fixed.params, list(gamma=1/2, theta = 4, K = K[i],#
+		betaB = 0.6087396, betaT = 1.2974554/1000, rhoT = 1, rhoB = 2.1))#
+	sol <- as.data.frame(ode(x0, times,  rhs_age_logistic, params.test))#
+	val[i] <- sum(sol[1001,c(2:length(sol))])	#
+}#
+plot(x = K, y = val, type = "b", pch = 19)#
+abline(h = 609.0097) # K = 1034.99
+val
+val[10]
+K[10]
+val <- NA#
+K <- seq(382.5, 382.9, 0.01)#
+for (i in 1:length(K)){#
+	params.test <- c(fixed.params, list(gamma=1/2, theta = 4, K = K[i],#
+		betaB = 0.6087396, betaT = 1.2974554/1000, rhoT = 1, rhoB = 2.1))#
+	sol <- as.data.frame(ode(x0, times,  rhs_age_matrix_ricker, params.test))#
+	val[i] <- sum(sol[1001,c(2:length(sol))])	#
+}#
+plot(x = K, y = val[1:length(K)], type = "b", pch = 19)#
+abline(h = 609.0097) # K = 382.6
+val
+val[1:10]
+val[6:7]
+K[5:7]
+K[6:7]
+val <- NA#
+K <- seq(382.5, 382.56, 0.002)#
+for (i in 1:length(K)){#
+	params.test <- c(fixed.params, list(gamma=1/2, theta = 4, K = K[i],#
+		betaB = 0.6087396, betaT = 1.2974554/1000, rhoT = 1, rhoB = 2.1))#
+	sol <- as.data.frame(ode(x0, times,  rhs_age_matrix_ricker, params.test))#
+	val[i] <- sum(sol[1001,c(2:length(sol))])	#
+}#
+plot(x = K, y = val[1:length(K)], type = "b", pch = 19)#
+abline(h = 609.0097) # K = 382.6
+val
+val[29]
+K[29]
+# Make plots#
+################################
+n = 500#
+source('~/GitHub/bTB-bruc-co-infection-ms/get_EE.R', chdir = TRUE)#
+set.seed(1)#
+#
+EE_bTB_single_list <- NA; EE_bTB_co_list <- NA#
+EE_brucellosis_single_list <- NA; EE_brucellosis_co <- NA#
+rEE_bTB_single_list <- NA; rEE_bTB_co_list <- NA#
+rEE_brucellosis_single_list <- NA; rEE_brucellosis_co <- NA#
+lEE_bTB_single_list <- NA; lEE_bTB_co_list <- NA#
+lEE_brucellosis_single_list <- NA; lEE_brucellosis_co <- NA#
+#
+rhoB <- NA; mortB <- NA; mortT <- NA; mortC <- NA#
+pb <- txtProgressBar(min = 0, max = n, style = 3, char = "=")
+n = 3
+params$muS
+params.test$muS
+params.test$muS* 8
+for(i in 1:n){#
+	if(i %% 5 == 0){#
+		setTxtProgressBar(pb, i)#
+	}#
+	params <- c(fixed.params, list(gamma=1/2, theta = 4, K = 433,#
+		betaB = 0.6087396, betaT = 1.2974554/1000, rhoT = 1, rhoB = 2.1))#
+	params$rhoB<- exp(rnorm(n = 1, mean = 0.75579, sd = 0.40714))#
+	rhoB[i] <- params$rhoB#
+	mortB[i] <- exp(rnorm(n = 1, mean = 1.1060, sd = 0.3505))#
+	mortT[i] <- exp(rnorm(n = 1, mean = 1.0370, sd = 0.3483 ))#
+	mortC[i] <- exp(rnorm(n = 1, mean = 2.1430, sd = 0.5004329))#
+	params$muB <- params$muS * mortB[i]#
+	params$muT <- params$muS * mortT[i]#
+	params$muC <- params$muS * mortC[i]#
+	params$muB[params$muB > 1] <- 1#
+	params$muT[params$muT > 1] <- 1#
+	params$muC[params$muC > 1] <- 1#
+	params$muR <- params$muT#
+	params$muRC <- params$muC#
+	val <- getEE(params)#
+#
+	paramslog <- params; paramslog$K <- 1033.29#
+	vallog <- getEE(paramslog)#
+	paramsricker <- params; paramsricker$K <- 382.556#
+	valricker <- getEE(paramsricker)#
+#
+	EE_bTB_single_list[i] <- val[1]; EE_bTB_co_list[i] <- val[2]#
+	EE_brucellosis_single_list[i] <- val[3]; 	EE_brucellosis_co[i] <- val[4]#
+	rEE_bTB_single_list[i] <- valricker[1]; rEE_bTB_co_list[i] <- valricker[2]#
+	rEE_brucellosis_single_list[i] <- valricker[3]; rEE_brucellosis_co[i] <- valricker[4]#
+	lEE_bTB_single_list[i] <- vallog[1]; lEE_bTB_co_list[i] <- vallog[2]#
+	lEE_brucellosis_single_list[i] <- vallog[3]; lEE_brucellosis_co[i] <- vallog[4]#
+}
+senslist <- list(#
+	EE_bTB_single_list = EE_bTB_single_list, #
+	EE_bTB_co_list = EE_bTB_co_list,#
+	EE_brucellosis_single_list = EE_brucellosis_single_list, #
+	EE_brucellosis_co = EE_brucellosis_co,#
+	rEE_bTB_single_list = rEE_bTB_single_list, #
+	rEE_bTB_co_list = rEE_bTB_co_list,#
+	rEE_brucellosis_single_list = rEE_brucellosis_single_list, #
+	rEE_brucellosis_co = rEE_brucellosis_co,	#
+	lEE_bTB_single_list = lEE_bTB_single_list, #
+	lEE_bTB_co_list = lEE_bTB_co_list,#
+	lEE_brucellosis_single_list = lEE_brucellosis_single_list, #
+	lEE_brucellosis_co = lEE_brucellosis_co)#
+str(senslist)
+summary(EE_bTB_single_list)
+EE_bTB_single_list
+EE_bTB_co_list
+EE_brucellosis_single_list
+EE_brucellosis_co_list
+EE_brucellosis_co
+rEE_bTB_co_list
+rEE_bTB_single_list
+# Make plots#
+################################
+n = 500#
+source('~/GitHub/bTB-bruc-co-infection-ms/get_EE.R', chdir = TRUE)#
+set.seed(1)#
+#
+EE_bTB_single_list <- NA; EE_bTB_co_list <- NA#
+EE_brucellosis_single_list <- NA; EE_brucellosis_co <- NA#
+rEE_bTB_single_list <- NA; rEE_bTB_co_list <- NA#
+rEE_brucellosis_single_list <- NA; rEE_brucellosis_co <- NA#
+lEE_bTB_single_list <- NA; lEE_bTB_co_list <- NA#
+lEE_brucellosis_single_list <- NA; lEE_brucellosis_co <- NA#
+#
+rhoB <- NA; mortB <- NA; mortT <- NA; mortC <- NA#
+pb <- txtProgressBar(min = 0, max = n, style = 3, char = "=")#
+#
+for(i in 1:n){#
+	if(i %% 5 == 0){#
+		setTxtProgressBar(pb, i)#
+	}#
+	params <- c(fixed.params, list(gamma=1/2, theta = 4, K = 433,#
+		betaB = 0.6087396, betaT = 1.2974554/1000, rhoT = 1, rhoB = 2.1))#
+	params$rhoB<- exp(rnorm(n = 1, mean = 0.75579, sd = 0.40714))#
+	rhoB[i] <- params$rhoB#
+	mortB[i] <- exp(rnorm(n = 1, mean = 1.1060, sd = 0.3505))#
+	mortT[i] <- exp(rnorm(n = 1, mean = 1.0370, sd = 0.3483 ))#
+	mortC[i] <- exp(rnorm(n = 1, mean = 2.1430, sd = 0.5004329))#
+	params$muB <- params$muS * mortB[i]#
+	params$muT <- params$muS * mortT[i]#
+	params$muC <- params$muS * mortC[i]#
+	params$muB[params$muB > 1] <- 1#
+	params$muT[params$muT > 1] <- 1#
+	params$muC[params$muC > 1] <- 1#
+	params$muR <- params$muT#
+	params$muRC <- params$muC#
+	val <- getEE(params)#
+#
+	paramslog <- params; paramslog$K <- 1033.29#
+	vallog <- getEE(paramslog)#
+	paramsricker <- params; paramsricker$K <- 382.556#
+	valricker <- getEE(paramsricker)#
+#
+	EE_bTB_single_list[i] <- val[1]; EE_bTB_co_list[i] <- val[2]#
+	EE_brucellosis_single_list[i] <- val[3]; 	EE_brucellosis_co[i] <- val[4]#
+	rEE_bTB_single_list[i] <- valricker[1]; rEE_bTB_co_list[i] <- valricker[2]#
+	rEE_brucellosis_single_list[i] <- valricker[3]; rEE_brucellosis_co[i] <- valricker[4]#
+	lEE_bTB_single_list[i] <- vallog[1]; lEE_bTB_co_list[i] <- vallog[2]#
+	lEE_brucellosis_single_list[i] <- vallog[3]; lEE_brucellosis_co[i] <- vallog[4]#
+}#
+#
+senslist <- list(#
+	EE_bTB_single_list = EE_bTB_single_list, #
+	EE_bTB_co_list = EE_bTB_co_list,#
+	EE_brucellosis_single_list = EE_brucellosis_single_list, #
+	EE_brucellosis_co = EE_brucellosis_co,#
+	rEE_bTB_single_list = rEE_bTB_single_list, #
+	rEE_bTB_co_list = rEE_bTB_co_list,#
+	rEE_brucellosis_single_list = rEE_brucellosis_single_list, #
+	rEE_brucellosis_co = rEE_brucellosis_co,	#
+	lEE_bTB_single_list = lEE_bTB_single_list, #
+	lEE_bTB_co_list = lEE_bTB_co_list,#
+	lEE_brucellosis_single_list = lEE_brucellosis_single_list, #
+	lEE_brucellosis_co = lEE_brucellosis_co)#
+str(senslist)#
+#
+saveRDS(senslist, "~/GitHub/bTB-bruc-co-infection-ms/sensitivity_densitydependence_simulation_results.rds")
+d <- readRDS("~/GitHub/bTB-bruc-co-infection-ms/sensitivity_densitydependence_simulation_results.rds")
+str(d)
+n = length(d$EE_bTB_single_list)
+df <- data.frame(E = c(d$EE_bTB_single_list, d$EE_bTB_co_list, #
+	d$EE_brucellosis_single_list, d$EE_brucellosis_co, #
+	d$rEE_bTB_single_list, d$rEE_bTB_co_list, #
+	d$rEE_brucellosis_single_list, d$rEE_brucellosis_co, #
+	d$lEE_bTB_single_list, d$lEE_bTB_co_list, #
+	d$lEE_brucellosis_single_list, d$lEE_brucellosis_co),#
+	meanE = c(rep(mean(d$EE_bTB_single_list),n), #
+		rep(mean(d$EE_bTB_co_list),n),#
+		rep(mean(d$EE_brucellosis_single_list),n), #
+		rep(mean(d$EE_brucellosis_co),n),#
+		rep(mean(d$rEE_bTB_single_list),n), #
+		rep(mean(d$rEE_bTB_co_list),n),#
+		rep(mean(d$rEE_brucellosis_single_list),n), #
+		rep(mean(d$rEE_brucellosis_co),n), #
+		rep(mean(d$lEE_bTB_single_list),n), #
+		rep(mean(d$lEE_bTB_co_list),n),#
+		rep(mean(d$lEE_brucellosis_single_list),n), #
+		rep(mean(d$lEE_brucellosis_co),n)),#
+	sdE = c(rep(sd(d$EE_bTB_single_list),n), #
+		rep(sd(d$EE_bTB_co_list),n),#
+		rep(sd(d$EE_brucellosis_single_list),n), #
+		rep(sd(d$EE_brucellosis_co),n),#
+		rep(sd(d$rEE_bTB_single_list),n), #
+		rep(sd(d$rEE_bTB_co_list),n),#
+		rep(sd(d$rEE_brucellosis_single_list),n), #
+		rep(sd(d$rEE_brucellosis_co),n),#
+		rep(sd(d$lEE_bTB_single_list),n), #
+		rep(sd(d$lEE_bTB_co_list),n),#
+		rep(sd(d$lEE_brucellosis_single_list),n), #
+		rep(sd(d$lEE_brucellosis_co),n)),#
+	infection = c(rep("bTB", 2*n), rep("brucellosis", 2*n),#
+		rep("bTB", 2*n), rep("brucellosis", 2*n), #
+		rep("bTB", 2*n), rep("brucellosis", 2*n)), #
+	singleco = rep(c("single", "co-infection", "single","co-infection",#
+		"single", "co-infection", "single","co-infection",#
+		"single", "co-infection", "single","co-infection"), each = n),#
+	X = rep(c("bTB-single", "bTB-co-infection", "bruc-single", "bruc-co-infection", #
+		"bTB-single", "bTB-co-infection", "bruc-single", "bruc-co-infection", #
+		"bTB-single", "bTB-co-infection", "bruc-single", "bruc-co-infection"), each = n))
+df$X <- factor(df$X, levels = c("bTB-single",#
+	"bTB-co-infection", "bruc-single", "bruc-co-infection"))#
+df$infection <- relevel(as.factor(df$infection), "bTB")#
+df$singleco <- relevel(as.factor(df$singleco), "single")
+# Dot and error plots for Endemic Prevalence#
+pR <- ggplot(df, aes(x = infection, y = E, colour = infection, shape = singleco)) +#
+	geom_point(aes(x = infection, y = meanE), size = 3,#
+		position= position_dodge(width = 0.9)) +#
+	geom_errorbar(aes(x = infection, ymin = meanE - sdE, ymax = meanE + sdE),#
+		width = 0, position= position_dodge(width = 0.9)) +#
+	ylim(0.8, 6) +#
+	xlab("") +#
+	ylab(expression(R[0])) +#
+	theme_bw() +#
+	scale_colour_manual(values = c("slateblue3","chartreuse4"), guide = F) +#
+	scale_shape_manual(values = c(19, 17)) +#
+	theme(axis.line.x = element_line(colour= "black"),#
+  		axis.line.y = element_line(colour= "black"),#
+  		axis.title.x = element_text(size=16, vjust=-0.15),#
+        axis.title.y = element_text(size=16, vjust= 0.8),#
+        axis.text.x = element_text(size=16, vjust=-0.05),#
+        axis.text.y = element_text(size=14),#
+        panel.border = element_blank(), #
+		legend.position=c(0.85, 0.9),  #
+		legend.text = element_text(size = 10),#
+        legend.background= element_rect(fill="white", colour="white"),#
+        legend.key= element_blank(),#
+        legend.title= element_blank())
+pR
+head(df)
+# test figure with violin plots#
+n = length(d$EE_bTB_single_list)#
+df <- data.frame(E = c(d$EE_bTB_single_list, d$EE_bTB_co_list, #
+	d$EE_brucellosis_single_list, d$EE_brucellosis_co, #
+	d$rEE_bTB_single_list, d$rEE_bTB_co_list, #
+	d$rEE_brucellosis_single_list, d$rEE_brucellosis_co, #
+	d$lEE_bTB_single_list, d$lEE_bTB_co_list, #
+	d$lEE_brucellosis_single_list, d$lEE_brucellosis_co),#
+	meanE = c(rep(mean(d$EE_bTB_single_list),n), #
+		rep(mean(d$EE_bTB_co_list),n),#
+		rep(mean(d$EE_brucellosis_single_list),n), #
+		rep(mean(d$EE_brucellosis_co),n),#
+		rep(mean(d$rEE_bTB_single_list),n), #
+		rep(mean(d$rEE_bTB_co_list),n),#
+		rep(mean(d$rEE_brucellosis_single_list),n), #
+		rep(mean(d$rEE_brucellosis_co),n), #
+		rep(mean(d$lEE_bTB_single_list),n), #
+		rep(mean(d$lEE_bTB_co_list),n),#
+		rep(mean(d$lEE_brucellosis_single_list),n), #
+		rep(mean(d$lEE_brucellosis_co),n)),#
+	sdE = c(rep(sd(d$EE_bTB_single_list),n), #
+		rep(sd(d$EE_bTB_co_list),n),#
+		rep(sd(d$EE_brucellosis_single_list),n), #
+		rep(sd(d$EE_brucellosis_co),n),#
+		rep(sd(d$rEE_bTB_single_list),n), #
+		rep(sd(d$rEE_bTB_co_list),n),#
+		rep(sd(d$rEE_brucellosis_single_list),n), #
+		rep(sd(d$rEE_brucellosis_co),n),#
+		rep(sd(d$lEE_bTB_single_list),n), #
+		rep(sd(d$lEE_bTB_co_list),n),#
+		rep(sd(d$lEE_brucellosis_single_list),n), #
+		rep(sd(d$lEE_brucellosis_co),n)),#
+	infection = c(rep("bTB", 2*n), rep("brucellosis", 2*n),#
+		rep("bTB", 2*n), rep("brucellosis", 2*n), #
+		rep("bTB", 2*n), rep("brucellosis", 2*n)), #
+	model = rep(c("Beverton & Holt", "Ricker", "Logistic" ), each = 4*n),#
+	singleco = rep(c("single", "co-infection", "single","co-infection",#
+		"single", "co-infection", "single","co-infection",#
+		"single", "co-infection", "single","co-infection"), each = n),#
+	X = rep(c("bTB-single-BH", "bTB-co-infection-BH", "bruc-single-BH", "bruc-co-infection-BH", #
+		"bTB-single-R", "bTB-co-infection-R", "bruc-single-R", "bruc-co-infection-R", #
+		"bTB-single-L", "bTB-co-infection-L", "bruc-single-L", "bruc-co-infection-L"), each = n))#
+#	Xindex = rep(c(1.1, 1.4, 3.1, 3.4), each = n) )#
+df$X <- factor(df$X, levels = c("bTB-single-BH", "bTB-co-infection-BH", "bruc-single-BH", "bruc-co-infection-BH", #
+		"bTB-single-R", "bTB-co-infection-R", "bruc-single-R", "bruc-co-infection-R", #
+		"bTB-single-L", "bTB-co-infection-L", "bruc-single-L", "bruc-co-infection-L"))#
+df$infection <- relevel(as.factor(df$infection), "bTB")#
+df$singleco <- relevel(as.factor(df$singleco), "single")
+head(df)
+summary(df)
+df <- df[!is.na(df)]
+summary(df)
+# test figure with violin plots#
+n = length(d$EE_bTB_single_list)#
+df <- data.frame(E = c(d$EE_bTB_single_list, d$EE_bTB_co_list, #
+	d$EE_brucellosis_single_list, d$EE_brucellosis_co, #
+	d$rEE_bTB_single_list, d$rEE_bTB_co_list, #
+	d$rEE_brucellosis_single_list, d$rEE_brucellosis_co, #
+	d$lEE_bTB_single_list, d$lEE_bTB_co_list, #
+	d$lEE_brucellosis_single_list, d$lEE_brucellosis_co),#
+	meanE = c(rep(mean(d$EE_bTB_single_list),n), #
+		rep(mean(d$EE_bTB_co_list),n),#
+		rep(mean(d$EE_brucellosis_single_list),n), #
+		rep(mean(d$EE_brucellosis_co),n),#
+		rep(mean(d$rEE_bTB_single_list),n), #
+		rep(mean(d$rEE_bTB_co_list),n),#
+		rep(mean(d$rEE_brucellosis_single_list),n), #
+		rep(mean(d$rEE_brucellosis_co),n), #
+		rep(mean(d$lEE_bTB_single_list),n), #
+		rep(mean(d$lEE_bTB_co_list),n),#
+		rep(mean(d$lEE_brucellosis_single_list),n), #
+		rep(mean(d$lEE_brucellosis_co),n)),#
+	sdE = c(rep(sd(d$EE_bTB_single_list),n), #
+		rep(sd(d$EE_bTB_co_list),n),#
+		rep(sd(d$EE_brucellosis_single_list),n), #
+		rep(sd(d$EE_brucellosis_co),n),#
+		rep(sd(d$rEE_bTB_single_list),n), #
+		rep(sd(d$rEE_bTB_co_list),n),#
+		rep(sd(d$rEE_brucellosis_single_list),n), #
+		rep(sd(d$rEE_brucellosis_co),n),#
+		rep(sd(d$lEE_bTB_single_list),n), #
+		rep(sd(d$lEE_bTB_co_list),n),#
+		rep(sd(d$lEE_brucellosis_single_list),n), #
+		rep(sd(d$lEE_brucellosis_co),n)),#
+	infection = c(rep("bTB", 2*n), rep("brucellosis", 2*n),#
+		rep("bTB", 2*n), rep("brucellosis", 2*n), #
+		rep("bTB", 2*n), rep("brucellosis", 2*n)), #
+	model = rep(c("Beverton & Holt", "Ricker", "Logistic" ), each = 4*n),#
+	singleco = rep(c("single", "co-infection", "single","co-infection",#
+		"single", "co-infection", "single","co-infection",#
+		"single", "co-infection", "single","co-infection"), each = n),#
+	X = rep(c("bTB-single-BH", "bTB-co-infection-BH", "bruc-single-BH", "bruc-co-infection-BH", #
+		"bTB-single-R", "bTB-co-infection-R", "bruc-single-R", "bruc-co-infection-R", #
+		"bTB-single-L", "bTB-co-infection-L", "bruc-single-L", "bruc-co-infection-L"), each = n))#
+#	Xindex = rep(c(1.1, 1.4, 3.1, 3.4), each = n) )#
+df$X <- factor(df$X, levels = c("bTB-single-BH", "bTB-co-infection-BH", "bruc-single-BH", "bruc-co-infection-BH", #
+		"bTB-single-R", "bTB-co-infection-R", "bruc-single-R", "bruc-co-infection-R", #
+		"bTB-single-L", "bTB-co-infection-L", "bruc-single-L", "bruc-co-infection-L"))#
+df$infection <- relevel(as.factor(df$infection), "bTB")#
+df$singleco <- relevel(as.factor(df$singleco), "single")#
+df <- df[!is.na(df$E),]
+summary(df)
+df <- df[!is.na(df$sdE),]
+head(df)
+summary(df)
+table(df$X)
+# Dot and error plots for Endemic Prevalence#
+pR <- ggplot(df, aes(x = infection, y = E, colour = infection, shape = singleco)) +#
+	geom_point(aes(x = infection, y = meanE), size = 3,#
+		position= position_dodge(width = 0.9)) +#
+	geom_errorbar(aes(x = infection, ymin = meanE - sdE, ymax = meanE + sdE),#
+		width = 0, position= position_dodge(width = 0.9)) +#
+	ylim(0.8, 6) +#
+	xlab("") +#
+	ylab(expression(R[0])) +#
+	theme_bw() +#
+	scale_colour_manual(values = c("slateblue3","chartreuse4"), guide = F) +#
+	scale_shape_manual(values = c(19, 17)) +#
+	theme(axis.line.x = element_line(colour= "black"),#
+  		axis.line.y = element_line(colour= "black"),#
+  		axis.title.x = element_text(size=16, vjust=-0.15),#
+        axis.title.y = element_text(size=16, vjust= 0.8),#
+        axis.text.x = element_text(size=16, vjust=-0.05),#
+        axis.text.y = element_text(size=14),#
+        panel.border = element_blank(), #
+		legend.position=c(0.85, 0.9),  #
+		legend.text = element_text(size = 10),#
+        legend.background= element_rect(fill="white", colour="white"),#
+        legend.key= element_blank(),#
+        legend.title= element_blank())
+pR
+str(df)
+summary(df)
+df <- df[df$model != "logistic",]
+head(df)
+df$infectionmodel <- paste(df$infection, df$model, sep = "_")
+head(df)
+pR <- ggplot(df, aes(x = infectionmodel, y = E, colour = infection, shape = singleco)) +#
+	geom_point(aes(x = infectionmodel, y = meanE), size = 3,#
+		position= position_dodge(width = 0.9)) +#
+	geom_errorbar(aes(x = infectionmodel, ymin = meanE - sdE, ymax = meanE + sdE),#
+		width = 0, position= position_dodge(width = 0.9)) ; pR
+df <- df[df$model != "logistic",]
+###########################################################
+#
+###########################################################
+###########################################################
+# 1) Run with other form of density dependence (logistic)#
+###########################################################
+###########################################################
+rm(list = ls())#
+require("deSolve")#
+#
+source('~/GitHub/bTB-bruc-co-infection-ms/fixed_parameters_norecovery_agematrix.R', chdir = TRUE)#
+source('~/GitHub/bTB-bruc-co-infection-ms/rhs_age.R', chdir = TRUE)#
+#
+# Run B-H model with no disease (endemic population size = 609)#
+s_index <- 1:20#
+it_index <- 21:40#
+ib_index <- 41:60#
+ic_index <- 61:80#
+r_index <- 81:100#
+rc_index <- 101:120#
+relageall = c(0.137, rep(0.368/4, 4), rep(0.185/4, 4),  #
+	rep(0.235/6, 6), rep(0.075/5, 5))					#
+relage = relageall#
+S0 = 400*relage; It0 = 0*relage; Ib0 = 0*relage; #
+Ic0 = 0*relage; R0 = 0 * relage; Rc0 = 0 * relage#
+x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)#
+times <- seq(0, 1000, 1)  #
+params.test <- c(fixed.params, list(gamma=1/2, theta = 4, K = 433,#
+	betaB = 0.6087396, betaT = 1.2974554/1000, rhoT = 1, rhoB = 2.1))#
+sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params.test))#
+stable_age <- unname(unlist( sol[1000, c(2:21)]/sum(sol[500, c(2:21)]) ))#
+#
+plot_raw_numbers = function(sol){#
+	plot(sol$time, apply(sol[s_index+1], 1, sum), col= "black",#
+		type= 'l', ylim = c(0, 800), ylab = "Number of animals", #
+		xlab = "Time (in years)")#
+	lines(sol$time, apply(sol[it_index+1], 1, sum), col= "red")#
+	lines(sol$time, apply(sol[ib_index+1], 1, sum), col= "blue")#
+	lines(sol$time, apply(sol[ic_index+1], 1, sum), col= "green")#
+	lines(sol$time, apply(sol[r_index+1], 1, sum), col = "orange")#
+	lines(sol$time, apply(sol[rc_index+1], 1, sum), col = "pink")#
+	legend("topright", legend = c("S", "It", "Ib", "Ic", "R", "Rc"),#
+		col = c("black", "red", "blue", "green", "orange", "pink"), #
+		bty="n", lty = 1)#
+}#
+plot_raw_numbers(sol)
+S0 = 400*relage; It0 = 0*relage; Ib0 = 0*relage; #
+Ic0 = 0*relage; R0 = 0 * relage; Rc0 = 0 * relage#
+x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)#
+times <- seq(0, 1000, 1)  #
+val <- NA
+params.test <- c(fixed.params, list(gamma=1/2, theta = 4, K = 1033.29,#
+		betaB = 0.6087396, betaT = 1.2974554/1000, rhoT = 1, rhoB = 2.1))#
+	sol <- as.data.frame(ode(x0, times,  rhs_age_logistic, params.test))
+plot_raw_numbers(sol)
+S0 = 398*relage; It0 = 0*relage; Ib0 = 2*relage; #
+Ic0 = 0*relage; R0 = 0 * relage; Rc0 = 0 * relage#
+x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)
+params.test <- c(fixed.params, list(gamma=1/2, theta = 4, K = 1033.29,#
+		betaB = 0.6087396, betaT = 1.2974554/1000, rhoT = 1, rhoB = 2.1))#
+	sol <- as.data.frame(ode(x0, times,  rhs_age_logistic, params.test))
+plot_raw_numbers(sol)
+tail(sol)
+x0b <- sol[length(sol),]
+sol
+x0b <- sol[,length(sol)]
+x0b
+x0b <- sol[,length(sol[,1])]
+length(sol)
+tail(sol)
+sol[1,1:5]
+sol[length(sol[,1]), 2:length(sol)]
+x0new <- sol[length(sol[,1]), 2:length(sol)]
+x0new
+params.test <- c(fixed.params, list(gamma=1/2, theta = 4, K = 1033.29,#
+		betaB = 0.6087396, betaT = 1.2974554/1000, rhoT = 1, rhoB = 2.1))#
+	sol <- as.data.frame(ode(x0new, times,  rhs_age_logistic, params.test))
+x0new
+x0new <- unlist(sol[length(sol[,1]), 2:length(sol)])
+x0new
+x0new[27] <- 2
+sol <- as.data.frame(ode(x0new, times,  rhs_age_logistic, params.test))
+plot_raw_numbers(sol)
+getEE
+getEE()
+source('~/GitHub/bTB-bruc-co-infection-ms/get_EE.R', chdir = TRUE)
+x0new
+getEE = function(params, method){#
+	####################################
+	# Input: x = c(S = final, 1*20 S vector at params)#
+	# method = "logistic", "ricker", "beverton-holt"#
+	# Output: Ro#
+	####################################
+	# Get stable age distribution in dz free conditions#
+	relage = c(0.137, rep(0.368/4, 4), rep(0.185/4, 4),#
+		rep(0.235/6, 6), rep(0.075/5, 5))#
+	S0 = 400*relage; It0 = 0*relage; Ib0 = 0*relage; #
+	Ic0 = 0*relage; R0 = 0 * relage; Rc0 = 0 * relage#
+	x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)#
+	times <- seq(0, 1000, 1)#
+	if (method = "ricker"){#
+		sol <- as.data.frame(ode(x0, times, rhs_age_matrix_ricker, params))}#
+	if (method = "logistic"){#
+		sol <- as.data.frame(ode(x0, times, rhs_age_logistic, params))}#
+	if (method = "beverton-holt"){#
+		sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))}#
+	stable_age <- unname(unlist( sol[length(sol[,1]), c(2:21)]/sum(sol[length(sol[,1]), c(2:21)]) ))#
+	S0 = 400 * stable_age; It0 = 0 * stable_age; Ib0 = 0* stable_age; #
+	Ic0 = 0* stable_age; R0 = 0 * stable_age; Rc0 = 0 * stable_age#
+	x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)#
+	# run single infection EE, bTB#
+	####################################
+	x_singleTB = x0#
+	x_singleTB[22:24] <- x_singleTB[22:24] + 1#
+	x_singleTB[2:4] <- x_singleTB[2:4] - 1#
+	if (method = "ricker"){#
+		sol <- as.data.frame(ode(x_singleTB, times, rhs_age_matrix_ricker, params, method = "ode45"))}#
+	if (method = "logistic"){#
+		sol <- as.data.frame(ode(x_singleTB, times, rhs_age_logistic, params, method = "ode45"))}#
+	if (method = "beverton-holt"){#
+		sol <- as.data.frame(ode(x_singleTB, times, rhs_age_matrix, params, method = "ode45"))#
+	S <-sum(sol[length(sol[,1]) , s_index+1])#
+	It <- sum(sol[length(sol[,1]) , it_index +1])#
+	Ic <- sum(sol[length(sol[,1]) , ic_index +1])#
+	Ib <- sum(sol[length(sol[,1]) , ib_index +1])#
+	Ic <- sum(sol[length(sol[,1]) , ic_index +1])#
+	R <- sum(sol[length(sol[,1]) , r_index +1])#
+	Rc <-sum(sol[length(sol[,1]) , rc_index +1])#
+	N <- sum(sol[length(sol[,1]), 2:121])	#
+	EE_bTB_alone <- (It + Ic + Rc) / N#
+#
+	# run single infection EE, bruc#
+	####################################
+	x_singleBruc = x0#
+	x_singleBruc[42:44] <- x_singleBruc[42:44] + 1#
+	x_singleBruc[2:4] <- x_singleBruc[2:4] - 1#
+	if (method = "ricker"){#
+		sol <- as.data.frame(ode(x_singleBruc, times, rhs_age_matrix_ricker, params, method = "ode45"))}#
+	if (method = "logistic"){#
+		sol <- as.data.frame(ode(x_singleBruc, times, rhs_age_logistic, params, method = "ode45"))}#
+	if (method = "beverton-holt"){#
+		sol <- as.data.frame(ode(x_singleBruc, times, rhs_age_matrix, params, method = "ode45"))}	#
+	S <-sum(sol[length(sol[,1]) , s_index+1])#
+	It <- sum(sol[length(sol[,1]) , it_index +1])#
+	Ic <- sum(sol[length(sol[,1]) , ic_index +1])#
+	Ib <- sum(sol[length(sol[,1]) , ib_index +1])#
+	Ic <- sum(sol[length(sol[,1]) , ic_index +1])#
+	R <- sum(sol[length(sol[,1]) , r_index +1])#
+	Rc <-sum(sol[length(sol[,1]) , rc_index +1])#
+	N <- sum(S + It + Ib + Ic + R + Rc)#
+	EE_bruc_alone <- (Ib + Ic + R + Rc) / N#
+#
+	x_endB <- unname(unlist(sol[length(sol[,1]), 2:121] ))#
+#
+	# introduce both...#
+	####################################
+	x_endB[26:28] <- x_endB[26:28] + 1#
+	if(x_endB[2] > 1){x_endB[2] <- x_endB[2] - 1 }#
+	if(x_endB[3] > 1){x_endB[3] <- x_endB[3] - 1 }#
+	if(x_endB[4] > 1){x_endB[4] <- x_endB[4] - 1 }#
+#
+	if (method = "ricker"){#
+		sol <- as.data.frame(ode(x_endB, times, rhs_age_matrix_ricker, params, method = "ode45"))}#
+	if (method = "logistic"){#
+		sol <- as.data.frame(ode(x_endB, times, rhs_age_logistic, params, method = "ode45"))}#
+	if (method = "beverton-holt"){#
+		sol <- as.data.frame(ode(x_endB, times, rhs_age_matrix, params, method = "ode45"))}	#
+	S <-sum(sol[length(sol[,1]) , s_index+1])#
+	It <- sum(sol[length(sol[,1]) , it_index +1])#
+	Ic <- sum(sol[length(sol[,1]) , ic_index +1])#
+	Ib <- sum(sol[length(sol[,1]) , ib_index +1])#
+	Ic <- sum(sol[length(sol[,1]) , ic_index +1])#
+	R <- sum(sol[length(sol[,1]) , r_index +1])#
+	Rc <-sum(sol[length(sol[,1]) , rc_index +1])#
+	N <- sum(S + It + Ib + Ic + R + Rc)#
+#
+	EE_bTB_co <- (It + Ic + Rc) / N#
+	EE_bruc_co <- (Ib + Ic + R + Rc) / N#
+	return(c(EE_bTB_alone, EE_bTB_co, EE_bruc_alone, EE_bruc_co))#
+}
+getEE = function(params, method){#
+	####################################
+	# Input: x = c(S = final, 1*20 S vector at params)#
+	# method = "logistic", "ricker", "beverton-holt"#
+	# Output: Ro#
+	####################################
+	# Get stable age distribution in dz free conditions#
+	relage = c(0.137, rep(0.368/4, 4), rep(0.185/4, 4),#
+		rep(0.235/6, 6), rep(0.075/5, 5))#
+	S0 = 400*relage; It0 = 0*relage; Ib0 = 0*relage; #
+	Ic0 = 0*relage; R0 = 0 * relage; Rc0 = 0 * relage#
+	x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)#
+	times <- seq(0, 1000, 1)#
+	if (method == "ricker"){#
+		sol <- as.data.frame(ode(x0, times, rhs_age_matrix_ricker, params))}#
+	if (method == "logistic"){#
+		sol <- as.data.frame(ode(x0, times, rhs_age_logistic, params))}#
+	if (method == "beverton-holt"){#
+		sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))}#
+	stable_age <- unname(unlist( sol[length(sol[,1]), c(2:21)]/sum(sol[length(sol[,1]), c(2:21)]) ))#
+	S0 = 400 * stable_age; It0 = 0 * stable_age; Ib0 = 0* stable_age; #
+	Ic0 = 0* stable_age; R0 = 0 * stable_age; Rc0 = 0 * stable_age#
+	x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)#
+	# run single infection EE, bTB#
+	####################################
+	x_singleTB = x0#
+	x_singleTB[22:24] <- x_singleTB[22:24] + 1#
+	x_singleTB[2:4] <- x_singleTB[2:4] - 1#
+	if (method == "ricker"){#
+		sol <- as.data.frame(ode(x_singleTB, times, rhs_age_matrix_ricker, params, method = "ode45"))}#
+	if (method == "logistic"){#
+		sol <- as.data.frame(ode(x_singleTB, times, rhs_age_logistic, params, method = "ode45"))}#
+	if (method == "beverton-holt"){#
+		sol <- as.data.frame(ode(x_singleTB, times, rhs_age_matrix, params, method = "ode45"))#
+	S <-sum(sol[length(sol[,1]) , s_index+1])#
+	It <- sum(sol[length(sol[,1]) , it_index +1])#
+	Ic <- sum(sol[length(sol[,1]) , ic_index +1])#
+	Ib <- sum(sol[length(sol[,1]) , ib_index +1])#
+	Ic <- sum(sol[length(sol[,1]) , ic_index +1])#
+	R <- sum(sol[length(sol[,1]) , r_index +1])#
+	Rc <-sum(sol[length(sol[,1]) , rc_index +1])#
+	N <- sum(sol[length(sol[,1]), 2:121])	#
+	EE_bTB_alone <- (It + Ic + Rc) / N#
+#
+	# run single infection EE, bruc#
+	####################################
+	x_singleBruc = x0#
+	x_singleBruc[42:44] <- x_singleBruc[42:44] + 1#
+	x_singleBruc[2:4] <- x_singleBruc[2:4] - 1#
+	if (method == "ricker"){#
+		sol <- as.data.frame(ode(x_singleBruc, times, rhs_age_matrix_ricker, params, method = "ode45"))}#
+	if (method == "logistic"){#
+		sol <- as.data.frame(ode(x_singleBruc, times, rhs_age_logistic, params, method = "ode45"))}#
+	if (method == "beverton-holt"){#
+		sol <- as.data.frame(ode(x_singleBruc, times, rhs_age_matrix, params, method = "ode45"))}	#
+	S <-sum(sol[length(sol[,1]) , s_index+1])#
+	It <- sum(sol[length(sol[,1]) , it_index +1])#
+	Ic <- sum(sol[length(sol[,1]) , ic_index +1])#
+	Ib <- sum(sol[length(sol[,1]) , ib_index +1])#
+	Ic <- sum(sol[length(sol[,1]) , ic_index +1])#
+	R <- sum(sol[length(sol[,1]) , r_index +1])#
+	Rc <-sum(sol[length(sol[,1]) , rc_index +1])#
+	N <- sum(S + It + Ib + Ic + R + Rc)#
+	EE_bruc_alone <- (Ib + Ic + R + Rc) / N#
+#
+	x_endB <- unname(unlist(sol[length(sol[,1]), 2:121] ))#
+#
+	# introduce both...#
+	####################################
+	x_endB[26:28] <- x_endB[26:28] + 1#
+	if(x_endB[2] > 1){x_endB[2] <- x_endB[2] - 1 }#
+	if(x_endB[3] > 1){x_endB[3] <- x_endB[3] - 1 }#
+	if(x_endB[4] > 1){x_endB[4] <- x_endB[4] - 1 }#
+#
+	if (method == "ricker"){#
+		sol <- as.data.frame(ode(x_endB, times, rhs_age_matrix_ricker, params, method = "ode45"))}#
+	if (method == "logistic"){#
+		sol <- as.data.frame(ode(x_endB, times, rhs_age_logistic, params, method = "ode45"))}#
+	if (method == "beverton-holt"){#
+		sol <- as.data.frame(ode(x_endB, times, rhs_age_matrix, params, method = "ode45"))}	#
+	S <-sum(sol[length(sol[,1]) , s_index+1])#
+	It <- sum(sol[length(sol[,1]) , it_index +1])#
+	Ic <- sum(sol[length(sol[,1]) , ic_index +1])#
+	Ib <- sum(sol[length(sol[,1]) , ib_index +1])#
+	Ic <- sum(sol[length(sol[,1]) , ic_index +1])#
+	R <- sum(sol[length(sol[,1]) , r_index +1])#
+	Rc <-sum(sol[length(sol[,1]) , rc_index +1])#
+	N <- sum(S + It + Ib + Ic + R + Rc)#
+#
+	EE_bTB_co <- (It + Ic + Rc) / N#
+	EE_bruc_co <- (Ib + Ic + R + Rc) / N#
+	return(c(EE_bTB_alone, EE_bTB_co, EE_bruc_alone, EE_bruc_co))#
+}
+getEE = function(params, method){#
+	####################################
+	# Input: x = c(S = final, 1*20 S vector at params)#
+	# method = "logistic", "ricker", "beverton-holt"#
+	# Output: Ro#
+	####################################
+	# Get stable age distribution in dz free conditions#
+	relage = c(0.137, rep(0.368/4, 4), rep(0.185/4, 4),#
+		rep(0.235/6, 6), rep(0.075/5, 5))#
+	S0 = 400*relage; It0 = 0*relage; Ib0 = 0*relage; #
+	Ic0 = 0*relage; R0 = 0 * relage; Rc0 = 0 * relage#
+	x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)#
+	times <- seq(0, 1000, 1)#
+	if (method == "ricker"){#
+		sol <- as.data.frame(ode(x0, times, rhs_age_matrix_ricker, params))}#
+	if (method == "logistic"){#
+		sol <- as.data.frame(ode(x0, times, rhs_age_logistic, params))}#
+	if (method == "beverton-holt"){#
+		sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))}#
+	stable_age <- unname(unlist( sol[length(sol[,1]), c(2:21)]/sum(sol[length(sol[,1]), c(2:21)]) ))#
+	S0 = 400 * stable_age; It0 = 0 * stable_age; Ib0 = 0* stable_age; #
+	Ic0 = 0* stable_age; R0 = 0 * stable_age; Rc0 = 0 * stable_age#
+	x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)#
+	# run single infection EE, bTB#
+	####################################
+	x_singleTB = x0#
+	x_singleTB[22:24] <- x_singleTB[22:24] + 1#
+	x_singleTB[2:4] <- x_singleTB[2:4] - 1#
+	if (method == "ricker"){#
+		sol <- as.data.frame(ode(x_singleTB, times, rhs_age_matrix_ricker, params, method = "ode45"))}#
+	if (method == "logistic"){#
+		sol <- as.data.frame(ode(x_singleTB, times, rhs_age_logistic, params, method = "ode45"))}#
+	if (method == "beverton-holt"){#
+		sol <- as.data.frame(ode(x_singleTB, times, rhs_age_matrix, params, method = "ode45"))}#
+	S <-sum(sol[length(sol[,1]) , s_index+1])#
+	It <- sum(sol[length(sol[,1]) , it_index +1])#
+	Ic <- sum(sol[length(sol[,1]) , ic_index +1])#
+	Ib <- sum(sol[length(sol[,1]) , ib_index +1])#
+	Ic <- sum(sol[length(sol[,1]) , ic_index +1])#
+	R <- sum(sol[length(sol[,1]) , r_index +1])#
+	Rc <-sum(sol[length(sol[,1]) , rc_index +1])#
+	N <- sum(sol[length(sol[,1]), 2:121])	#
+	EE_bTB_alone <- (It + Ic + Rc) / N#
+#
+	# run single infection EE, bruc#
+	####################################
+	x_singleBruc = x0#
+	x_singleBruc[42:44] <- x_singleBruc[42:44] + 1#
+	x_singleBruc[2:4] <- x_singleBruc[2:4] - 1#
+	if (method == "ricker"){#
+		sol <- as.data.frame(ode(x_singleBruc, times, rhs_age_matrix_ricker, params, method = "ode45"))}#
+	if (method == "logistic"){#
+		sol <- as.data.frame(ode(x_singleBruc, times, rhs_age_logistic, params, method = "ode45"))}#
+	if (method == "beverton-holt"){#
+		sol <- as.data.frame(ode(x_singleBruc, times, rhs_age_matrix, params, method = "ode45"))}	#
+	S <-sum(sol[length(sol[,1]) , s_index+1])#
+	It <- sum(sol[length(sol[,1]) , it_index +1])#
+	Ic <- sum(sol[length(sol[,1]) , ic_index +1])#
+	Ib <- sum(sol[length(sol[,1]) , ib_index +1])#
+	Ic <- sum(sol[length(sol[,1]) , ic_index +1])#
+	R <- sum(sol[length(sol[,1]) , r_index +1])#
+	Rc <-sum(sol[length(sol[,1]) , rc_index +1])#
+	N <- sum(S + It + Ib + Ic + R + Rc)#
+	EE_bruc_alone <- (Ib + Ic + R + Rc) / N#
+#
+	x_endB <- unname(unlist(sol[length(sol[,1]), 2:121] ))#
+#
+	# introduce both...#
+	####################################
+	x_endB[26:28] <- x_endB[26:28] + 1#
+	if(x_endB[2] > 1){x_endB[2] <- x_endB[2] - 1 }#
+	if(x_endB[3] > 1){x_endB[3] <- x_endB[3] - 1 }#
+	if(x_endB[4] > 1){x_endB[4] <- x_endB[4] - 1 }#
+#
+	if (method == "ricker"){#
+		sol <- as.data.frame(ode(x_endB, times, rhs_age_matrix_ricker, params, method = "ode45"))}#
+	if (method == "logistic"){#
+		sol <- as.data.frame(ode(x_endB, times, rhs_age_logistic, params, method = "ode45"))}#
+	if (method == "beverton-holt"){#
+		sol <- as.data.frame(ode(x_endB, times, rhs_age_matrix, params, method = "ode45"))}	#
+	S <-sum(sol[length(sol[,1]) , s_index+1])#
+	It <- sum(sol[length(sol[,1]) , it_index +1])#
+	Ic <- sum(sol[length(sol[,1]) , ic_index +1])#
+	Ib <- sum(sol[length(sol[,1]) , ib_index +1])#
+	Ic <- sum(sol[length(sol[,1]) , ic_index +1])#
+	R <- sum(sol[length(sol[,1]) , r_index +1])#
+	Rc <-sum(sol[length(sol[,1]) , rc_index +1])#
+	N <- sum(S + It + Ib + Ic + R + Rc)#
+#
+	EE_bTB_co <- (It + Ic + Rc) / N#
+	EE_bruc_co <- (Ib + Ic + R + Rc) / N#
+	return(c(EE_bTB_alone, EE_bTB_co, EE_bruc_alone, EE_bruc_co))#
+}
+###########################################################
+###########################################################
+###########################################################
+# Model sensitivity and evaluation #
+###########################################################
+###########################################################
+###########################################################
+# Outline#
+# 1) Run with other form of density dependence (logistic)#
+# 2) Do whole process with longer infection duraiton (1/gamma = 3 yr; 4 yr)#
+# 2) Latin hypercube PRCC#
+###########################################################
+#
+###########################################################
+###########################################################
+# 1) Run with other form of density dependence (logistic)#
+###########################################################
+###########################################################
+rm(list = ls())#
+require("deSolve")#
+#
+source('~/GitHub/bTB-bruc-co-infection-ms/fixed_parameters_norecovery_agematrix.R', chdir = TRUE)#
+source('~/GitHub/bTB-bruc-co-infection-ms/rhs_age.R', chdir = TRUE)#
+#
+# Run B-H model with no disease (endemic population size = 609)#
+s_index <- 1:20#
+it_index <- 21:40#
+ib_index <- 41:60#
+ic_index <- 61:80#
+r_index <- 81:100#
+rc_index <- 101:120#
+relageall = c(0.137, rep(0.368/4, 4), rep(0.185/4, 4),  #
+	rep(0.235/6, 6), rep(0.075/5, 5))					#
+relage = relageall#
+S0 = 400*relage; It0 = 0*relage; Ib0 = 0*relage; #
+Ic0 = 0*relage; R0 = 0 * relage; Rc0 = 0 * relage#
+x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)#
+times <- seq(0, 1000, 1)  #
+params.test <- c(fixed.params, list(gamma=1/2, theta = 4, K = 433,#
+	betaB = 0.6087396, betaT = 1.2974554/1000, rhoT = 1, rhoB = 2.1))#
+sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params.test))#
+stable_age <- unname(unlist( sol[1000, c(2:21)]/sum(sol[500, c(2:21)]) ))#
+#
+plot_raw_numbers = function(sol){#
+	plot(sol$time, apply(sol[s_index+1], 1, sum), col= "black",#
+		type= 'l', ylim = c(0, 800), ylab = "Number of animals", #
+		xlab = "Time (in years)")#
+	lines(sol$time, apply(sol[it_index+1], 1, sum), col= "red")#
+	lines(sol$time, apply(sol[ib_index+1], 1, sum), col= "blue")#
+	lines(sol$time, apply(sol[ic_index+1], 1, sum), col= "green")#
+	lines(sol$time, apply(sol[r_index+1], 1, sum), col = "orange")#
+	lines(sol$time, apply(sol[rc_index+1], 1, sum), col = "pink")#
+	legend("topright", legend = c("S", "It", "Ib", "Ic", "R", "Rc"),#
+		col = c("black", "red", "blue", "green", "orange", "pink"), #
+		bty="n", lty = 1)#
+}#
+plot_raw_numbers(sol)#
+sum(sol[1001,c(2:length(sol))])#
+#
+# Set K s.t. get same popuation size/age structure (endemic population size = 609.0097)#
+K <- seq(1033.2, 1033.35, 0.01)#
+S0 = 400*relage; It0 = 0*relage; Ib0 = 0*relage; #
+Ic0 = 0*relage; R0 = 0 * relage; Rc0 = 0 * relage#
+x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)#
+times <- seq(0, 1000, 1)
+# Make plots#
+################################
+n = 500#
+source('~/GitHub/bTB-bruc-co-infection-ms/get_EE.R', chdir = TRUE)#
+set.seed(1)#
+#
+EE_bTB_single_list <- NA; EE_bTB_co_list <- NA#
+EE_brucellosis_single_list <- NA; EE_brucellosis_co <- NA#
+rEE_bTB_single_list <- NA; rEE_bTB_co_list <- NA#
+rEE_brucellosis_single_list <- NA; rEE_brucellosis_co <- NA#
+lEE_bTB_single_list <- NA; lEE_bTB_co_list <- NA#
+lEE_brucellosis_single_list <- NA; lEE_brucellosis_co <- NA#
+#
+rhoB <- NA; mortB <- NA; mortT <- NA; mortC <- NA#
+pb <- txtProgressBar(min = 0, max = n, style = 3, char = "=")
+for(i in 1:n){#
+	if(i %% 5 == 0){#
+		setTxtProgressBar(pb, i)#
+	}#
+	params <- c(fixed.params, list(gamma=1/2, theta = 4, K = 433,#
+		betaB = 0.6087396, betaT = 1.2974554/1000, rhoT = 1, rhoB = 2.1))#
+	params$rhoB<- exp(rnorm(n = 1, mean = 0.75579, sd = 0.40714))#
+	rhoB[i] <- params$rhoB#
+	mortB[i] <- exp(rnorm(n = 1, mean = 1.1060, sd = 0.3505))#
+	mortT[i] <- exp(rnorm(n = 1, mean = 1.0370, sd = 0.3483 ))#
+	mortC[i] <- exp(rnorm(n = 1, mean = 2.1430, sd = 0.5004329))#
+	params$muB <- params$muS * mortB[i]#
+	params$muT <- params$muS * mortT[i]#
+	params$muC <- params$muS * mortC[i]#
+	params$muB[params$muB > 1] <- 1#
+	params$muT[params$muT > 1] <- 1#
+	params$muC[params$muC > 1] <- 1#
+	params$muR <- params$muT#
+	params$muRC <- params$muC#
+	val <- getEE(params, method = "beverton-holt")#
+#
+	paramslog <- params; paramslog$K <- 1033.29#
+	vallog <- getEE(paramslog, method = "logistic")#
+	paramsricker <- params; paramsricker$K <- 382.556#
+	valricker <- getEE(paramsricker, method = "ricker")#
+#
+	EE_bTB_single_list[i] <- val[1]; EE_bTB_co_list[i] <- val[2]#
+	EE_brucellosis_single_list[i] <- val[3]; 	EE_brucellosis_co[i] <- val[4]#
+	rEE_bTB_single_list[i] <- valricker[1]; rEE_bTB_co_list[i] <- valricker[2]#
+	rEE_brucellosis_single_list[i] <- valricker[3]; rEE_brucellosis_co[i] <- valricker[4]#
+	lEE_bTB_single_list[i] <- vallog[1]; lEE_bTB_co_list[i] <- vallog[2]#
+	lEE_brucellosis_single_list[i] <- vallog[3]; lEE_brucellosis_co[i] <- vallog[4]#
+}#
+#
+senslist <- list(#
+	EE_bTB_single_list = EE_bTB_single_list, #
+	EE_bTB_co_list = EE_bTB_co_list,#
+	EE_brucellosis_single_list = EE_brucellosis_single_list, #
+	EE_brucellosis_co = EE_brucellosis_co,#
+	rEE_bTB_single_list = rEE_bTB_single_list, #
+	rEE_bTB_co_list = rEE_bTB_co_list,#
+	rEE_brucellosis_single_list = rEE_brucellosis_single_list, #
+	rEE_brucellosis_co = rEE_brucellosis_co,	#
+	lEE_bTB_single_list = lEE_bTB_single_list, #
+	lEE_bTB_co_list = lEE_bTB_co_list,#
+	lEE_brucellosis_single_list = lEE_brucellosis_single_list, #
+	lEE_brucellosis_co = lEE_brucellosis_co)#
+str(senslist)#
+#
+saveRDS(senslist, "~/GitHub/bTB-bruc-co-infection-ms/sensitivity_densitydependence_simulation_results.rds")
+d <- readRDS("~/GitHub/bTB-bruc-co-infection-ms/sensitivity_densitydependence_simulation_results.rds")
+str(d)
+summary(d)
+# test figure with violin plots#
+n = length(d$EE_bTB_single_list)#
+df <- data.frame(E = c(d$EE_bTB_single_list, d$EE_bTB_co_list, #
+	d$EE_brucellosis_single_list, d$EE_brucellosis_co, #
+	d$rEE_bTB_single_list, d$rEE_bTB_co_list, #
+	d$rEE_brucellosis_single_list, d$rEE_brucellosis_co, #
+	d$lEE_bTB_single_list, d$lEE_bTB_co_list, #
+	d$lEE_brucellosis_single_list, d$lEE_brucellosis_co),#
+	meanE = c(rep(mean(d$EE_bTB_single_list),n), #
+		rep(mean(d$EE_bTB_co_list),n),#
+		rep(mean(d$EE_brucellosis_single_list),n), #
+		rep(mean(d$EE_brucellosis_co),n),#
+		rep(mean(d$rEE_bTB_single_list),n), #
+		rep(mean(d$rEE_bTB_co_list),n),#
+		rep(mean(d$rEE_brucellosis_single_list),n), #
+		rep(mean(d$rEE_brucellosis_co),n), #
+		rep(mean(d$lEE_bTB_single_list),n), #
+		rep(mean(d$lEE_bTB_co_list),n),#
+		rep(mean(d$lEE_brucellosis_single_list),n), #
+		rep(mean(d$lEE_brucellosis_co),n)),#
+	sdE = c(rep(sd(d$EE_bTB_single_list),n), #
+		rep(sd(d$EE_bTB_co_list),n),#
+		rep(sd(d$EE_brucellosis_single_list),n), #
+		rep(sd(d$EE_brucellosis_co),n),#
+		rep(sd(d$rEE_bTB_single_list),n), #
+		rep(sd(d$rEE_bTB_co_list),n),#
+		rep(sd(d$rEE_brucellosis_single_list),n), #
+		rep(sd(d$rEE_brucellosis_co),n),#
+		rep(sd(d$lEE_bTB_single_list),n), #
+		rep(sd(d$lEE_bTB_co_list),n),#
+		rep(sd(d$lEE_brucellosis_single_list),n), #
+		rep(sd(d$lEE_brucellosis_co),n)),#
+	infection = c(rep("bTB", 2*n), rep("brucellosis", 2*n),#
+		rep("bTB", 2*n), rep("brucellosis", 2*n), #
+		rep("bTB", 2*n), rep("brucellosis", 2*n)), #
+	model = rep(c("Beverton & Holt", "Ricker", "Logistic" ), each = 4*n),#
+	singleco = rep(c("single", "co-infection", "single","co-infection",#
+		"single", "co-infection", "single","co-infection",#
+		"single", "co-infection", "single","co-infection"), each = n),#
+	X = rep(c("bTB-single-BH", "bTB-co-infection-BH", "bruc-single-BH", "bruc-co-infection-BH", #
+		"bTB-single-R", "bTB-co-infection-R", "bruc-single-R", "bruc-co-infection-R", #
+		"bTB-single-L", "bTB-co-infection-L", "bruc-single-L", "bruc-co-infection-L"), each = n))#
+#	Xindex = rep(c(1.1, 1.4, 3.1, 3.4), each = n) )#
+df$X <- factor(df$X, levels = c("bTB-single-BH", "bTB-co-infection-BH", "bruc-single-BH", "bruc-co-infection-BH", #
+		"bTB-single-R", "bTB-co-infection-R", "bruc-single-R", "bruc-co-infection-R", #
+		"bTB-single-L", "bTB-co-infection-L", "bruc-single-L", "bruc-co-infection-L"))#
+df$infection <- relevel(as.factor(df$infection), "bTB")#
+df$singleco <- relevel(as.factor(df$singleco), "single")#
+df <- df[!is.na(df$E),]#
+df <- df[df$model != "logistic",]#
+df <- df[!is.na(df$sdE),]#
+df$infectionmodel <- paste(df$infection, df$model, sep = "_")
+summary(df)
+ggplot(df, aes(x = infectionmodel, y = E, colour = infection, shape = singleco)) +#
+	geom_point(aes(x = infectionmodel, y = meanE), size = 3,#
+		position= position_dodge(width = 0.9)) +#
+	geom_errorbar(aes(x = infectionmodel, ymin = meanE - sdE, ymax = meanE + sdE),#
+		width = 0, position= position_dodge(width = 0.9))
+library(ggplot2)
+ggplot(df, aes(x = infectionmodel, y = E, colour = infection, shape = singleco)) +#
+	geom_point(aes(x = infectionmodel, y = meanE), size = 3,#
+		position= position_dodge(width = 0.9)) +#
+	geom_errorbar(aes(x = infectionmodel, ymin = meanE - sdE, ymax = meanE + sdE),#
+		width = 0, position= position_dodge(width = 0.9))
+brucellosis <- df[df$infection  == "brucellosis",]#
+tb <- df[df$infection == "bTB",]
+pB <- ggplot(brucellosis, aes(x = model, y = E, shape = singleco)) +#
+	geom_point(aes(x = model, y = meanE), size = 3,#
+		position= position_dodge(width = 0.9)) +#
+	geom_errorbar(aes(x = model, ymin = meanE - sdE, ymax = meanE + sdE),#
+		width = 0, position= position_dodge(width = 0.9)) +#
+	ylim(0, 0.8) +#
+	xlab("") +#
+	ylab("Brucellosis prevalence") +#
+	theme_bw() +#
+	#scale_colour_manual(values = c("slateblue3","chartreuse4"), guide = F) +#
+	scale_shape_manual(values = c(19, 17)) +#
+	theme(axis.line.x = element_line(colour= "black"),#
+  		axis.line.y = element_line(colour= "black"),#
+  		axis.title.x = element_text(size=16, vjust=-0.15),#
+        axis.title.y = element_text(size=16, vjust= 0.8),#
+        axis.text.x = element_text(size=16, vjust=-0.05),#
+        axis.text.y = element_text(size=14),#
+        panel.border = element_blank(), #
+		legend.position=c(0.85, 0.9),  #
+		legend.text = element_text(size = 10),#
+        legend.background= element_rect(fill="white", colour="white"),#
+        legend.key= element_blank(),#
+        legend.title= element_blank())
+pB
+pB <- ggplot(brucellosis, aes(x = model, y = E, shape = singleco)) +#
+	geom_point(aes(x = model, y = meanE), size = 3,#
+		position= position_dodge(width = 0.9)) +#
+	geom_errorbar(aes(x = model, ymin = meanE - sdE, ymax = meanE + sdE),#
+		width = 0, position= position_dodge(width = 0.9)) +#
+	ylim(0, 0.8) +#
+	xlab("") +#
+	ylab("Brucellosis prevalence") +#
+	theme_bw() +#
+	#scale_colour_manual(values = c("slateblue3","chartreuse4"), guide = F) +#
+	scale_shape_manual(values = c(19, 17), guide = FALSE) +#
+	theme(axis.line.x = element_line(colour= "black"),#
+  		axis.line.y = element_line(colour= "black"),#
+  		axis.title.x = element_text(size=16, vjust=-0.15),#
+        axis.title.y = element_text(size=16, vjust= 0.8),#
+        axis.text.x = element_text(size=16, vjust=-0.05),#
+        axis.text.y = element_text(size=14),#
+        panel.border = element_blank())
+pB
+pT <- ggplot(tb, aes(x = model, y = E, shape = singleco)) +#
+	geom_point(aes(x = model, y = meanE), size = 3,#
+		position= position_dodge(width = 0.9)) +#
+	geom_errorbar(aes(x = model, ymin = meanE - sdE, ymax = meanE + sdE),#
+		width = 0, position= position_dodge(width = 0.9)) +#
+	ylim(0, 0.8) +#
+	xlab("") +#
+	ylab("bTB prevalence") +#
+	theme_bw() +#
+	#scale_colour_manual(values = c("slateblue3","chartreuse4"), guide = F) +#
+	scale_shape_manual(values = c(19, 17)) +#
+	theme(axis.line.x = element_line(colour= "black"),#
+  		axis.line.y = element_line(colour= "black"),#
+  		axis.title.x = element_text(size=16, vjust=-0.15),#
+        axis.title.y = element_text(size=16, vjust= 0.8),#
+        axis.text.x = element_text(size=16, vjust=-0.05),#
+        axis.text.y = element_text(size=14),#
+        panel.border = element_blank(), #
+		legend.position=c(0.85, 0.9),  #
+		legend.text = element_text(size = 10),#
+        legend.background= element_rect(fill="white", colour="white"),#
+        legend.key= element_blank(),#
+        legend.title= element_blank())
+pT
+source('~/Documents/grants & applications/PostDocFellowships/SACEMA/SACEMA_round2&3/submitted/multiplot.R', chdir = TRUE)
+multiplot(pB, pT, 2)
+multiplot
+multiplot(pB, pT, cols = 2)
+pB <- ggplot(brucellosis, aes(x = model, y = E, shape = singleco, colour = "chartreuse4")) +#
+	geom_point(aes(x = model, y = meanE), size = 3,#
+		position= position_dodge(width = 0.9)) +#
+	geom_errorbar(aes(x = model, ymin = meanE - sdE, ymax = meanE + sdE),#
+		width = 0, position= position_dodge(width = 0.9)) +#
+	ylim(0, 0.8) +#
+	xlab("") +#
+	ylab("Brucellosis prevalence") +#
+	theme_bw() +#
+	#scale_colour_manual(values = c("slateblue3","chartreuse4"), guide = F) +#
+	scale_shape_manual(values = c(19, 17)) +#
+	theme(axis.line.x = element_line(colour= "black"),#
+  		axis.line.y = element_line(colour= "black"),#
+  		axis.title.x = element_text(size=16, vjust=-0.15),#
+        axis.title.y = element_text(size=16, vjust= 0.8),#
+        axis.text.x = element_text(size=16, vjust=-0.05),#
+        axis.text.y = element_text(size=14),#
+        panel.border = element_blank(), #
+		legend.position= c(0.85, 0.9),  #
+		legend.text = element_text(size = 14),#
+        legend.background= element_rect(fill="white", colour="white"),#
+        legend.key= element_blank(),#
+        legend.title= element_blank())
+pT <- ggplot(tb, aes(x = model, y = E, shape = singleco, colour = "slateblue3")) +#
+	geom_point(aes(x = model, y = meanE), size = 3,#
+		position= position_dodge(width = 0.9)) +#
+	geom_errorbar(aes(x = model, ymin = meanE - sdE, ymax = meanE + sdE),#
+		width = 0, position= position_dodge(width = 0.9)) +#
+	ylim(0, 0.8) +#
+	xlab("") +#
+	ylab("bTB prevalence") +#
+	theme_bw() +#
+	#scale_colour_manual(values = c("slateblue3","chartreuse4"), guide = F) +#
+	scale_shape_manual(values = c(19, 17),  guide = FALSE) +#
+	theme(axis.line.x = element_line(colour= "black"),#
+  		axis.line.y = element_line(colour= "black"),#
+  		axis.title.x = element_text(size=16, vjust=-0.15),#
+        axis.title.y = element_text(size=16, vjust= 0.8),#
+        axis.text.x = element_text(size=16, vjust=-0.05),#
+        axis.text.y = element_text(size=14),#
+        panel.border = element_blank())#
+		#legend.position=c(0.85, 0.9),  #
+		#legend.text = element_text(size = 10),#
+        #legend.background= element_rect(fill="white", colour="white"),#
+        #legend.key= element_blank(),#
+        #legend.title= element_blank())#
+#
+source('~/Documents/grants & applications/PostDocFellowships/SACEMA/SACEMA_round2&3/submitted/multiplot.R', chdir = TRUE)#
+multiplot(pT,  pB, cols = 2)
+# Dot and error plots for Endemic Prevalence#
+pB <- ggplot(brucellosis, aes(x = model, y = E, shape = singleco, colour = singleco)) +#
+	geom_point(aes(x = model, y = meanE), size = 3,#
+		position= position_dodge(width = 0.9)) +#
+	geom_errorbar(aes(x = model, ymin = meanE - sdE, ymax = meanE + sdE),#
+		width = 0, position= position_dodge(width = 0.9)) +#
+	ylim(0, 0.8) +#
+	xlab("") +#
+	ylab("Brucellosis prevalence") +#
+	theme_bw() +#
+	scale_colour_manual(values = c("chartreuse4","chartreuse4"), guide = F) +#
+	scale_shape_manual(values = c(19, 17)) +#
+	theme(axis.line.x = element_line(colour= "black"),#
+  		axis.line.y = element_line(colour= "black"),#
+  		axis.title.x = element_text(size=16, vjust=-0.15),#
+        axis.title.y = element_text(size=16, vjust= 0.8),#
+        axis.text.x = element_text(size=16, vjust=-0.05),#
+        axis.text.y = element_text(size=14),#
+        panel.border = element_blank(), #
+		legend.position= c(0.85, 0.9),  #
+		legend.text = element_text(size = 14),#
+        legend.background= element_rect(fill="white", colour="white"),#
+        legend.key= element_blank(),#
+        legend.title= element_blank())#
+#
+pT <- ggplot(tb, aes(x = model, y = E, shape = singleco, colour = singleco)) +#
+	geom_point(aes(x = model, y = meanE), size = 3,#
+		position= position_dodge(width = 0.9)) +#
+	geom_errorbar(aes(x = model, ymin = meanE - sdE, ymax = meanE + sdE),#
+		width = 0, position= position_dodge(width = 0.9)) +#
+	ylim(0, 0.8) +#
+	xlab("") +#
+	ylab("bTB prevalence") +#
+	theme_bw() +#
+	scale_colour_manual(values = c("slateblue3","slateblue3"), guide = FALSE) +#
+	scale_shape_manual(values = c(19, 17),  guide = FALSE) +#
+	theme(axis.line.x = element_line(colour= "black"),#
+  		axis.line.y = element_line(colour= "black"),#
+  		axis.title.x = element_text(size=16, vjust=-0.15),#
+        axis.title.y = element_text(size=16, vjust= 0.8),#
+        axis.text.x = element_text(size=16, vjust=-0.05),#
+        axis.text.y = element_text(size=14),#
+        panel.border = element_blank())#
+		#legend.position=c(0.85, 0.9),  #
+		#legend.text = element_text(size = 10),#
+        #legend.background= element_rect(fill="white", colour="white"),#
+        #legend.key= element_blank(),#
+        #legend.title= element_blank())#
+#
+source('~/Documents/grants & applications/PostDocFellowships/SACEMA/SACEMA_round2&3/submitted/multiplot.R', chdir = TRUE)#
+multiplot(pT,  pB, cols = 2)
+# Dot and error plots for Endemic Prevalence#
+pB <- ggplot(brucellosis, aes(x = model, y = E, shape = singleco, colour = singleco)) +#
+	geom_point(aes(x = model, y = meanE), size = 3,#
+		position= position_dodge(width = 0.5)) +#
+	geom_errorbar(aes(x = model, ymin = meanE - sdE, ymax = meanE + sdE),#
+		width = 0, position= position_dodge(width = 0.9)) +#
+	ylim(0, 0.8) +#
+	xlab("") +#
+	ylab("Brucellosis prevalence") +#
+	theme_bw() +#
+	scale_colour_manual(values = c("chartreuse4","chartreuse4"), guide = F) +#
+	scale_shape_manual(values = c(19, 17)) +#
+	theme(axis.line.x = element_line(colour= "black"),#
+  		axis.line.y = element_line(colour= "black"),#
+  		axis.title.x = element_text(size=16, vjust=-0.15),#
+        axis.title.y = element_text(size=16, vjust= 0.8),#
+        axis.text.x = element_text(size=16, vjust=-0.05),#
+        axis.text.y = element_text(size=14),#
+        panel.border = element_blank(), #
+		legend.position= c(0.85, 0.9),  #
+		legend.text = element_text(size = 14),#
+        legend.background= element_rect(fill="white", colour="white"),#
+        legend.key= element_blank(),#
+        legend.title= element_blank())#
+#
+pT <- ggplot(tb, aes(x = model, y = E, shape = singleco, colour = singleco)) +#
+	geom_point(aes(x = model, y = meanE), size = 3,#
+		position= position_dodge(width = 0.9)) +#
+	geom_errorbar(aes(x = model, ymin = meanE - sdE, ymax = meanE + sdE),#
+		width = 0, position= position_dodge(width = 0.5)) +#
+	ylim(0, 0.8) +#
+	xlab("") +#
+	ylab("bTB prevalence") +#
+	theme_bw() +#
+	scale_colour_manual(values = c("slateblue3","slateblue3"), guide = FALSE) +#
+	scale_shape_manual(values = c(19, 17),  guide = FALSE) +#
+	theme(axis.line.x = element_line(colour= "black"),#
+  		axis.line.y = element_line(colour= "black"),#
+  		axis.title.x = element_text(size=16, vjust=-0.15),#
+        axis.title.y = element_text(size=16, vjust= 0.8),#
+        axis.text.x = element_text(size=16, vjust=-0.05),#
+        axis.text.y = element_text(size=14),#
+        panel.border = element_blank())#
+		#legend.position=c(0.85, 0.9),  #
+		#legend.text = element_text(size = 10),#
+        #legend.background= element_rect(fill="white", colour="white"),#
+        #legend.key= element_blank(),#
+        #legend.title= element_blank())#
+#
+source('~/Documents/grants & applications/PostDocFellowships/SACEMA/SACEMA_round2&3/submitted/multiplot.R', chdir = TRUE)#
+multiplot(pT,  pB, cols = 2)
+# Dot and error plots for Endemic Prevalence#
+pB <- ggplot(brucellosis, aes(x = model, y = E, shape = singleco, colour = singleco)) +#
+	geom_point(aes(x = model, y = meanE), size = 3,#
+		position= position_dodge(width = 0.5)) +#
+	geom_errorbar(aes(x = model, ymin = meanE - sdE, ymax = meanE + sdE),#
+		width = 0, position= position_dodge(width = 0.5)) +#
+	ylim(0, 0.8) +#
+	xlab("") +#
+	ylab("Brucellosis prevalence") +#
+	theme_bw() +#
+	scale_colour_manual(values = c("chartreuse4","chartreuse4"), guide = F) +#
+	scale_shape_manual(values = c(19, 17)) +#
+	theme(axis.line.x = element_line(colour= "black"),#
+  		axis.line.y = element_line(colour= "black"),#
+  		axis.title.x = element_text(size=16, vjust=-0.15),#
+        axis.title.y = element_text(size=16, vjust= 0.8),#
+        axis.text.x = element_text(size=16, vjust=-0.05),#
+        axis.text.y = element_text(size=14),#
+        panel.border = element_blank(), #
+		legend.position= c(0.85, 0.9),  #
+		legend.text = element_text(size = 14),#
+        legend.background= element_rect(fill="white", colour="white"),#
+        legend.key= element_blank(),#
+        legend.title= element_blank())#
+#
+pT <- ggplot(tb, aes(x = model, y = E, shape = singleco, colour = singleco)) +#
+	geom_point(aes(x = model, y = meanE), size = 3,#
+		position= position_dodge(width = 0.5)) +#
+	geom_errorbar(aes(x = model, ymin = meanE - sdE, ymax = meanE + sdE),#
+		width = 0, position= position_dodge(width = 0.5)) +#
+	ylim(0, 0.8) +#
+	xlab("") +#
+	ylab("bTB prevalence") +#
+	theme_bw() +#
+	scale_colour_manual(values = c("slateblue3","slateblue3"), guide = FALSE) +#
+	scale_shape_manual(values = c(19, 17),  guide = FALSE) +#
+	theme(axis.line.x = element_line(colour= "black"),#
+  		axis.line.y = element_line(colour= "black"),#
+  		axis.title.x = element_text(size=16, vjust=-0.15),#
+        axis.title.y = element_text(size=16, vjust= 0.8),#
+        axis.text.x = element_text(size=16, vjust=-0.05),#
+        axis.text.y = element_text(size=14),#
+        panel.border = element_blank())#
+		#legend.position=c(0.85, 0.9),  #
+		#legend.text = element_text(size = 10),#
+        #legend.background= element_rect(fill="white", colour="white"),#
+        #legend.key= element_blank(),#
+        #legend.title= element_blank())#
+#
+source('~/Documents/grants & applications/PostDocFellowships/SACEMA/SACEMA_round2&3/submitted/multiplot.R', chdir = TRUE)#
+multiplot(pT,  pB, cols = 2)

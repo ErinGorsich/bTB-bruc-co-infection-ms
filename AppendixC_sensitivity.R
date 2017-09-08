@@ -54,16 +54,28 @@ plot_raw_numbers = function(sol){
 		col = c("black", "red", "blue", "green", "orange", "pink"), 
 		bty="n", lty = 1)
 }
-
 plot_raw_numbers(sol)
 sum(sol[1001,c(2:length(sol))])
 
 # Set K s.t. get same popuation size/age structure (endemic population size = 609.0097)
-K <- seq(1030, 1038, 0.02)
+K <- seq(1033.2, 1033.35, 0.01)
 S0 = 400*relage; It0 = 0*relage; Ib0 = 0*relage; 
 Ic0 = 0*relage; R0 = 0 * relage; Rc0 = 0 * relage
 x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)
 times <- seq(0, 1000, 1)  
+
+# test (run with bruc only ,hten introduce bTB)
+params.test <- c(fixed.params, list(gamma=1/2, theta = 4, K = 1033.29,
+		betaB = 0.6087396, betaT = 1.2974554/1000, rhoT = 1, rhoB = 2.1))
+S0 = 398*relage; It0 = 0*relage; Ib0 = 2*relage; 
+Ic0 = 0*relage; R0 = 0 * relage; Rc0 = 0 * relage
+x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)
+sol <- as.data.frame(ode(x0, times,  rhs_age_logistic, params.test))
+x0new <- unlist(sol[length(sol[,1]), 2:length(sol)])
+x0new[27] <- 2
+sol <- as.data.frame(ode(x0new, times,  rhs_age_logistic, params.test))
+plot_raw_numbers(sol)
+
 val <- NA
 for (i in 1:length(K)){
 	params.test <- c(fixed.params, list(gamma=1/2, theta = 4, K = K[i],
@@ -72,10 +84,10 @@ for (i in 1:length(K)){
 	val[i] <- sum(sol[1001,c(2:length(sol))])	
 }
 plot(x = K, y = val, type = "b", pch = 19)
-abline(h = 609.0097) # K = 1034.99
+abline(h = 609.0097) # K = 1033.29
 
 val <- NA
-K <- seq(382, 383, 0.05)
+K <- seq(382.5, 382.56, 0.002)
 for (i in 1:length(K)){
 	params.test <- c(fixed.params, list(gamma=1/2, theta = 4, K = K[i],
 		betaB = 0.6087396, betaT = 1.2974554/1000, rhoT = 1, rhoB = 2.1))
@@ -83,11 +95,11 @@ for (i in 1:length(K)){
 	val[i] <- sum(sol[1001,c(2:length(sol))])	
 }
 plot(x = K, y = val[1:length(K)], type = "b", pch = 19)
-abline(h = 609.0097) # K = 382.6 
+abline(h = 609.0097) # K = 382.556 
 
 # Make plots
 ###############################
-n = 2
+n = 500
 source('~/GitHub/bTB-bruc-co-infection-ms/get_EE.R', chdir = TRUE)
 set.seed(1)
 
@@ -115,26 +127,28 @@ for(i in 1:n){
 	params$muB <- params$muS * mortB[i]
 	params$muT <- params$muS * mortT[i]
 	params$muC <- params$muS * mortC[i]
-	params$muB[params$muB < 0] <- 0
-	params$muT[params$muT < 0] <- 0
-	params$muC[params$muC < 0] <- 0
+	params$muB[params$muB > 1] <- 1
+	params$muT[params$muT > 1] <- 1
+	params$muC[params$muC > 1] <- 1
 	params$muR <- params$muT
 	params$muRC <- params$muC
-	val <- getEE(params)
+	val <- getEE(params, method = "beverton-holt")
 
-	paramslog <- params; paramslog$K <- 1034.99
-	vallog <- getEE(paramslog)
+	paramslog <- params; paramslog$K <- 1033.29
+	vallog <- getEE(paramslog, method = "logistic")
 	
-	paramsricker <- params; paramsricker$K <- 382.6
-	valricker <- getEE(paramsricker)
+	paramsricker <- params; paramsricker$K <- 382.556
+	valricker <- getEE(paramsricker, method = "ricker")
 
 	EE_bTB_single_list[i] <- val[1]; EE_bTB_co_list[i] <- val[2]
 	EE_brucellosis_single_list[i] <- val[3]; 	EE_brucellosis_co[i] <- val[4]
-	rEE_bTB_single_list[i] <- val[1]; rEE_bTB_co_list[i] <- val[2]
-	rEE_brucellosis_single_list[i] <- val[3]; rEE_brucellosis_co[i] <- val[4]
-	lEE_bTB_single_list[i] <- val[1]; lEE_bTB_co_list[i] <- val[2]
-	lEE_brucellosis_single_list[i] <- val[3]; lEE_brucellosis_co[i] <- val[4]
+	
+	rEE_bTB_single_list[i] <- valricker[1]; rEE_bTB_co_list[i] <- valricker[2]
+	rEE_brucellosis_single_list[i] <- valricker[3]; rEE_brucellosis_co[i] <- valricker[4]
+	lEE_bTB_single_list[i] <- vallog[1]; lEE_bTB_co_list[i] <- vallog[2]
+	lEE_brucellosis_single_list[i] <- vallog[3]; lEE_brucellosis_co[i] <- vallog[4]
 }
+
 senslist <- list(
 	EE_bTB_single_list = EE_bTB_single_list, 
 	EE_bTB_co_list = EE_bTB_co_list,

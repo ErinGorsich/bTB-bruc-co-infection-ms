@@ -1,6 +1,7 @@
-getEE = function(params){
+getEE = function(params, method){
 	###################################
 	# Input: x = c(S = final, 1*20 S vector at params)
+	# method = "logistic", "ricker", "beverton-holt"
 	# Output: Ro
 	###################################
 	# Get stable age distribution in dz free conditions
@@ -10,7 +11,12 @@ getEE = function(params){
 	Ic0 = 0*relage; R0 = 0 * relage; Rc0 = 0 * relage
 	x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)
 	times <- seq(0, 1000, 1)
-	sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))
+	if (method == "ricker"){
+		sol <- as.data.frame(ode(x0, times, rhs_age_matrix_ricker, params))}
+	if (method == "logistic"){
+		sol <- as.data.frame(ode(x0, times, rhs_age_logistic, params))}
+	if (method == "beverton-holt"){
+		sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))}
 	stable_age <- unname(unlist( sol[length(sol[,1]), c(2:21)]/sum(sol[length(sol[,1]), c(2:21)]) ))
 	S0 = 400 * stable_age; It0 = 0 * stable_age; Ib0 = 0* stable_age; 
 	Ic0 = 0* stable_age; R0 = 0 * stable_age; Rc0 = 0 * stable_age
@@ -21,8 +27,12 @@ getEE = function(params){
 	x_singleTB = x0
 	x_singleTB[22:24] <- x_singleTB[22:24] + 1
 	x_singleTB[2:4] <- x_singleTB[2:4] - 1
-	sol <- as.data.frame(ode(x_singleTB, times, rhs_age_matrix, params, method = "ode45"))
-	
+	if (method == "ricker"){
+		sol <- as.data.frame(ode(x_singleTB, times, rhs_age_matrix_ricker, params, method = "ode45"))}
+	if (method == "logistic"){
+		sol <- as.data.frame(ode(x_singleTB, times, rhs_age_logistic, params, method = "ode45"))}
+	if (method == "beverton-holt"){
+		sol <- as.data.frame(ode(x_singleTB, times, rhs_age_matrix, params, method = "ode45"))}
 	S <-sum(sol[length(sol[,1]) , s_index+1])
 	It <- sum(sol[length(sol[,1]) , it_index +1])
 	Ic <- sum(sol[length(sol[,1]) , ic_index +1])
@@ -38,8 +48,12 @@ getEE = function(params){
 	x_singleBruc = x0
 	x_singleBruc[42:44] <- x_singleBruc[42:44] + 1
 	x_singleBruc[2:4] <- x_singleBruc[2:4] - 1
-	sol <- as.data.frame(ode(x_singleBruc, times, rhs_age_matrix, params, method = "ode45"))
-	
+	if (method == "ricker"){
+		sol <- as.data.frame(ode(x_singleBruc, times, rhs_age_matrix_ricker, params, method = "ode45"))}
+	if (method == "logistic"){
+		sol <- as.data.frame(ode(x_singleBruc, times, rhs_age_logistic, params, method = "ode45"))}
+	if (method == "beverton-holt"){
+		sol <- as.data.frame(ode(x_singleBruc, times, rhs_age_matrix, params, method = "ode45"))}	
 	S <-sum(sol[length(sol[,1]) , s_index+1])
 	It <- sum(sol[length(sol[,1]) , it_index +1])
 	Ic <- sum(sol[length(sol[,1]) , ic_index +1])
@@ -54,12 +68,17 @@ getEE = function(params){
 
 	# introduce both...
 	###################################
-	x_endB[22:24] <- x_endB[22:24] + 1
+	x_endB[26:28] <- x_endB[26:28] + 1
 	if(x_endB[2] > 1){x_endB[2] <- x_endB[2] - 1 }
 	if(x_endB[3] > 1){x_endB[3] <- x_endB[3] - 1 }
 	if(x_endB[4] > 1){x_endB[4] <- x_endB[4] - 1 }
 
-	sol <- as.data.frame(ode(x_endB, times, rhs_age_matrix, params, method = "ode45"))
+	if (method == "ricker"){
+		sol <- as.data.frame(ode(x_endB, times, rhs_age_matrix_ricker, params, method = "ode45"))}
+	if (method == "logistic"){
+		sol <- as.data.frame(ode(x_endB, times, rhs_age_logistic, params, method = "ode45"))}
+	if (method == "beverton-holt"){
+		sol <- as.data.frame(ode(x_endB, times, rhs_age_matrix, params, method = "ode45"))}	
 	
 	S <-sum(sol[length(sol[,1]) , s_index+1])
 	It <- sum(sol[length(sol[,1]) , it_index +1])
