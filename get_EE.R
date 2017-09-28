@@ -94,3 +94,5 @@ getEE = function(params, method){
 	
 	return(c(EE_bTB_alone, EE_bTB_co, EE_bruc_alone, EE_bruc_co))
 }
+
+

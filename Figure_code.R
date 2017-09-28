@@ -424,75 +424,6 @@ tiff("Figure2.tiff", width = 1000, height = 450, units = "px")
 multiplot(p6red, p13, cols =2)
 dev.off()
 
-#######################################################
-#######################################################
-# Figure C1- Beverton-Holt and stable age distribution
-#######################################################
-#######################################################
-#######################################################
-
-# Left Pannel, Beverton-Holt
-########################################################
-thetaL = seq(0.1, 0.9, by = 0.1)
-thetaH = seq(1.1, 1.9, by = 0.1)
-N = seq(1, 800, 1)
-f_N = function(N, theta){
-	0.5 / (1 + ((N/443)^theta))
-}
-
-# Right Pannel, stable age distribution with no disease
-########################################################
-# age divisions in rhs function
-s_index <- 1:20
-it_index <- 21:40
-ib_index <- 41:60
-ic_index <- 61:80
-r_index <- 81:100
-rc_index <- 101:120
-juveniles <- 1:3
-subadult<- 4
-adult <- 5:14
-mature <- 15:20
-
-# Parameters and initial conditions (disease params not used)
-relage <- c(0.137, rep(0.368/4, 4), rep(0.185/4, 4),  # initial guess, Jolles 2007, Caron et al. 2001
-	rep(0.235/6, 6), rep(0.075/5, 5))
-S0 <- 400*relage; It0 <- 0*relage; Ib0 <- 0*relage; 
-Ic0 <- 0*relage; R0 <- 0 * relage; Rc0 <- 0 * relage
-x0 <- c(S0, It0, Ib0, Ic0, R0, Rc0)
-times <- seq(0, 500, 1)
-source('~/GitHub/bTB-bruc-co-infection-ms/fixed_parameters_recovery_agematrix.R', chdir = TRUE)
-source('~/GitHub/bTB-bruc-co-infection-ms/rhs_age.R', chdir = TRUE)
-params <- c(fixed.params.recov, list(gamma=1/2, betaB = 0.01,
-	betaT = 0.0001, rhoT = 1.2, rhoB = 4, theta= 4, K = 433))
-sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))
-
-# Make plot
-########################################################
-png("FigureC1_BH_and_agestructure.png", width = 800, height = 400, units = "px")
-par(mfrow = c(1,2), mar = c(5,6,2,2))
-#par(mar = c(5,6,4,2))
-plot(x = N, y = f_N(N, theta = 4), type = "l", ylab = "Per captia birth rate, R(a, N)", 
-	xlab = "Population size, N", bty = "n", las = 1, cex.axis = 1.3, cex.lab = 1.5, 
-	ylim = c(0, 0.5))
-abline(v = 443, col = "dark red")
-lines(x = N, y = f_N(N, theta = 2), type = "l", col = "black", lty = 3)
-lines(x = N, y = f_N(N, theta = 6), type = "l", col = "black", lty = 5)
-legend("topright", bty = "n", 
-	legend = c(expression(phi == 2), expression(phi == 4), expression(phi == 6)),
-	lty = c(3, 1, 5) )
-
-# Plot final age structure! (WILL NEED UPDATED WITH FINAL PARAMS)
-x <- as.matrix(sol[101,c(2:121)])
-xcounts <- NA
-for(i in 1:20){
- 	xcounts[i] <- (x[i] + x[20+i] + x[40+i] + x[60+i] + x[80+i] + x[100+i]) #/sum(x)
-}
-plot(y = xcounts, x = seq(1:20), ylab = "Number of buffalo", pch = 19,
-	xlab = "Age (years)", bty = "n", las = 1, cex.axis = 1.3,
-	xlim = c(0, 20), cex.lab = 1.5)
-dev.off()
-
 
 #######################################################
 #######################################################
@@ -1150,6 +1081,75 @@ p12
 
 #######################################################
 #######################################################
+# Figure C1- Beverton-Holt and stable age distribution
+#######################################################
+#######################################################
+#######################################################
+
+# Left Pannel, Beverton-Holt
+########################################################
+thetaL = seq(0.1, 0.9, by = 0.1)
+thetaH = seq(1.1, 1.9, by = 0.1)
+N = seq(1, 800, 1)
+f_N = function(N, theta){
+	0.5 / (1 + ((N/443)^theta))
+}
+
+# Right Pannel, stable age distribution with no disease
+########################################################
+# age divisions in rhs function
+s_index <- 1:20
+it_index <- 21:40
+ib_index <- 41:60
+ic_index <- 61:80
+r_index <- 81:100
+rc_index <- 101:120
+juveniles <- 1:3
+subadult<- 4
+adult <- 5:14
+mature <- 15:20
+
+# Parameters and initial conditions (disease params not used)
+relage <- c(0.137, rep(0.368/4, 4), rep(0.185/4, 4),  # initial guess, Jolles 2007, Caron et al. 2001
+	rep(0.235/6, 6), rep(0.075/5, 5))
+S0 <- 400*relage; It0 <- 0*relage; Ib0 <- 0*relage; 
+Ic0 <- 0*relage; R0 <- 0 * relage; Rc0 <- 0 * relage
+x0 <- c(S0, It0, Ib0, Ic0, R0, Rc0)
+times <- seq(0, 500, 1)
+source('~/GitHub/bTB-bruc-co-infection-ms/fixed_parameters_recovery_agematrix.R', chdir = TRUE)
+source('~/GitHub/bTB-bruc-co-infection-ms/rhs_age.R', chdir = TRUE)
+params <- c(fixed.params.recov, list(gamma=1/2, betaB = 0.01,
+	betaT = 0.0001, rhoT = 1.2, rhoB = 4, theta= 4, K = 433))
+sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))
+
+# Make plot
+########################################################
+png("FigureC1_BH_and_agestructure.png", width = 800, height = 400, units = "px")
+par(mfrow = c(1,2), mar = c(5,6,2,2))
+#par(mar = c(5,6,4,2))
+plot(x = N, y = f_N(N, theta = 4), type = "l", ylab = "Per captia birth rate, R(a, N)", 
+	xlab = "Population size, N", bty = "n", las = 1, cex.axis = 1.3, cex.lab = 1.5, 
+	ylim = c(0, 0.5))
+abline(v = 443, col = "dark red")
+lines(x = N, y = f_N(N, theta = 2), type = "l", col = "black", lty = 3)
+lines(x = N, y = f_N(N, theta = 6), type = "l", col = "black", lty = 5)
+legend("topright", bty = "n", 
+	legend = c(expression(phi == 2), expression(phi == 4), expression(phi == 6)),
+	lty = c(3, 1, 5) )
+
+# Plot final age structure! (WILL NEED UPDATED WITH FINAL PARAMS)
+x <- as.matrix(sol[101,c(2:121)])
+xcounts <- NA
+for(i in 1:20){
+ 	xcounts[i] <- (x[i] + x[20+i] + x[40+i] + x[60+i] + x[80+i] + x[100+i]) #/sum(x)
+}
+plot(y = xcounts, x = seq(1:20), ylab = "Number of buffalo", pch = 19,
+	xlab = "Age (years)", bty = "n", las = 1, cex.axis = 1.3,
+	xlim = c(0, 20), cex.lab = 1.5)
+dev.off()
+
+#######################################################
+#######################################################
 # Figure S5- Endemic prevalence figures for each form of density dependence
 #######################################################
 #######################################################
@@ -1263,6 +1263,108 @@ pT <- ggplot(tb, aes(x = model, y = E, shape = singleco, colour = singleco)) +
 source('~/Documents/grants & applications/PostDocFellowships/SACEMA/SACEMA_round2&3/submitted/multiplot.R', chdir = TRUE)
 multiplot(pT,  pB, cols = 2)
 
+
+#######################################################
+#######################################################
+# Figure C - 6 in supplement- sensitivity
+#######################################################
+#######################################################
+#######################################################
+df <- read.csv("~/GitHub/bTB-bruc-co-infection-ms/Ro_sensitivity.rds")
+df$infection <- as.character(df$infection)
+df$infection[df$infection == "TB"] <- "BTB"
+df$infection <- as.factor(df$infection)
+df$infection <- relevel(df$infection, "BTB")
+df$order <- rep(c(5, 4, 3, 6, 7, 8, 2, 1, 10, 9, 12, 11, 13), 2)  # order by table 1
+df$order <- as.factor(df$order)
+
+# Ro
+pB <- ggplot(df, aes(x = order, y = Ro, shape = infection, colour = infection)) +
+	geom_point(aes(x = order, y = Ro), size = 3,
+		position= position_dodge(width = 0.5)) +
+	geom_errorbar(aes(x = order, ymin = cilow, ymax = cihigh),
+		width = 0, position= position_dodge(width = 0.5)) +
+	geom_hline(yintercept = 0, color = 'red', size = 0.5) +
+	ylim(-1, 1) +
+	xlab("") +
+	ylab("PRCC, Ro") +
+	theme_bw() +
+	scale_x_discrete("", labels = c("K",
+		expression(theta), expression(beta[T]), expression(beta[B]),  
+		expression(gamma), expression(epsilon), 
+		expression(beta[B]/beta[B]), expression(beta[T]/beta[T]),
+		expression(paste(mu[T], "/", mu[S], sep = "")),
+		expression(paste(mu[B], "/", mu[S], sep = "")), 
+		expression(paste(mu[R], "/", mu[S], sep = "")), 
+		expression(paste(mu[C], "/", mu[S], sep = "")), 
+		expression(paste(mu[RC], "/", mu[S], sep = "")))) +
+	scale_colour_manual(values = c("black","dark gray")) +
+	scale_shape_manual(values = c(19, 17)) +
+	theme(axis.line.x = element_line(colour= "black"),
+  		axis.line.y = element_line(colour= "black"),
+  		axis.title.x = element_text(size=16, vjust=-0.15),
+        axis.title.y = element_text(size=16, vjust= 0.8),
+        axis.text.x = element_text(size=16, vjust=-0.05),
+        axis.text.y = element_text(size=14),
+        panel.border = element_blank(), 
+		legend.position= c(0.85, 0.9),  
+		legend.text = element_text(size = 14),
+        legend.background= element_rect(fill="white", colour="white"),
+        legend.key= element_blank(),
+        legend.title= element_blank())
+
+
+df <- read.csv("~/GitHub/bTB-bruc-co-infection-ms/EE_sensitivity.rds")
+df$infection <- as.character(df$infection)
+df$infection[df$infection == "TB"] <- "BTB"
+df$infection <- as.factor(df$infection)
+df$infection <- relevel(df$infection, "BTB")
+df$order <- rep(c(5, 4, 3, 6, 7, 8, 2, 1, 10, 9, 12, 11, 13), 2)  # order by table 1
+df$order <- as.factor(df$order)
+
+# EE
+pB <- ggplot(df, aes(x = order, y = EE, shape = infection, colour = infection)) +
+	geom_point(aes(x = order, y = EE), size = 3,
+		position= position_dodge(width = 0.5)) +
+	geom_errorbar(aes(x = order, ymin = cilow, ymax = cihigh),
+		width = 0, position= position_dodge(width = 0.5)) +
+	geom_hline(yintercept = 0, color = 'red', size = 0.5) +
+	ylim(-1, 1) +
+	xlab("") +
+	ylab("PRCC, Endemic prevalence") +
+	theme_bw() +
+	scale_x_discrete("", labels = c("K",
+		expression(theta), expression(beta[T]), expression(beta[B]),  
+		expression(gamma), expression(epsilon), 
+		expression(beta[B]/beta[B]), expression(beta[T]/beta[T]),
+		expression(paste(mu[T], "/", mu[S], sep = "")),
+		expression(paste(mu[B], "/", mu[S], sep = "")), 
+		expression(paste(mu[R], "/", mu[S], sep = "")), 
+		expression(paste(mu[C], "/", mu[S], sep = "")), 
+		expression(paste(mu[RC], "/", mu[S], sep = "")))) +
+	scale_colour_manual(values = c("black","dark gray")) +
+	scale_shape_manual(values = c(19, 17)) +
+	theme(axis.line.x = element_line(colour= "black"),
+  		axis.line.y = element_line(colour= "black"),
+  		axis.title.x = element_text(size=16, vjust=-0.15),
+        axis.title.y = element_text(size=16, vjust= 0.8),
+        axis.text.x = element_text(size=16, vjust=-0.05),
+        axis.text.y = element_text(size=14),
+        panel.border = element_blank(), 
+		legend.position= c(0.85, 0.9),  
+		legend.text = element_text(size = 14),
+        legend.background= element_rect(fill="white", colour="white"),
+        legend.key= element_blank(),
+        legend.title= element_blank())
+
+
+
+
+
+
+
+
+df <- read.csv("~/GitHub/bTB-bruc-co-infection-ms/EE_sensitivity.rds")
 
 
 #######################################################

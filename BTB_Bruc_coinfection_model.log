@@ -1,10 +1,10 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2014) (preloaded format=pdflatex 2014.5.25)  16 MAY 2017 21:18
+This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2014) (preloaded format=pdflatex 2014.5.25)  28 SEP 2017 12:19
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
  %&-line parsing enabled.
-**BTB_Bruc_coinfection_model_densitydepence_noagestructure.tex
-(./BTB_Bruc_coinfection_model_densitydepence_noagestructure.tex
+**BTB_Bruc_coinfection_model.tex
+(./BTB_Bruc_coinfection_model.tex
 LaTeX2e <2014/05/01>
 Babel <3.9k> and hyphenation patterns for 78 languages loaded.
 (/usr/local/texlive/2014/texmf-dist/tex/latex/base/article.cls
@@ -284,8 +284,8 @@ Package xcolor Info: Model `HSB' substituted by `hsb' on input line 1358.
 Package xcolor Info: Model `Gray' substituted by `gray' on input line 1359.
 Package xcolor Info: Model `wave' substituted by `hsb' on input line 1360.
 )
-(./BTB_Bruc_coinfection_model_densitydepence_noagestructure.aux)
-\openout1 = `BTB_Bruc_coinfection_model_densitydepence_noagestructure.aux'.
+(./BTB_Bruc_coinfection_model.aux)
+\openout1 = `BTB_Bruc_coinfection_model.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 20.
 LaTeX Font Info:    ... okay on input line 20.
@@ -414,90 +414,106 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 
 LaTeX Warning: No \author given.
 
-
-Underfull \hbox (badness 10000) in paragraph at lines 34--38
-
- []
+<Figure1_ageprev.pdf, id=1, 598.32837pt x 457.71pt>
+File: Figure1_ageprev.pdf Graphic file (type pdf)
+ <use Figure1_ageprev.pdf>
+Package pdftex.def Info: Figure1_ageprev.pdf used on input line 34.
+(pdftex.def)             Requested size: 289.07999pt x 221.14401pt.
 
 [1
 
 {/usr/local/texlive/2014/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
+[2 <./Figure1_ageprev.pdf>]
+<Figure1_PNAS.jpg, id=125, 1554.0459pt x 695.59875pt>
+File: Figure1_PNAS.jpg Graphic file (type jpg)
+ <use Figure1_PNAS.jpg>
+Package pdftex.def Info: Figure1_PNAS.jpg used on input line 57.
+(pdftex.def)             Requested size: 433.62pt x 194.08702pt.
 
-./BTB_Bruc_coinfection_model_densitydepence_noagestructure.tex:43: LaTeX Error:
- File `Figure1_ageprev' not found.
+[3 <./Figure1_PNAS.jpg>]
 
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.43 \includegraphics[width=5in]{Figure1_ageprev}
-                                                 
-? 
-[2]
-
-./BTB_Bruc_coinfection_model_densitydepence_noagestructure.tex:60: LaTeX Error:
- File `bTB_Bruc_model' not found.
+./BTB_Bruc_coinfection_model.tex:76: LaTeX Error: Unknown float option `H'.
 
 See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.60 \includegraphics[width=5in]{bTB_Bruc_model}
-                                                
+l.76 \begin{table}[H]
+                      %hb
 ? 
-[3]
-Underfull \hbox (badness 10000) in paragraph at lines 88--89
+
+./BTB_Bruc_coinfection_model.tex:106: LaTeX Error: \caption outside float.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.106 \caption
+              {Parameter table- not yet updated}
+? 
+./BTB_Bruc_coinfection_model.tex:106: Undefined control sequence.
+\caption ... \endcsname \fi \fi \@dblarg {\@tempf 
+                                                  \@captype }
+l.106 \caption
+              {Parameter table- not yet updated}
+? 
+./BTB_Bruc_coinfection_model.tex:106: Undefined control sequence.
+\caption ...e \fi \fi \@dblarg {\@tempf \@captype 
+                                                  }
+l.106 \caption
+              {Parameter table- not yet updated}
+? 
+
+Underfull \hbox (badness 10000) in paragraph at lines 75--108
+
+ []
+
+[4] [5] [6]
+Underfull \hbox (badness 10000) in paragraph at lines 140--141
 
  []
 
 
-Overfull \hbox (1.65193pt too wide) detected at line 103
+Overfull \hbox (1.65193pt too wide) detected at line 155
 \OML/cmm/m/it/12 I[] \OT1/cmr/m/n/12 = [][] [] \OML/cmm/m/it/12 :
  []
 
-[4] [5]
-Underfull \hbox (badness 10000) in paragraph at lines 124--142
+[7] [8]
+Underfull \hbox (badness 10000) in paragraph at lines 176--194
 
  []
 
-[6] [7] [8] [9] [10] [11] [12] [13]
-(./BTB_Bruc_coinfection_model_densitydepence_noagestructure.aux)
-
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
-
- ) 
+[9] [10] [11] [12] [13] (./BTB_Bruc_coinfection_model.aux) ) 
 Here is how much of TeX's memory you used:
- 4187 strings out of 493117
- 56534 string characters out of 6135433
- 137871 words of memory out of 5000000
- 7538 multiletter control sequences out of 15000+600000
- 16174 words of font info for 62 fonts, out of 8000000 for 9000
+ 4172 strings out of 493117
+ 56291 string characters out of 6135433
+ 134871 words of memory out of 5000000
+ 7540 multiletter control sequences out of 15000+600000
+ 14599 words of font info for 56 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 41i,20n,35p,754b,271s stack positions out of 5000i,500n,10000p,200000b,80000s
-</usr/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb
-></usr/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb>
-</usr/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx6.pfb></
-usr/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx8.pfb></us
-r/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr
-/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/
-local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb></usr/l
-ocal/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi6.pfb></usr/loc
-al/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/local
-/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/local/t
-exlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/local/tex
-live/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb></usr/local/texli
-ve/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/local/texlive/
-2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/local/texlive/201
-4/texmf-dist/fonts/type1/public/amsfonts/cm/cmss8.pfb></usr/local/texlive/2014/
-texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/2014/t
-exmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></usr/local/texlive/2014/tex
-mf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/texlive/2014/texmf
--dist/fonts/type1/public/amsfonts/cm/cmti12.pfb>
-Output written on BTB_Bruc_coinfection_model_densitydepence_noagestructure.pdf 
-(13 pages, 226666 bytes).
+ 41i,13n,35p,894b,278s stack positions out of 5000i,500n,10000p,200000b,80000s
+</usr/local/texlive
+/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/local/texlive/
+2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/local/texlive/2
+014/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/local/texlive/20
+14/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/local/texlive/201
+4/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb></usr/local/texlive/2014
+/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi6.pfb></usr/local/texlive/2014/t
+exmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/local/texlive/2014/tex
+mf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/local/texlive/2014/texmf
+-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/local/texlive/2014/texmf-d
+ist/fonts/type1/public/amsfonts/cm/cmr17.pfb></usr/local/texlive/2014/texmf-dis
+t/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/local/texlive/2014/texmf-dist/f
+onts/type1/public/amsfonts/cm/cmr8.pfb></usr/local/texlive/2014/texmf-dist/font
+s/type1/public/amsfonts/cm/cmss8.pfb></usr/local/texlive/2014/texmf-dist/fonts/
+type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/2014/texmf-dist/fonts/t
+ype1/public/amsfonts/cm/cmsy6.pfb></usr/local/texlive/2014/texmf-dist/fonts/typ
+e1/public/amsfonts/cm/cmsy8.pfb></usr/local/texlive/2014/texmf-dist/fonts/type1
+/public/amsfonts/cm/cmti12.pfb>
+Output written on BTB_Bruc_coinfection_model.pdf (13 pages, 2893427 bytes).
 PDF statistics:
- 123 PDF objects out of 1000 (max. 8388607)
- 88 compressed objects within 1 object stream
+ 230 PDF objects out of 1000 (max. 8388607)
+ 168 compressed objects within 2 object streams
  0 named destinations out of 1000 (max. 500000)
- 1 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 11 words of extra memory for PDF output out of 10000 (max. 10000000)
 
