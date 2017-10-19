@@ -3,7 +3,7 @@
 # NOT UPDATD- NEED TO CHANGE AGE CLASSES!
 # Fixed parameters
 # Animals in recoverd class have similar birth/death rates to infecteds 
-# Model contains 4 age classes, 20*6 compartments
+# Units in 1/year
 #############################################################
 #############################################################
 

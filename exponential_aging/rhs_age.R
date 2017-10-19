@@ -1,10 +1,6 @@
 #############################################################
+# Beverton & Holt (with exponential aging)
 #############################################################
-# Write ODEs, density dependence... age structure, gamma ageing & wafwi
-#############################################################
-#############################################################
-
-# in paper
 rhs_age_matrix = function(times, x, params){
 	##########################
 	# Inputs: t = time sequence; 
@@ -22,12 +18,6 @@ rhs_age_matrix = function(times, x, params){
 	# Output: differences, for 20 ages
 	##########################
 	with(as.list(c(x, params)), {
-
-		# Assign state variables, each 20 long, 
-		# 4 categories: 1-3.9, 4-4.9, 5-14.9, 15+)
-		# from incidence anlaysis, use [0-3),[3 +) 
-		# from mortality analysis, use [0-3),[3 +)
-		# from birth analyis, use, [3-5),[5+)
 		s_index <- 1:20
 		it_index <- 21:40
 		ib_index <- 41:60
@@ -84,9 +74,10 @@ birthplay = function(r, Nall){
 	0.5*800- r * 800 * (Nall/1000)
 }
 
-
+#############################################################
 # Logistic growth - only works with no fecundity consequences of infection
 # needs extra parameter K- set so have same equilibrium population size with no dz
+#############################################################
 rhs_age_logistic = function(times, x, params){
 	##########################
 	# Inputs: t = time sequence; 
@@ -103,12 +94,6 @@ rhs_age_logistic = function(times, x, params){
 	# Output: differences, for 20 ages
 	##########################
 	with(as.list(c(x, params)), {
-
-		# Assign state variables, each 20 long, 
-		# 4 categories: 1-3.9, 4-4.9, 5-14.9, 15+)
-		# from incidence anlaysis, use [0-3),[3 +) 
-		# from mortality analysis, use [0-3),[3 +)
-		# from birth analyis, use, [3-5),[5+)
 		s_index <- 1:20
 		it_index <- 21:40
 		ib_index <- 41:60
@@ -160,7 +145,9 @@ rhs_age_logistic = function(times, x, params){
 	)
 }
 
-# Ricker (needs checked... )
+#############################################################
+# Ricker
+#############################################################
 rhs_age_matrix_ricker = function(times, x, params){
 	##########################
 	# Inputs: t = time sequence; 
@@ -218,7 +205,7 @@ rhs_age_matrix_ricker = function(times, x, params){
 		birth <- c(b %*% Nb, rep(0, 19))
 		dS <- birth * (exp(- Nall/K)) + aging %*% S -
 			(lambdaT + lambdaB) * S - muS * S
-		dIt <- lambdaT * S - (lambdapB + muT) * It + aging %*% It 
+		dIt <- lambdaT * S - (lambdapB + muT) * It + aging %*% It
 		dIb <- lambdaB * S + aging %*% Ib +
 			epsilon * R - (gamma + lambdapT + muB) * Ib
 		dIc <- lambdapT * Ib + lambdapB * It + aging %*% Ic +
@@ -230,5 +217,5 @@ rhs_age_matrix_ricker = function(times, x, params){
 		out = list(c(dS, dIt, dIb, dIc, dR, dRc))
 		return(out)	
 		}
-	)	
+	)
 }

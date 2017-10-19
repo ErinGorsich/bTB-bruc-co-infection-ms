@@ -165,67 +165,52 @@ a<- hist((d$start2 %% 12)/3)
 ############################################
 # = AGE1 in text
 # 0-2.9, 3-5.9, 6+
-data3$age2.2 <- data3$age2
-data3$age2.2[data3$age_yr2 == 4] <- "subadult"
-data3$age2.2[data3$age_yr2 == 5] <- "subadult"
-data3$age2.2[data3$age_yr2 == 6] <- "subadult"
-data3$age2.2[data3$age_yr2 == 7] <- "matureadult"
-data3$age2.2 <- as.factor(as.character(data3$age2.2))
-data3$age2.3 <- data3$age2.2
-data3$age2.3[data3$age_yr2 == 3] <- "juvenile"
-data3$age2.4 <- data3$age2.3
-data3$age2.4[data3$age_yr2 == 6] <- "matureadult"
-data3$age2.4[data3$age_yr2 == 3] <- "subadult"
-data3$age2.4 <- as.character(data3$age2.4)
-table(data3$age2.4, data3$age_yr)
-test.mod<-coxph(Surv(start, stop, death.time)~brucella*age2.4+TB_3+herd2+ cluster(animal), data=data3); summary(test.mod)
-test.mod<-coxph(Surv(start, stop, death.time)~age2.4+ cluster(animal), data=data3); summary(test.mod)
+data3$age1 <- NA
+data3$age2 <- NA
+data3$age3 <- NA
+data3$age4 <- NA
+
+data3$age1[data3$age_yr < 3] <- "juvenile"
+data3$age1[data3$age_yr >= 3 & data3$age_yr < 6] <- "subadult"
+data3$age1[data3$age_yr >= 6] <- "adult"
+data3$age1 <- relevel(as.factor(data3$age1), "juvenile")
+
+
+data3$age2[data3$age_yr < 3] <- "juvenile"
+data3$age2[data3$age_yr >= 3 ] <- "adult"
+
+data3$age3[data3$age_yr < 2] <- "juvenile"
+data3$age3[data3$age_yr >= 2 & data3$age_yr < 5] <- "subadult"
+data3$age3[data3$age_yr >= 5] <- "adult"
+
+data3$age4[data3$age_yr < 2] <- "juvenile"
+data3$age4[data3$age_yr >= 2 ] <- "adult"
+
+test.mod<-coxph(Surv(start, stop, death.time)~age1 + cluster(animal), data=data3); 
+logLik(test.mod); extractAIC(test.mod)
+test.mod<-coxph(Surv(start, stop, death.time)~age2 + cluster(animal), data=data3); 
+logLik(test.mod); extractAIC(test.mod)
+test.mod<-coxph(Surv(start, stop, death.time)~age3 + cluster(animal), data=data3); 
+logLik(test.mod); extractAIC(test.mod)
+test.mod<-coxph(Surv(start, stop, death.time)~age4 + cluster(animal), data=data3); 
 logLik(test.mod); extractAIC(test.mod)
 
-# = AGE3 in text
-# 0-1.9, 2-4.9, 5+ 
-data3$age3.2 <- data3$age3
-data3$age3.2[data3$age_yr2 == 4] <- "subadult"
-data3$age3.2 <- as.factor(as.character(data3$age3.2))
-table(data3$age3.2, data3$age_yr)
-#test.mod<-coxph(Surv(start, stop, death.time)~brucella*age3.2+TB_3+herd2+ cluster(animal), data=data3); summary(test.mod)  # AIC = 316.9
-test.mod<-coxph(Surv(start, stop, death.time)~age3.2 + cluster(animal), data=data3); summary(test.mod)
+# same conclusion
+test.mod<-coxph(Surv(start, stop, death.time)~age1+ brucella+TB_3+herd2  + cluster(animal), data=data3); 
 logLik(test.mod); extractAIC(test.mod)
-
-# AGE 4 in TEXT!!
-# 0-1.9, 2+
-table(data3$age5, data3$age_yr)
-test.mod<-coxph(Surv(start, stop, death.time)~brucella+TB_3+herd2+ age5+ cluster(animal), data=data3); summary(test.mod)
-test.mod<-coxph(Surv(start, stop, death.time)~ age5+ cluster(animal), data=data3); summary(test.mod)
+test.mod<-coxph(Surv(start, stop, death.time)~age2 + brucella+TB_3+herd2 + cluster(animal), data=data3); 
+logLik(test.mod); extractAIC(test.mod)
+test.mod<-coxph(Surv(start, stop, death.time)~age3 + brucella+TB_3+herd2 + cluster(animal), data=data3); 
+logLik(test.mod); extractAIC(test.mod)
+test.mod<-coxph(Surv(start, stop, death.time)~age4 + brucella+TB_3+herd2 + cluster(animal), data=data3); 
 logLik(test.mod); extractAIC(test.mod)
 
 
-# Additional Age Categories
-# 1.4-1.9, 2-3.9, 4-8, 8+
-# juveniles (0-1) and subadults (2-4) both have higher mortality than adults (4-8); subadults not significantly different than juveniles (p=0.11)
-test.mod<-coxph(Surv(start, stop, death.time)~brucella*age1+TB_3+herd2+ age1+ cluster(animal), data=data3); summary(test.mod) # AIC = 317.686
-test.mod<-coxph(Surv(start, stop, death.time)~age1+ cluster(animal), data=data3); test.mod$loglik # AIC = 336.93
+add.mod <- coxph(Surv(start, stop, death.time)~age1 + brucella+TB_3+herd2 + cluster(animal), data=data3);
+full.mod <- coxph(Surv(start, stop, death.time)~brucella+age1*TB_3+brucella*herd2 + TB_3*herd2 + cluster(animal), data=data3)
+lwm <- coxph(Surv(start, stop, death.time)~brucella+age1*TB_3+ TB_3*herd2 + cluster(animal), data=data3); extractAIC(lwm)
+lwm <- coxph(Surv(start, stop, death.time)~brucella+age1+TB_3+ TB_3*herd2 + cluster(animal), data=data3); extractAIC(lwm)
 
-# 1.4-2.9, 3-4.9, 5-7.9, 8+
-# AIC = 314.7509; LogLike =  -167.0254 -151.3755
-test.mod<-coxph(Surv(start, stop, death.time)~brucella*age2+TB_3+herd2+ cluster(animal), data=data3); summary(test.mod)  #LL error
-test.mod<-coxph(Surv(start, stop, death.time)~age2+ cluster(animal), data=data3); summary(test.mod)  # AIC = 333.33
-
-# 1-1.9, 2-3.9, 4+ 
-test.mod<-coxph(Surv(start, stop, death.time)~brucella*age3+TB_3+herd2+ age3+ cluster(animal), data=data3); summary(test.mod)  # AIC = 314.51
-test.mod<-coxph(Surv(start, stop, death.time)~age3+ cluster(animal), data=data3); summary(test.mod)# AIC = 335.5
-
-# 0-2, 3-4, 5+ -> 0-3 yr olds have highest mortality. 3-5 vs 5+ similar
-test.mod<-coxph(Surv(start, stop, death.time)~brucella+TB_3+herd2+ age4+ cluster(animal), data=data3); summary(test.mod)
-# AIC = 313.242; LogLike = -167.0254 -151.6210
-
-
-
-
-# AGE 2 IN TEXT
-#0-2.9, 3+
-data3$age6[data3$age_yr == 3] <- "adult"
-test.mod<-coxph(Surv(start2, stop2, death.time)~ age6 + cluster(animal), data=data3); summary(test.mod)
 
 final.mod<-coxph(Surv(start2, stop2, death.time)~brucella+TB_3+herd2+ age6+ cluster(animal), data=data3); summary(final.mod)
 # AIC = 312.7035; LogLike = -167.0254 -152.3518
@@ -307,22 +292,6 @@ with(Shat2, head(data.frame(time, surv), n=4))
 
 
 
-
-data3$age7 <- data3$age3							 
-data3$age7[data3$age7 == "juvenile"] <- "subadult"   # pre-repro (0-3)
-data3$age7 <- as.character(data3$age7)				# post-repro (4+)
-
-data3$age8 <- data3$age7							 
-data3$age8[data3$age_yr2 == 4] <- "subadult"         # pre-repro (0-4)
-data3$age8 <- as.character(data3$age8)				 # post-repro (5+)
-
-data3$age9 <- data3$age2							 
-data3$age9[data3$age_yr2 == 3] <- "juvenile"         # pre-repro (0-3)
-data3$age9[data3$age_yr2 == 5] <- "subadult" # pre-repro (4-6)
-data3$age9[data3$age_yr2 == 6] <- "subadult" # pre-repro (4-6)
-data3$age9[data3$age_yr2 == 7] <- "matureadult"        #(7+)
-data3$age9 <- as.factor(as.character(data3$age9))				 # post-repro (6+)
-data3$age9 <- relevel(data3$age9, "matureadult")
 ########################################################
 # CPH model diagnostics
 # no change with start/stop designations: exact same covariates
@@ -389,71 +358,3 @@ Shat2 <- survexp(~ age6 + TB_3+ brucella, ratetable=final.mod, data=data3)
 with(Shat2, head(data.frame(time, surv), n=4))
 
 
-# CUT - Delete later
-
-############################
-# New data, no bolus- age continuous
-############################
-# just brucellosis
-test.mod<-coxph(Surv(start, stop, death.time)~brucella+ cluster(animal), data=data3) # 0.0119
-test.mod<-coxph(Surv(start, stop, death.time)~brucella+herd2+ cluster(animal), data=data3); summary(test.mod) #0.0134 
-test.mod<-coxph(Surv(start, stop, death.time)~brucella+herd2+age_yr2+ cluster(animal), data=data3); summary(test.mod) #0.00457
-test.mod<-coxph(Surv(start, stop, death.time)~brucella+herd2+age_yr2+ I(age_yr2^2)+ cluster(animal), data=data3); summary(test.mod) # 0.00533
-test.mod<-coxph(Surv(start, stop, death.time)~brucella*herd2+age_yr2+ I(age_yr2^2)+ cluster(animal), data=data3); summary(test.mod) # 0.01, int n.s. 
-
-# just tb
-test.mod<-coxph(Surv(start, stop, death.time)~ TB_3+ cluster(animal), data=data3) ; summary(test.mod) #0.0172 
-test.mod<-coxph(Surv(start, stop, death.time)~ TB_3 +herd2+ cluster(animal), data=data3); summary(test.mod)  # 0.0125
-test.mod<-coxph(Surv(start, stop, death.time)~ TB_3 +herd2+age_yr2+ cluster(animal), data=data3) ; summary(test.mod) #0.00934
-test.mod<-coxph(Surv(start, stop, death.time)~ TB_3 +herd2+age_yr2+ I(age_yr2^2)+ cluster(animal), data=data3); # 0.00216 summary(test.mod)
-test.mod<-coxph(Surv(start, stop, death.time)~ TB_3*herd2+age_yr2+ I(age_yr2^2)+ cluster(animal), data=data3); summary(test.mod)
-#0.00110  
-
-# both
-test.mod<-coxph(Surv(start, stop, death.time)~brucella+ TB_3+ cluster(animal), data=data3); summary(test.mod) # Br- 0.01,TB-0.02
-test.mod<-coxph(Surv(start, stop, death.time)~brucella*TB_3+ cluster(animal), data=data3); summary(test.mod) #ns
-test.mod<-coxph(Surv(start, stop, death.time)~brucella+ TB_3+herd2+ cluster(animal), data=data3); summary(test.mod)#.01,0.01
-#*******test.mod<-coxph(Surv(start, stop, death.time)~brucella+TB_3+herd2 + age_yr2 +I(age_yr2^2)+ cluster(animal), data=data3); summary(test.mod)
-
-
-test.mod<-coxph(Surv(start, stop, death.time)~brucella*herd2+TB_3*herd2 + age_yr2 +I(age_yr2^2)+ cluster(animal), data=data3); summary(test.mod)
-
-final.mod<-coxph(Surv(start, stop, death.time)~brucella+TB_3+herd2 + age_yr2 +I(age_yr2^2)+ cluster(animal), data=data3); summary(final.mod)
-
-standardize = function(datavec){
-    temp<- NA
-    for (i in 1:length(datavec)){
-        temp[i]<- (datavec[i]-mean(datavec)) / (2*sd(datavec))
-    }
-    return(temp)
-}
-data3$age_yrsd<- NA; data3$age_yrsq<- NA; data3$herdsd<-NA; data3$tbsd<- NA; data3$brucsd<-NA
-data3$age_yrsd<-standardize(data3$age_yr)
-t<- data3$age_yr*data3$age_yr
-data3$age_yrsq<-standardize(t)
-data3$therd<-NA
-data3$therd[data3$herd=="CB"]<- 1
-data3$therd[data3$herd=="LS"]<- 0
-data3$herdsd<- standardize(data3$therd)
-data3$tbsd<- standardize(data3$TB_3)
-data3$brucsd<- standardize(data3$brucella)
-
-# standardized output
-test.mod<-coxph(Surv(start2, stop2, death.time)~brucsd+tbsd+ herdsd + age_yrsd +I(age_yrsd^2)+ cluster(animal), data=data3)  
-#                coef exp(coef) se(coef) robust se      z Pr(>|z|)   
-#brucsd         0.8826    2.4172   0.3365    0.3427  2.576  0.01001 * 
-#tbsd           0.8983    2.4555   0.3251    0.3058  2.937  0.00331 **
-#herdsd         0.7981    2.2214   0.3628    0.3466  2.303  0.02129 * 
-#age_yrsd      -1.5095    0.2210   0.5051    0.5078 -2.973  0.00295 **
-#I(age_yrsd^2)  0.8707    2.3887   0.3199    0.2981  2.921  0.00349 **
-#              exp(coef) exp(-coef) lower .95 upper .95
-#brucsd            2.417     0.4137    1.2348    4.7316
-#tbsd              2.456     0.4072    1.3484    4.4716
-#herdsd            2.221     0.4502    1.1261    4.3818
-#age_yrsd          0.221     4.5243    0.0817    0.5979
-#(age_yrsd^2)     2.389     0.4186    1.3316    4.2849
-
-library('JMbayes')
-library('JM')
-#http://www.r-bloggers.com/joint-models-for-longitudinal-and-survival-data/
-#http://www.r-bloggers.com/dynamic-predictions-using-joint-models/

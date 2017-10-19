@@ -1,22 +1,22 @@
 #############################################################
 #############################################################
 # Erin Gorsich
-# This Code Reads in and runs an age-structured co-infection 
-# model (defined in rhs_age) for a range of parameters 
+# This Code Reads in and runs an age-structured co-infection model
+# model is defined in rhs_age_matrix
 #############################################################
 #############################################################
 #############################################################
-# Outline: 
+# Outline:
 # 1) Load fixed parameters, model
 # 2) Set-up features of aging; Functions for plotting
 # 3) Getz / Generalized Beverton-Holt form of density dependence
-# 4) Ricker form of density dependence
 #############################################################
 #############################################################
 #############################################################
 # This code owes much to:
+# Age Structured Models by A. King & H. Wearing, &
+# Structured models for host heterogenieties by J. Drake and P. Rohani
 #  http://ms.mcmaster.ca/~bolker/eeid/2011_eco/waifw.pdf
-# King & Wearing, Age Structured Models
 #############################################################
 
 #############################################################
@@ -32,10 +32,11 @@ library("lattice") # for levelplots
 library("gridExtra") # layout for lattice
 set.seed(5)
 # get fixed.params & fixed.params.recov
-source('~/GitHub/bTB-bruc-co-infection-ms/fixed_parameters_norecovery_agematrix.R', chdir = TRUE)
-source('~/GitHub/bTB-bruc-co-infection-ms/fixed_parameters_recovery_agematrix.R', chdir = TRUE)
+setwd("~/GitHub/bTB-bruc-co-infection-ms/exponential_aging")
+source('fixed_parameters_norecovery_agematrix.R', chdir = TRUE)
+source('fixed_parameters_recovery_agematrix.R', chdir = TRUE)
 # rhs function, determinitic model, age structure
-source('~/GitHub/bTB-bruc-co-infection-ms/rhs_age.R', chdir = TRUE)
+source('rhs_age.R', chdir = TRUE)
 
 #############################################################
 #############################################################
@@ -43,7 +44,6 @@ source('~/GitHub/bTB-bruc-co-infection-ms/rhs_age.R', chdir = TRUE)
 #############################################################
 #############################################################
 # age divisions in rhs function
-#(age= 1-3.9, 4-4.9, 5-14.9, 15+)..subsume calf mortality in births
 s_index <- 1:20
 it_index <- 21:40
 ib_index <- 41:60
@@ -56,8 +56,8 @@ adult <- 5:14
 mature <- 15:20
 
 # Age structure information, used to calculate mortality rates in susceptibles. 
-relageall = c(0.137, rep(0.368/4, 4), rep(0.185/4, 4),  # Jolles 2007, set max age at 20
-	rep(0.235/6, 6), rep(0.075/5, 5))					# Also in Caron et al. from 2001 KNP
+relageall = c(0.137, rep(0.368/4, 4), rep(0.185/4, 4),  	# Jolles 2007, set max age at 20
+	rep(0.235/6, 6), rep(0.075/5, 5))									# Also in Caron et al. from 2001 KNP
 	
 relage = relageall
 
@@ -213,10 +213,10 @@ times <- seq(0, 500, 1)
 # parameters
 params= c(fixed.params, list(gamma=1/2, betaB = 0.6087396,
 	betaT = 0.0012974553, rhoT = 1, rhoB = 2.1, theta= 4, K = 433))
-#params.recov = c(fixed.params.recov, list(gamma=1/2, 
-#	betaB = 1.128788, betaT = 0.0009585864, rhoT = 1, rhoB = 2.1, theta = 4, K = 433))
+params.recov = c(fixed.params.recov, list(gamma=1/2, 
+	betaB = 1.128788, betaT = 0.0009585864, rhoT = 1, rhoB = 2.1, theta = 4, K = 433))
 sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))
-#sol.recov<- as.data.frame(ode(x0, times, rhs_age_matrix, params.recov))
+sol.recov<- as.data.frame(ode(x0, times, rhs_age_matrix, params.recov))
 
 par(mfrow = c(2,2))
 plot(x = sol$time, y = apply(sol[c(2:120)], 1, sum), 

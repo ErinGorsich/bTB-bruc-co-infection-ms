@@ -2,17 +2,17 @@
 #############################################################
 # Fixed parameters
 # Animals in recoverd class have similar birth/death rates to infecteds 
-# Model contains 4 age classes, 20*6 compartments
+# Units in years
 #############################################################
 #############################################################
 
 #############################################################
 # Aging
 #############################################################
-ages <- c(seq(1,20,by=1)) # upper end of age classes
-da <- diff(c(0,ages))
+ages <- c(seq(1, 20, by = 1)) # upper end of age classes
+da <- diff(c(0, ages))
 aging <- diag(-1/da)
-aging[row(aging)- col(aging)==1] <- 1/head(da, -1)
+aging[row(aging) - col(aging) == 1] <- 1/head(da, -1)
 
 #dim(betaB)
 #filled.contour(betaBm,plot.title=title(main="WAIFW matrix"))
@@ -20,10 +20,9 @@ aging[row(aging)- col(aging)==1] <- 1/head(da, -1)
 # Mortality, susceptible females
 #############################################################
 muS <- NA; muT <- NA; muB <- NA; muC <- NA
-muS[1:2]<- 1- 0.86 # mortality rate in yearlings 
-muS[3:15]<-  1- 0.94 # mortality rate in adults 
-muS[16:20]<-  1- 0.86 # mortality rate in adults 15+  (1/yr)
-
+muS[1:2] <- 1- 0.86 # mortality rate in yearlings 
+muS[3:16] <-  1- 0.94 # mortality rate in adults 
+muS[17:20] <-  1- 0.86 # mortality rate in adults 15+  (1/yr)
 muT <- 2.8 * muS
 muB <- 3.03 * muS
 muC <- 8.56 * muS
@@ -34,35 +33,20 @@ muR <- muB
 #############################################################
 # births
 #############################################################
-# NOTES: data informing birts are from ages 4-10.  Age 4 is the youngest sucessful mom with calf.
+# NOTES: data informing births are from ages 5-10.  Age 4 is the youngest sucessful mom with calf.
 # birth rate in uninfected buffalo of each age category
 # now b is the maximum possible birth rate 
 
 # Birth rate in uninfecteds
 b <- c(0,0,0,0, rep(0.74, 16))
 b1 <- 1; b2 <- 1; b3 <- 1; b4 <- 1; b5 <- 1
-epsilon = 0.01
-
-
-# old fecundity estimates
-#b <- NA; b1 <- NA; b2<- NA; b3 <- NA; b4 <- NA; b5 <- NA
-#b[1:3] <- 0						# [1-4)
-#b[5:15] <- 0.5 #0.56/2			# age [5-15); raw data (14/25)
-#b[4] <- 0.45						# age [4-5); raw data (2/26)
-#b[16:20] <- max(b[5] * 0.7, 0)	# age 15 +; raw data (14/25)
-#b <- b/2						
-# Proportional reductions
-#b1 <- c(rep(1, 4), rep(0.86, 20-4)) # c(rep(1, 4), rep(0.65, 20-4))		# with bTB (from raw data)
-#b2 <- c(1, 1, 1, 1, rep(0.8, 20-4))		# brucellosis
-#b3<- b2  								# chronic/recovered = active
-#b4<- rep(1, 20) 						# coinfected
-#b5 <- b4 								# chronic-coinf = coinfected
-
+epsilon = 0.03
 
 fixed.params = list(aging = aging, 
 	b1= b1, b2 = b2, b3 = b3, b4= b4, b5 = b5, b = b, 
 	muS = muS, muB = muB, muT = muT, muC = muC, 
 	muR = muR, muRC = muRC, 	epsilon = epsilon)
+
 # missing: gamma, betaT = betaT, betaB = betaB, betapT = betapT, betapB = betapB
 
 
