@@ -222,9 +222,9 @@ epiB <- data.frame(
 # xB, endemic age structure for brucellosis only set above
 xB.test <- xB[(min(it.index)+50):(min(it.index)+53)] <- 1
 
-imax <- c(length(epiTB[,1]))
-pb <- txtProgressBar(min = 0, max = imax, style = 3)	
-for (i in 1:length(epiTB[,1])){
+cl <- makeCluster(6)
+registerDoParallel(cl)
+epiT <- foreach(i = l:length(epiTB[,1]), .combine = rbind) %dopar% {
 	params.test <- c(f.params, list(gamma = 1/2, betaB = 0.5764065, 
 		betaT = 1.3305462/1000, rhoT = epiTB$rhoT[i], rhoB = 2.1))
 	params.test$muC <- epiTB$mort[i] * params.test$muS
@@ -232,21 +232,25 @@ for (i in 1:length(epiTB[,1])){
 		
 	sol <- as.data.frame(ode(xB.test, times, rhs, params.test))
 	temp <- get_prevalence(sol)
-	
-	epiTB$bTBprev[i] = temp$prevTB
-	epiTB$brucprev[i] = temp$prevB 	
-	epiTB$finalN[i] = sum(sol[length(sol), c(2:121)])
-	epiTB$bTB_inS[i] = temp$prevTinS 
-	epiTB$bTB_inB[i] = temp$prevTinB
-	epiTB$bruc_inS[i] = temp$prevBinS 
-	epiTB$bruc_inTB[i] = temp$prevBinT
-	rm(params.test, sol, temp)
-	setTxtProgressBar(pb, i)
-}
-cat("\n")
-summary(epiTB)
 
-write.csv(epiTB, "epiT.csv")
+	data <- data.frame(
+		rhoT = epiTB$rhoT[i]
+		mort = epiTB$mort[i]
+		bTBprev = temp$prevTB,
+		brucprev = temp$prevB 	
+		finalN = sum(sol[length(sol), c(2:length(colnames(sol)))])
+		bTB_inS = temp$prevTinS 
+		bTB_inB = temp$prevTinB
+		bruc_inS = temp$prevBinS 
+		bruc_inTB = temp$prevBinT
+	)
+	rm(params.test, sol, temp)
+}
+stopCluster(cl)
+
+summary(epiT)
+
+write.csv(epiT, "epiT.csv")
 
 
 # For Brucellosis analyses set x0 as endemic prevalence BTB
@@ -254,9 +258,9 @@ write.csv(epiTB, "epiT.csv")
 #############################################################
 xT.test <- xT[(min(ib.index)+50):(min(ib.index)+53)] <- 1
 
-imax <- c(length(epiB[,1]))
-pb <- txtProgressBar(min = 0, max = imax, style = 3)	
-for (i in 1:length(epiB[,1])){
+cl <- makeCluster(6)
+registerDoParallel(cl)
+epiBR <- foreach(i = l:length(epiB[,1]), .combine = rbind) %dopar% {
 	params.test <- c(f.params, list(gamma = 1/2, betaB = 0.5764065, 
 		betaT = 1.3305462/1000, rhoT = 1, rhoB = epiB$rhoB[i]))
 	params.test$muC <- epiB$mort[i] * params.test$muS
@@ -264,21 +268,26 @@ for (i in 1:length(epiB[,1])){
 		
 	sol <- as.data.frame(ode(xT.test, times, rhs, params.test))
 	temp <- get_prevalence(sol)
-	
-	epiB$bTBprev[i] = temp$prevTB
-	epiB$brucprev[i] = temp$prevB 	
-	epiB$finalN[i] = sum(sol[length(sol[,1]), c(2:length(colnames(sol)))])
-	epiB$bTB_inS[i] = temp$prevTinS 
-	epiB$bTB_inB[i] = temp$prevTinB
-	epiB$bruc_inS[i] = temp$prevBinS 
-	epiB$bruc_inTB[i] = temp$prevBinT
+
+	data <- data.frame(
+		rhoB = epiB$rhoB[i]
+		mort = epiB$mort[i]
+		bTBprev = temp$prevTB,
+		brucprev = temp$prevB 	
+		finalN = sum(sol[length(sol), c(2:length(colnames(sol)))])
+		bTB_inS = temp$prevTinS 
+		bTB_inB = temp$prevTinB
+		bruc_inS = temp$prevBinS 
+		bruc_inTB = temp$prevBinT
+	)
 	rm(params.test, sol, temp)
-	setTxtProgressBar(pb, i)
 }
-cat("\n")
+stopCluster(cl)
 
-write.csv(epiB, "~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/draft2/post-labmeeting/epiB.csv")
+write.csv(epiBR, "epiB.csv")
 
+################################################
+# NOT RUN
 ################################################
 # Again for epiB - but for when the rhoT = 1
 rhoB_test <- seq(0, 8, length.out = 30)
