@@ -43,7 +43,7 @@ Ro_brucellosis_single = function(params, x0){
 	Vmat[row(Vmat) - col(Vmat) == 1] <- ageflux
 	Vinv <- solve(Vmat)
 	vals <- eigen(Fmat %*% Vinv)$values
-	return(max(Re(vals2)))
+	return(max(Re(vals)))
 }
 
 

@@ -17,14 +17,14 @@ get_EE = function(params, x0, method){
 	x_singleTB[(N+1)  +  3*binsize] <- 1
 	x_singleTB[(N+1) +  4*binsize] <- 1
 	if (method == "ricker"){
-		sol <- as.data.frame(ode(x_singleTB, times, 
-			rhs_ricker, params, method = "ode45"))}
+		sol <- as.data.frame(ode.1D(x_singleTB, times, 
+			rhs_ricker, params, nspec = 6, dimens = N,method = "ode45"))}
 	if (method == "logistic"){
-		sol <- as.data.frame(ode(x_singleTB, times, rhs_logistic, 
-			params, method = "ode45"))}
+		sol <- as.data.frame(ode.1D(x_singleTB, times, rhs_logistic, 
+			params, nspec = 6, dimens = N, method = "ode45"))}
 	if (method == "beverton-holt"){
-		sol <- as.data.frame(ode(x_singleTB, times, rhs, 
-			params, method = "ode45"))}
+		sol <- as.data.frame(ode.1D(x_singleTB, times, rhs, 
+			nspec = 6, dimens = N, params, method = "ode45"))}
 	S <-sum(sol[length(sol[,1]) , s.index+1])
 	It <- sum(sol[length(sol[,1]) , it.index +1])
 	Ic <- sum(sol[length(sol[,1]) , ic.index +1])
@@ -43,14 +43,14 @@ get_EE = function(params, x0, method){
 	x_singleBruc[min(ib.index) + 1 + 4*binsize] <- 1
 
 	if (method == "ricker"){
-		sol <- as.data.frame(ode(x_singleBruc, times, rhs_ricker, 
-			params, method = "ode45"))}
+		sol <- as.data.frame(ode.1D(x_singleBruc, times, rhs_ricker, 
+			params, nspec = 6, dimens = N, method = "ode45"))}
 	if (method == "logistic"){
-		sol <- as.data.frame(ode(x_singleBruc, times, rhs_logistic, 
-			params, method = "ode45"))}
+		sol <- as.data.frame(ode.1D(x_singleBruc, times, rhs_logistic, 
+			params, nspec = 6, dimens = N, method = "ode45"))}
 	if (method == "beverton-holt"){
-		sol <- as.data.frame(ode(x_singleBruc, times, rhs,
-			params, method = "ode45"))}	
+		sol <- as.data.frame(ode.1D(x_singleBruc, times, rhs,
+			params, nspec = 6, dimens = N, method = "ode45"))}	
 	S <-sum(sol[length(sol[,1]) , s.index+1])
 	It <- sum(sol[length(sol[,1]) , it.index +1])
 	Ic <- sum(sol[length(sol[,1]) , ic.index +1])
@@ -70,11 +70,14 @@ get_EE = function(params, x0, method){
 	x_endB[min(it.index) + 1  +  4*binsize] <- 1
 
 	if (method == "ricker"){
-		sol <- as.data.frame(ode(x_endB, times, rhs_ricker, params, method = "ode45"))}
+		sol <- as.data.frame(ode.1D(x_endB, times, rhs_ricker, params,  
+			nspec = 6, dimens = N, method = "ode45"))}
 	if (method == "logistic"){
-		sol <- as.data.frame(ode(x_endB, times, rhs_logistic, params, method = "ode45"))}
+		sol <- as.data.frame(ode.1D(x_endB, times, rhs_logistic, params,
+			nspec = 6, dimens = N, method = "ode45"))}
 	if (method == "beverton-holt"){
-		sol <- as.data.frame(ode(x_endB, times, rhs, params, method = "ode45"))}	
+		sol <- as.data.frame(ode.1D(x_endB, times, rhs, params, 
+			nspec = 6, dimens = N, method = "ode45"))}	
 	
 	S <-sum(sol[length(sol[,1]) , s.index+1])
 	It <- sum(sol[length(sol[,1]) , it.index +1])

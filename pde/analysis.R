@@ -21,6 +21,7 @@ library("gridExtra") # layout for lattice
 library("RColorBrewer")
 library("doParallel")
 library("foreach")
+library("deSolve")
 set.seed(5)
 
 setwd("~/GitHub/bTB-bruc-co-infection-ms/pde")
@@ -164,7 +165,7 @@ set.seed(1)
 # Generate 1000 samples
 cl <- makeCluster(6)
 registerDoParallel(cl)
-d2 <- foreach(icount(n), .combine = rbind) %dopar% {
+d2 <- foreach(icount(n), .combine = rbind, .packages = "deSolve") %dopar% {
 	params <- c(f.params, list(gamma = 1/2, betaB = 0.5764065, 
 		betaT = 1.3305462/1000, rhoT = 1, rhoB = 2.1))
 	params$rhoB<- exp(rnorm(n = 1, mean = 0.75579, sd = 0.40714))
@@ -220,29 +221,30 @@ epiB <- data.frame(
 # For BTB analyses set x0 as endemic prevalence of bruc in absence of BTB
 #############################################################
 # xB, endemic age structure for brucellosis only set above
-xB.test <- xB[(min(it.index)+50):(min(it.index)+53)] <- 1
+xB.test <- xB
+xB.test[(min(it.index)+50):(min(it.index)+53)] <- 1
 
 cl <- makeCluster(6)
 registerDoParallel(cl)
-epiT <- foreach(i = l:length(epiTB[,1]), .combine = rbind) %dopar% {
+epiT <- foreach(d = iter(epiTB, by = 'row'), .combine = rbind, .packages = "deSolve") %dopar% {
 	params.test <- c(f.params, list(gamma = 1/2, betaB = 0.5764065, 
-		betaT = 1.3305462/1000, rhoT = epiTB$rhoT[i], rhoB = 2.1))
-	params.test$muC <- epiTB$mort[i] * params.test$muS
-	params.test$muRC <- epiTB$mort[i] * params.test$muS
+		betaT = 1.3305462/1000, rhoT = d$rhoT, rhoB = 2.1))
+	params.test$muC <- d$mort * params.test$muS
+	params.test$muRC <- d$mort * params.test$muS
 		
-	sol <- as.data.frame(ode(xB.test, times, rhs, params.test))
+	sol <- as.data.frame(ode.1D(xB.test, times, rhs, params.test, nspec = 6, dimens = N))
 	temp <- get_prevalence(sol)
 
 	data <- data.frame(
-		rhoT = epiTB$rhoT[i]
-		mort = epiTB$mort[i]
+		rhoT = params.test$rhoT,
+		mort = params.test$muC[1]/ params.test$muS[1],
 		bTBprev = temp$prevTB,
-		brucprev = temp$prevB 	
-		finalN = sum(sol[length(sol), c(2:length(colnames(sol)))])
-		bTB_inS = temp$prevTinS 
-		bTB_inB = temp$prevTinB
-		bruc_inS = temp$prevBinS 
-		bruc_inTB = temp$prevBinT
+		brucprev = temp$prevB, 	
+		finalN = sum(sol[length(sol), c(2:length(colnames(sol)))]),
+		bTB_inS = temp$prevTinS ,
+		bTB_inB = temp$prevTinB,
+		bruc_inS = temp$prevBinS ,
+		bruc_inTB = temp$prevBinT,
 	)
 	rm(params.test, sol, temp)
 }
@@ -254,30 +256,30 @@ write.csv(epiT, "epiT.csv")
 
 
 # For Brucellosis analyses set x0 as endemic prevalence BTB
-# NOT UPDATED!
 #############################################################
-xT.test <- xT[(min(ib.index)+50):(min(ib.index)+53)] <- 1
+xT.test <- xT
+xT.test[(min(ib.index)+50):(min(ib.index)+53)] <- 1
 
 cl <- makeCluster(6)
 registerDoParallel(cl)
-epiBR <- foreach(i = l:length(epiB[,1]), .combine = rbind) %dopar% {
+epiBR <- foreach(i = l:length(epiB[,1]), .combine = rbind, .packages = "deSolve") %dopar% {
 	params.test <- c(f.params, list(gamma = 1/2, betaB = 0.5764065, 
 		betaT = 1.3305462/1000, rhoT = 1, rhoB = epiB$rhoB[i]))
 	params.test$muC <- epiB$mort[i] * params.test$muS
 	params.test$muRC <- epiB$mort[i] * params.test$muS
 		
-	sol <- as.data.frame(ode(xT.test, times, rhs, params.test))
+	sol <- as.data.frame(ode.1D(xT.test, times, rhs, params.test, nspec = 6, dimens = N, ))
 	temp <- get_prevalence(sol)
 
 	data <- data.frame(
-		rhoB = epiB$rhoB[i]
-		mort = epiB$mort[i]
+		rhoB = params.test$rhoB,
+		mort = params.test$muC[1]/params.test$muS[1],
 		bTBprev = temp$prevTB,
-		brucprev = temp$prevB 	
-		finalN = sum(sol[length(sol), c(2:length(colnames(sol)))])
-		bTB_inS = temp$prevTinS 
-		bTB_inB = temp$prevTinB
-		bruc_inS = temp$prevBinS 
+		brucprev = temp$prevB, 	
+		finalN = sum(sol[length(sol), c(2:length(colnames(sol)))]),
+		bTB_inS = temp$prevTinS ,
+		bTB_inB = temp$prevTinB,
+		bruc_inS = temp$prevBinS,
 		bruc_inTB = temp$prevBinT
 	)
 	rm(params.test, sol, temp)
