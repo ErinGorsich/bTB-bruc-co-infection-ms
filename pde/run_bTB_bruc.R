@@ -53,6 +53,12 @@ agestep <- 0.1
 N <- agemax / agestep
 ages <- seq(1, agemax + 1, by = agestep)[-(N)]
 N == length(ages)
+s.index <- 1:N
+it.index <- seq(N+1, 2*N)
+ib.index <- seq((2*N+1), 3*N)
+ic.index <- seq((3*N+1), 4*N)
+r.index <- seq((4*N+1), 5*N)
+rc.index <- seq((5*N+1), 6*N)
 
 # generate parameters with correct agebins
 f.params <- gen_fixed_params(agemax, agestep, p = p, recovery = FALSE)

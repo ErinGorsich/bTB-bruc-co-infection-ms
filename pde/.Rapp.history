@@ -1,378 +1,727 @@
-betaBm <- matrix(nrow = 20, ncol = 20)#
-		betaBm[1:20, 1:20] <- betaB
-betaBm
-lambdaB <- betaBm %*% (Ib + Ic) / Nall
-lambdaB
-betaBv <- rep(betaB, 20)
-betaBv
-betaBv[2:5] <- exp(0.885) * betaBv[2:5]   #2-3yr have higher suscept.
-betaBv
-lambdaB <- betaBv * (sum(Ib) + sum(Ic)) / Nall
-lambdaB
-R
-Ic
-Ib
-lambdaB*Ib
-0.41*1.829
-##############################################################
-# Beverton & Holt, in main text #
-##############################################################
-rhs = function(times, x, params){#
-	###########################
-	# Inputs: t = time sequence; #
-	# x = initial conditions, vector(length=24), 4 age categories#
-	# params= list(#
-	# b1,b2,b3,b4,b5: age sp. prop reduction in fecundity (20 long)#
-	# with TB/bruc/chronic bruc/co/co-chronic #
-	# betaT, betaB: transmission rates, age independent#
-	# rhoB & rhoT: prop increase in transmission #
-	# with co-infection (scalor=age independent)#
-	# gamma, epsilon: scalors	 #
-	# b = a vector (0, small no., birth rate set to get growth = 1.2, same rate)#
-	# muS, muT, muB, muC, muR, muRC age specific mortality rates.  #
-	###########################
-	# Output: differences, for 20 ages#
-	###########################
-	with(as.list(c(x, params)), {#
-		# Assign state variables, each 20 long, #
-		# 4 categories: 1-2.9, 3-4.9, 5-15.9, 16+)#
-		# from incidence anlaysis, use [0-4.9),[5 +) #
-		# from mortality analysis, use [1-2.9),[3 +)#
-		# from birth analyis, use, 5+#
-		s_index <- 1:20#
-		it_index <- 21:40#
-		ib_index <- 41:60#
-		ic_index <- 61:80#
-		r_index <- 81:100#
-		rc_index <- 101:120#
+# agemax and N need to be global parameters#
+# indicies as well#
 #
-		S = x[s_index] 				#
-		It = x[it_index] 			#
-		Ib = x[ib_index]#
-		Ic = x[ic_index]#
-		R = x[r_index]#
-		Rc = x[rc_index]#
-#
-		# Population size (N)#
-		Nall <- sum(S + It + Ib + Ic + R + Rc)  # overall#
-		N <- S + It + Ib +Ic + R + Rc 			# by age category#
-#
-		# Frequency dependent force of infection is age dependent #
-		betaBv <- rep(betaB, 20)#
-		betaBv[2:5] <- exp(0.885) * betaBv[2:5]   #2-3yr have higher suscept.#
-		betaTv <- rep(betaT, 20)#
-		# lambdaB = age specific vectors!#
-		# bTB = density dependent, bruc = freq dependent#
-		lambdaT <- betaTv * sum((It + Ic + Rc))#
-		lambdaB <- betaBv * (sum(Ib) + sum(Ic)) / Nall#
-		lambdapT <- rhoT * betaTv * sum((It + Ic + Rc))#
-		lambdapB <- rhoB * betaBv * (sum(Ib) + sum(Ic)) / Nall#
-#
-		# Age spcific pop contributing to births (Nb = vector); #
-		# reduced births(b1, b2...=vectors; Nb = vector, birth = vector) #
-		Nb <- S + b1 * It + b2 * Ib + #
-			b3 * R + b4 * Ic + b5 * Rc#
-		birth <- c(b %*% Nb)#
-		recruitment <- c(birth / ( 1 + (Nall/K)^theta), rep(0, 19))#
-		dS <- recruitment - (lambdaT + lambdaB) * S - muS * S#
-		dIt <- lambdaT * S - (lambdapB + muT) * It#
-		dIb <- lambdaB * S +	epsilon * R - (gamma + lambdapT + muB) * Ib#
-		dIc <- lambdapT*Ib + lambdapB*It + epsilon * Rc - (gamma + muC)*Ic#
-		dR <- gamma * Ib - (epsilon + muR + lambdapT) * R#
-		dRc <- lambdapT * R + gamma * Ic - (epsilon + muRC) * Rc#
-		out = list(c(dS, dIt, dIb, dIc, dR, dRc))#
-		return(out)	#
-		}#
-	)#
-}
-betaB_temp <- seq(0.4, 1, 0.05) #
-prevB <- NA; prevBrecov <- NA#
-for (i in 1:length(betaB_temp)){#
-	params.test = c(fixed.params, list(gamma=0.5/365.25, #
-		betaB = betaB_temp[i]/365.25, betaT = 0.0012974553/365.25, rhoT = 1, rhoB = 2.1))#
-	sol <- run_one(tmax = 100*365, x0 = x0, params = params.test)#
-	prevB[i]<- get_prevalence(sol)$prevB#
-	get_prevalence(sol$prevB)#
-	rm(sol, params.test)#
-}
-plot(x = betaB_temp, y = prevB, type = "l", xlab = expression(beta), #
-	ylab = "Brucellosis prevalence", main = "Single disease")#
-abline(h = c(0.1, 0.2, 0.3, 0.4), col = "dark red")
-S0 <- 400* stable_age; It0 <- 0 * stable_age; Ib0 <- 20* stable_age; #
-Ic0 <- 0* stable_age; R0 <- 30 * stable_age; Rc0 <- 0 * stable_age#
-x0 <- c(S0, It0, Ib0, Ic0, R0, Rc0)#
-#
-betaB_temp <- seq(0.4, 1, 0.05) #
-prevB <- NA; prevBrecov <- NA
-params.test = c(fixed.params, list(gamma=0.5/365.25, #
-		betaB = betaB_temp[5]/365.25, betaT = 0.0012974553/365.25, rhoT = 1, rhoB = 2.1))#
-	sol <- run_one(tmax = 100*365, x0 = x0, params = params.test)
-plot_raw_numbers(sol)
-get_prevalence(sol)$prevB
-get_prevalence(sol)
-get_prevalence
-head(sol)
-S <- sum(sol[length(sol), s.index+1])#
-	It <- sum(sol[length(sol), it.index +1])#
-	Ib <- sum(sol[length(sol) , ib.index +1])#
-	Ic <- sum(sol[length(sol) , ic.index +1])#
-	R <- sum(sol[length(sol) , r.index +1])#
-	Rc <- sum(sol[length(sol) , rc.index +1])#
-	N <- sum(sol[length(sol), 2:121])
-S
-length(sol)
-S <- sum(sol[length(sol[,1]), s.index+1])#
-	It <- sum(sol[length(sol[,1]), it.index +1])#
+getEE = function(params, x0, method){#
+	####################################
+	# Input: x = c(S = final, 1*20 S vector at params)#
+	# method = "logistic", "ricker", "beverton-holt"#
+	# Output: Ro#
+	####################################
+	# stable age in disease free conditions now read in#
+	####################################
+	binsize <- N/agemax #number of delta age bins to get one age bin...#
+	# run single infection EE, bTB#
+	####################################
+	x_singleTB <- x0#
+	x_singleTB[(N+1)  +  3*binsize] <- 1#
+	x_singleTB[(N+1) +  4*binsize] <- 1#
+	if (method == "ricker"){#
+		sol <- as.data.frame(ode(x_singleTB, times, #
+			rhs_ricker, params, method = "ode45"))}#
+	if (method == "logistic"){#
+		sol <- as.data.frame(ode(x_singleTB, times, rhs_logistic, #
+			params, method = "ode45"))}#
+	if (method == "beverton-holt"){#
+		sol <- as.data.frame(ode(x_singleTB, times, rhs, #
+			params, method = "ode45"))}#
+	S <-sum(sol[length(sol[,1]) , s.index+1])#
+	It <- sum(sol[length(sol[,1]) , it.index +1])#
+	Ic <- sum(sol[length(sol[,1]) , ic.index +1])#
 	Ib <- sum(sol[length(sol[,1]) , ib.index +1])#
 	Ic <- sum(sol[length(sol[,1]) , ic.index +1])#
 	R <- sum(sol[length(sol[,1]) , r.index +1])#
-	Rc <- sum(sol[length(sol[,1]) , rc.index +1])#
-	N <- sum(sol[length(sol[,1]), 2:121])
-S
-It
-Ib
-betaB_temp <- seq(0.4, 1, 0.05) #
-prevB <- NA; prevBrecov <- NA#
-for (i in 1:length(betaB_temp)){#
-	params.test = c(fixed.params, list(gamma=0.5/365.25, #
-		betaB = betaB_temp[i]/365.25, betaT = 0.0012974553/365.25, rhoT = 1, rhoB = 2.1))#
-	sol <- run_one(tmax = 100*365, x0 = x0, params = params.test)#
-	prevB[i]<- get_prevalence(sol)$prevB#
-	get_prevalence(sol)$prevB#
-	rm(sol, params.test)#
-}#
-plot(x = betaB_temp, y = prevB, type = "l", xlab = expression(beta), #
-	ylab = "Brucellosis prevalence", main = "Single disease")#
-abline(h = c(0.1, 0.2, 0.3, 0.4), col = "dark red")
-prevB
-head(sol)
-params.test = c(fixed.params, list(gamma=0.5/365.25, #
-		betaB = betaB_temp[5]/365.25, betaT = 0.0012974553/365.25, rhoT = 1, rhoB = 2.1))
-sol <- run_one(tmax = 100*365, x0 = x0, params = params.test)
-plot_raw_numbers(sol)
-get_prevalence(sol)
-get_prevalence = function(sol){#
-	S <- sum(sol[length(sol[,1]), s.index+1])#
-	It <- sum(sol[length(sol[,1]), it.index +1])#
+	Rc <-sum(sol[length(sol[,1]) , rc.index +1])#
+	Tot <- sum(sol[length(sol[,1]), 2:length(colnames(sol))])	#
+	EE_bTB_alone <- (It + Ic + Rc) / Tot#
+#
+	# run single infection EE, bruc#
+	####################################
+	x_singleBruc = x0#
+	x_singleBruc[min(ib.index) + 1 + 3*binsize] <- 1#
+	x_singleBruc[min(ib.index) + 1 + 4*binsize] <- 1#
+#
+	if (method == "ricker"){#
+		sol <- as.data.frame(ode(x_singleBruc, times, rhs_ricker, #
+			params, method = "ode45"))}#
+	if (method == "logistic"){#
+		sol <- as.data.frame(ode(x_singleBruc, times, rhs_logistic, #
+			params, method = "ode45"))}#
+	if (method == "beverton-holt"){#
+		sol <- as.data.frame(ode(x_singleBruc, times, rhs,#
+			params, method = "ode45"))}	#
+	S <-sum(sol[length(sol[,1]) , s.index+1])#
+	It <- sum(sol[length(sol[,1]) , it.index +1])#
+	Ic <- sum(sol[length(sol[,1]) , ic.index +1])#
 	Ib <- sum(sol[length(sol[,1]) , ib.index +1])#
 	Ic <- sum(sol[length(sol[,1]) , ic.index +1])#
 	R <- sum(sol[length(sol[,1]) , r.index +1])#
-	Rc <- sum(sol[length(sol[,1]) , rc.index +1])#
-	N <- sum(sol[length(sol[,1]), 2:121])#
-	prevTB <- (It + Ic + Rc) / N #
-	prevB <- (Ib + Ic + R + Rc) / N#
-	prevBinS <- (Ib + R) / (S + Ib + R)#
-	prevBinT <- (Ic + Rc) / (It + Ic + Rc)#
-	prevTinS <- (It) / (S + It)#
-	prevTinB <- (Ic + Rc) / (Ib + Ic + R + Rc)#
-	return(list(prevTB = prevTB, prevB = prevB,#
-		prevBinS = prevBinS, prevBinT = prevBinT, #
-		prevTinS = prevTinS, prevTinB = prevTinB))#
+	Rc <-sum(sol[length(sol[,1]) , rc.index +1])#
+	Tot <- sum(sol[length(sol[,1]), 2:length(colnames(sol))])	#
+	EE_bruc_alone <- (Ib + Ic + R + Rc) / Tot#
+#
+	x_endB <- unname(unlist(sol[length(sol[,1]), 2:length(colnames(sol))] ))#
+#
+	# introduce both...#
+	####################################
+	x_endB[min(it.index) + 1  +  3*binsize] <- 1#
+	x_endB[min(it.index) + 1  +  4*binsize] <- 1#
+#
+	if (method == "ricker"){#
+		sol <- as.data.frame(ode(x_endB, times, rhs_ricker, params, method = "ode45"))}#
+	if (method == "logistic"){#
+		sol <- as.data.frame(ode(x_endB, times, rhs_logistic, params, method = "ode45"))}#
+	if (method == "beverton-holt"){#
+		sol <- as.data.frame(ode(x_endB, times, rhs, params, method = "ode45"))}	#
+	S <-sum(sol[length(sol[,1]) , s.index+1])#
+	It <- sum(sol[length(sol[,1]) , it.index +1])#
+	Ic <- sum(sol[length(sol[,1]) , ic.index +1])#
+	Ib <- sum(sol[length(sol[,1]) , ib.index +1])#
+	Ic <- sum(sol[length(sol[,1]) , ic.index +1])#
+	R <- sum(sol[length(sol[,1]) , r.index +1])#
+	Rc <-sum(sol[length(sol[,1]) , rc.index +1])#
+	Tot <- sum(sol[length(sol[,1]), 2:length(colnames(sol))])	#
+#
+	EE_bTB_co <- (It + Ic + Rc) / Tot#
+	EE_bruc_co <- (Ib + Ic + R + Rc) / Tot#
+	return(c(EE_bTB_alone, EE_bTB_co, EE_bruc_alone, EE_bruc_co))#
 }
-get_prevalence(sol)
-S0 <- 400* stable_age; It0 <- 0 * stable_age; Ib0 <- 20* stable_age; #
-Ic0 <- 0* stable_age; R0 <- 30 * stable_age; Rc0 <- 0 * stable_age#
+xB <- x0#
+binsize <- N / agemax#
+xB[(2*N + 1) + 3*binsize] <- 1#
+xB[(2*N + 1) + 4*binsize] <- 1
+params <- c(f.params, list(gamma = 1/2, betaB = 0.5764065, #
+		betaT = 1.3305462/1000, rhoT = 1, rhoB = 2.1))#
+get_EE(params)
+getEE(params)
+getEE(params, xB, "beverton-holt")
+params$muS
+params$muT
+it.index
+####################################################
+####################################################
+# Accessory functions for fitting: #
+rm(list = ls())#
+require("deSolve")#
+library("gridExtra")#
+library("ggplot2")#
+library("lattice") # for levelplots#
+setwd("~/GitHub/bTB-bruc-co-infection-ms/pde")#
+#
+# parameters#
+source('fixed_parameters.R', chdir = TRUE)#
+# rhs function - model structure#
+source('rhs.R', chdir = TRUE)#
+##############################################################
+##############################################################
+#2) Set-up features of aging#
+##############################################################
+##############################################################
+agemax <- 20#
+agestep <- 0.1#
+N <- agemax / agestep#
+ages <- seq(1, agemax + 1, by = agestep)[-(N)]#
+N == length(ages)#
+#
+# generate parameters with correct agebins#
+f.params <- gen_fixed_params(agemax, agestep, p = p, recovery = FALSE)#
+f.params.recov <- gen_fixed_params(agemax, agestep, p = p, recovery = TRUE)#
+#
+# Functions for plotting (and define indecies based on ages, N): #
+source('plotting_functions.R', chdir = TRUE)#
+#
+# Starting agestructure (Jolles 2007; Caron et al. 2001)#
+juv <- rep(0.137 / length(ages[ages < 2]), length(ages[ages < 2]))#
+sa <- rep(0.368 / length(ages[ages >= 2 & ages < 6]), length(ages[ages >= 2 & ages < 6]))#
+a <- rep(0.185 / length(ages[ages >= 6 & ages < 9]), length(ages[ages >= 6 & ages < 9]))#
+ma <- rep(0.235 / length(ages[ages >= 9 & ages < 14]), length(ages[ages >= 9 & ages < 14]))#
+sen <- rep(0.075 / length(ages[ages >= 14 ]), length(ages[ages >= 14]))#
+#
+relage <- c(juv, sa, a, ma, sen); length(relage) == N	#
+#
+# Initial conditions#
+S0 <- 400 * relage; It0 <- 0 * relage; Ib0 <- 0 * relage#
+Ic0 <- 0 * relage; R0 <- 0 * relage; Rc0 <- 0 * relage#
+times <- seq(1, 500, 1)#
 x0 <- c(S0, It0, Ib0, Ic0, R0, Rc0)#
 #
-betaB_temp <- seq(0.4, 1, 0.05) #
-prevB <- NA; prevBrecov <- NA#
-for (i in 1:length(betaB_temp)){#
-	params.test = c(fixed.params, list(gamma=0.5/365.25, #
-		betaB = betaB_temp[i]/365.25, betaT = 0.0012974553/365.25, rhoT = 1, rhoB = 2.1))#
-	sol <- run_one(tmax = 100*365, x0 = x0, params = params.test)#
-	prevB[i]<- get_prevalence(sol)$prevB#
-	get_prevalence(sol)$prevB#
-	rm(sol, params.test)#
-}#
-plot(x = betaB_temp, y = prevB, type = "l", xlab = expression(beta), #
-	ylab = "Brucellosis prevalence", main = "Single disease")#
-abline(h = c(0.1, 0.2, 0.3, 0.4), col = "dark red")#
-# Beta value at:#
-betaB_temp[which(prevB < 0.06 & prevB > 0.04)]  		#
-betaB_temp[which(prevB < 0.11 & prevB > 0.09)]		#
-betaB_temp[which(prevB < 0.21 & prevB > 0.19)]		#
-betaB_temp[which(prevB < 0.31 & prevB > 0.29)]		#
-betaB_temp[which(prevB < 0.405 & prevB > 0.395)]
-S0 <- 400* stable_age; It0 <- 0 * stable_age; Ib0 <- 20* stable_age; #
-Ic0 <- 0* stable_age; R0 <- 30 * stable_age; Rc0 <- 0 * stable_age#
+# set stable age structure in disease free context (1200 long N*6)#
+params <- c(f.params, list(gamma = 1/2, betaB = 0.6087396, #
+	betaT = 0.0012974553, rhoT = 1, rhoB = 2.1))
+##############################################################
+##############################################################
+#1) Load fixed parameters, model#
+##############################################################
+##############################################################
+rm(list = ls())#
+require("deSolve")#
+library("plyr")#
+library("ggplot2")#
+library("lattice") # for levelplots#
+library("gridExtra") # layout for lattice#
+library("RColorBrewer")#
+library("doParallel")#
+library("foreach")#
+set.seed(5)#
+#
+setwd("~/GitHub/bTB-bruc-co-infection-ms/pde")#
+#
+# parameters#
+source('fixed_parameters.R', chdir = TRUE)#
+#
+# rhs function - model structure#
+source('rhs.R', chdir = TRUE)#
+# age divisions in rhs function#
+agemax <- 20#
+agestep <- 0.1#
+N <- agemax / agestep#
+ages <- seq(1, agemax + 1, by = agestep)[-(N)]#
+N == length(ages)#
+#
+# generate parameters with correct agebins#
+f.params <- gen_fixed_params(agemax, agestep, p = p, recovery = FALSE)#
+f.params.recov <- gen_fixed_params(agemax, agestep, p = p, recovery = TRUE)#
+#
+# Functions for plotting (and define indecies based on ages, N): #
+source('~/GitHub/bTB-bruc-co-infection-ms/pde/plotting_functions.R', chdir = TRUE)
+s.index
+# Starting agestructure (Jolles 2007; Caron et al. 2001)#
+juv <- rep(0.137 / length(ages[ages < 2]), length(ages[ages < 2]))#
+sa <- rep(0.368 / length(ages[ages >= 2 & ages < 6]), length(ages[ages >= 2 & ages < 6]))#
+a <- rep(0.185 / length(ages[ages >= 6 & ages < 9]), length(ages[ages >= 6 & ages < 9]))#
+ma <- rep(0.235 / length(ages[ages >= 9 & ages < 14]), length(ages[ages >= 9 & ages < 14]))#
+sen <- rep(0.075 / length(ages[ages >= 14 ]), length(ages[ages >= 14]))#
+#
+relage <- c(juv, sa, a, ma, sen); length(relage) == N									#
+plot.relage <- c(0.137, rep(0.368/4, 4), rep(0.185/3, 3), rep(0.235/5, 5), rep(0.075/7, 7)) 	#
+# Define x0, parameter for getEE function, disease free values#
+##############################################################
+S0 <- 400 * relage; It0 <- 0 * relage; Ib0 <- 0 * relage#
+Ic0 <- 0 * relage; R0 <- 0 * relage; Rc0 <- 0 * relage#
+times <- seq(1, 500, 1)#
 x0 <- c(S0, It0, Ib0, Ic0, R0, Rc0)#
-#
-betaB_temp <- seq(0.4, 1, 0.01) #
-prevB <- NA; prevBrecov <- NA#
-for (i in 1:length(betaB_temp)){#
-	params.test = c(fixed.params, list(gamma=0.5/365.25, #
-		betaB = betaB_temp[i]/365.25, betaT = 0.0012974553/365.25, rhoT = 1, rhoB = 2.1))#
-	sol <- run_one(tmax = 100*365, x0 = x0, params = params.test)#
-	prevB[i]<- get_prevalence(sol)$prevB#
-	get_prevalence(sol)$prevB#
-	rm(sol, params.test)#
-}#
-#
-plot(x = betaB_temp, y = prevB, type = "l", xlab = expression(beta), #
-	ylab = "Brucellosis prevalence", main = "Single disease")#
-abline(h = c(0.1, 0.2, 0.3, 0.4), col = "dark red")#
-# Beta value at:#
-betaB_temp[which(prevB < 0.06 & prevB > 0.04)]  		#
-betaB_temp[which(prevB < 0.11 & prevB > 0.09)]		#
-betaB_temp[which(prevB < 0.21 & prevB > 0.19)]		#
-betaB_temp[which(prevB < 0.31 & prevB > 0.29)]		#
-betaB_temp[which(prevB < 0.405 & prevB > 0.395)]
-betaT_temp <- seq(0.0001, 0.005, 0.0001)
-length(betaT_temp)
-# Test 3: Add bTB, only get bTB#
+params <- c(f.params, list(gamma = 1/2, betaB = 0, #
+	betaT = 0, rhoT = 1, rhoB = 2.1))#
+test <- as.data.frame(ode.1D(x0, times, rhs, params, nspec = 6, dimens = N, method = "ode45"))#
+x0 <- unname(unlist(test[length(test[,1]), c(2:(length(colnames(test))))]))
 ##############################################################
-S0 = 400* stable_age; It0 = 20 * stable_age; Ib0 = 0* stable_age; #
-Ic0 = 0* stable_age; R0 = 0 * stable_age; Rc0 = 0 * stable_age#
-x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)#
-#
-betaT_temp <- seq(0.0001, 0.005, 0.0001) #
-prevT <- NA; prevTrecov <- NA#
-for (i in 1:length(betaT_temp)){#
-	params.test = c(fixed.params, list(gamma=0.5/365.25, #
-		betaB = 0.6087396/365.25, betaT = betaT_temp[i]/365.25, rhoT = 1, rhoB = 2.1))#
-	sol <- run_one(tmax = 100*365, x0 = x0, params = params.test)#
-	prevT[i]<- get_prevalence(sol)$prevT#
-	rm(sol, params.test)#
-}
-S0 = 400*stable_age; It0 = 20 * stable_age; Ib0 = 0* stable_age; #
-Ic0 = 0* stable_age; R0 = 0 * stable_age; Rc0 = 0 * stable_age#
-x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)#
-#
-betaT_temp <- seq(0.0001, 0.005, 0.0001) #
-prevT <- NA; prevTrecov <- NA
-params.test = c(fixed.params, list(gamma=0.5/365.25, #
-		betaB = 0.6087396/365.25, betaT = betaT_temp[5]/365.25, rhoT = 1, rhoB = 2.1))#
-	sol <- run_one(tmax = 100*365, x0 = x0, params = params.test)
-tail(sol)
-get_prevalence(sol)
-S0 = 400*stable_age; It0 = 20 * stable_age; Ib0 = 0* stable_age; #
-Ic0 = 0* stable_age; R0 = 0 * stable_age; Rc0 = 0 * stable_age#
-x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)#
-#
-betaT_temp <- seq(0.0001, 0.005, 0.0001) #
-prevT <- NA; prevTrecov <- NA#
-for (i in 1:length(betaT_temp)){#
-	params.test = c(fixed.params, list(gamma=0.5/365.25, #
-		betaB = 0.6087396/365.25, betaT = betaT_temp[i]/365.25, rhoT = 1, rhoB = 2.1))#
-	sol <- run_one(tmax = 100*365, x0 = x0, params = params.test)#
-	prevT[i]<- get_prevalence(sol)$prevTB#
-	rm(sol, params.test)#
-}#
-#
-plot(x = betaT_temp, y = prevT, type = "l", xlab = expression(beta), #
-	ylab = "BTB prevalence", main = "Single disease")#
-abline(h = c(0.1, 0.2, 0.3, 0.4), col = "dark red")
-betaT_temp[which(prevT < 0.06 & prevT > 0.04)]  		#
-betaT_temp[which(prevT < 0.11 & prevT > 0.09)]		#
-betaT_temp[which(prevT < 0.21 & prevT > 0.19)]		#
-betaT_temp[which(prevT < 0.31 & prevT > 0.29)]		#
-betaT_temp[which(prevT < 0.405 & prevT > 0.395)]
-plot(x = betaT_temp, y = prevT, type = "l", xlab = expression(beta), #
-	ylab = "BTB prevalence", main = "Single disease")#
-abline(h = c(0.1, 0.2, 0.3, 0.4), col = "dark red")
-betaT_temp[which(prevT < 0.32 & prevT > 0.28)]
-params.test = c(fixed.params, list(gamma=0.5/365.25, #
-	betaB = 0.6087396/365.25, betaT = 0.0012974553/365.25, rhoT = 1, rhoB = 2.1))#
-sol <- run_one(tmax = 500*365, x0 = x0, params = params.test)#
-endemic_agestructure <- unname(unlist( sol[500, c(2:121)] ))
-plot_raw_numbers(sol)
-# Test 2: Add brucellosis, only get brucellosis #
 ##############################################################
-S0 <- 400* stable_age; It0 <- 0 * stable_age; Ib0 <- 20* stable_age; #
-Ic0 <- 0* stable_age; R0 <- 30 * stable_age; Rc0 <- 0 * stable_age#
-x0 <- c(S0, It0, Ib0, Ic0, R0, Rc0)
-# set endemic age-structure#
-params.test = c(fixed.params, list(gamma=0.5/365.25, #
-	betaB = 0.6087396/365.25, betaT = 0.0012974553/365.25, rhoT = 1, rhoB = 2.1))#
-sol <- run_one(tmax = 500*365, x0 = x0, params = params.test)#
-endemic_agestructure <- unname(unlist( sol[500, c(2:121)] ))
+# Functions to calculate EE and Ro#
+source('~/GitHub/bTB-bruc-co-infection-ms/pde/Ro_calculations.R', chdir = TRUE)#
+#
+# Functions for plotting#
+source('~/GitHub/bTB-bruc-co-infection-ms/pde/plotting_functions.R', chdir = TRUE)
+source('~/GitHub/bTB-bruc-co-infection-ms/pde/get_EE.R', chdir = TRUE)
+params <- c(f.params, list(gamma = 1/2, betaB = 0.5764065, #
+		betaT = 1.3305462/1000, rhoT = 1, rhoB = 2.1))
+binsize <- N/agemax #number of delta age bins to get one age bin...
+x_singleTB <- x0#
+	x_singleTB[(N+1)  +  3*binsize] <- 1#
+	x_singleTB[(N+1) +  4*binsize] <- 1
+x_singleTB
+sol <- as.data.frame(ode(x_singleTB, times, rhs, #
+			params, method = "ode45"))}#
+	S <-sum(sol[length(sol[,1]) , s.index+1])#
+	It <- sum(sol[length(sol[,1]) , it.index +1])#
+	Ic <- sum(sol[length(sol[,1]) , ic.index +1])#
+	Ib <- sum(sol[length(sol[,1]) , ib.index +1])#
+	Ic <- sum(sol[length(sol[,1]) , ic.index +1])#
+	R <- sum(sol[length(sol[,1]) , r.index +1])#
+	Rc <-sum(sol[length(sol[,1]) , rc.index +1])#
+	Tot <- sum(sol[length(sol[,1]), 2:length(colnames(sol))])	#
+	EE_bTB_alone <- (It + Ic + Rc) / Tot
+method = "beverton-holt"
+if (method == "beverton-holt"){#
+		sol <- as.data.frame(ode(x_singleTB, times, rhs, #
+			params, method = "ode45"))}#
+	S <-sum(sol[length(sol[,1]) , s.index+1])#
+	It <- sum(sol[length(sol[,1]) , it.index +1])#
+	Ic <- sum(sol[length(sol[,1]) , ic.index +1])#
+	Ib <- sum(sol[length(sol[,1]) , ib.index +1])#
+	Ic <- sum(sol[length(sol[,1]) , ic.index +1])#
+	R <- sum(sol[length(sol[,1]) , r.index +1])#
+	Rc <-sum(sol[length(sol[,1]) , rc.index +1])#
+	Tot <- sum(sol[length(sol[,1]), 2:length(colnames(sol))])	#
+	EE_bTB_alone <- (It + Ic + Rc) / Tot
+EE_bTB_alone
+x_singleBruc <- x0#
+	x_singleBruc[min(ib.index) + 1 + 3*binsize] <- 1#
+	x_singleBruc[min(ib.index) + 1 + 4*binsize] <- 1
+x_singleBruc
+if (method == "ricker"){#
+		sol <- as.data.frame(ode(x_singleBruc, times, rhs_ricker, #
+			params, method = "ode45"))}#
+	if (method == "logistic"){#
+		sol <- as.data.frame(ode(x_singleBruc, times, rhs_logistic, #
+			params, method = "ode45"))}
+if (method == "beverton-holt"){#
+		sol <- as.data.frame(ode(x_singleBruc, times, rhs,#
+			params, method = "ode45"))}	#
+	S <-sum(sol[length(sol[,1]) , s.index+1])#
+	It <- sum(sol[length(sol[,1]) , it.index +1])#
+	Ic <- sum(sol[length(sol[,1]) , ic.index +1])#
+	Ib <- sum(sol[length(sol[,1]) , ib.index +1])#
+	Ic <- sum(sol[length(sol[,1]) , ic.index +1])#
+	R <- sum(sol[length(sol[,1]) , r.index +1])#
+	Rc <-sum(sol[length(sol[,1]) , rc.index +1])#
+	Tot <- sum(sol[length(sol[,1]), 2:length(colnames(sol))])	#
+	EE_bruc_alone <- (Ib + Ic + R + Rc) / Tot
 plot_raw_numbers(sol)
-params <- c(fixed.params, list(gamma=0.5/365.25, betaB = 0.6087396/365.25,#
-	betaT = 0.0012974553/365.25, rhoT = 1, rhoB = 2.1))#
-sol <- run_one(tmax = 200*365, x0 = x0, params = params.test)
+if (method == "beverton-holt"){#
+		sol <- as.data.frame(ode(x_singleBruc, times, rhs,#
+			params, method = "ode45"))}	#
+	S <-sum(sol[length(sol[,1]) , s.index+1])#
+	It <- sum(sol[length(sol[,1]) , it.index +1])#
+	Ic <- sum(sol[length(sol[,1]) , ic.index +1])#
+	Ib <- sum(sol[length(sol[,1]) , ib.index +1])#
+	Ic <- sum(sol[length(sol[,1]) , ic.index +1])#
+	R <- sum(sol[length(sol[,1]) , r.index +1])#
+	Rc <-sum(sol[length(sol[,1]) , rc.index +1])#
+	Tot <- sum(sol[length(sol[,1]), 2:length(colnames(sol))])	#
+	EE_bruc_alone <- (Ib + Ic + R + Rc) / Tot
+EE_bruc_alone
 plot_raw_numbers(sol)
+x_endB <- unname(unlist(sol[length(sol[,1]), 2:length(colnames(sol))] ))
+x_endB[min(it.index) + 1  +  3*binsize] <- 1#
+	x_endB[min(it.index) + 1  +  4*binsize] <- 1
+x_endB
+if (method == "ricker"){#
+		sol <- as.data.frame(ode(x_endB, times, rhs_ricker, params, method = "ode45"))}#
+	if (method == "logistic"){#
+		sol <- as.data.frame(ode(x_endB, times, rhs_logistic, params, method = "ode45"))}#
+	if (method == "beverton-holt"){#
+		sol <- as.data.frame(ode(x_endB, times, rhs, params, method = "ode45"))}	#
+	S <-sum(sol[length(sol[,1]) , s.index+1])#
+	It <- sum(sol[length(sol[,1]) , it.index +1])#
+	Ic <- sum(sol[length(sol[,1]) , ic.index +1])#
+	Ib <- sum(sol[length(sol[,1]) , ib.index +1])#
+	Ic <- sum(sol[length(sol[,1]) , ic.index +1])#
+	R <- sum(sol[length(sol[,1]) , r.index +1])#
+	Rc <-sum(sol[length(sol[,1]) , rc.index +1])#
+	Tot <- sum(sol[length(sol[,1]), 2:length(colnames(sol))])	#
+#
+	EE_bTB_co <- (It + Ic + Rc) / Tot#
+	EE_bruc_co <- (Ib + Ic + R + Rc) / Tot
+EE_bTB_co
+EE_bruc_co
+source('~/GitHub/bTB-bruc-co-infection-ms/pde/get_EE.R', chdir = TRUE)
+get_EE(params, xB, "beverton-holt")
 x0
-x0 = endemic_agestructure#
-x0[28] <- 5; x0[8] <- x0[8] - 5
-params <- c(fixed.params, list(gamma=0.5/365.25, betaB = 0.6087396/365.25,#
-	betaT = 0.0012974553/365.25, rhoT = 1, rhoB = 2.1))#
-sol <- run_one(tmax = 200*365, x0 = x0, params = params.test)#
-plot_raw_numbers(sol)
-get_prevalence(sol); #get_prevalence(sol.recov);   # almost no change in Bruc prev, no bTB!
-library("RColorBrewer")
-exp(1)
-exp(2.2)
-color.df$color <- NA#
-color.df$color[color.df$origin.ind2009 ==1 & color.df$origin.ind2011 == 0] <- "#fee0d2"  # 2009 only #
-color.df$color[color.df$origin.ind2009 == 0 & color.df$origin.ind2011 == 1] <- "#fc9272"  # 2010 only #
-color.df$color[color.df$origin.ind2009==1 & color.df$origin.ind2011 ==1] <- "#de2d26"  # both #
-color.df$color[is.na(color.df$color)]<-"white"
-###################################################
-# 1) packages and files#
-###################################################
+source('~/GitHub/bTB-bruc-co-infection-ms/pde/get_EE.R', chdir = TRUE)
+get_EE(params, x0, "beverton-holt")
+test <- get_EE(params, x0, "beverton-holt")
+test
+test[1]
+params$betaT
+Fmat = params$betaT* matrix(rep(S, each = 20), nrow = 20, byrow = T)
+Fmat
+S <- x0[s.index + 1]
+S
+length(S)
+Fmat = params$betaT* matrix(rep(S, each = N), nrow = 20, byrow = T)
+Fmat
+params$betaT
+matrix(rep(S, each = N), nrow = N, byrow = T)
+params$aging[1:10, 1:10]
+da
+rhs
+ls()
+gen_fixed_params
+params$aging[1,1]
+x0
+####################################
+	S <- x0[s.index + 1]#
+	ageflux <- params$aging[1,1]#
 #
-library(maps)#
-import<- read.csv("~/Documents/post-doc/2009-2011 comparison final/paperdrafts2- MxSim/Manuscript drafts/draft2_toColleen/2009_2011imports_all.csv")#
+	# Calculate next generation matrix#
+	Fmat = params$betaT* matrix(rep(S, each = N), nrow = N, byrow = T)#
+	Vmat = diag(x = params$muT + ageflux)#
+	Vmat[row(Vmat) - col(Vmat) == 1] <- - ageflux#
+	Vinv <- solve(Vmat)#
+	vals <- eigen(Fmat %*% Vinv)$values#
 #
-ctname=map('county', plot=F)$names#
-ctname=as.character(ctname)#
-color.df<-data.frame(ctname=ctname)#
-data(county.fips)#
-color.df$fips<-county.fips$fips[match(color.df$ctname, county.fips$polyname)]#
+	Vmat2 <- diag(x = params$muT)#
+	V2inv <- solve(Vmat2)#
+	vals2 <- eigen(Fmat %*% V2inv)$values#
+	return(max(Re(vals2)))
+vals2
+max(Re(vals2))
+params$betaB
+S
+ages
+Fmat <- params$betaB* matrix(rep(S, each = N), nrow = N, byrow = T)
+nrow(Fmat)
+ncol(Fmat)
+which(ages > 2 & ages <5)
+ages[2]
+which(ages => 2 & ages <5)
+which(ages >=2 & ages <5)
+ages[40]
+which(ages >=2 & ages =<5)
+which(ages >=2 & ages <= 5)
+Fmat <- params$betaB* matrix(rep(S, each = N), nrow = N, byrow = T)#
+	Fmat[which(ages >= 2 & ages <=5), ] <- exp(0.885) * Fmat[#
+		which(ages >= 2 & ages <=5), ]
+Fmat
+Fmat[which(ages >= 2 & ages <= 5)]
+Fmat[which(ages >= 2 & ages <= 5), ]
+Fmat[1:5, 1:5]
+which(ages >= 2 & ages <=5)
+length(ages)
+ages
+Ro_brucellosis_single = function(params, x0){#
+	####################################
+	# Input: paramter file#
+	####################################
+	# Get stable age distribution in dz free conditions#
+	S <- x0[s.index + 1]#
+	ageflux <- params$aging[1,1]#
 #
-# columns defining import locations#
-color.df$origin.ind2009 <- 0 #
-color.df$origin.ind2011 <- 0#
-fips09 <- import$FIPS[import$ships09 > 0]#
-fips11<- import$FIPS[import$ships11 > 0]#
-color.df$origin.ind2009[color.df$fips %in% fips09] <- 1#
-color.df$origin.ind2011[color.df$fips %in% fips11] <- 1#
+	Fmat <- params$betaB* matrix(rep(S, each = N), nrow = N, byrow = T)#
+	Fmat[which(ages >= 2 & ages <=5), ] <- exp(0.885) * Fmat[which(ages >= 2 & ages <=5), ]#
+	Vmat = diag(x = params$muB + params$gamma + ageflux)#
+	Vmat[row(Vmat) - col(Vmat) == 1] <- - ageflux#
+	Vinv <- solve(Vmat)#
+	vals <- eigen(Fmat %*% Vinv)$values#
+	return(max(Re(vals)))#
+}
+Ro_brucellosis_single(params, x0)
+params$betaB
+aging
+params$aging[1,1]
+S <- x0[s.index + 1]
+x0
+head(x0)
+Fmat <- params$betaB* matrix(rep(S, each = N), nrow = N, byrow = T)
+Fmat[1:10, 1:10]
+Fmat[which(ages >= 2 & ages <=5), ] <- exp(0.885) * Fmat[which(ages >= 2 & ages <=5), ]
+Fmat[1:10, 1:10]
+Fmat[10:30, 1:10]
+Fmat <- params$betaB* matrix(rep(S, each = N), nrow = N, byrow = T)
+Fmat[10:30, 1:10]
+ages
+Fmat[which(ages >= 2 & ages <=5), ] <- exp(0.885) * Fmat[which(ages >= 2 & ages <=5), ]
+ages
+Fmat[10:30, 1:10]
+Vmat = diag(x = params$muB + params$gamma + ageflux)
+ncols(Vmat)
+dims(Vmat)
+Vmat
+Vmat[row(Vmat) - col(Vmat) == 1] <- - ageflux#
+	Vinv <- solve(Vmat)#
+	vals <- eigen(Fmat %*% Vinv)$values
+max(Re(vals))
+params$muB
+params$muS
+params$betaB
+ageflux
+Ro_bTB_single = function(params, x0){#
+	####################################
+	# Input: x0 = c(S = final, 1*N S vector at params)#
+	# Output: Ro#
+	####################################
+	S <- x0[s.index + 1]#
+	ageflux <- params$aging[1,1]#
 #
-color.df$color <- NA#
-color.df$color[color.df$origin.ind2009 ==1 & color.df$origin.ind2011 == 0] <- "#fee0d2"  # 2009 only #
-color.df$color[color.df$origin.ind2009 == 0 & color.df$origin.ind2011 == 1] <- "#fc9272"  # 2010 only #
-color.df$color[color.df$origin.ind2009==1 & color.df$origin.ind2011 ==1] <- "#de2d26"  # both #
-color.df$color[is.na(color.df$color)]<-"white"
-map('county', fill = T, col = color.df$color, lty = 0, mar = c(2,1.5, 2, 7), resolution = 0)
-map('county', fill=F, col="dark gray", lwd=0.3,add=T, resolution=0);
-map('state' , col='black',lwd=0.5,add=T, resolution=0)
-setwd("~/Documents/post-doc/2009-2011 comparison final/paperdrafts2- MxSim/Manuscript drafts/draft2_toColleen/draft3_toTomKatieRyan/draft_toUSDA_andFinalCollaboratorRound/Draft_to_DHS/draft_ColleenComments/figures")
-tiff(filename="conceptual_VSPS_locations.tiff", height=65, width=120, units="mm", res=600, compression="lzw")#
-map('county', fill = T, col = color.df$color, lty = 0, mar = c(2,1.5, 2, 7), resolution = 0)#
-map('county', fill=F, col="dark gray", lwd=0.3,add=T, resolution=0); #
-map('state' , col='black',lwd=0.5,add=T, resolution=0)#
-cntyhighlight(makeyellow)#
-colorlegend(col=colorpal[2:7], zlim=c(0,12), zval=c(0,2,4,6,8,10), posx=c(0.75,0.79),posy=c(0.2,0.5), digit=0, cex=0.55)#
-text(x=1.274, y=0.565, labels="Log(number of", cex=0.46)#
-text(x=1.255, y=0.53, labels="shipments)", cex=0.46)#
-dev.off()
-tiff(filename="conceptual_VSPS_locations.tiff", height=65, width=120, units="mm", res=600, compression="lzw")#
-map('county', fill = T, col = color.df$color, lty = 0, mar = c(2,1.5, 2, 7), resolution = 0)#
-#map('county', fill=F, col="dark gray", lwd=0.3,add=T, resolution=0); #
-map('state' , col='black',lwd=0.5,add=T, resolution=0)#
-dev.off()
+	# Calculate next generation matrix#
+	Fmat = params$betaT* matrix(rep(S, each = N), nrow = N, byrow = T)#
+	Vmat = diag(x = params$muT + ageflux)#
+	Vmat[row(Vmat) - col(Vmat) == 1] <- - ageflux#
+	Vinv <- solve(Vmat)#
+	vals <- eigen(Fmat %*% Vinv)$values#
+#
+	Vmat2 <- diag(x = params$muT)#
+	V2inv <- solve(Vmat2)#
+	vals2 <- eigen(Fmat %*% V2inv)$values#
+	return(max(Re(vals2)))#
+	#return(list(Ro =vals, Ro2 =vals2, Vmat = Vmat, Vmat2 = Vmat2, #
+	#	check = Vmat%*%Vinv, check2 = Vmat2 %*% V2inv, N = sum(S)))#
+}#
+#
+################################################
+# Ro of brucellosis in the absence of bTB, age structure#
+################################################
+#
+Ro_brucellosis_single = function(params, x0){#
+	####################################
+	# Input: paramter file#
+	####################################
+	# Get stable age distribution in dz free conditions#
+	S <- x0[s.index + 1]#
+	ageflux <- params$aging[1,1]#
+#
+	Fmat <- params$betaB* matrix(rep(S, each = N), nrow = N, byrow = T)#
+	Fmat[which(ages >= 2 & ages <=5), ] <- exp(0.885) * Fmat[which(ages >= 2 & ages <=5), ]#
+	Vmat <- diag(x = params$muB + params$gamma + ageflux)#
+	Vmat[row(Vmat) - col(Vmat) == 1] <- - ageflux#
+	Vinv <- solve(Vmat)#
+	vals <- eigen(Fmat %*% Vinv)$values#
+	return(max(Re(vals)))#
+}
+Ro_TB_single
+Ro_bTB_single(params, x0)
+Ro_brucellosis_single(params, x0)
+params
+Ro_brucellosis_single = function(params, x0){#
+	####################################
+	# Input: paramter file#
+	####################################
+	# Get stable age distribution in dz free conditions#
+	S <- x0[s.index + 1]#
+	ageflux <- params$aging[1,1]#
+#
+	Fmat <- params$betaB* matrix(rep(S, each = N), nrow = N, byrow = T)#
+	Fmat[which(ages >= 2 & ages <=5), ] <- exp(0.885) * Fmat[which(ages >= 2 & ages <=5), ]#
+	Vmat <- diag(x = params$muB + params$gamma - ageflux)#
+	Vmat[row(Vmat) - col(Vmat) == 1] <-  ageflux#
+	Vinv <- solve(Vmat)#
+	vals <- eigen(Fmat %*% Vinv)$values#
+	return(max(Re(vals)))#
+}
+Ro_brucellosis_single(params, x0)
+x0
+head(S)
+S <- x0[s.index]
+ageflux <- params$aging[1,1]#
+#
+	Fmat <- params$betaB* matrix(rep(S, each = N), nrow = N, byrow = T)#
+	Fmat[which(ages >= 2 & ages <=5), ] <- exp(0.885) * Fmat[which(ages >= 2 & ages <=5), ]#
+	Vmat <- diag(x = params$muB + params$gamma + ageflux)#
+	Vmat[row(Vmat) - col(Vmat) == 1] <- - ageflux#
+	Vinv <- solve(Vmat)#
+	vals <- eigen(Fmat %*% Vinv)$values#
+	return(max(Re(vals)))#
+}
+Ro_brucellosis_single = function(params, x0){#
+	####################################
+	# Input: paramter file#
+	####################################
+	# Get stable age distribution in dz free conditions#
+	S <- x0[s.index]#
+	ageflux <- params$aging[1,1]#
+#
+	Fmat <- params$betaB* matrix(rep(S, each = N), nrow = N, byrow = T)#
+	Fmat[which(ages >= 2 & ages <=5), ] <- exp(0.885) * Fmat[which(ages >= 2 & ages <=5), ]#
+	Vmat <- diag(x = params$muB + params$gamma + ageflux)#
+	Vmat[row(Vmat) - col(Vmat) == 1] <- - ageflux#
+	Vinv <- solve(Vmat)#
+	vals <- eigen(Fmat %*% Vinv)$values#
+	return(max(Re(vals)))#
+}
+Ro_brucellosis_single(params, x0)
+Ro_bTB_single = function(params, x0){#
+	####################################
+	# Input: x0 = c(S = final, 1*N S vector at params)#
+	# Output: Ro#
+	####################################
+	S <- x0[s.index]#
+	ageflux <- params$aging[1,1]#
+#
+	# Calculate next generation matrix#
+	Fmat = params$betaT* matrix(rep(S, each = N), nrow = N, byrow = T)#
+	Vmat = diag(x = params$muT + ageflux)#
+	Vmat[row(Vmat) - col(Vmat) == 1] <- - ageflux#
+	Vinv <- solve(Vmat)#
+	vals <- eigen(Fmat %*% Vinv)$values#
+#
+	Vmat2 <- diag(x = params$muT)#
+	V2inv <- solve(Vmat2)#
+	vals2 <- eigen(Fmat %*% V2inv)$values#
+	return(max(Re(vals2)))#
+	#return(list(Ro =vals, Ro2 =vals2, Vmat = Vmat, Vmat2 = Vmat2, #
+	#	check = Vmat%*%Vinv, check2 = Vmat2 %*% V2inv, N = sum(S)))#
+}
+Ro_bTB_single(params, x0)
+Ro_brucellosis_single = function(params, x0){#
+	####################################
+	# Input: paramter file#
+	####################################
+	# Get stable age distribution in dz free conditions#
+	S <- x0[s.index]#
+	ageflux <- params$aging[1,1]#
+#
+	Fmat <- params$betaB* matrix(rep(S, each = N), nrow = N, byrow = T) / sum(S)#
+	Fmat[which(ages >= 2 & ages <=5), ] <- exp(0.885) * Fmat[which(ages >= 2 & ages <=5), ]#
+	Vmat <- diag(x = params$muB + params$gamma + ageflux)#
+	Vmat[row(Vmat) - col(Vmat) == 1] <- - ageflux#
+	Vinv <- solve(Vmat)#
+	vals <- eigen(Fmat %*% Vinv)$values#
+	return(max(Re(vals)))#
+}
+Ro_brucellosis_single(params, x0)
+head(S)
+S2 <- S/sum(S)
+head(S2)
+S <- x0[s.index]#
+	S.fd <- S/sum(S)#
+	ageflux <- params$aging[1,1]#
+#
+	Fmat <- params$betaB* matrix(rep(S.fd, each = N), nrow = N, byrow = T)#
+	Fmat[which(ages >= 2 & ages <=5), ] <- exp(0.885) * Fmat[which(ages >= 2 & ages <=5), ]#
+	Vmat <- diag(x = params$muB + params$gamma + ageflux)#
+	Vmat[row(Vmat) - col(Vmat) == 1] <- - ageflux
+Vmat[1:10, 1:10]
+S <- x0[s.index]#
+	ageflux <- params$aging[1,1]#
+#
+	# Calculate next generation matrix#
+	Fmat = params$betaT* matrix(rep(S, each = N), nrow = N, byrow = T)#
+	Vmat = diag(x = params$muT + ageflux)#
+	Vmat[row(Vmat) - col(Vmat) == 1] <- - ageflux#
+	Vinv <- solve(Vmat)#
+	vals <- eigen(Fmat %*% Vinv)$values#
+#
+	Vmat2 <- diag(x = params$muT)#
+	V2inv <- solve(Vmat2)#
+	vals2 <- eigen(Fmat %*% V2inv)$values
+Vmat2[1:10, 1:10]
+Vmat[1:10, 1:10]
+Ro_bTB_single = function(params, x0){#
+	####################################
+	# Input: x0 = c(S = final, 1*N S vector at params)#
+	# Output: Ro#
+	####################################
+	S <- x0[s.index]#
+	ageflux <- params$aging[1,1]#
+#
+	# Calculate next generation matrix#
+	Fmat = params$betaT* matrix(rep(S, each = N), nrow = N, byrow = T)#
+	Vmat = diag(x = params$muT + ageflux)#
+	Vmat[row(Vmat) - col(Vmat) == 1] <- - ageflux#
+	Vinv <- solve(Vmat)#
+	vals <- eigen(Fmat %*% Vinv)$values#
+	return(max(Re(vals)))#
+	#Vmat2 <- diag(x = params$muT)#
+	#V2inv <- solve(Vmat2)#
+	#vals2 <- eigen(Fmat %*% V2inv)$values#
+	#return(max(Re(vals2)))#
+	#return(list(Ro =vals, Ro2 =vals2, Vmat = Vmat, Vmat2 = Vmat2, #
+	#	check = Vmat%*%Vinv, check2 = Vmat2 %*% V2inv, N = sum(S)))#
+}
+Ro_bTB_single(params, x0)
+Ro_bTB_single = function(params, x0){#
+	####################################
+	# Input: x0 = c(S = final, 1*N S vector at params)#
+	# Output: Ro#
+	####################################
+	S <- x0[s.index]#
+	ageflux <- params$aging[1,1]#
+#
+	# Calculate next generation matrix#
+	Fmat = params$betaT* matrix(rep(S, each = N), nrow = N, byrow = T)#
+	Vmat = diag(x = params$muT + 1/ageflux)#
+	Vmat[row(Vmat) - col(Vmat) == 1] <- - 1/ageflux#
+	Vinv <- solve(Vmat)#
+	vals <- eigen(Fmat %*% Vinv)$values#
+	return(max(Re(vals)))#
+	#Vmat2 <- diag(x = params$muT)#
+	#V2inv <- solve(Vmat2)#
+	#vals2 <- eigen(Fmat %*% V2inv)$values#
+	#return(max(Re(vals2)))#
+	#return(list(Ro =vals, Ro2 =vals2, Vmat = Vmat, Vmat2 = Vmat2, #
+	#	check = Vmat%*%Vinv, check2 = Vmat2 %*% V2inv, N = sum(S)))#
+}
+Ro_bTB_single(params, x0)
+S <- x0[s.index]#
+	ageflux <- params$aging[1,1]#
+#
+	# Calculate next generation matrix#
+	Fmat = params$betaT* matrix(rep(S, each = N), nrow = N, byrow = T)#
+	Vmat = diag(x = params$muT + 1/ageflux)#
+	Vmat[row(Vmat) - col(Vmat) == 1] <- - 1/ageflux#
+	Vinv <- solve(Vmat)
+Vmat[1:10, 1:10]
+# WARNING: reads in x0, xB, and xT from global environment#
+# agemax and N need to be global parameters#
+# indicies as well#
+#
+Ro_bTB_single = function(params, x0){#
+	####################################
+	# Input: x0 = c(S = final, 1*N S vector at params)#
+	# Output: Ro#
+	####################################
+	S <- x0[s.index]#
+	ageflux <- params$aging[1,1]#
+#
+	# Calculate next generation matrix#
+	Fmat = params$betaT* matrix(rep(S, each = N), nrow = N, byrow = T)#
+	Vmat = diag(x = params$muT + ageflux)#
+	Vmat[row(Vmat) - col(Vmat) == 1] <- - ageflux#
+	Vinv <- solve(Vmat)#
+	vals <- eigen(Fmat %*% Vinv)$values#
+	Vmat2 <- diag(x = params$muT)#
+	V2inv <- solve(Vmat2)#
+	vals2 <- eigen(Fmat %*% V2inv)$values#
+	return(max(Re(vals2)))#
+}#
+#
+################################################
+# Ro of brucellosis in the absence of bTB, age structure#
+################################################
+#
+Ro_brucellosis_single = function(params, x0){#
+	####################################
+	# Input: paramter file#
+	####################################
+	# Get stable age distribution in dz free conditions#
+	S <- x0[s.index]#
+	S.fd <- S/sum(S)#
+	ageflux <- params$aging[1,1]#
+#
+	Fmat <- params$betaB* matrix(rep(S.fd, each = N), nrow = N, byrow = T)#
+	Fmat[which(ages >= 2 & ages <=5), ] <- exp(0.885) * Fmat[which(ages >= 2 & ages <=5), ]#
+	Vmat <- diag(x = params$muB + params$gamma + ageflux)#
+	Vmat[row(Vmat) - col(Vmat) == 1] <- - ageflux#
+	Vinv <- solve(Vmat)#
+	vals <- eigen(Fmat %*% Vinv)$values#
+	Vmat2 <- diag(x = params$muB + params$gamma)#
+	Vinv2 <- solve(Vmat2)#
+	vals2 <- eigen(Fmat %*% Vinv2)$values#
+#
+	return(max(Re(vals2)))#
+}
+Ro_bTB_single(params, x0)
+Ro_brucellosis_single(params, x0)
+N
+params$betaBm <- rep(params$betaB, length.out = N)
+params$betaBm[which(ages >= 2 & ages <=5)] <- exp(0.885) * params$betaB
+params$betaBm
+params$betaT
+Fmat = rbind(params$betaT * matrix(rep(S, each = 3*N), nrow = N, byrow = T),#
+		params$rhoT * params$betaT * matrix(rep(Ib, each = 60), nrow = N, byrow = T),#
+		params$rhoT * params$betaT * matrix(rep(R, each = 60), nrow = N, byrow = T))
+S <- xB[s.index]#
+	Ib <- xB[ib.index]#
+	R <- xB[r.index]
+binsize
+# set xB#
+xstart <- x0#
+xstart[min(ib.index)+1 + 3*binsize] <- 1#
+xstart[min(it.index)+1 + 3*binsize] <- 1#
+params <- c(f.params, list(gamma = 1/2, betaB = 0.5764065, #
+		betaT = 1.3305462/1000, rhoT = 1, rhoB = 2.1))#
+test <- as.data.frame(ode.1D(xstart, times, rhs, params, #
+	nspec = 6, dimens = N, method = "ode45"))#
+xB <- unname(unlist(test[length(test[,1]), c(2:(length(colnames(test))))])) #
+plot_raw_numbers(test)#
+#
+# set xT#
+xstart <- x0#
+xstart[min(it.index)+1 + 3*binsize] <- 1#
+xstart[min(it.index)+1 + 4*binsize] <- 1#
+test <- as.data.frame(ode.1D(xstart, times, rhs, params, #
+	nspec = 6, dimens = N, method = "ode45"))#
+xT <- unname(unlist(test[length(test[,1]), c(2:(length(colnames(test))))])) #
+plot_raw_numbers(test)
+get_prevalence(test)
+aging
+params$aging[1:5, 1:5]
 ##############################################################
 ##############################################################
 # Erin Gorsich#
-# This Code Reads in and runs the pde co-infection model#
+# This Code analyzes the pde co-infection model#
 # model is defined in rhs; parameters in fixed_parameters#
 ##############################################################
 ##############################################################
-##############################################################
-# Outline:#
-# 1) Load fixed parameters, model#
-# 2) Set-up features of aging; Functions for plotting#
-# 3) Test plots, with no Disease, none takes off (Generalized Beverton-Holt)#
-# 3) Test plots, BTB only #
-# 4) Test plots Bruc only#
-# 5) Co-infection #
-##############################################################
-##############################################################
-##############################################################
-# This code owes much to:#
-# Age Structured Models by A. King & H. Wearing, &#
-# Structured models for host heterogenieties by J. Drake and P. Rohani#
-#  http://ms.mcmaster.ca/~bolker/eeid/2011_eco/waifw.pdf#
 ##############################################################
 #
 ##############################################################
@@ -386,8 +735,11 @@ library("plyr")#
 library("ggplot2")#
 library("lattice") # for levelplots#
 library("gridExtra") # layout for lattice#
-library("pracma")#
+library("RColorBrewer")#
+library("doParallel")#
+library("foreach")#
 set.seed(5)#
+#
 setwd("~/GitHub/bTB-bruc-co-infection-ms/pde")#
 #
 # parameters#
@@ -395,12 +747,7 @@ source('fixed_parameters.R', chdir = TRUE)#
 #
 # rhs function - model structure#
 source('rhs.R', chdir = TRUE)#
-#
-##############################################################
-##############################################################
-#2) Set-up features of aging, functions for plotting#
-##############################################################
-##############################################################
+# age divisions in rhs function#
 agemax <- 20#
 agestep <- 0.1#
 N <- agemax / agestep#
@@ -423,743 +770,448 @@ sen <- rep(0.075 / length(ages[ages >= 14 ]), length(ages[ages >= 14]))#
 #
 relage <- c(juv, sa, a, ma, sen); length(relage) == N									#
 plot.relage <- c(0.137, rep(0.368/4, 4), rep(0.185/3, 3), rep(0.235/5, 5), rep(0.075/7, 7)) 	#
-#
+# Define x0, parameter for getEE function, disease free values#
 ##############################################################
-##############################################################
-# 3) Test plots, with no Disease, none takes off#
-##############################################################
-##############################################################
-# Initial conditions#
 S0 <- 400 * relage; It0 <- 0 * relage; Ib0 <- 0 * relage#
 Ic0 <- 0 * relage; R0 <- 0 * relage; Rc0 <- 0 * relage#
-times <- seq(1, 500, 1)#
+times <- seq(1, 300, 1)#
 x0 <- c(S0, It0, Ib0, Ic0, R0, Rc0)#
+params <- c(f.params, list(gamma = 1/2, betaB = 0, #
+	betaT = 0, rhoT = 1, rhoB = 2.1))#
+test <- as.data.frame(ode.1D(x0, times, rhs, params, #
+	nspec = 6, dimens = N, method = "ode45"))#
+x0 <- unname(unlist(test[length(test[,1]), c(2:(length(colnames(test))))])) #
 #
-params <- c(f.params, list(gamma = 1/2, betaB = 0.6087396, #
-	betaT = 0.0012974553, rhoT = 1, rhoB = 2.1))#
-params$muC[params$muC > 1] <- 0.9#
-params$muRC[params$muRC > 1] <- 0.9
-?ode.1D
-system.time(#
-	test <- as.data.frame(ode(x0, times, rhs, params, method = "ode45"))  )#
-#test2 <- ode.1D(x0, times, rhs, params, nspec = 6, dimens = N, method = "ode45")#
-system.time(#
-	test3 <- as.data.frame(ode.1D(x0, times, rhs, params, #
-		nspec = 6, dimens = N, method = "ode45")) )#
-system.time(#
-	test4 <- as.data.frame(ode.1D(x0, times, rhs, params,#
-		nspec = 6, dimens = N, method = "lsoda")) )
 ##############################################################
 ##############################################################
-S0 <- 400* stable_age; It0 <- 0 * stable_age; Ib0 <- 20* stable_age; #
-Ic0 <- 0* stable_age; R0 <- 30 * stable_age; Rc0 <- 0 * stable_age#
-x0 <- c(S0, It0, Ib0, Ic0, R0, Rc0)
-stable_age <- unname(unlist( test[length(test[,1]), c(2:(length(ages)+1))] / #
-	sum(test[length(test[,1]), c(2:(length(ages)+1))]) ))
+#2) Analyses plotting Ro and EE using MC simulation from stats#
 ##############################################################
-S0 <- 400* stable_age; It0 <- 0 * stable_age; Ib0 <- 20* stable_age; #
-Ic0 <- 0* stable_age; R0 <- 30 * stable_age; Rc0 <- 0 * stable_age#
-x0 <- c(S0, It0, Ib0, Ic0, R0, Rc0)
-params.test = c(f.params, list(gamma=0.5, #
-	betaB = 0.63, betaT = 0.00129, rhoT = 1, rhoB = 2.1))
-params.test$muRC
-rhs
-exp(3.022 + 2.821)
-exp(1.1+1)
-#############################################
-#############################################
-#############################################
-rm(list = ls())#
-library('survival')#
-setwd("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/survival")#
-data<-read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/survival/brucsurvival_TB3controls_longresidnomissing_noerrors_season2.csv")#
-data$age_yr2<-floor(data$age_yr)#
-#
-data2<-read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/survival/brucsurvival_TB3controls_longresidnomissing_noerrors_season2_final_fixed.csv")#
-data2$age_yr2<-floor(data2$age_yr)#
-#
-bolus <- c("R22", "R24", "R27", "R35", "R45", "R45b", "R50", "R6", "Y20", "Y31c", "Y31d", "Y39", "Y43", "Y44")#
-#"W1" is ok.#
-data3<- data2[!(data2$animal %in% bolus),]#
-length(unique(data2$animal)); length(unique(data3$animal))  # 142 to 128 = 14#
-#
-data3<- data3[data3$animal!= "O10",]#
-data<- data3#
-data3$animal<-as.character(data3$animal)
-# plot time to death, doesn't tell you about time between infection and death, just overall time#
-d<-data[data$death.time==1,]
-data<- data3#
-# want a plot from time bruc+ to death in TB+ and TB- buffalo. #
-mort<-data[data$death.time==1,]#
-mort2<-data2[data2$death.time==1,]
-# Need a sum of time observing uninfected, TB+, Bruc+, Coinfected animals#
-id<-as.character(unique(data3$animal))#
-data3$animal<-as.character(data3$animal)#
-#
-timedf<-data.frame(id=id, min_neg=NA, max_neg=NA, min_TB=NA, #
-	max_TB=NA, min_B=NA, max_B=NA, min_C=NA, max_C=NA)#
-for (i in 1:length(id)){#
-	newdf<- data3[data3$animal==id[i],]#
-	# need if statments added in case of NA vlaues#
-	if(length(newdf$animal[newdf$TB_3==0 & newdf$brucella==0])>0){#
-	timedf$min_neg[i]<-min(newdf$start2[newdf$TB_3==0 & newdf$brucella==0])#
-	timedf$max_neg[i]<-max(newdf$stop2[newdf$TB_3==0 & newdf$brucella==0])#
-	} else {#
-		timedf$min_neg[i]<-0#
-		timedf$max_neg[i]<-0#
-	}#
-	if(length(newdf$animal[newdf$TB_3==1 & newdf$brucella==0]>0)){#
-		timedf$min_TB[i]<-min(newdf$start2[newdf$TB_3==1 & newdf$brucella==0])#
-		timedf$max_TB[i]<-max(newdf$stop2[newdf$TB_3==1 & newdf$brucella==0])#
-	} else {#
-		timedf$min_TB[i]<-0#
-		timedf$max_TB[i]<-0#
-	}#
-#
-	if(length(newdf$animal[newdf$TB_3==0 & newdf$brucella==1]>0)){#
-		timedf$min_B[i]<-min(newdf$start2[newdf$TB_3==0 & newdf$brucella==1])#
-		timedf$max_B[i]<-max(newdf$stop2[newdf$TB_3==0 & newdf$brucella==1])#
-	} else {#
-		timedf$min_B[i]<-0#
-		timedf$max_B[i]<-0#
-	}#
-#
-	if(length(newdf$animal[newdf$TB_3==1 & newdf$brucella==1]>0)){#
-	timedf$min_C[i]<-min(newdf$start2[newdf$TB_3==1 & newdf$brucella==1])#
-	timedf$max_C[i]<-max(newdf$stop2[newdf$TB_3==1 & newdf$brucella==1])#
-	} else {#
-		timedf$min_C[i]<-0#
-		timedf$max_C[i]<-0#
-	}#
-}
-data3$age2.2 <- data3$age2#
-data3$age2.2[data3$age_yr2 == 4] <- "subadult"#
-data3$age2.2[data3$age_yr2 == 5] <- "subadult"#
-data3$age2.2[data3$age_yr2 == 6] <- "subadult"#
-data3$age2.2[data3$age_yr2 == 7] <- "matureadult"#
-data3$age2.2 <- as.factor(as.character(data3$age2.2))#
-data3$age2.3 <- data3$age2.2#
-data3$age2.3[data3$age_yr2 == 3] <- "juvenile"#
-data3$age2.4 <- data3$age2.3#
-data3$age2.4[data3$age_yr2 == 6] <- "matureadult"#
-data3$age2.4[data3$age_yr2 == 3] <- "subadult"#
-data3$age2.4 <- as.character(data3$age2.4)#
-table(data3$age2.4, data3$age_yr)#
-test.mod<-coxph(Surv(start, stop, death.time)~brucella*age2.4+TB_3+herd2+ cluster(animal), data=data3); summary(test.mod)#
-test.mod<-coxph(Surv(start, stop, death.time)~age2.4+ cluster(animal), data=data3); summary(test.mod)#
-logLik(test.mod); extractAIC(test.mod)#
-#
-# = AGE3 in text#
-# 0-1.9, 2-4.9, 5+ #
-data3$age3.2 <- data3$age3#
-data3$age3.2[data3$age_yr2 == 4] <- "subadult"#
-data3$age3.2 <- as.factor(as.character(data3$age3.2))#
-table(data3$age3.2, data3$age_yr)
-test.mod<-coxph(Surv(start, stop, death.time)~age3.2 + cluster(animal), data=data3); summary(test.mod)#
-logLik(test.mod); extractAIC(test.mod)
-test.mod<-coxph(Surv(start, stop, death.time)~ age5+ cluster(animal), data=data3); summary(test.mod)#
-logLik(test.mod); extractAIC(test.mod)
-test.mod<-coxph(Surv(start, stop, death.time)~age1+ cluster(animal), data=data3); test.mod$loglik
-test.mod<-coxph(Surv(start, stop, death.time)~age2+ cluster(animal), data=data3); summary(test.mod)  # AIC = 333.33
-test.mod<-coxph(Surv(start, stop, death.time)~age3+ cluster(animal), data=data3); summary(test.mod)# AIC = 335.5
-test.mod$loglik
-test.mod<-coxph(Surv(start2, stop2, death.time)~ age6 + cluster(animal), data=data3); summary(test.mod)
-test.mod<-coxph(Surv(start2, stop2, death.time)~ age6 + cluster(animal), data=data3); summary(test.mod); test.mod$loglik
-test.mod<-coxph(Surv(start2, stop2, death.time)~ age6 + cluster(animal), data=data3)
-test.mod$loglik
-str(test.mod)
-test.mod<-coxph(Surv(start, stop, death.time)~ age5+ cluster(animal), data=data3); summary(test.mod)#
-logLik(test.mod); extractAIC(test.mod)
-logLik(test.mod)
-test.mod<-coxph(Surv(start, stop, death.time)~age3+ cluster(animal), data=data3);
-logLik(test.mod)
-test.mod<-coxph(Surv(start2, stop2, death.time)~ age6 + cluster(animal), data=data3)#
-summary(test.mod); test.mod$loglik   #-167.0254 -164.1939
-logLik(test.mod)
-test.mod<-coxph(Surv(start, stop, death.time)~brucella+TB_3+herd2+ age5+ cluster(animal), data=data3); summary(test.mod)
-exp(1.06 + 0.87)
-0.14*6.88
-test.mod<-coxph(Surv(start, stop, death.time)~brucella*herd2+TB_3+herd2*age5+ cluster(animal), data=data3); summary(test.mod)
-test.mod<-coxph(Surv(start, stop, death.time)~brucella +herd2*TB_3+herd2*age5+ cluster(animal), data=data3); summary(test.mod)
-test.mod<-coxph(Surv(start, stop, death.time)~brucella+TB_3+herd2+age5+ cluster(animal), data=data3); summary(test.mod)
-test.mod<-coxph(Surv(start, stop, death.time)~brucella+TB_3+herd2+ cluster(animal), data=data3); summary(test.mod)
-test.mod<-coxph(Surv(start, stop, death.time)~brucella*herd2+TB_3+herd2+age5+ cluster(animal), data=data3); summary(test.mod)
-head(data3)
-table(data3$age5, data3$age_yr)
-# 0-2.9, 3-5.9, 6+#
-data3$age1 <- NA#
-data3$age2 <- NA#
-data3$age3 <- NA#
-data3$age4 <- NA#
-#
-data3$age1[data3$age_yr < 3] <- "juvenile"#
-data3$age1[data3$age_yr <= 3 & data3$age_yr < 6] <- "subadult"#
-data3$age1[data3$age_yr >= 6] <- "adult"#
-#
-data3$age2[data3$age_yr < 3] <- "juvenile"#
-data3$age2[data3$age_yr >= 3 ] <- "adult"#
-#
-data3$age3[data3$age_yr < 2] <- "juvenile"#
-data3$age3[data3$age_yr <= 2 & data3$age_yr < 5] <- "subadult"#
-data3$age3[data3$age_yr >= 5] <- "adult"#
-#
-data3$age4[data3$age_yr < 2] <- "juvenile"#
-data3$age4[data3$age_yr >= 2 ] <- "adult"
-test.mod<-coxph(Surv(start, stop, death.time)~age1 + cluster(animal), data=data3); #
-logLik(test.mod); extractAIC(test.mod)#
-test.mod<-coxph(Surv(start, stop, death.time)~age2 + cluster(animal), data=data3); #
-logLik(test.mod); extractAIC(test.mod)#
-test.mod<-coxph(Surv(start, stop, death.time)~age3 + cluster(animal), data=data3); #
-logLik(test.mod); extractAIC(test.mod)#
-test.mod<-coxph(Surv(start, stop, death.time)~age4 + cluster(animal), data=data3); #
-logLik(test.mod); extractAIC(test.mod)
-test.mod<-coxph(Surv(start, stop, death.time)~age3 + cluster(animal), data=data3);
-summary(test.mod)
-test.mod<-coxph(Surv(start, stop, death.time)~age4 + cluster(animal), data=data3);
-summary(test.mod)
-full.mod <- coxph(Surv(start, stop, death.time)~age4 + brucella+TB_3+herd2 + cluster(animal), data=data3)
-summary(full.mod)
-full.mod <- coxph(Surv(start, stop, death.time)~age4*brucella+age4*TB_3+brucella*herd2 + TB_3*herd2 + cluster(animal), data=data3)
-full.mod <- coxph(Surv(start, stop, death.time)~brucella+age4*TB_3+brucella*herd2 + TB_3*herd2 + cluster(animal), data=data3)
-summary(full.mod)
-table(data3$brucella, data3$age4)
-lwm <- coxph(Surv(start, stop, death.time)~brucella+age4*TB_3+ TB_3*herd2 + cluster(animal), data=data3)
-summary(lwm)
-lwm <- coxph(Surv(start, stop, death.time)~brucella+age4+TB_3+ TB_3*herd2 + cluster(animal), data=data3); extractAIC(lwm)
-summary(lwm)
-test.mod<-coxph(Surv(start, stop, death.time)~age1 + cluster(animal), data=data3); #
-logLik(test.mod); extractAIC(test.mod)#
-test.mod<-coxph(Surv(start, stop, death.time)~age2 + cluster(animal), data=data3); #
-logLik(test.mod); extractAIC(test.mod)#
-test.mod<-coxph(Surv(start, stop, death.time)~age3 + cluster(animal), data=data3); #
-logLik(test.mod); extractAIC(test.mod)#
-test.mod<-coxph(Surv(start, stop, death.time)~age4 + cluster(animal), data=data3); #
-logLik(test.mod); extractAIC(test.mod)
-table(data3$age3, data3$brucella)
-table(data3$age3, data3$TB_3)
-table(data3$age3, data3$TB_3, data3$brucella)
-# = AGE1 in text#
-# 0-2.9, 3-5.9, 6+#
-data3$age1 <- NA#
-data3$age2 <- NA#
-data3$age3 <- NA#
-data3$age4 <- NA#
-#
-data3$age1[data3$age_yr < 3] <- "juvenile"#
-data3$age1[data3$age_yr <= 3 & data3$age_yr < 6] <- "subadult"#
-data3$age1[data3$age_yr >= 6] <- "adult"#
-#
-data3$age2[data3$age_yr < 3] <- "juvenile"#
-data3$age2[data3$age_yr >= 3 ] <- "adult"#
-#
-data3$age3[data3$age_yr < 2] <- "juvenile"#
-data3$age3[data3$age_yr <= 2 & data3$age_yr < 5] <- "subadult"#
-data3$age3[data3$age_yr >= 5] <- "adult"#
-#
-data3$age4[data3$age_yr < 2] <- "juvenile"#
-data3$age4[data3$age_yr >= 2 ] <- "adult"
-table(data3$age3, data3$age_yr)
-data3$age1[data3$age_yr < 3] <- "juvenile"#
-data3$age1[data3$age_yr >= 3 & data3$age_yr < 6] <- "subadult"#
-data3$age1[data3$age_yr >= 6] <- "adult"#
-#
-data3$age2[data3$age_yr < 3] <- "juvenile"#
-data3$age2[data3$age_yr >= 3 ] <- "adult"#
-#
-data3$age3[data3$age_yr < 2] <- "juvenile"#
-data3$age3[data3$age_yr >= 2 & data3$age_yr < 5] <- "subadult"#
-data3$age3[data3$age_yr >= 5] <- "adult"#
-#
-data3$age4[data3$age_yr < 2] <- "juvenile"#
-data3$age4[data3$age_yr >= 2 ] <- "adult"
-table(data3$age3, data3$age_yr)
-table(data3$age1, data3$age_yr)
-test.mod<-coxph(Surv(start, stop, death.time)~age1 + cluster(animal), data=data3); #
-logLik(test.mod); extractAIC(test.mod)#
-test.mod<-coxph(Surv(start, stop, death.time)~age2 + cluster(animal), data=data3); #
-logLik(test.mod); extractAIC(test.mod)#
-test.mod<-coxph(Surv(start, stop, death.time)~age3 + cluster(animal), data=data3); #
-logLik(test.mod); extractAIC(test.mod)#
-test.mod<-coxph(Surv(start, stop, death.time)~age4 + cluster(animal), data=data3); #
-logLik(test.mod); extractAIC(test.mod)
-add.mod <- coxph(Surv(start, stop, death.time)~age1 + brucella+TB_3+herd2 + cluster(animal), data=data3);
-summary(add.mod)
-add.mod <- coxph(Surv(start, stop, death.time)~age2 + brucella+TB_3+herd2 + cluster(animal), data=data3);
-summary(add.mod)
-test.mod<-coxph(Surv(start, stop, death.time)~age1+ brucella+TB_3+herd2  + cluster(animal), data=data3); #
-logLik(test.mod); extractAIC(test.mod)#
-test.mod<-coxph(Surv(start, stop, death.time)~age2 + brucella+TB_3+herd2 + cluster(animal), data=data3); #
-logLik(test.mod); extractAIC(test.mod)#
-test.mod<-coxph(Surv(start, stop, death.time)~age3 + brucella+TB_3+herd2 + cluster(animal), data=data3); #
-logLik(test.mod); extractAIC(test.mod)#
-test.mod<-coxph(Surv(start, stop, death.time)~age4 + brucella+TB_3+herd2 + cluster(animal), data=data3);
-logLik(test.mod); extractAIC(test.mod)
-test.mod<-coxph(Surv(start, stop, death.time)~age2 + brucella+TB_3+herd2 + cluster(animal), data=data3);
-summary(test.mod)
-test.mod<-coxph(Surv(start, stop, death.time)~age1+ brucella+TB_3+herd2  + cluster(animal), data=data3);
-summary(test.mod)
-data3$age1 <- relevel(data3$age1, "juvenile")
-str(data3)
-data3$age1 <- relevel(as.factor(data3$age1), "juvenile")
-table(data$age6, data$age_yr)
-final.mod<-coxph(Surv(start2, stop2, death.time)~brucella+TB_3+herd2+ age6+ cluster(animal), data=data3); summary(final.mod)
-table(data$age2, data$age_yr)
-table(data3$age2, data$age_yr)
-table(data3$age6, data$age_yr)
-exp(3+2.8)
-exp(1.1+1)
-exp(1.1+1)*0.1
-exp(1.1+1)*0.12
-prevTBobs <- 0.27  # for test- bootstrap estimate of overall prevalence#
-prevBobs <- 0.34#
-data <- read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/cross_sectional_data_withdz_cleandisease_nofinal_Feb2016_capturetime_forsurv.csv")#
-counts<- hist(data$age_sel/12, plot = FALSE)$counts
-agestructure<- counts/sum(counts)
-agestructure
-counts
-length(counts)
-data_agestructure = c(agestructure, 0, 0, 0, 0, 0)
-prevTBobs <- 0.27  # for test- bootstrap estimate of overall prevalence#
-prevBobs <- 0.34#
-data <- read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/cross_sectional_data_withdz_cleandisease_nofinal_Feb2016_capturetime_forsurv.csv")#
-counts<- hist(data$age_sel/12, plot = FALSE)$counts  # youngest = 1.4 so aged 1-2#
-agestructure<- counts/sum(counts)#
-agestructure_yr = c(agestructure, 0, 0, 0, 0, 0)#
-#
-# put in terms of aging features: #
-binsize <- 1 / agestep#
-data_agestructure <- rep(agestructure_yr, each = binsize)
 ##############################################################
-agemax <- 20#
-agestep <- 0.1#
-N <- agemax / agestep#
-ages <- seq(1, agemax + 1, by = agestep)[-(N)]#
-N == length(ages)
-# put in terms of aging features: #
-binsize <- 1 / agestep#
-data_agestructure <- rep(agestructure_yr, each = binsize)
-length(data_agestructure)
-get_structured_prevalence = function(sol){#
-	# FIX ME: #
-	# make S, It, Ib, Ic, Rc ect in bins of length 20 for each one year age bin#
-	# then multiply#
-	S <-sum(sol[length(sol[,1]) , s.index+1] * data_agestructure)  # should give a scalar#
-	It <- sum(sol[length(sol[,1]) , it.index +1] * data_agestructure)#
-	Ib <- sum(sol[length(sol[,1]) , ib.index +1] * data_agestructure)#
-	Ic <- sum(sol[length(sol[,1]) , ic.index +1] * data_agestructure)#
-	R <- sum(sol[length(sol[,1]) , r.index +1] * data_agestructure)#
-	Rc <-sum(sol[length(sol[,1]) , rc.index +1] * data_agestructure)#
-	N <- sum(S + It + Ib + Ic + R + Rc)#
-	prevTB <- (It + Ic + Rc) / N #
-	prevB <- (Ib + Ic + R + Rc) / N#
-	prevBinS <- (Ib + R) / (S + Ib + R)#
-	prevBinT <- (Ic + Rc) / (It + Ic + Rc)#
-	prevTinS <- (It) / (S + It)#
-	prevTinB <- (Ic + Rc) / (Ib + Ic + R + Rc)#
-	return(list(prevTB = prevTB, prevB = prevB,#
-		prevBinS = prevBinS, prevBinT = prevBinT, #
-		prevTinS = prevTinS, prevTinB = prevTinB))#
-}
-str(sol)
-str(test)
-###################################################
-###################################################
-# 1) Load fixed parameters, model#
-####################################################
-####################################################
-# Accessory functions for fitting: #
-rm(list = ls())#
-require("deSolve")#
-library("gridExtra")#
-library("ggplot2")#
+# Functions to calculate EE and Ro#
+source('~/GitHub/bTB-bruc-co-infection-ms/pde/Ro_calculations.R', chdir = TRUE)#
+source('~/GitHub/bTB-bruc-co-infection-ms/pde/get_EE.R', chdir = TRUE)#
 #
-# parameters#
-source('fixed_parameters.R', chdir = TRUE)#
-# rhs function - model structure#
-source('rhs.R', chdir = TRUE)#
-# functions for plotting#
-source('plotting_functions.R', chdir = TRUE)
-# Accessory functions for fitting: #
-rm(list = ls())#
-require("deSolve")#
-library("gridExtra")#
-library("ggplot2")#
-setwd("~/GitHub/bTB-bruc-co-infection-ms/pde")#
-#
-# parameters#
-source('fixed_parameters.R', chdir = TRUE)#
-# rhs function - model structure#
-source('rhs.R', chdir = TRUE)#
-# functions for plotting#
-source('plotting_functions.R', chdir = TRUE)
-library("lattice") # for levelplots
-# functions for plotting#
-source('plotting_functions.R', chdir = TRUE)
+# At ML parameters, find Ro and EE alone and with both pathogens#
 ##############################################################
-agemax <- 20#
-agestep <- 0.1#
-N <- agemax / agestep#
-ages <- seq(1, agemax + 1, by = agestep)[-(N)]#
-N == length(ages)
-# generate parameters with correct agebins#
-f.params <- gen_fixed_params(agemax, agestep, p = p, recovery = FALSE)#
-f.params.recov <- gen_fixed_params(agemax, agestep, p = p, recovery = TRUE)#
-#
-# Functions for plotting (and define indecies based on ages, N): #
-source('plotting_functions.R', chdir = TRUE)
-params$muC
-f.params$muC
-f.params$mus
-f.params$muS
-# Starting agestructure (Jolles 2007; Caron et al. 2001)#
-juv <- rep(0.137 / length(ages[ages < 2]), length(ages[ages < 2]))#
-sa <- rep(0.368 / length(ages[ages >= 2 & ages < 6]), length(ages[ages >= 2 & ages < 6]))#
-a <- rep(0.185 / length(ages[ages >= 6 & ages < 9]), length(ages[ages >= 6 & ages < 9]))#
-ma <- rep(0.235 / length(ages[ages >= 9 & ages < 14]), length(ages[ages >= 9 & ages < 14]))#
-sen <- rep(0.075 / length(ages[ages >= 14 ]), length(ages[ages >= 14]))#
-#
-relage <- c(juv, sa, a, ma, sen); length(relage) == N
-# Initial conditions#
-S0 <- 400 * relage; It0 <- 0 * relage; Ib0 <- 0 * relage#
-Ic0 <- 0 * relage; R0 <- 0 * relage; Rc0 <- 0 * relage#
-times <- seq(1, 500, 1)#
-x0 <- c(S0, It0, Ib0, Ic0, R0, Rc0)#
-#
-# set stable age structure in disease free context (1200 long N*6)#
-params <- c(f.params, list(gamma = 1/2, betaB = 0.6087396, #
-	betaT = 0.0012974553, rhoT = 1, rhoB = 2.1))#
-params$muC > 1
-params.recov <- c(f.params.recov, list(gamma = 1/2, betaB = 0.6087396, #
-	betaT = 0.0012974553, rhoT = 1, rhoB = 2.1))#
-# use based on speed#
-test <- as.data.frame(ode.1D(x0, times, rhs, params, nspec = 6, dimens = N, method = "ode45"))#
-stable_age <- unname(unlist( test[length(test[,1]), c(2:(length(ages)+1))] / #
-	sum(test[length(test[,1]), c(2:(length(ages)+1))]) ))#
-#
-# no infections...#
-plot_raw_numbers(sol)#
-get_prevalence(sol)#
-###################################################
-###################################################
-# 3) Define true prevalence and objective functions#
-####################################################
-####################################################
-prevTBobs <- 0.27  # for test- bootstrap estimate of overall prevalence#
-prevBobs <- 0.34#
-data <- read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder/cross_sectional_data_withdz_cleandisease_nofinal_Feb2016_capturetime_forsurv.csv")#
-counts<- hist(data$age_sel/12, plot = FALSE)$counts  # youngest = 1.4 so aged 1-2#
-agestructure<- counts/sum(counts)#
-agestructure_yr = c(agestructure, 0, 0, 0, 0, 0)#
-#
-# put in terms of aging features: #
-binsize <- 1 / agestep#
-data_agestructure <- rep(agestructure_yr, each = binsize)#
-#
-# Set starting prevalence for brucellosis in simulations#
-S0 <- 400 * stable_age; It0 <- 0 * stable_age; Ib0 <- 0 * stable_age#
-Ic0 <- 0 * stable_age; R0 <- 0 * stable_age; Rc0 <- 0 * stable_age#
-x0 <- c(S0, It0, Ib0, Ic0, R0, Rc0)#
-sol <- as.data.frame(ode.1D(x0, times, rhs, params, nspec = 6, dimens = N, method = "ode45"))
-plot_raw_numbers(sol)
-get_structured_prevalence = function(sol){#
-	# FIX ME: #
-	# make S, It, Ib, Ic, Rc ect in bins of length 20 for each one year age bin#
-	# then multiply#
-	S <- sol[length(sol[,1]) , s.index+1]#
-	It <- sol[length(sol[,1]) , it.index +1]#
-	Ib <- sol[length(sol[,1]) , ib.index +1]#
-	Ic <- sol[length(sol[,1]) , ic.index +1]#
-	R <- sol[length(sol[,1]) , r.index +1]#
-	Rc <- sol[length(sol[,1]) , rc.index +1]#
-	# bin disease stats by age#
-	binsize <- 1/agestep#
-	Sb <- sum(S[1:binsize]); Itb <- sum(It[1:binsize])#
-	Ibb <- sum(Ib[1:binsize]); Icb <- sum(Ic[1:binsize])#
-	Rb <- sum(R[1:binsize]); Rcb <- sum(Rc[1:binsize])#
-	for (i in 1:19) {#
-		minbin <- i * binsize + 1 # 1, 11, 21, 31, ...#
-	 	maxbin <- (i+1) * binsize # 10, 20, 30...#
-	 	Sb <- c(Sb, sum(Sb[minbin:maxbin]))#
-	 	Itb <- c(Itb, sum(Itb[minbin:maxbin]))#
-	 	Ibb <- c(Ibb, sum(Ibb[minbin:maxbin]))#
-	 	Icb <- c(Icb, sum(Icb[minbin:maxbin]))#
-	 	Rb <- c(Rb, sum(Rb[minbin:maxbin]))#
-	 	Rcb <- c(Rcb, sum(Rcb[minbin:maxbin]))#
-	}#
-	S <- Sb * data_agestructure#
-	It <- Itb * data_agestructure#
-	Ib <- Ibb * data_agestructure#
-	Ic <- Icb * data_agestructure#
-	R <- Rb * data_agestructure#
-	Rc <-Rcb * data_agestructure#
-	N <- sum(S + It + Ib + Ic + R + Rc)#
-	prevTB <- (It + Ic + Rc) / N #
-	prevB <- (Ib + Ic + R + Rc) / N#
-	prevBinS <- (Ib + R) / (S + Ib + R)#
-	prevBinT <- (Ic + Rc) / (It + Ic + Rc)#
-	prevTinS <- (It) / (S + It)#
-	prevTinB <- (Ic + Rc) / (Ib + Ic + R + Rc)#
-	return(list(prevTB = prevTB, prevB = prevB,#
-		prevBinS = prevBinS, prevBinT = prevBinT, #
-		prevTinS = prevTinS, prevTinB = prevTinB))#
-}
-get_structured_prevalence(sol)
-############################################
-get_structured_prevalence = function(sol){#
-	S <- sol[length(sol[,1]) , s.index+1]#
-	It <- sol[length(sol[,1]) , it.index +1]#
-	Ib <- sol[length(sol[,1]) , ib.index +1]#
-	Ic <- sol[length(sol[,1]) , ic.index +1]#
-	R <- sol[length(sol[,1]) , r.index +1]#
-	Rc <- sol[length(sol[,1]) , rc.index +1]#
-	# bin disease stats by age#
-	binsize <- 1/agestep#
-	Sb <- sum(S[1:binsize]); Itb <- sum(It[1:binsize])#
-	Ibb <- sum(Ib[1:binsize]); Icb <- sum(Ic[1:binsize])#
-	Rb <- sum(R[1:binsize]); Rcb <- sum(Rc[1:binsize])#
-	for (i in 1:19) {#
-		minbin <- i * binsize + 1 # 1, 11, 21, 31, ...#
-	 	maxbin <- (i+1) * binsize # 10, 20, 30...#
-	 	Sb <- c(Sb, sum(Sb[minbin:maxbin]))#
-	 	Itb <- c(Itb, sum(Itb[minbin:maxbin]))#
-	 	Ibb <- c(Ibb, sum(Ibb[minbin:maxbin]))#
-	 	Icb <- c(Icb, sum(Icb[minbin:maxbin]))#
-	 	Rb <- c(Rb, sum(Rb[minbin:maxbin]))#
-	 	Rcb <- c(Rcb, sum(Rcb[minbin:maxbin]))#
-	}#
-	S <- sum(Sb * data_agestructure)#
-	It <- sum(Itb * data_agestructure)#
-	Ib <- sum(Ibb * data_agestructure)#
-	Ic <- sum(Icb * data_agestructure)#
-	R <- sum(Rb * data_agestructure)#
-	Rc <- sum(Rcb * data_agestructure)#
-	N <- sum(S + It + Ib + Ic + R + Rc)#
-	prevTB <- (It + Ic + Rc) / N #
-	prevB <- (Ib + Ic + R + Rc) / N#
-	prevBinS <- (Ib + R) / (S + Ib + R)#
-	prevBinT <- (Ic + Rc) / (It + Ic + Rc)#
-	prevTinS <- (It) / (S + It)#
-	prevTinB <- (Ic + Rc) / (Ib + Ic + R + Rc)#
-	return(list(prevTB = prevTB, prevB = prevB,#
-		prevBinS = prevBinS, prevBinT = prevBinT, #
-		prevTinS = prevTinS, prevTinB = prevTinB))#
-}
-get_structured_prevalence(sol)
-head(sol)
-S <- sol[length(sol[,1]) , s.index+1]#
-	It <- sol[length(sol[,1]) , it.index +1]#
-	Ib <- sol[length(sol[,1]) , ib.index +1]#
-	Ic <- sol[length(sol[,1]) , ic.index +1]#
-	R <- sol[length(sol[,1]) , r.index +1]#
-	Rc <- sol[length(sol[,1]) , rc.index +1]
-S
-It
-Ib
-binsize <- 1/agestep#
-	Sb <- sum(S[1:binsize]); Itb <- sum(It[1:binsize])#
-	Ibb <- sum(Ib[1:binsize]); Icb <- sum(Ic[1:binsize])#
-	Rb <- sum(R[1:binsize]); Rcb <- sum(Rc[1:binsize])
-for (i in 1:19) {#
-		minbin <- i * binsize + 1 # 1, 11, 21, 31, ...#
-	 	maxbin <- (i+1) * binsize # 10, 20, 30...#
-	 	Sb <- c(Sb, sum(Sb[minbin:maxbin]))#
-	 	Itb <- c(Itb, sum(Itb[minbin:maxbin]))#
-	 	Ibb <- c(Ibb, sum(Ibb[minbin:maxbin]))#
-	 	Icb <- c(Icb, sum(Icb[minbin:maxbin]))#
-	 	Rb <- c(Rb, sum(Rb[minbin:maxbin]))#
-	 	Rcb <- c(Rcb, sum(Rcb[minbin:maxbin]))#
-	}
-Sb
-binsize <- 1/agestep#
-	Sb <- sum(S[1:binsize]); Itb <- sum(It[1:binsize])#
-	Ibb <- sum(Ib[1:binsize]); Icb <- sum(Ic[1:binsize])#
-	Rb <- sum(R[1:binsize]); Rcb <- sum(Rc[1:binsize])
-Sb
-Itb
-Ibb
-for (i in 1:19) {#
-		minbin <- i * binsize + 1 # 1, 11, 21, 31, ...#
-	 	maxbin <- (i+1) * binsize # 10, 20, 30...#
-	 	Sb <- c(Sb, sum(Sb[minbin:maxbin]))#
-	 	Itb <- c(Itb, sum(Itb[minbin:maxbin]))#
-	 	Ibb <- c(Ibb, sum(Ibb[minbin:maxbin]))#
-	 	Icb <- c(Icb, sum(Icb[minbin:maxbin]))#
-	 	Rb <- c(Rb, sum(Rb[minbin:maxbin]))#
-	 	Rcb <- c(Rcb, sum(Rcb[minbin:maxbin]))#
-	}
-Sb
-sum(Sb[11:20])
-Sb
-Sb <- sum(S[1:binsize]); Itb <- sum(It[1:binsize])#
-	Ibb <- sum(Ib[1:binsize]); Icb <- sum(Ic[1:binsize])#
-	Rb <- sum(R[1:binsize]); Rcb <- sum(Rc[1:binsize])#
-	for (i in 1:19) {#
-		minbin <- i * binsize + 1 # 1, 11, 21, 31, ...#
-	 	maxbin <- (i+1) * binsize # 10, 20, 30...#
-	 	Sb <- c(Sb, sum(S[minbin:maxbin]))#
-	 	Itb <- c(Itb, sum(It[minbin:maxbin]))#
-	 	Ibb <- c(Ibb, sum(Ib[minbin:maxbin]))#
-	 	Icb <- c(Icb, sum(Ic[minbin:maxbin]))#
-	 	Rb <- c(Rb, sum(R[minbin:maxbin]))#
-	 	Rcb <- c(Rcb, sum(Rc[minbin:maxbin]))#
-	}
-Sb
-data_agestructure
-data_agestructure <- agestructure_yr
-data_agestructure
-sum(data_agestructure)
-S <- sum(Sb * data_agestructure)#
-	It <- sum(Itb * data_agestructure)#
-	Ib <- sum(Ibb * data_agestructure)#
-	Ic <- sum(Icb * data_agestructure)#
-	R <- sum(Rb * data_agestructure)#
-	Rc <- sum(Rcb * data_agestructure)#
-	N <- sum(S + It + Ib + Ic + R + Rc)#
-	prevTB <- (It + Ic + Rc) / N #
-	prevB <- (Ib + Ic + R + Rc) / N#
-	prevBinS <- (Ib + R) / (S + Ib + R)#
-	prevBinT <- (Ic + Rc) / (It + Ic + Rc)#
-	prevTinS <- (It) / (S + It)#
-	prevTinB <- (Ic + Rc) / (Ib + Ic + R + Rc)
-prev(TB)
-prevB
-prevTB
-############################################
-# Figures specific for fitting#
-############################################
-get_structured_prevalence = function(sol){#
-	S <- sol[length(sol[,1]) , s.index+1]#
-	It <- sol[length(sol[,1]) , it.index +1]#
-	Ib <- sol[length(sol[,1]) , ib.index +1]#
-	Ic <- sol[length(sol[,1]) , ic.index +1]#
-	R <- sol[length(sol[,1]) , r.index +1]#
-	Rc <- sol[length(sol[,1]) , rc.index +1]#
-	# bin disease stats by age#
-	binsize <- 1/agestep#
-	Sb <- sum(S[1:binsize]); Itb <- sum(It[1:binsize])#
-	Ibb <- sum(Ib[1:binsize]); Icb <- sum(Ic[1:binsize])#
-	Rb <- sum(R[1:binsize]); Rcb <- sum(Rc[1:binsize])#
-	for (i in 1:19) {#
-		minbin <- i * binsize + 1 # 1, 11, 21, 31, ...#
-	 	maxbin <- (i+1) * binsize # 10, 20, 30...#
-	 	Sb <- c(Sb, sum(S[minbin:maxbin]))#
-	 	Itb <- c(Itb, sum(It[minbin:maxbin]))#
-	 	Ibb <- c(Ibb, sum(Ib[minbin:maxbin]))#
-	 	Icb <- c(Icb, sum(Ic[minbin:maxbin]))#
-	 	Rb <- c(Rb, sum(R[minbin:maxbin]))#
-	 	Rcb <- c(Rcb, sum(Rc[minbin:maxbin]))#
-	}#
-	S <- sum(Sb * data_agestructure)#
-	It <- sum(Itb * data_agestructure)#
-	Ib <- sum(Ibb * data_agestructure)#
-	Ic <- sum(Icb * data_agestructure)#
-	R <- sum(Rb * data_agestructure)#
-	Rc <- sum(Rcb * data_agestructure)#
-	N <- sum(S + It + Ib + Ic + R + Rc)#
-	prevTB <- (It + Ic + Rc) / N #
-	prevB <- (Ib + Ic + R + Rc) / N#
-	prevBinS <- (Ib + R) / (S + Ib + R)#
-	prevBinT <- (Ic + Rc) / (It + Ic + Rc)#
-	prevTinS <- (It) / (S + It)#
-	prevTinB <- (Ic + Rc) / (Ib + Ic + R + Rc)#
-	return(list(prevTB = prevTB, prevB = prevB,#
-		prevBinS = prevBinS, prevBinT = prevBinT, #
-		prevTinS = prevTinS, prevTinB = prevTinB))#
-}
-# Set starting prevalence for brucellosis in simulations#
-S0 <- 400 * stable_age; It0 <- 0 * stable_age; Ib0 <- 10 * stable_age#
-Ic0 <- 0 * stable_age; R0 <- 0 * stable_age; Rc0 <- 0 * stable_age#
-x0 <- c(S0, It0, Ib0, Ic0, R0, Rc0)
-sol <- as.data.frame(ode.1D(x0, times, rhs, params, nspec = 6, dimens = N, method = "ode45"))
-xB <- unname(unlist( sol[length(sol[,1]), c(2:length(colnames(sol)))] ))
-length(xB)
-get_prevalence(xB)
-get_prevalence(sol)
-objective = function(params.est){#
-	# params.est = 2 long = c(betaB, betaT)#
-	params <- c(fixed.params, list(gamma=1/2, betaB = params.est[1],#
-		betaT = params.est[2]/1000, rhoT = 1, rhoB = 2.1, theta= 4, K = 433))#
-	# seed from endemic brucellosis conditions, 10 bTB positive buffalo#
-	x0 = xB#
-	x0[[25]] <- x0[[25]] + 2#
-	sol <- as.data.frame(ode.1D(x0, times, rhs, params, nspec = 6, dimens = N, method = "ode45"))#
-	df <- get_structured_prevalence(sol)#
-	error <- sqrt(((prevTBobs - df$prevTB)^2 + (prevBobs - df$prevB)^2))#
-	return (error)#
-}
-xB
-it.index
-prevTBobs
-# No recovery#
-par <- optim(c(1.025, 0.00094*1000), objective); par#
-par2 <- optim(c(1.5, 0.0007*1000), objective); par2#
-par3 <- optim(c(0.8, 0.001*1000), objective); par3
-objective = function(params.est){#
-	# params.est = 2 long = c(betaB, betaT)#
-	params <- c(f.params, list(gamma = 1/2, betaB = params.est[1], #
-		betaT = params.est[2]/1000, rhoT = 1, rhoB = 2.1))#
-	# seed from endemic brucellosis conditions, 10 bTB positive buffalo#
-	x0 = xB#
-	x0[[min(it.index) + 5*binsize]] <- 5#
-	x0[[min(it.index) + 5*binsize + 1]] <- 5#
-	sol <- as.data.frame(ode.1D(x0, times, rhs, params, nspec = 6, dimens = N, method = "ode45"))#
-	df <- get_structured_prevalence(sol)#
-	error <- sqrt(((prevTBobs - df$prevTB)^2 + (prevBobs - df$prevB)^2))#
-	return (error)#
-}
-objective_recov = function(params.est){#
-	# params.est = 2 long = c(betaB, betaT)#
-	params <- c(f.params.recov, list(gamma = 1/2, betaB = params.est[1], #
-		betaT = params.est[2]/1000, rhoT = 1, rhoB = 2.1))#
-	# seed from endemic brucellosis conditions, 10 bTB positive buffalo#
-	x0 = xB#
-	x0[[min(it.index) + 5*binsize]] <- 5#
-	x0[[min(it.index) + 5*binsize + 1]] <- 5#
-#
-	sol <- as.data.frame(ode.1D(x0, times, rhs, params, nspec = 6, dimens = N, method = "ode45"))#
-	df <- get_structured_prevalence(sol)#
-	error <- sqrt(((prevTBobs - df$prevTB)^2 + (prevBobs - df$prevB)^2))#
-	return (error)#
-}
-# No recovery#
-par <- optim(c(1.025, 0.00094*1000), objective); par#
-par2 <- optim(c(1.5, 0.0007*1000), objective); par2#
-par3 <- optim(c(0.8, 0.001*1000), objective); par3
-objective_recov = function(params.est){#
-	# params.est = 2 long = c(betaB, betaT)#
-	params <- c(f.params.recov, list(gamma = 1/2, betaB = params.est[1], #
-		betaT = params.est[2]/1000, rhoT = 1, rhoB = 2.1))#
-	# seed from endemic brucellosis conditions, 10 bTB positive buffalo#
-	x0 = xB#
-	x0[[min(it.index) + 5*binsize]] <- 5#
-	x0[[min(it.index) + 5*binsize + 1]] <- 5#
-#
-	sol <- as.data.frame(ode.1D(x0, times, rhs, params, nspec = 6, dimens = N, method = "ode45"))#
-	df <- get_structured_prevalence(sol)#
-	error <- sqrt(((prevTBobs - df$prevTB)^2 + (prevBobs - df$prevB)^2))#
-	return (error)#
-}
-par.r <- optim(c(1.025, 0.00094*1000), objective_recov); par
-f.params.recov$muS
-f.params.recov$muC
-f.params.recov$muRC
-f.params.recov$muR
-rhs
-par.r
-# Plot best fit, no recovery#
 params <- c(f.params, list(gamma = 1/2, betaB = 0.5764065, #
 		betaT = 1.3305462/1000, rhoT = 1, rhoB = 2.1))#
-x0 <- xB#
-x0[[min(it.index) + 5*binsize]] <- 5#
-x0[[min(it.index) + 5*binsize + 1]] <- 5#
-sol <- as.data.frame(ode.1D(x0, times, rhs, params, nspec = 6, dimens = N, method = "ode45"))#
-get_structured_prevalence(sol)#
-plot_raw_numbers(sol)
-params <- c(f.params.recov, list(gamma = 1/2, betaB = 0.6282482, #
-		betaT = 0.7848374/1000, rhoT = 1, rhoB = 2.1))#
-x0 <- xB#
-x0[[min(it.index) + 5*binsize]] <- 5#
-x0[[min(it.index) + 5*binsize + 1]] <- 5#
-sol <- as.data.frame(ode.1D(x0, times, rhs, params, nspec = 6, dimens = N, method = "ode45"))#
-get_structured_prevalence(sol)#
-plot_raw_numbers(sol)
+#get_EE(params, x0, "beverton-holt")#
+# 65.855 TB alone#
+# 27.861 TB with co-infection#
+# 21.072 BRUC alone#
+# 31.493 BRUC with co-infection#
+#
+# make sure get ok age-prev#
+xtest <- x0#
+# MCMC Ro calculations#
+# WARNING Ro reads in x0 frame global environment#
+##############################################################
+n = 1000#
+set.seed(1)#
+binsize <- N/agemax#
+#
+# set xB#
+xstart <- x0#
+xstart[min(ib.index)+1 + 3*binsize] <- 1#
+xstart[min(it.index)+1 + 3*binsize] <- 1#
+params <- c(f.params, list(gamma = 1/2, betaB = 0.5764065, #
+		betaT = 1.3305462/1000, rhoT = 1, rhoB = 2.1))#
+test <- as.data.frame(ode.1D(xstart, times, rhs, params, #
+	nspec = 6, dimens = N, method = "ode45"))#
+xB <- unname(unlist(test[length(test[,1]), c(2:(length(colnames(test))))])) #
+plot_raw_numbers(test)#
+#
+# set xT#
+xstart <- x0#
+xstart[min(it.index)+1 + 3*binsize] <- 1#
+xstart[min(it.index)+1 + 4*binsize] <- 1#
+test <- as.data.frame(ode.1D(xstart, times, rhs, params, #
+	nspec = 6, dimens = N, method = "ode45"))#
+xT <- unname(unlist(test[length(test[,1]), c(2:(length(colnames(test))))])) #
+plot_raw_numbers(test)
+source('get_Ro.R', chdir = TRUE)
+xB
+xstart <- x0
+xstart
+xstart[min(ib.index)+1 + 3*binsize] <- 1#
+xstart[min(ib.index)+1 + 3*binsize] <- 1#
+params <- c(f.params, list(gamma = 1/2, betaB = 0.5764065, #
+		betaT = 1.3305462/1000, rhoT = 1, rhoB = 2.1))#
+test <- as.data.frame(ode.1D(xstart, times, rhs, params, #
+	nspec = 6, dimens = N, method = "ode45"))#
+xB <- unname(unlist(test[length(test[,1]), c(2:(length(colnames(test))))])) #
+plot_raw_numbers(test)
+####################################
+	S <- x0[s.index]#
+	ageflux <- params$aging[1,1]#
+#
+	# Calculate next generation matrix#
+	Fmat = params$betaT* matrix(rep(S, each = N), nrow = N, byrow = T)#
+	Vmat = diag(x = params$muT + ageflux)#
+	Vmat[row(Vmat) - col(Vmat) == 1] <- - ageflux#
+	Vinv <- solve(Vmat)#
+	vals <- eigen(Fmat %*% Vinv)$values
+max(Re(vals))
+Vmat2 <- diag(x = params$muT)#
+	V2inv <- solve(Vmat2)#
+	vals2 <- eigen(Fmat %*% V2inv)$values
+max(Re(vals2))
+Vmat = diag(x = params$muT - ageflux)#
+	Vmat[row(Vmat) - col(Vmat) == 1] <- ageflux#
+	Vinv <- solve(Vmat)#
+	vals <- eigen(Fmat %*% Vinv)$values
+max(Re(vals))
+S <- x0[s.index]#
+	S.fd <- S/sum(S)#
+	ageflux <- params$aging[1,1]#
+#
+	Fmat <- params$betaB* matrix(rep(S.fd, each = N), nrow = N, byrow = T)#
+	Fmat[which(ages >= 2 & ages <=5), ] <- exp(0.885) * Fmat[which(ages >= 2 & ages <=5), ]#
+	Vmat <- diag(x = params$muB + params$gamma - ageflux)#
+	Vmat[row(Vmat) - col(Vmat) == 1] <- ageflux#
+	Vinv <- solve(Vmat)#
+	vals <- eigen(Fmat %*% Vinv)$values
+max(Re(vals))
+S <- xB[s.index]#
+	Ib <- xB[ib.index]#
+	R <- xB[r.index]#
+#
+	Tot <- sum(S) + sum(Ib) + sum(R)#
+	Sall <- sum(S)#
+	Iball <- sum(Ib)#
+	Rall <- sum(R)#
+	#  age specific FOI (vector)#
+	params$betaB <- rep(params$betaB, length.out = N)#
+	params$betaB[which(ages >= 2 & ages <=5)] <- exp(0.885) * params$betaB #
+#
+	# Calculate next generation matrix, 1:60 columns, 1:60 rows#
+	Fmat = rbind(params$betaT * matrix(rep(S, each = 3*N), nrow = N, byrow = T),#
+		params$rhoT * params$betaT * matrix(rep(Ib, each = 3*N), nrow = N, byrow = T),#
+		params$rhoT * params$betaT * matrix(rep(R, each = 3*N), nrow = N, byrow = T))
+####################################
+	# Get stable age distribution in dz free conditions#
+	S <- xB[s.index]#
+	Ib <- xB[ib.index]#
+	R <- xB[r.index]#
+#
+	Tot <- sum(S) + sum(Ib) + sum(R)#
+	Sall <- sum(S)#
+	Iball <- sum(Ib)#
+	Rall <- sum(R)#
+	#  age specific FOI (vector)#
+	params$betaB <- rep(params$betaB, length.out = N)#
+	params$betaB[which(ages >= 2 & ages <=5)] <- exp(0.885) * params$betaB[which(ages >= 2 & ages <=5)]
+params$betaT * matrix(rep(S, each = 3*N), nrow = N, byrow = T)
+t <- params$betaT * matrix(rep(S, each = 3*N), nrow = N, byrow = T)
+t[1:10, 1:10]
+nrows(t)
+?n.rows
+??nrows
+nrow(t)
+ncol(t)
+Fmat = rbind(params$betaT * matrix(rep(S, each = 3*N), nrow = N, byrow = T),#
+		params$rhoT * params$betaT * matrix(rep(Ib, each = 3*N), nrow = N, byrow = T),#
+		params$rhoT * params$betaT * matrix(rep(R, each = 3*N), nrow = N, byrow = T))
+nrow(Fmat)
+ncol(Fmat)
+# rows 1:N, cols 1:3*N#
+	diag <- (params$rhoB * params$betaB * Iball / Tot) + params$muT - ageflux#
+	M1 <- diag(x = diag)#
+	M1[row(M1) - col(M1) == 1] <- ageflux#
+	Vmat1 = cbind(M1, 		#
+		matrix(0, nrow = N, ncol = 2*N) )#
+#
+	# rows 21:40, cols 1:60		 #
+	diag <- - params$rhoB * params$betaBm * Iball / Tot   #
+	M4 <- diag(x = diag)
+M4[1:10, 1:10]
+diag <- rep(- params$rhoB * params$betaBm * Iball / Tot , N )
+M4 <- diag(x = diag)
+M4[1:10, 1:10]
+ncols(M4)
+ncol(M4)
+nrow(M4)
+params$rhoB
+params$betaB
+diag <- rep(- params$rhoB * params$betaB * Iball / Tot , N )
+diag <- - params$rhoB * params$betaB * Iball / Tot
+M4 <- diag(x = diag)
+ncol(M4)
+nrow(M4)
+diag <- params$gamma + params$muC - ageflux#
+	M5 <- diag(x = diag)#
+	M5[row(M5) - col(M5) == 1] <- - ageflux
+M6 <- diag(x = rep(- params$epsilon), N)#
+	Vmat2 <- cbind(M4, M5, M6)
+################################################
+# Ro of bTB in the absence of brucellosis, with age structure (and age sp. FOI, brucellosis)#
+################################################
+Ro_bTB_co = function(params, xB){#
+	####################################
+	# Input: x = c(S = final, 1*20 S vector at params)#
+	# Output: Ro#
+	####################################
+	# Get stable age distribution in dz free conditions#
+	S <- xB[s.index]#
+	Ib <- xB[ib.index]#
+	R <- xB[r.index]#
+#
+	Tot <- sum(S) + sum(Ib) + sum(R)#
+	Sall <- sum(S)#
+	Iball <- sum(Ib)#
+	Rall <- sum(R)#
+	ageflux <- params$aging[1,1]#
+	#  age specific FOI (vector)#
+	params$betaB <- rep(params$betaB, length.out = N)#
+	params$betaB[which(ages >= 2 & ages <=5)] <- exp(0.885) * params$betaB[which(ages >= 2 & ages <=5)] #
+#
+	# Calculate next generation matrix, 1:60 columns, 1:60 rows#
+	Fmat = rbind(params$betaT * matrix(rep(S, each = 3*N), nrow = N, byrow = T),#
+		params$rhoT * params$betaT * matrix(rep(Ib, each = 3*N), nrow = N, byrow = T),#
+		params$rhoT * params$betaT * matrix(rep(R, each = 3*N), nrow = N, byrow = T))#
+	# rows 1:N, cols 1:3*N#
+	diag <- (params$rhoB * params$betaB * Iball / Tot) + params$muT - ageflux#
+	M1 <- diag(x = diag)#
+	M1[row(M1) - col(M1) == 1] <- ageflux#
+	Vmat1 = cbind(M1, 		#
+		matrix(0, nrow = N, ncol = 2*N) )#
+#
+	# rows 21:40, cols 1:60		 #
+	diag <- - params$rhoB * params$betaB * Iball / Tot #
+	M4 <- diag(x = diag)#
+	diag <- params$gamma + params$muC - ageflux#
+	M5 <- diag(x = diag)#
+	M5[row(M5) - col(M5) == 1] <- ageflux#
+	M6 <- diag(x = rep(- params$epsilon), N)#
+	Vmat2 <- cbind(M4, M5, M6)#
+	# rows 41:60, cols 1:60		 #
+	M7 <- matrix(0, nrow = N, ncol = N)#
+	M8 <- diag(x = rep(-params$gamma, N))#
+	M9 <- diag(x = params$epsilon + params$muRC - ageflux)#
+	M9[row(M9 - col(M9) == 1)] <- ageflux#
+	Vmat3 <- cbind(M7, M8, M9)#
+	Vmat <- rbind(Vmat1, Vmat2, Vmat3)#
+	Vinv <- solve(Vmat)#
+	vals <- eigen(Fmat %*% Vinv)$values#
+	return(max(Re(vals)))   # 0.9634113#
+}
+Ro_bTB_single(params, x0)#
+Ro_brucellosis_single(params, x0)#
+Ro_bTB_co(params, xB)
+# Get stable age distribution in TB only#
+	S <- xT[s.index]#
+	It <- xT[it.index]#
+#
+	Tot <- sum(S) + sum(It) #
+	Sall <- sum(S)#
+	Itall <- sum(It)#
+#
+	# age specific FOI (a vector)#
+	params$betaB <- rep(params$betaB, length.out = N)#
+	params$betaB[which(ages >= 2 & ages <=5)] <- exp(0.885) * params$betaB[which(ages >= 2 & ages <=5)] #
+	params$betaT <- rep(params$betaT, length.out = N)
+params <- c(f.params, list(gamma = 1/2, betaB = 0.5764065, #
+		betaT = 1.3305462/1000, rhoT = 1, rhoB = 2.1))
+# Get stable age distribution in TB only#
+	S <- xT[s.index]#
+	It <- xT[it.index]#
+#
+	Tot <- sum(S) + sum(It) #
+	Sall <- sum(S)#
+	Itall <- sum(It)#
+#
+	# age specific FOI (a vector)#
+	betaBm <- rep(params$betaB, length.out = N)#
+	betaBm[which(ages >= 2 & ages <=5)] <- exp(0.885) * params$betaB#
+	betaTm <- rep(params$betaT, length.out = N)
+################################################
+# Ro of brucellosis in the presence of bTB, age structure#
+################################################
+#
+Ro_brucellosis_co = function(params, xT){#
+	####################################
+	# Input: paramter file#
+	####################################
+	# Get stable age distribution in TB only#
+	S <- xT[s.index]#
+	It <- xT[it.index]#
+#
+	Tot <- sum(S) + sum(It) #
+	Sall <- sum(S)#
+	Itall <- sum(It)#
+#
+	ageflux <- params$aging[1,1]#
+#
+	# age specific FOI (a vector)#
+	betaBm <- rep(params$betaB, length.out = N)#
+	betaBm[which(ages >= 2 & ages <=5)] <- exp(0.885) * params$betaB#
+	betaTm <- rep(params$betaT, length.out = N)#
+#
+	# Calculate next generation matrix, 1:40 columns, 1:40 rows#
+	Fmat = rbind(#
+		matrix(rep(betaBm * S / Tot, each = 2*N), nrow = N, byrow = T),#
+		matrix(rep(params$rhoB * betaBm * It / Tot, each = 2*N), nrow = N, #
+		byrow = T))#
+#
+	# Rows 1:20, cols 1:40#
+	diag <- params$rhoT * params$betaT * Itall + params$muB + #
+		params$gamma - ageflux#
+	M1 <- diag(x = diag)#
+	M1[row(M1) - col(M1) == 1] <- ageflux#
+	Vmat1 = cbind(M1, 		#
+		matrix(0, nrow = N, ncol = N) )#
+#
+	# Rows 21:40, cols 1:40		 #
+	diag <- - params$rhoT * params$betaT * Itall  #
+	M4 <- diag(x = diag)#
+	diag <- params$gamma + params$muC - ageflux#
+	M5 <- diag(x = diag)#
+	M5[row(M5) - col(M5) == 1] <- ageflux#
+	Vmat2 <- cbind(M4, M5)#
+	Vmat <- rbind(Vmat1, Vmat2)#
+	Vinv <- solve(Vmat)#
+	vals <- eigen(Fmat %*% Vinv)$values#
+	return(max(Re(vals))) #
+}
+Ro_brucellosis_co(params, xT)
+head(betaTm)
+# Rows 21:40, cols 1:40		 #
+	diag <- - params$rhoT * betaTm * Itall  #
+	M4 <- diag(x = diag)#
+	diag <- params$gamma + params$muC - ageflux#
+	M5 <- diag(x = diag)#
+	M5[row(M5) - col(M5) == 1] <- ageflux#
+	Vmat2 <- cbind(M4, M5)
+Vmat <- rbind(Vmat1, Vmat2)
+ncol(Vmat1)
+ncol(Vmat2)
+ncol(Fmat)
+# Calculate next generation matrix, 1:40 columns, 1:40 rows#
+	Fmat = rbind(#
+		matrix(rep(betaBm * S / Tot, each = N), nrow = N, byrow = T),#
+		matrix(rep(params$rhoB * betaBm * It / Tot, each = N), nrow = N, #
+		byrow = T))
+params$betaT
+diag <- params$rhoT * params$betaT * Itall + params$muB + #
+		params$gamma - ageflux#
+	M1 <- diag(x = diag)#
+	M1[row(M1) - col(M1) == 1] <- ageflux
+ncol(M1)
+Vmat1 = cbind(M1, 		#
+		matrix(0, nrow = N, ncol = N) )
+ncol(Vmat1)
+################################################
+# Ro of brucellosis in the presence of bTB, age structure#
+################################################
+Ro_brucellosis_co = function(params, xT){#
+	####################################
+	# Input: paramter file#
+	####################################
+	# Get stable age distribution in TB only#
+	S <- xT[s.index]#
+	It <- xT[it.index]#
+#
+	Tot <- sum(S) + sum(It) #
+	Sall <- sum(S)#
+	Itall <- sum(It)#
+#
+	ageflux <- params$aging[1,1]#
+#
+	# age specific FOI (a vector)#
+	betaBm <- rep(params$betaB, length.out = N)#
+	betaBm[which(ages >= 2 & ages <=5)] <- exp(0.885) * params$betaB#
+	betaTm <- rep(params$betaT, length.out = N)#
+#
+	# Calculate next generation matrix, 1:40 columns, 1:40 rows#
+	Fmat = rbind(#
+		matrix(rep(betaBm * S / Tot, each = N), nrow = N, byrow = T),#
+		matrix(rep(params$rhoB * betaBm * It / Tot, each = N), nrow = N, #
+		byrow = T))#
+#
+	# Rows 1:20, cols 1:40#
+	diag <- params$rhoT * params$betaT * Itall + params$muB + #
+		params$gamma - ageflux#
+	M1 <- diag(x = diag)#
+	M1[row(M1) - col(M1) == 1] <- ageflux#
+	Vmat1 = cbind(M1, 		#
+		matrix(0, nrow = N, ncol = N) )#
+#
+	# Rows 21:40, cols 1:40		 #
+	diag <- - params$rhoT * betaTm * Itall  #
+	M4 <- diag(x = diag)#
+	diag <- params$gamma + params$muC - ageflux#
+	M5 <- diag(x = diag)#
+	M5[row(M5) - col(M5) == 1] <- ageflux#
+	Vmat2 <- cbind(M4, M5)#
+	Vmat <- rbind(Vmat1, Vmat2)#
+	Vinv <- solve(Vmat)#
+	vals <- eigen(Fmat %*% Vinv)$values#
+	return(max(Re(vals))) #
+}
+Ro_brucellosis_co(params, xT)
+ncol(Vmat)
+S <- xT[s.index]#
+	It <- xT[it.index]#
+#
+	Tot <- sum(S) + sum(It) #
+	Sall <- sum(S)#
+	Itall <- sum(It)#
+#
+	ageflux <- params$aging[1,1]#
+#
+	# age specific FOI (a vector)#
+	betaBm <- rep(params$betaB, length.out = N)#
+	betaBm[which(ages >= 2 & ages <=5)] <- exp(0.885) * params$betaB#
+	betaTm <- rep(params$betaT, length.out = N)#
+#
+	# Calculate next generation matrix, 1:40 columns, 1:40 rows#
+	Fmat = rbind(#
+		matrix(rep(betaBm * S / Tot, each = N), nrow = N, byrow = T),#
+		matrix(rep(params$rhoB * betaBm * It / Tot, each = N), nrow = N, #
+		byrow = T))#
+#
+	# Rows 1:20, cols 1:40#
+	diag <- params$rhoT * params$betaT * Itall + params$muB + #
+		params$gamma - ageflux#
+	M1 <- diag(x = diag)#
+	M1[row(M1) - col(M1) == 1] <- ageflux#
+	Vmat1 = cbind(M1, 		#
+		matrix(0, nrow = N, ncol = N) )#
+#
+	# Rows 21:40, cols 1:40		 #
+	diag <- - params$rhoT * betaTm * Itall  #
+	M4 <- diag(x = diag)#
+	diag <- params$gamma + params$muC - ageflux#
+	M5 <- diag(x = diag)#
+	M5[row(M5) - col(M5) == 1] <- ageflux#
+	Vmat2 <- cbind(M4, M5)
+nrow(Vmat1)
+ncol(Vmat)
+ncol(Vmat1)
+ncol(Vmat2)
+nrow(Vmat2)
+Vmat <- rbind(Vmat1, Vmat2)
+Vinv <- solve(Vmat)
+nrow(Vinv)
+ncol(Vinv)
+nrow(Fmat)
+ncol(Fmat)
+Fmat = rbind(#
+		matrix(rep(betaBm * S / Tot, each = 2* N), nrow = 2*N, byrow = T),#
+		matrix(rep(params$rhoB * betaBm * It / Tot, each = 2*N), nrow = 2* N, #
+		byrow = T))
+nrow(Fmat)
+ncol(Fmat)
+Fmat = rbind(#
+		matrix(rep(betaBm * S / Tot, each = 2* N), nrow = N, byrow = T),#
+		matrix(rep(params$rhoB * betaBm * It / Tot, each = 2*N), nrow = N, #
+		byrow = T))
+ncol(Fmat)
+nrow(Fmat)
+vals <- eigen(Fmat %*% Vinv)$values#
+	return(max(Re(vals)))
+max(Re(vals))
+xB[(min(it.index)+50):(min(it.index)+53)] <- 1
+head(eipB)
+head(epiB)
+min(ib.index)
