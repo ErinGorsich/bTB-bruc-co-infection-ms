@@ -44,6 +44,7 @@ agemax <- 20
 agestep <- 0.1
 N <- agemax / agestep
 ages <- seq(1, agemax + 1, by = agestep)[-(N)]
+binsize <- N / agemax
 N == length(ages)
 
 # generate parameters with correct agebins
@@ -71,7 +72,7 @@ x0 <- c(S0, It0, Ib0, Ic0, R0, Rc0)
 # set stable age structure in disease free context (1200 long N*6)
 params <- c(f.params, list(gamma = 1/2, betaB = 0.6087396, 
 	betaT = 0.0012974553, rhoT = 1, rhoB = 2.1))
-params$muC > 1
+#params$muC > 1
 
 params.recov <- c(f.params.recov, list(gamma = 1/2, betaB = 0.6087396, 
 	betaT = 0.0012974553, rhoT = 1, rhoB = 2.1))
@@ -125,7 +126,8 @@ objective = function(params.est){
 	x0 = xB
 	x0[[min(it.index) + 5*binsize]] <- 5
 	x0[[min(it.index) + 5*binsize + 1]] <- 5
-	sol <- as.data.frame(ode.1D(x0, times, rhs, params, nspec = 6, dimens = N, method = "ode45"))
+	sol <- as.data.frame(ode.1D(x0, times, rhs, params, 
+		nspec = 6, dimens = N, method = "ode45"))
 	df <- get_structured_prevalence(sol)
 	error <- sqrt(((prevTBobs - df$prevTB)^2 + (prevBobs - df$prevB)^2))
 	return (error)
@@ -141,7 +143,8 @@ objective_recov = function(params.est){
 	x0[[min(it.index) + 5*binsize]] <- 5
 	x0[[min(it.index) + 5*binsize + 1]] <- 5
 
-	sol <- as.data.frame(ode.1D(x0, times, rhs, params, nspec = 6, dimens = N, method = "ode45"))
+	sol <- as.data.frame(ode.1D(x0, times, rhs, params, 
+		nspec = 6, dimens = N, method = "ode45"))
 	df <- get_structured_prevalence(sol)
 	error <- sqrt(((prevTBobs - df$prevTB)^2 + (prevBobs - df$prevB)^2))
 	return (error)
@@ -182,7 +185,8 @@ params <- c(f.params, list(gamma = 1/2, betaB = 0.5764065,
 x0 <- xB
 x0[[min(it.index) + 5*binsize]] <- 5
 x0[[min(it.index) + 5*binsize + 1]] <- 5
-sol <- as.data.frame(ode.1D(x0, times, rhs, params, nspec = 6, dimens = N, method = "ode45"))
+sol <- as.data.frame(ode.1D(x0, times, rhs, params, 
+	nspec = 6, dimens = N, method = "ode45"))
 get_structured_prevalence(sol)
 plot_raw_numbers(sol)
 
@@ -190,8 +194,16 @@ plot_raw_numbers(sol)
 params <- c(f.params.recov, list(gamma = 1/2, betaB = 0.6282482, 
 		betaT = 0.7848374/1000, rhoT = 1, rhoB = 2.1))
 x0 <- xB
-x0[[min(it.index) + 5*binsize]] <- 5
-x0[[min(it.index) + 5*binsize + 1]] <- 5
-sol <- as.data.frame(ode.1D(x0, times, rhs, params, nspec = 6, dimens = N, method = "ode45"))
+x0[[min(it.index) + 5*binsize]] <- 1
+x0[[min(it.index) + 5*binsize + 1]] <- 1
+sol <- as.data.frame(ode.1D(x0, times, rhs, params, 
+	nspec = 6, dimens = N, method = "ode45"))
 get_structured_prevalence(sol)
 plot_raw_numbers(sol)
+
+#######################################
+# TB Prev without brucellosis: 65.855
+# TB prev in populations with co: 27.861
+# BRUC prev without TB: 21.072
+# BRUC prev in populations with co: 31.072
+#######################################

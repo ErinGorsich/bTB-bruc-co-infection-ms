@@ -1,280 +1,3 @@
-##############################################################
-##############################################################
-# Functions to calculate EE and Ro#
-source('~/GitHub/bTB-bruc-co-infection-ms/pde/Ro_calculations.R', chdir = TRUE)#
-#
-# Functions for plotting#
-source('~/GitHub/bTB-bruc-co-infection-ms/pde/plotting_functions.R', chdir = TRUE)
-source('~/GitHub/bTB-bruc-co-infection-ms/pde/get_EE.R', chdir = TRUE)
-params <- c(f.params, list(gamma = 1/2, betaB = 0.5764065, #
-		betaT = 1.3305462/1000, rhoT = 1, rhoB = 2.1))
-binsize <- N/agemax #number of delta age bins to get one age bin...
-x_singleTB <- x0#
-	x_singleTB[(N+1)  +  3*binsize] <- 1#
-	x_singleTB[(N+1) +  4*binsize] <- 1
-x_singleTB
-sol <- as.data.frame(ode(x_singleTB, times, rhs, #
-			params, method = "ode45"))}#
-	S <-sum(sol[length(sol[,1]) , s.index+1])#
-	It <- sum(sol[length(sol[,1]) , it.index +1])#
-	Ic <- sum(sol[length(sol[,1]) , ic.index +1])#
-	Ib <- sum(sol[length(sol[,1]) , ib.index +1])#
-	Ic <- sum(sol[length(sol[,1]) , ic.index +1])#
-	R <- sum(sol[length(sol[,1]) , r.index +1])#
-	Rc <-sum(sol[length(sol[,1]) , rc.index +1])#
-	Tot <- sum(sol[length(sol[,1]), 2:length(colnames(sol))])	#
-	EE_bTB_alone <- (It + Ic + Rc) / Tot
-method = "beverton-holt"
-if (method == "beverton-holt"){#
-		sol <- as.data.frame(ode(x_singleTB, times, rhs, #
-			params, method = "ode45"))}#
-	S <-sum(sol[length(sol[,1]) , s.index+1])#
-	It <- sum(sol[length(sol[,1]) , it.index +1])#
-	Ic <- sum(sol[length(sol[,1]) , ic.index +1])#
-	Ib <- sum(sol[length(sol[,1]) , ib.index +1])#
-	Ic <- sum(sol[length(sol[,1]) , ic.index +1])#
-	R <- sum(sol[length(sol[,1]) , r.index +1])#
-	Rc <-sum(sol[length(sol[,1]) , rc.index +1])#
-	Tot <- sum(sol[length(sol[,1]), 2:length(colnames(sol))])	#
-	EE_bTB_alone <- (It + Ic + Rc) / Tot
-EE_bTB_alone
-x_singleBruc <- x0#
-	x_singleBruc[min(ib.index) + 1 + 3*binsize] <- 1#
-	x_singleBruc[min(ib.index) + 1 + 4*binsize] <- 1
-x_singleBruc
-if (method == "ricker"){#
-		sol <- as.data.frame(ode(x_singleBruc, times, rhs_ricker, #
-			params, method = "ode45"))}#
-	if (method == "logistic"){#
-		sol <- as.data.frame(ode(x_singleBruc, times, rhs_logistic, #
-			params, method = "ode45"))}
-if (method == "beverton-holt"){#
-		sol <- as.data.frame(ode(x_singleBruc, times, rhs,#
-			params, method = "ode45"))}	#
-	S <-sum(sol[length(sol[,1]) , s.index+1])#
-	It <- sum(sol[length(sol[,1]) , it.index +1])#
-	Ic <- sum(sol[length(sol[,1]) , ic.index +1])#
-	Ib <- sum(sol[length(sol[,1]) , ib.index +1])#
-	Ic <- sum(sol[length(sol[,1]) , ic.index +1])#
-	R <- sum(sol[length(sol[,1]) , r.index +1])#
-	Rc <-sum(sol[length(sol[,1]) , rc.index +1])#
-	Tot <- sum(sol[length(sol[,1]), 2:length(colnames(sol))])	#
-	EE_bruc_alone <- (Ib + Ic + R + Rc) / Tot
-plot_raw_numbers(sol)
-if (method == "beverton-holt"){#
-		sol <- as.data.frame(ode(x_singleBruc, times, rhs,#
-			params, method = "ode45"))}	#
-	S <-sum(sol[length(sol[,1]) , s.index+1])#
-	It <- sum(sol[length(sol[,1]) , it.index +1])#
-	Ic <- sum(sol[length(sol[,1]) , ic.index +1])#
-	Ib <- sum(sol[length(sol[,1]) , ib.index +1])#
-	Ic <- sum(sol[length(sol[,1]) , ic.index +1])#
-	R <- sum(sol[length(sol[,1]) , r.index +1])#
-	Rc <-sum(sol[length(sol[,1]) , rc.index +1])#
-	Tot <- sum(sol[length(sol[,1]), 2:length(colnames(sol))])	#
-	EE_bruc_alone <- (Ib + Ic + R + Rc) / Tot
-EE_bruc_alone
-plot_raw_numbers(sol)
-x_endB <- unname(unlist(sol[length(sol[,1]), 2:length(colnames(sol))] ))
-x_endB[min(it.index) + 1  +  3*binsize] <- 1#
-	x_endB[min(it.index) + 1  +  4*binsize] <- 1
-x_endB
-if (method == "ricker"){#
-		sol <- as.data.frame(ode(x_endB, times, rhs_ricker, params, method = "ode45"))}#
-	if (method == "logistic"){#
-		sol <- as.data.frame(ode(x_endB, times, rhs_logistic, params, method = "ode45"))}#
-	if (method == "beverton-holt"){#
-		sol <- as.data.frame(ode(x_endB, times, rhs, params, method = "ode45"))}	#
-	S <-sum(sol[length(sol[,1]) , s.index+1])#
-	It <- sum(sol[length(sol[,1]) , it.index +1])#
-	Ic <- sum(sol[length(sol[,1]) , ic.index +1])#
-	Ib <- sum(sol[length(sol[,1]) , ib.index +1])#
-	Ic <- sum(sol[length(sol[,1]) , ic.index +1])#
-	R <- sum(sol[length(sol[,1]) , r.index +1])#
-	Rc <-sum(sol[length(sol[,1]) , rc.index +1])#
-	Tot <- sum(sol[length(sol[,1]), 2:length(colnames(sol))])	#
-#
-	EE_bTB_co <- (It + Ic + Rc) / Tot#
-	EE_bruc_co <- (Ib + Ic + R + Rc) / Tot
-EE_bTB_co
-EE_bruc_co
-source('~/GitHub/bTB-bruc-co-infection-ms/pde/get_EE.R', chdir = TRUE)
-get_EE(params, xB, "beverton-holt")
-x0
-source('~/GitHub/bTB-bruc-co-infection-ms/pde/get_EE.R', chdir = TRUE)
-get_EE(params, x0, "beverton-holt")
-test <- get_EE(params, x0, "beverton-holt")
-test
-test[1]
-params$betaT
-Fmat = params$betaT* matrix(rep(S, each = 20), nrow = 20, byrow = T)
-Fmat
-S <- x0[s.index + 1]
-S
-length(S)
-Fmat = params$betaT* matrix(rep(S, each = N), nrow = 20, byrow = T)
-Fmat
-params$betaT
-matrix(rep(S, each = N), nrow = N, byrow = T)
-params$aging[1:10, 1:10]
-da
-rhs
-ls()
-gen_fixed_params
-params$aging[1,1]
-x0
-####################################
-	S <- x0[s.index + 1]#
-	ageflux <- params$aging[1,1]#
-#
-	# Calculate next generation matrix#
-	Fmat = params$betaT* matrix(rep(S, each = N), nrow = N, byrow = T)#
-	Vmat = diag(x = params$muT + ageflux)#
-	Vmat[row(Vmat) - col(Vmat) == 1] <- - ageflux#
-	Vinv <- solve(Vmat)#
-	vals <- eigen(Fmat %*% Vinv)$values#
-#
-	Vmat2 <- diag(x = params$muT)#
-	V2inv <- solve(Vmat2)#
-	vals2 <- eigen(Fmat %*% V2inv)$values#
-	return(max(Re(vals2)))
-vals2
-max(Re(vals2))
-params$betaB
-S
-ages
-Fmat <- params$betaB* matrix(rep(S, each = N), nrow = N, byrow = T)
-nrow(Fmat)
-ncol(Fmat)
-which(ages > 2 & ages <5)
-ages[2]
-which(ages => 2 & ages <5)
-which(ages >=2 & ages <5)
-ages[40]
-which(ages >=2 & ages =<5)
-which(ages >=2 & ages <= 5)
-Fmat <- params$betaB* matrix(rep(S, each = N), nrow = N, byrow = T)#
-	Fmat[which(ages >= 2 & ages <=5), ] <- exp(0.885) * Fmat[#
-		which(ages >= 2 & ages <=5), ]
-Fmat
-Fmat[which(ages >= 2 & ages <= 5)]
-Fmat[which(ages >= 2 & ages <= 5), ]
-Fmat[1:5, 1:5]
-which(ages >= 2 & ages <=5)
-length(ages)
-ages
-Ro_brucellosis_single = function(params, x0){#
-	####################################
-	# Input: paramter file#
-	####################################
-	# Get stable age distribution in dz free conditions#
-	S <- x0[s.index + 1]#
-	ageflux <- params$aging[1,1]#
-#
-	Fmat <- params$betaB* matrix(rep(S, each = N), nrow = N, byrow = T)#
-	Fmat[which(ages >= 2 & ages <=5), ] <- exp(0.885) * Fmat[which(ages >= 2 & ages <=5), ]#
-	Vmat = diag(x = params$muB + params$gamma + ageflux)#
-	Vmat[row(Vmat) - col(Vmat) == 1] <- - ageflux#
-	Vinv <- solve(Vmat)#
-	vals <- eigen(Fmat %*% Vinv)$values#
-	return(max(Re(vals)))#
-}
-Ro_brucellosis_single(params, x0)
-params$betaB
-aging
-params$aging[1,1]
-S <- x0[s.index + 1]
-x0
-head(x0)
-Fmat <- params$betaB* matrix(rep(S, each = N), nrow = N, byrow = T)
-Fmat[1:10, 1:10]
-Fmat[which(ages >= 2 & ages <=5), ] <- exp(0.885) * Fmat[which(ages >= 2 & ages <=5), ]
-Fmat[1:10, 1:10]
-Fmat[10:30, 1:10]
-Fmat <- params$betaB* matrix(rep(S, each = N), nrow = N, byrow = T)
-Fmat[10:30, 1:10]
-ages
-Fmat[which(ages >= 2 & ages <=5), ] <- exp(0.885) * Fmat[which(ages >= 2 & ages <=5), ]
-ages
-Fmat[10:30, 1:10]
-Vmat = diag(x = params$muB + params$gamma + ageflux)
-ncols(Vmat)
-dims(Vmat)
-Vmat
-Vmat[row(Vmat) - col(Vmat) == 1] <- - ageflux#
-	Vinv <- solve(Vmat)#
-	vals <- eigen(Fmat %*% Vinv)$values
-max(Re(vals))
-params$muB
-params$muS
-params$betaB
-ageflux
-Ro_bTB_single = function(params, x0){#
-	####################################
-	# Input: x0 = c(S = final, 1*N S vector at params)#
-	# Output: Ro#
-	####################################
-	S <- x0[s.index + 1]#
-	ageflux <- params$aging[1,1]#
-#
-	# Calculate next generation matrix#
-	Fmat = params$betaT* matrix(rep(S, each = N), nrow = N, byrow = T)#
-	Vmat = diag(x = params$muT + ageflux)#
-	Vmat[row(Vmat) - col(Vmat) == 1] <- - ageflux#
-	Vinv <- solve(Vmat)#
-	vals <- eigen(Fmat %*% Vinv)$values#
-#
-	Vmat2 <- diag(x = params$muT)#
-	V2inv <- solve(Vmat2)#
-	vals2 <- eigen(Fmat %*% V2inv)$values#
-	return(max(Re(vals2)))#
-	#return(list(Ro =vals, Ro2 =vals2, Vmat = Vmat, Vmat2 = Vmat2, #
-	#	check = Vmat%*%Vinv, check2 = Vmat2 %*% V2inv, N = sum(S)))#
-}#
-#
-################################################
-# Ro of brucellosis in the absence of bTB, age structure#
-################################################
-#
-Ro_brucellosis_single = function(params, x0){#
-	####################################
-	# Input: paramter file#
-	####################################
-	# Get stable age distribution in dz free conditions#
-	S <- x0[s.index + 1]#
-	ageflux <- params$aging[1,1]#
-#
-	Fmat <- params$betaB* matrix(rep(S, each = N), nrow = N, byrow = T)#
-	Fmat[which(ages >= 2 & ages <=5), ] <- exp(0.885) * Fmat[which(ages >= 2 & ages <=5), ]#
-	Vmat <- diag(x = params$muB + params$gamma + ageflux)#
-	Vmat[row(Vmat) - col(Vmat) == 1] <- - ageflux#
-	Vinv <- solve(Vmat)#
-	vals <- eigen(Fmat %*% Vinv)$values#
-	return(max(Re(vals)))#
-}
-Ro_TB_single
-Ro_bTB_single(params, x0)
-Ro_brucellosis_single(params, x0)
-params
-Ro_brucellosis_single = function(params, x0){#
-	####################################
-	# Input: paramter file#
-	####################################
-	# Get stable age distribution in dz free conditions#
-	S <- x0[s.index + 1]#
-	ageflux <- params$aging[1,1]#
-#
-	Fmat <- params$betaB* matrix(rep(S, each = N), nrow = N, byrow = T)#
-	Fmat[which(ages >= 2 & ages <=5), ] <- exp(0.885) * Fmat[which(ages >= 2 & ages <=5), ]#
-	Vmat <- diag(x = params$muB + params$gamma - ageflux)#
-	Vmat[row(Vmat) - col(Vmat) == 1] <-  ageflux#
-	Vinv <- solve(Vmat)#
-	vals <- eigen(Fmat %*% Vinv)$values#
-	return(max(Re(vals)))#
-}
-Ro_brucellosis_single(params, x0)
-x0
-head(S)
 S <- x0[s.index]
 ageflux <- params$aging[1,1]#
 #
@@ -1277,3 +1000,1021 @@ epiT <- foreach(d = iter(epiTB, by = 'row'), .combine = rbind, .packages = "deSo
 	rm(params.test, sol, temp)#
 }#
 stopCluster(cl)
+##############################################################
+##############################################################
+# Erin Gorsich#
+# This Code analyzes the pde co-infection model#
+# model is defined in rhs; parameters in fixed_parameters#
+##############################################################
+##############################################################
+##############################################################
+#
+##############################################################
+##############################################################
+#1) Load fixed parameters, model#
+##############################################################
+##############################################################
+rm(list = ls())#
+require("deSolve")#
+library("plyr")#
+library("ggplot2")#
+library("lattice") # for levelplots#
+library("gridExtra") # layout for lattice#
+library("RColorBrewer")#
+library("doParallel")#
+library("foreach")#
+library("deSolve")#
+set.seed(5)#
+#
+setwd("~/GitHub/bTB-bruc-co-infection-ms/pde")#
+#setwd("~/Erin/pde")#
+#
+# parameters#
+source('fixed_parameters.R', chdir = TRUE)#
+#
+# rhs function - model structure#
+source('rhs.R', chdir = TRUE)#
+# age divisions in rhs function#
+agemax <- 20#
+agestep <- 0.1#
+N <- agemax / agestep#
+ages <- seq(1, agemax + 1, by = agestep)[-(N)]#
+N == length(ages)#
+#
+# generate parameters with correct agebins#
+f.params <- gen_fixed_params(agemax, agestep,#
+    p = p, recovery = FALSE)#
+f.params.recov <- gen_fixed_params(agemax, agestep, #
+    p = p, recovery = TRUE)#
+#
+# Functions for plotting (and define indecies based on ages, N): #
+source('plotting_functions.R', chdir = TRUE)#
+#
+# Starting agestructure (Jolles 2007; Caron et al. 2001)#
+juv <- rep(0.137 / length(ages[ages < 2]), length(ages[ages < 2]))#
+sa <- rep(0.368 / length(ages[ages >= 2 & ages < 6]), #
+    length(ages[ages >= 2 & ages < 6]))#
+a <- rep(0.185 / length(ages[ages >= 6 & ages < 9]), #
+    length(ages[ages >= 6 & ages < 9]))#
+ma <- rep(0.235 / length(ages[ages >= 9 & ages < 14]), #
+    length(ages[ages >= 9 & ages < 14]))#
+sen <- rep(0.075 / length(ages[ages >= 14 ]), length(ages[ages >= 14]))#
+#
+relage <- c(juv, sa, a, ma, sen); length(relage) == N									#
+plot.relage <- c(0.137, rep(0.368/4, 4), rep(0.185/3, 3), #
+    rep(0.235/5, 5), rep(0.075/7, 7))#
+#
+# Define x0, parameter for getEE function, disease free values#
+##############################################################
+S0 <- 400 * relage; It0 <- 0 * relage; Ib0 <- 0 * relage#
+Ic0 <- 0 * relage; R0 <- 0 * relage; Rc0 <- 0 * relage#
+times <- seq(1, 300, 1)#
+x0 <- c(S0, It0, Ib0, Ic0, R0, Rc0)#
+params <- c(f.params, list(gamma = 1/2, betaB = 0, #
+	betaT = 0, rhoT = 1, rhoB = 2.1))#
+test <- as.data.frame(ode.1D(x0, times, rhs, params, #
+	nspec = 6, dimens = N, method = "ode45"))#
+x0 <- unname(unlist(test[length(test[,1]), c(2:(length(colnames(test))))])) #
+#
+##############################################################
+##############################################################
+#2) Analyses plotting Ro and EE using MC simulation from stats#
+##############################################################
+##############################################################
+# Functions to calculate EE and Ro#
+source('get_Ro.R', chdir = TRUE)#
+source('get_EE.R', chdir = TRUE)#
+#
+# At ML parameters, find Ro and EE alone and with both pathogens#
+##############################################################
+params <- c(f.params, list(gamma = 1/2, betaB = 0.5764065, #
+		betaT = 1.3305462/1000, rhoT = 1, rhoB = 2.1))#
+#get_EE(params, x0, "beverton-holt")#
+# 65.855 TB alone#
+# 27.861 TB with co-infection#
+# 21.072 BRUC alone#
+# 31.493 BRUC with co-infection#
+#
+# make sure get ok age-prev#
+xtest <- x0
+head(xtest)
+# For BTB analyses set x0 as endemic prevalence of bruc in absence of BTB#
+##############################################################
+# xB, endemic age structure for brucellosis only set above#
+xB.test <- xB#
+xB.test[(min(it.index)+50):(min(it.index)+53)] <- 1
+n = 1000#
+set.seed(1)#
+binsize <- N/agemax#
+#
+# set xB#
+xstart <- x0#
+xstart[min(ib.index)+1 + 3*binsize] <- 1#
+xstart[min(ib.index)+1 + 3*binsize] <- 1#
+params <- c(f.params, list(gamma = 1/2, betaB = 0.5764065, #
+		betaT = 1.3305462/1000, rhoT = 1, rhoB = 2.1))#
+test <- as.data.frame(ode.1D(xstart, times, rhs, params, #
+	nspec = 6, dimens = N, method = "ode45"))#
+xB <- unname(unlist(test[length(test[,1]), c(2:(length(colnames(test))))])) #
+plot_raw_numbers(test)#
+#
+# set xT#
+xstart <- x0#
+xstart[min(it.index)+1 + 3*binsize] <- 1#
+xstart[min(it.index)+1 + 4*binsize] <- 1#
+test <- as.data.frame(ode.1D(xstart, times, rhs, params, #
+	nspec = 6, dimens = N, method = "ode45"))#
+xT <- unname(unlist(test[length(test[,1]), c(2:(length(colnames(test))))])) #
+plot_raw_numbers(test)
+head(epiT)
+epiTB <- data.frame(#
+	rhoT= rep(rhoB_test, length(rhoB_test)), #
+	mort = rep(mort_test, each = length(rhoB_test)), #
+	bTBprev = NA, brucprev = NA, 	finalN = NA, #
+	bTB_inS = NA, bTB_inB = NA, bruc_inS = NA, bruc_inTB = NA)
+##############################################################
+##############################################################
+#3) Analyses varying mortality and transmission rates#
+##############################################################
+##############################################################
+#
+# Set up dataframe to hold the results#
+##############################################################
+rhoB_test <- seq(0, 8, length.out = 101)#
+rhoT_test <- seq(0, 8, length.out = 101)#
+mort_test <- seq(0, 15, length.out = 101) #
+#
+# Data frame to hold results of changing bruc effects on bTB#
+epiTB <- data.frame(#
+	rhoT= rep(rhoB_test, length(rhoB_test)), #
+	mort = rep(mort_test, each = length(rhoB_test)), #
+	bTBprev = NA, brucprev = NA, 	finalN = NA, #
+	bTB_inS = NA, bTB_inB = NA, bruc_inS = NA, bruc_inTB = NA)#
+#
+# Data frame to hold results of changing bTB effects on bruc#
+epiB <- data.frame(#
+	rhoB= rep(rhoB_test, length(rhoB_test)), #
+	mort = rep(mort_test, each = length(rhoB_test)),#
+	bTBprev = NA, brucprev = NA, finalN = NA, #
+	bTB_inS = NA, bTB_inB = NA, bruc_inS = NA, bruc_inTB = NA)
+head(epiTB)
+# xB, endemic age structure for brucellosis only set above#
+xB.test <- xB#
+xB.test[(min(it.index)+50):(min(it.index)+53)] <- 1
+# For Brucellosis analyses set x0 as endemic prevalence BTB#
+##############################################################
+xT.test <- xT#
+xT.test[(min(ib.index)+50):(min(ib.index)+53)] <- 1
+cl <- makeCluster(6)#
+registerDoParallel(cl)
+head(epiBR)
+epiBR <- epiB
+epiBR <- epiB[c(1:2), ]
+epiBR
+epiB <- foreach(d = iter(epiBR, by = "row"), .combine = rbind, .packages = "deSolve") %dopar% {#
+	params.test <- c(f.params, list(gamma = 1/2, betaB = 0.5764065, #
+		betaT = 1.3305462/1000, rhoT = 1, rhoB = d$rhoB))#
+	params.test$muC <- d$mort * params.test$muS#
+	params.test$muRC <- d$mort * params.test$muS#
+	sol <- as.data.frame(ode.1D(xT.test, times, rhs, params.test,  nspec = 6, dimens = N))#
+	temp <- get_prevalence(sol)#
+#
+	data <- data.frame(#
+		rhoB = params.test$rhoB,#
+		mort = params.test$muC[1]/ params.test$muS[1],#
+		bTBprev = temp$prevTB,#
+		brucprev = temp$prevB, 	#
+		finalN = sum(sol[length(sol), c(2:length(colnames(sol)))]),#
+		bTB_inS = temp$prevTinS,#
+		bTB_inB = temp$prevTinB,#
+		bruc_inS = temp$prevBinS, #
+		bruc_inTB = temp$prevBinT)#
+}#
+stopCluster(cl)
+epiB
+########################################################
+setwd("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/final_datasets_copied_from_phdfolder")#
+source('~/GitHub/bTB-bruc-co-infection-ms/multiplot.R', chdir = TRUE)#
+library(ggplot2)#
+library(tidyr)#
+library('grid')#
+library('gridExtra') # specifies layout#
+library(survival)#
+library(lattice)#
+library(RColorBrewer)#
+library(deSolve)#
+#
+# read in data prepared in cross_sectional_dataprep, groomed for my bTB statuses#
+data<-read.csv(#
+	"cross_sectional_data_withdz_cleandisease_nofinal_Feb2016_capturetime.csv")#
+#
+data_nofinal<-data[data$final_capture=="0",] #
+d<-data.frame(btb=data_nofinal$tb , bruc=as.character(data_nofinal$bruc), age=data_nofinal$age_sel/12, #
+              id=data_nofinal$id)#
+d<-d[d$age<14,]#
+#
+# location to save results#
+setwd("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/draft2/post-labmeeting/post-labmeeting2/Vanessa&Rampalcomments/draft_with_pde/figures")
+###################################################
+###################################################
+# 1) Load fixed parameters, model#
+####################################################
+####################################################
+# Accessory functions for fitting: #
+rm(list = ls())#
+require("deSolve")#
+library("gridExtra")#
+library("ggplot2")#
+library("lattice") # for levelplots#
+setwd("~/GitHub/bTB-bruc-co-infection-ms/pde")#
+#
+# parameters#
+source('fixed_parameters.R', chdir = TRUE)#
+# rhs function - model structure#
+source('rhs.R', chdir = TRUE)#
+##############################################################
+##############################################################
+#2) Set-up features of aging#
+##############################################################
+##############################################################
+agemax <- 20#
+agestep <- 0.1#
+N <- agemax / agestep#
+ages <- seq(1, agemax + 1, by = agestep)[-(N)]#
+binsize <- N / agemax#
+N == length(ages)#
+#
+# generate parameters with correct agebins#
+f.params <- gen_fixed_params(agemax, agestep, p = p, recovery = FALSE)#
+f.params.recov <- gen_fixed_params(agemax, agestep, p = p, recovery = TRUE)#
+#
+# Functions for plotting (and define indecies based on ages, N): #
+source('plotting_functions.R', chdir = TRUE)#
+#
+# Starting agestructure (Jolles 2007; Caron et al. 2001)#
+juv <- rep(0.137 / length(ages[ages < 2]), length(ages[ages < 2]))#
+sa <- rep(0.368 / length(ages[ages >= 2 & ages < 6]), length(ages[ages >= 2 & ages < 6]))#
+a <- rep(0.185 / length(ages[ages >= 6 & ages < 9]), length(ages[ages >= 6 & ages < 9]))#
+ma <- rep(0.235 / length(ages[ages >= 9 & ages < 14]), length(ages[ages >= 9 & ages < 14]))#
+sen <- rep(0.075 / length(ages[ages >= 14 ]), length(ages[ages >= 14]))#
+#
+relage <- c(juv, sa, a, ma, sen); length(relage) == N	#
+#
+# Initial conditions#
+S0 <- 400 * relage; It0 <- 0 * relage; Ib0 <- 0 * relage#
+Ic0 <- 0 * relage; R0 <- 0 * relage; Rc0 <- 0 * relage#
+times <- seq(1, 500, 1)#
+x0 <- c(S0, It0, Ib0, Ic0, R0, Rc0)#
+#
+# set stable age structure in disease free context (1200 long N*6)#
+params <- c(f.params, list(gamma = 1/2, betaB = 0.6087396, #
+	betaT = 0.0012974553, rhoT = 1, rhoB = 2.1))#
+#params$muC > 1#
+#
+params.recov <- c(f.params.recov, list(gamma = 1/2, betaB = 0.6087396, #
+	betaT = 0.0012974553, rhoT = 1, rhoB = 2.1))#
+# use based on speed#
+test <- as.data.frame(ode.1D(x0, times, rhs, params, nspec = 6, dimens = N, method = "ode45"))#
+stable_age <- unname(unlist( test[length(test[,1]), c(2:(length(ages)+1))] / #
+	sum(test[length(test[,1]), c(2:(length(ages)+1))]) ))
+# Set starting prevalence for brucellosis in simulations#
+S0 <- 400 * stable_age; It0 <- 0 * stable_age; Ib0 <- 10 * stable_age#
+Ic0 <- 0 * stable_age; R0 <- 0 * stable_age; Rc0 <- 0 * stable_age#
+x0 <- c(S0, It0, Ib0, Ic0, R0, Rc0)#
+sol <- as.data.frame(ode.1D(x0, times, rhs, params, nspec = 6, dimens = N, method = "ode45"))#
+#
+# Bruc prev to introduct BTB to in the optimizer#
+xB <- unname(unlist( sol[length(sol[,1]), c(2:length(colnames(sol)))] )) # 27% bruc prev
+epiT <- read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/draft2/post-labmeeting/epiT.csv")
+cols <- brewer.pal(11, "RdBu")#
+cols2 <- colorRampPalette(brewer.pal(11, "RdBu"))
+epiT$bTBplot <- epiT$bTBprev - 0.65855#
+epiB$bTBplot <- epiB$bTBprev - 0.65855
+epiT$bTBplot <- epiT$bTBprev - 0.65855
+epiT$brucplot <- epiT$brucprev - 0.21072
+# see range of data by self overall#
+p1 <- ggplot(data = epiT, aes(x = mort, y = rhoT)) + geom_tile(aes(fill = bTBprev)) +#
+	scale_fill_distiller(palette = "RdYlBu", direction = -1, limits = c(-0.01, 1))
+p1
+# This code conducts sensitivity analsyes for the co-infection model#
+###########################################################
+###########################################################
+###########################################################
+# Outline#
+# 1) Run with other form of density dependence (logistic, ricker)#
+# 2) Do whole process with longer infection duraiton (1/gamma = 3 yr; 4 yr)#
+# 2) Latin hypercube, PRCC sensitivity#
+###########################################################
+###########################################################
+library('sensitivity')#
+library('deSolve')#
+library('lhs')#
+library("doParallel")#
+library("foreach")#
+#
+setwd("~/GitHub/bTB-bruc-co-infection-ms/pde")#
+#
+###########################################################
+###########################################################
+# 1) Run with other form of density dependence (logistic)#
+###########################################################
+###########################################################
+rm(list = ls())#
+source('fixed_parameters.R', chdir = TRUE)#
+source('rhs.R', chdir = TRUE)#
+#
+# age divisions in rhs function#
+agemax <- 20#
+agestep <- 0.1#
+N <- agemax / agestep#
+ages <- seq(1, agemax + 1, by = agestep)[-(N)]#
+N == length(ages)#
+#
+# generate parameters with correct agebins#
+f.params <- gen_fixed_params(agemax, agestep,#
+    p = p, recovery = FALSE)#
+f.params.recov <- gen_fixed_params(agemax, agestep, #
+    p = p, recovery = TRUE)#
+#
+source('plotting_functions.R', chdir = TRUE)#
+#
+# Starting agestructure (Jolles 2007; Caron et al. 2001)#
+juv <- rep(0.137 / length(ages[ages < 2]), length(ages[ages < 2]))#
+sa <- rep(0.368 / length(ages[ages >= 2 & ages < 6]), #
+    length(ages[ages >= 2 & ages < 6]))#
+a <- rep(0.185 / length(ages[ages >= 6 & ages < 9]), #
+    length(ages[ages >= 6 & ages < 9]))#
+ma <- rep(0.235 / length(ages[ages >= 9 & ages < 14]), #
+    length(ages[ages >= 9 & ages < 14]))#
+sen <- rep(0.075 / length(ages[ages >= 14 ]), length(ages[ages >= 14]))#
+#
+relage <- c(juv, sa, a, ma, sen); length(relage) == N									#
+plot.relage <- c(0.137, rep(0.368/4, 4), rep(0.185/3, 3), #
+    rep(0.235/5, 5), rep(0.075/7, 7))#
+# Run B-H model with no disease (endemic population size = ?)#
+##############################################################
+S0 <- 400 * relage; It0 <- 0 * relage; Ib0 <- 0 * relage#
+Ic0 <- 0 * relage; R0 <- 0 * relage; Rc0 <- 0 * relage#
+times <- seq(1, 300, 1)#
+x0 <- c(S0, It0, Ib0, Ic0, R0, Rc0)#
+params <- c(f.params, list(gamma = 1/2, betaB = 0, #
+	betaT = 0, rhoT = 1, rhoB = 2.1))#
+test <- as.data.frame(ode.1D(x0, times, rhs, params, #
+	nspec = 6, dimens = N, method = "ode45"))#
+x0 <- unname(unlist(test[length(test[,1]), c(2:(length(colnames(test))))]))
+sum(x0)
+params <- c(f.params, list(gamma = 1/2, betaB = 0.5764065, #
+	betaT = 1.3305462/1000, rhoT = 1, rhoB = 2.1))
+str(params)
+params <- c(f.params, list(gamma = 1/2, betaB = 0.5764065, #
+	betaT = 1.3305462/1000, rhoT = 1, rhoB = 2.1))
+params.test <- c(params, K = 1033.29)
+str(params.test)
+library('sensitivity')#
+library('deSolve')#
+library('lhs')#
+library("doParallel")#
+library("foreach")#
+#
+setwd("~/GitHub/bTB-bruc-co-infection-ms/pde")#
+#
+###########################################################
+###########################################################
+# 1) Run with other form of density dependence (logistic)#
+###########################################################
+###########################################################
+rm(list = ls())#
+source('fixed_parameters.R', chdir = TRUE)#
+source('rhs.R', chdir = TRUE)
+# age divisions in rhs function#
+agemax <- 20#
+agestep <- 0.1#
+N <- agemax / agestep#
+ages <- seq(1, agemax + 1, by = agestep)[-(N)]#
+N == length(ages)#
+#
+# generate parameters with correct agebins#
+f.params <- gen_fixed_params(agemax, agestep,#
+    p = p, recovery = FALSE)#
+f.params.recov <- gen_fixed_params(agemax, agestep, #
+    p = p, recovery = TRUE)
+str(f.params)
+source('plotting_functions.R', chdir = TRUE)#
+#
+# Starting agestructure (Jolles 2007; Caron et al. 2001)#
+juv <- rep(0.137 / length(ages[ages < 2]), length(ages[ages < 2]))#
+sa <- rep(0.368 / length(ages[ages >= 2 & ages < 6]), #
+    length(ages[ages >= 2 & ages < 6]))#
+a <- rep(0.185 / length(ages[ages >= 6 & ages < 9]), #
+    length(ages[ages >= 6 & ages < 9]))#
+ma <- rep(0.235 / length(ages[ages >= 9 & ages < 14]), #
+    length(ages[ages >= 9 & ages < 14]))#
+sen <- rep(0.075 / length(ages[ages >= 14 ]), length(ages[ages >= 14]))#
+#
+relage <- c(juv, sa, a, ma, sen); length(relage) == N									#
+plot.relage <- c(0.137, rep(0.368/4, 4), rep(0.185/3, 3), #
+    rep(0.235/5, 5), rep(0.075/7, 7))#
+# Run B-H model with no disease (endemic population size = 559.8903)#
+##############################################################
+S0 <- 400 * relage; It0 <- 0 * relage; Ib0 <- 0 * relage#
+Ic0 <- 0 * relage; R0 <- 0 * relage; Rc0 <- 0 * relage#
+times <- seq(1, 300, 1)#
+x0 <- c(S0, It0, Ib0, Ic0, R0, Rc0)#
+params <- c(f.params, list(gamma = 1/2, betaB = 0.5764065, #
+	betaT = 1.3305462/1000, rhoT = 1, rhoB = 2.1))#
+test <- as.data.frame(ode.1D(x0, times, rhs, params, #
+	nspec = 6, dimens = N, method = "ode45"))#
+x0 <- unname(unlist(test[length(test[,1]), c(2:(length(colnames(test))))])) #
+sum(x0)#
+# Set K s.t. get same popuation size/age structure (endemic population size = 609.0097)#
+##############################################################
+#K <- seq(1033.2, 1033.35, 0.01)#
+K <- seq(1030, 1035, 1)#
+times <- seq(0, 300, 1)  #
+#
+# test (run with bruc only, then introduce bTB)#
+params.test <- params#
+params.test$K <- 1033.29
+sol <- as.data.frame(ode(x0, times,  rhs_logistic, params.test))
+sol <- as.data.frame(ode.1D(x0, times, rhs_logistic, params.test, #
+	nspec = 6, dimens = N, method = "ode45"))#
+plot_raw_numbers(sol)
+sum(sol[length(sol[,1]), c(2:(length(colnames(sol))))])
+length(colnames(sol))
+sol[length(sol[,1]), 50:100]
+sol[length(sol[,1]), 250:300]
+sol[length(sol[,1]), 450:500]
+str(params)
+params.test
+sum(sol[length(sol[,1]), c(2:(length(colnames(sol))))])
+plot_agestructure(test, t = 300)
+plot_agestructure(sol, t = 200)
+params.test <- params#
+params.test$K <- 2000#
+sol <- as.data.frame(ode.1D(x0, times, rhs_logistic, params.test, #
+	nspec = 6, dimens = N, method = "ode45"))#
+plot_raw_numbers(sol)#
+sum(sol[length(sol[,1]), c(2:(length(colnames(sol))))])#
+plot_agestructure(sol, t = 200)
+params.test$K <- 1500#
+sol <- as.data.frame(ode.1D(x0, times, rhs_logistic, params.test, #
+	nspec = 6, dimens = N, method = "ode45"))#
+plot_raw_numbers(sol)#
+sum(sol[length(sol[,1]), c(2:(length(colnames(sol))))])#
+plot_agestructure(sol, t = 200)
+params.test$K <- 1600 #
+sol <- as.data.frame(ode.1D(x0, times, rhs_logistic, params.test, #
+	nspec = 6, dimens = N, method = "ode45"))#
+plot_raw_numbers(sol)#
+sum(sol[length(sol[,1]), c(2:(length(colnames(sol))))])
+params.test$K <- 1550 #
+sol <- as.data.frame(ode.1D(x0, times, rhs_logistic, params.test, #
+	nspec = 6, dimens = N, method = "ode45"))#
+plot_raw_numbers(sol)#
+sum(sol[length(sol[,1]), c(2:(length(colnames(sol))))])#
+plot_agestructure(sol, t = 200)
+params.test$K <- 1525 #
+sol <- as.data.frame(ode.1D(x0, times, rhs_logistic, params.test, #
+	nspec = 6, dimens = N, method = "ode45"))#
+plot_raw_numbers(sol)#
+sum(sol[length(sol[,1]), c(2:(length(colnames(sol))))])#
+plot_agestructure(sol, t = 200)
+params.test$K <- 1515 #
+sol <- as.data.frame(ode.1D(x0, times, rhs_logistic, params.test, #
+	nspec = 6, dimens = N, method = "ode45"))#
+plot_raw_numbers(sol)#
+sum(sol[length(sol[,1]), c(2:(length(colnames(sol))))])#
+plot_agestructure(sol, t = 200)
+params.test$K <- 1520 #
+sol <- as.data.frame(ode.1D(x0, times, rhs_logistic, params.test, #
+	nspec = 6, dimens = N, method = "ode45"))#
+plot_raw_numbers(sol)#
+sum(sol[length(sol[,1]), c(2:(length(coln
+sum(sol[length(sol[,1]), c(2:(length(colnames(sol))))])
+params.test <- params#
+params.test$K <- 382 #
+sol <- as.data.frame(ode.1D(x0, times, rhs_ricker, params.test, #
+	nspec = 6, dimens = N, method = "ode45"))#
+plot_raw_numbers(sol)#
+sum(sol[length(sol[,1]), c(2:(length(colnames(sol))))])
+params.test$K <- 400 #
+sol <- as.data.frame(ode.1D(x0, times, rhs_ricker, params.test, #
+	nspec = 6, dimens = N, method = "ode45"))#
+plot_raw_numbers(sol)#
+sum(sol[length(sol[,1]), c(2:(length(colnames(sol))))])#
+plot_agestructure(sol, t = 200)
+params.test <- params#
+params.test$K <- 500 #
+sol <- as.data.frame(ode.1D(x0, times, rhs_ricker, params.test, #
+	nspec = 6, dimens = N, method = "ode45"))#
+plot_raw_numbers(sol)#
+sum(sol[length(sol[,1]), c(2:(length(colnames(sol))))])
+params.test$K <- 450 #
+sol <- as.data.frame(ode.1D(x0, times, rhs_ricker, params.test, #
+	nspec = 6, dimens = N, method = "ode45"))#
+plot_raw_numbers(sol)#
+sum(sol[length(sol[,1]), c(2:(length(colnames(sol))))])#
+plot_agestructure(sol, t = 200)
+params.test$K <- 410 #
+sol <- as.data.frame(ode.1D(x0, times, rhs_ricker, params.test, #
+	nspec = 6, dimens = N, method = "ode45"))#
+plot_raw_numbers(sol)#
+sum(sol[length(sol[,1]), c(2:(length(colnames(sol))))])
+params.test$K <- 415 #
+sol <- as.data.frame(ode.1D(x0, times, rhs_ricker, params.test, #
+	nspec = 6, dimens = N, method = "ode45"))#
+plot_raw_numbers(sol)#
+sum(sol[length(sol[,1]), c(2:(length(colnames(sol))))])#
+plot_agestructure(sol, t = 200)
+params.test$K <- 420 #
+sol <- as.data.frame(ode.1D(x0, times, rhs_ricker, params.test, #
+	nspec = 6, dimens = N, method = "ode45"))#
+plot_raw_numbers(sol)
+sum(sol[length(sol[,1]), c(2:(length(colnames(sol))))])
+params.test$K <- 417 #
+sol <- as.data.frame(ode.1D(x0, times, rhs_ricker, params.test, #
+	nspec = 6, dimens = N, method = "ode45"))#
+plot_raw_numbers(sol)#
+sum(sol[length(sol[,1]), c(2:(length(colnames(sol))))])
+# (endemic population size = 559.8903)#
+##############################################################
+#K <- seq(1033.2, 1033.35, 0.01)#
+times <- seq(0, 200, 1)  #
+#
+# test run for logistic model #
+# at K = 1033-> 380; K = 2000 -> 736; K = 1500 -> 552.4; 1500 -> 589#
+# at 1550 --> 570.81 # at 1525 -> 561#
+params.test <- params#
+params.test$K <- 1520 #
+sol <- as.data.frame(ode.1D(x0, times, rhs_logistic, params.test, #
+	nspec = 6, dimens = N, method = "ode45"))#
+plot_raw_numbers(sol)#
+sum(sol[length(sol[,1]), c(2:(length(colnames(sol))))])#
+plot_agestructure(sol, t = 200)#
+#
+K <- seq(1519, 1522, 0.2)#
+val <- NA#
+for (i in 1:length(K)){#
+	params.test$K <- K[i]#
+	sol <-  as.data.frame(ode.1D(x0, times, rhs_logistic, params.test, #
+		nspec = 6, dimens = N, method = "ode45"))#
+	val[i] <- sum(sol[length(sol),c(2:length(colnames(sol)))])	#
+}#
+plot(x = K, y = val, type = "b", pch = 19)#
+abline(h = 559.8903) # K = ?#
+# Set K for ricker to get the same popuation size (size = 559.8903)#
+##############################################################
+# old -> K <- seq(382.5, 382.56, 0.002)#
+# K = 382 -> 509 K = 400 -> 533.5; K = 450-> 500#
+# 410 -> 546; 415-> 553; 420 -> 560#
+params.test <- params#
+params.test$K <- 417 #
+sol <- as.data.frame(ode.1D(x0, times, rhs_ricker, params.test, #
+	nspec = 6, dimens = N, method = "ode45"))#
+plot_raw_numbers(sol)#
+sum(sol[length(sol[,1]), c(2:(length(colnames(sol))))])#
+plot_agestructure(sol, t = 200)#
+#
+K2 <- seq(417, 420, 0.2)#
+val2 <- NA#
+for (i in 1:length(K)){#
+	params.test$K <- K2[i]#
+	sol <-  as.data.frame(ode.1D(x0, times, rhs_ricker, params.test, #
+		nspec = 6, dimens = N, method = "ode45"))#
+	val2[i] <- sum(sol[length(sol),c(2:length(colnames(sol)))])	#
+}#
+plot(x = K2, y = val2, type = "b", pch = 19)#
+abline(h = 559.8903) # K = 1033.29
+val
+K2
+val2
+x0
+times <- seq(0, 200, 1)
+K <- seq(1519, 1522, 0.2)#
+val <- NA#
+params <- c(f.params, list(gamma = 1/2, betaB = 0.5764065, #
+	betaT = 1.3305462/1000, rhoT = 1, rhoB = 2.1))
+K <- seq(1519, 1522, 0.2)#
+val <- NA#
+params <- c(f.params, list(gamma = 1/2, betaB = 0.5764065, #
+	betaT = 1.3305462/1000, rhoT = 1, rhoB = 2.1))#
+for (i in 1:length(K)){#
+	params.test <- params#
+	params.test$K <- K[i]#
+	sol <-  as.data.frame(ode.1D(x0, times, rhs_logistic, params.test, #
+		nspec = 6, dimens = N, method = "ode45"))#
+	val[i] <- sum(sol[length(sol),c(2:length(colnames(sol)))])	#
+	rm(params.test, sol)#
+}
+K <- seq(1519, 1522, 0.2)#
+val <- NA#
+params <- c(f.params, list(gamma = 1/2, betaB = 0.5764065, #
+	betaT = 1.3305462305462/1000, rhoT = 1, rhoB = 2.1))#
+for (i in 1:length(K)){#
+	params.test <- params#
+	params.test$K <- K[i]#
+	sol <-  as.data.frame(ode.1D(x0, times, rhs_logistic, params.test, #
+		nspec = 6, dimens = N, method = "ode45"))#
+	val[i] <- sum(sol[length(sol[,1]),c(2:length(colnames(sol)))])	#
+	rm(params.test, sol)#
+}#
+plot(x = K, y = val, type = "b", pch = 19)#
+abline(h = 559.8903) # K = ?
+K2 <- seq(417, 420, 0.2)#
+val2 <- NA#
+params <- c(f.params, list(gamma = 1/2, betaB = 0.5764065, #
+	betaT = 1.3305462305462/1000, rhoT = 1, rhoB = 2.1))#
+for (i in 1:length(K)){#
+	params.test <- params#
+	params.test$K <- K2[i]#
+	sol <-  as.data.frame(ode.1D(x0, times, rhs_ricker, params.test, #
+		nspec = 6, dimens = N, method = "ode45"))#
+	val2[i] <- sum(sol[length(sol[,1]),c(2:length(colnames(sol)))])	#
+}#
+plot(x = K2, y = val2, type = "b", pch = 19)#
+abline(h = 559.8903) # K = 1033.29
+plot(x = K, y = val, type = "b", pch = 19)#
+abline(h = 559.8903) # K = ?
+K <- seq(1520.4, 1520.6, 0.05)#
+val <- NA#
+params <- c(f.params, list(gamma = 1/2, betaB = 0.5764065, #
+	betaT = 1.3305462305462/1000, rhoT = 1, rhoB = 2.1))#
+for (i in 1:length(K)){#
+	params.test <- params#
+	params.test$K <- K[i]#
+	sol <-  as.data.frame(ode.1D(x0, times, rhs_logistic, params.test, #
+		nspec = 6, dimens = N, method = "ode45"))#
+	val[i] <- sum(sol[length(sol[,1]),c(2:length(colnames(sol)))])	#
+	rm(params.test, sol)#
+}#
+plot(x = K, y = val, type = "b", pch = 19)#
+abline(h = 559.8903) # K = ?
+abline(h = 559.8903)
+K <- seq(1520.2, 1520.4, 0.05)#
+val <- NA#
+params <- c(f.params, list(gamma = 1/2, betaB = 0.5764065, #
+	betaT = 1.3305462305462/1000, rhoT = 1, rhoB = 2.1))#
+for (i in 1:length(K)){#
+	params.test <- params#
+	params.test$K <- K[i]#
+	sol <-  as.data.frame(ode.1D(x0, times, rhs_logistic, params.test, #
+		nspec = 6, dimens = N, method = "ode45"))#
+	val[i] <- sum(sol[length(sol[,1]),c(2:length(colnames(sol)))])	#
+	rm(params.test, sol)#
+}#
+plot(x = K, y = val, type = "b", pch = 19)#
+abline(h = 559.8903)
+K
+val
+plot(x = K2, y = val2, type = "b", pch = 19)#
+abline(h = 559.8903) # K = 1033.29
+K2
+val2
+K2 <- seq(418.6, 419, 0.05)#
+val2 <- NA#
+params <- c(f.params, list(gamma = 1/2, betaB = 0.5764065, #
+	betaT = 1.3305462305462/1000, rhoT = 1, rhoB = 2.1))#
+for (i in 1:length(K)){#
+	params.test <- params#
+	params.test$K <- K2[i]#
+	sol <-  as.data.frame(ode.1D(x0, times, rhs_ricker, params.test, #
+		nspec = 6, dimens = N, method = "ode45"))#
+	val2[i] <- sum(sol[length(sol[,1]),c(2:length(colnames(sol)))])	#
+}#
+plot(x = K2, y = val2, type = "b", pch = 19)#
+abline(h = 559.8903) # K = 1033.29
+plot(x = K2, y = val2[1:length(K2)], type = "b", pch = 19)
+abline(h = 559.8903) # K = 418.?
+val2
+K2
+for (i in 6:length(K2)){#
+	params.test <- params#
+	params.test$K <- K2[i]#
+	sol <-  as.data.frame(ode.1D(x0, times, rhs_ricker, params.test, #
+		nspec = 6, dimens = N, method = "ode45"))#
+	val2[i] <- sum(sol[length(sol[,1]),c(2:length(colnames(sol)))])	#
+}#
+plot(x = K2, y = val2, type = "b", pch = 19)#
+abline(h = 559.8903)
+abline(h = 559.8903) # K = 418.?
+K2 <- seq(419, 420, 0.05)#
+val2 <- NA#
+params <- c(f.params, list(gamma = 1/2, betaB = 0.5764065, #
+	betaT = 1.3305462305462/1000, rhoT = 1, rhoB = 2.1))#
+for (i in 1:length(K2)){#
+	params.test <- params#
+	params.test$K <- K2[i]#
+	sol <-  as.data.frame(ode.1D(x0, times, rhs_ricker, params.test, #
+		nspec = 6, dimens = N, method = "ode45"))#
+	val2[i] <- sum(sol[length(sol[,1]),c(2:length(colnames(sol)))])	#
+}
+plot(x = K2, y = val2, type = "b", pch = 19)#
+abline(h = 559.8903) # K = 418.?
+K2
+val2
+K2[16]
+# Make plots#
+##############################################################
+set.seed(1)#
+n = 500#
+source('get_EE.R', chdir = TRUE)#
+#
+# Generate 500 samples#
+cl <- makeCluster(6)#
+# cl <- makeCluster(10) # work computer#
+registerDoParallel(cl)
+n = 2
+densitydependence <- foreach(icount(n), .combine = rbind, .packages = "deSolve") %dopar% {#
+	params <- c(f.params, list(gamma = 1/2, betaB = 0.5764065, #
+		betaT = 1.3305462/1000, rhoT = 1, rhoB = 2.1))#
+	params$rhoB<- exp(rnorm(n = 1, mean = 0.75579, sd = 0.40714))#
+	B <- rnorm(n = 1, mean = 1.1060, sd = 0.3505)#
+	TB <- rnorm(n = 1, mean = 1.0370, sd = 0.3483)#
+	params$muB <- params$muS * exp(B)#
+	params$muT <- params$muS * exp(TB)#
+	params$muC <- params$muS * exp(B + TB)#
+	params$muR <- params$muT#
+	params$muRC <- params$muC#
+#
+	val <- getEE(params, method = "beverton-holt")#
+#
+	paramslog <- params; paramslog$K <- 1520.35#
+	vallog <- getEE(paramslog, method = "logistic")#
+	paramsricker <- params; paramsricker$K <- 382.556#
+	valricker <- getEE(paramsricker, method = "ricker")#
+#
+	data <- data.frame(#
+		rhoB = params$rhoB,#
+		dB = B,#
+		dT = TB,#
+		EE_bTB_single = val[1], EE_bTB_co = val[2], #
+		EE_brucellosis_single = val[3], EE_brucellosis_co = val[4], #
+		rEE_bTB_single = valricker[1], rEE_bTB_co = valricker[2], #
+		rEE_brucellosis_single = valricker[3], rEE_brucellosis_co = valricker[4], #
+		lEE_bTB_single = vallog[1], lEE_bTB_co = vallog[2], #
+		lEE_brucellosis_single = vallog[3], lEE_brucellosis_co = vallog[4])#
+}#
+stopCluster(cl)#
+#
+str(densitydependence)
+# Generate 500 samples#
+cl <- makeCluster(6)#
+# cl <- makeCluster(10) # work computer#
+registerDoParallel(cl)#
+#
+densitydependence <- foreach(icount(n), .combine = rbind, .packages = "deSolve") %dopar% {#
+	params <- c(f.params, list(gamma = 1/2, betaB = 0.5764065, #
+		betaT = 1.3305462/1000, rhoT = 1, rhoB = 2.1))#
+	params$rhoB<- exp(rnorm(n = 1, mean = 0.75579, sd = 0.40714))#
+	B <- rnorm(n = 1, mean = 1.1060, sd = 0.3505)#
+	TB <- rnorm(n = 1, mean = 1.0370, sd = 0.3483)#
+	params$muB <- params$muS * exp(B)#
+	params$muT <- params$muS * exp(TB)#
+	params$muC <- params$muS * exp(B + TB)#
+	params$muR <- params$muT#
+	params$muRC <- params$muC#
+#
+	val <- get_EE(params, method = "beverton-holt")#
+#
+	paramslog <- params; paramslog$K <- 1520.35#
+	vallog <- get_EE(paramslog, method = "logistic")#
+	paramsricker <- params; paramsricker$K <- 382.556#
+	valricker <- get_EE(paramsricker, method = "ricker")#
+#
+	data <- data.frame(#
+		rhoB = params$rhoB,#
+		dB = B,#
+		dT = TB,#
+		EE_bTB_single = val[1], EE_bTB_co = val[2], #
+		EE_brucellosis_single = val[3], EE_brucellosis_co = val[4], #
+		rEE_bTB_single = valricker[1], rEE_bTB_co = valricker[2], #
+		rEE_brucellosis_single = valricker[3], rEE_brucellosis_co = valricker[4], #
+		lEE_bTB_single = vallog[1], lEE_bTB_co = vallog[2], #
+		lEE_brucellosis_single = vallog[3], lEE_brucellosis_co = vallog[4])#
+}#
+stopCluster(cl)#
+#
+str(densitydependence)
+get_EE
+# Generate 500 samples#
+cl <- makeCluster(6)#
+# cl <- makeCluster(10) # work computer#
+registerDoParallel(cl)#
+#
+densitydependence <- foreach(icount(n), .combine = rbind, .packages = "deSolve") %dopar% {#
+	params <- c(f.params, list(gamma = 1/2, betaB = 0.5764065, #
+		betaT = 1.3305462/1000, rhoT = 1, rhoB = 2.1))#
+	params$rhoB<- exp(rnorm(n = 1, mean = 0.75579, sd = 0.40714))#
+	B <- rnorm(n = 1, mean = 1.1060, sd = 0.3505)#
+	TB <- rnorm(n = 1, mean = 1.0370, sd = 0.3483)#
+	params$muB <- params$muS * exp(B)#
+	params$muT <- params$muS * exp(TB)#
+	params$muC <- params$muS * exp(B + TB)#
+	params$muR <- params$muT#
+	params$muRC <- params$muC#
+#
+	val <- get_EE(params, x0, method = "beverton-holt")#
+#
+	paramslog <- params; paramslog$K <- 1520.35#
+	vallog <- get_EE(paramslog, x0, method = "logistic")#
+	paramsricker <- params; paramsricker$K <- 382.556#
+	valricker <- get_EE(paramsricker, x0, method = "ricker")#
+#
+	data <- data.frame(#
+		rhoB = params$rhoB,#
+		dB = B,#
+		dT = TB,#
+		EE_bTB_single = val[1], EE_bTB_co = val[2], #
+		EE_brucellosis_single = val[3], EE_brucellosis_co = val[4], #
+		rEE_bTB_single = valricker[1], rEE_bTB_co = valricker[2], #
+		rEE_brucellosis_single = valricker[3], rEE_brucellosis_co = valricker[4], #
+		lEE_bTB_single = vallog[1], lEE_bTB_co = vallog[2], #
+		lEE_brucellosis_single = vallog[3], lEE_brucellosis_co = vallog[4])#
+}#
+stopCluster(cl)#
+#
+str(densitydependence)
+###########################################################
+rm(list = ls())#
+source('get_Ro.R', chdir = TRUE)#
+#
+# draw 100 lhs samples from 13 parameters (13 rows, 100 columns)#
+###########################################################
+set.seed(1)#
+X <- randomLHS(13, 100)  #
+params <- c(f.params, list(gamma = 1/2, betaB = 0.5764065, #
+	betaT = 1.3305462/1000, rhoT = 1, rhoB = 2.1))#
+#
+df <- data.frame(#
+	gamma = qunif(X[1, ], min = params$gamma/2, max = params$gamma*2),#
+	betaB = qunif(X[2, ], min = params$betaB/2, params$betaB*2),#
+	betaT = qunif(X[3, ], min = params$betaT/2, params$betaT*2), #
+	epsilon = qunif(X[4, ], min = params$epsilon/2, params$epsilon*2), #
+	rhoT = qunif(X[5, ], min = params$rhoT/2, params$rhoT*2), #
+	rhoB = qunif(X[6, ], min = params$rhoB/2, params$rhoB*2), #
+	theta =  qunif(X[7, ], min = params$theta/2, params$theta*2), #
+	K = qunif(X[8, ], min = params$K/2, params$K*2), #
+	pchange_muB = qunif(X[9, ], min = 3.02/2, max = 3.02*2), #
+	pchange_muT = qunif(X[10, ], min = 2.82/2, max = 2.82*2), #
+	pchange_muC = qunif(X[11, ], min = 8.58/2, max = 8.58),#
+	pchange_muR = qunif(X[12, ], min = 3.02/2, max = 3.02*2), #
+	pchange_muRC = qunif(X[13, ], min = 8.58/2, max = 8.58), #
+	# outputs of interest#
+	RoTB = NA, RoTBco = NA, change_RoTB = NA, #
+	RoB = NA, RoBco = NA, change_RoB = NA, #
+	prevTB = NA, prevTBco = NA, 	change_prevTB = NA, #
+	prevB = NA, prevBco = NA, 	change_prevB = NA)
+f.params <- gen_fixed_params(agemax, agestep,#
+    p = p, recovery = FALSE)
+source('fixed_parameters.R', chdir = TRUE)#
+source('rhs.R', chdir = TRUE)
+# age divisions in rhs function#
+agemax <- 20#
+agestep <- 0.1#
+N <- agemax / agestep#
+ages <- seq(1, agemax + 1, by = agestep)[-(N)]#
+N == length(ages)#
+#
+# generate parameters with correct agebins#
+f.params <- gen_fixed_params(agemax, agestep,#
+    p = p, recovery = FALSE)
+set.seed(1)#
+X <- randomLHS(13, 100)  #
+params <- c(f.params, list(gamma = 1/2, betaB = 0.5764065, #
+	betaT = 1.3305462/1000, rhoT = 1, rhoB = 2.1))#
+#
+df <- data.frame(#
+	gamma = qunif(X[1, ], min = params$gamma/2, max = params$gamma*2),#
+	betaB = qunif(X[2, ], min = params$betaB/2, params$betaB*2),#
+	betaT = qunif(X[3, ], min = params$betaT/2, params$betaT*2), #
+	epsilon = qunif(X[4, ], min = params$epsilon/2, params$epsilon*2), #
+	rhoT = qunif(X[5, ], min = params$rhoT/2, params$rhoT*2), #
+	rhoB = qunif(X[6, ], min = params$rhoB/2, params$rhoB*2), #
+	theta =  qunif(X[7, ], min = params$theta/2, params$theta*2), #
+	K = qunif(X[8, ], min = params$K/2, params$K*2), #
+	pchange_muB = qunif(X[9, ], min = 3.02/2, max = 3.02*2), #
+	pchange_muT = qunif(X[10, ], min = 2.82/2, max = 2.82*2), #
+	pchange_muC = qunif(X[11, ], min = 8.58/2, max = 8.58),#
+	pchange_muR = qunif(X[12, ], min = 3.02/2, max = 3.02*2), #
+	pchange_muRC = qunif(X[13, ], min = 8.58/2, max = 8.58), #
+	# outputs of interest#
+	RoTB = NA, RoTBco = NA, change_RoTB = NA, #
+	RoB = NA, RoBco = NA, change_RoB = NA, #
+	prevTB = NA, prevTBco = NA, 	change_prevTB = NA, #
+	prevB = NA, prevBco = NA, 	change_prevB = NA)
+###########################################################
+###########################################################
+###########################################################
+# Erin Gorsich#
+# This code conducts sensitivity analsyes for the co-infection model#
+###########################################################
+###########################################################
+###########################################################
+# Outline#
+# 1) Run with other form of density dependence (logistic, ricker)#
+# 2) Do whole process with longer infection duraiton (1/gamma = 3 yr; 4 yr)#
+# 2) Latin hypercube, PRCC sensitivity#
+###########################################################
+###########################################################
+library('sensitivity')#
+library('deSolve')#
+library('lhs')#
+library("doParallel")#
+library("foreach")#
+#
+setwd("~/GitHub/bTB-bruc-co-infection-ms/pde")#
+#
+###########################################################
+###########################################################
+# 1) Run with other form of density dependence (logistic)#
+###########################################################
+###########################################################
+rm(list = ls())#
+source('fixed_parameters.R', chdir = TRUE)#
+source('rhs.R', chdir = TRUE)#
+#
+# age divisions in rhs function#
+agemax <- 20#
+agestep <- 0.1#
+N <- agemax / agestep#
+ages <- seq(1, agemax + 1, by = agestep)[-(N)]#
+N == length(ages)#
+#
+# generate parameters with correct agebins#
+f.params <- gen_fixed_params(agemax, agestep,#
+    p = p, recovery = FALSE)#
+f.params.recov <- gen_fixed_params(agemax, agestep, #
+    p = p, recovery = TRUE)#
+#
+source('plotting_functions.R', chdir = TRUE)#
+#
+# Starting agestructure (Jolles 2007; Caron et al. 2001)#
+juv <- rep(0.137 / length(ages[ages < 2]), length(ages[ages < 2]))#
+sa <- rep(0.368 / length(ages[ages >= 2 & ages < 6]), #
+    length(ages[ages >= 2 & ages < 6]))#
+a <- rep(0.185 / length(ages[ages >= 6 & ages < 9]), #
+    length(ages[ages >= 6 & ages < 9]))#
+ma <- rep(0.235 / length(ages[ages >= 9 & ages < 14]), #
+    length(ages[ages >= 9 & ages < 14]))#
+sen <- rep(0.075 / length(ages[ages >= 14 ]), length(ages[ages >= 14]))#
+#
+relage <- c(juv, sa, a, ma, sen); length(relage) == N									#
+plot.relage <- c(0.137, rep(0.368/4, 4), rep(0.185/3, 3), #
+    rep(0.235/5, 5), rep(0.075/7, 7))#
+# Run B-H model with no disease (endemic population size = 559.8903)#
+##############################################################
+S0 <- 400 * relage; It0 <- 0 * relage; Ib0 <- 0 * relage#
+Ic0 <- 0 * relage; R0 <- 0 * relage; Rc0 <- 0 * relage#
+times <- seq(1, 300, 1)#
+x0 <- c(S0, It0, Ib0, Ic0, R0, Rc0)#
+params <- c(f.params, list(gamma = 1/2, betaB = 0.5764065, #
+	betaT = 1.3305462/1000, rhoT = 1, rhoB = 2.1))#
+test <- as.data.frame(ode.1D(x0, times, rhs, params, #
+	nspec = 6, dimens = N, method = "ode45"))#
+x0 <- unname(unlist(test[length(test[,1]), c(2:(length(colnames(test))))]))
+# Make plots#
+##############################################################
+set.seed(1)#
+n = 500#
+source('get_EE.R', chdir = TRUE)#
+#
+# Generate 500 samples#
+cl <- makeCluster(6)#
+# cl <- makeCluster(10) # work computer#
+registerDoParallel(cl)#
+#
+densitydependence <- foreach(icount(n), .combine = rbind, .packages = "deSolve") %dopar% {#
+	params <- c(f.params, list(gamma = 1/2, betaB = 0.5764065, #
+		betaT = 1.3305462/1000, rhoT = 1, rhoB = 2.1))#
+	params$rhoB<- exp(rnorm(n = 1, mean = 0.75579, sd = 0.40714))#
+	B <- rnorm(n = 1, mean = 1.1060, sd = 0.3505)#
+	TB <- rnorm(n = 1, mean = 1.0370, sd = 0.3483)#
+	params$muB <- params$muS * exp(B)#
+	params$muT <- params$muS * exp(TB)#
+	params$muC <- params$muS * exp(B + TB)#
+	params$muR <- params$muT#
+	params$muRC <- params$muC#
+#
+	val <- get_EE(params, x0, method = "beverton-holt")#
+#
+	paramslog <- params; paramslog$K <- 1520.35#
+	vallog <- get_EE(paramslog, x0, method = "logistic")#
+	paramsricker <- params; paramsricker$K <- 382.556#
+	valricker <- get_EE(paramsricker, x0, method = "ricker")#
+#
+	data <- data.frame(#
+		rhoB = params$rhoB,#
+		dB = B,#
+		dT = TB,#
+		EE_bTB_single = val[1], EE_bTB_co = val[2], #
+		EE_brucellosis_single = val[3], EE_brucellosis_co = val[4], #
+		rEE_bTB_single = valricker[1], rEE_bTB_co = valricker[2], #
+		rEE_brucellosis_single = valricker[3], rEE_brucellosis_co = valricker[4], #
+		lEE_bTB_single = vallog[1], lEE_bTB_co = vallog[2], #
+		lEE_brucellosis_single = vallog[3], lEE_brucellosis_co = vallog[4])#
+}#
+stopCluster(cl)#
+#
+str(densitydependence)#
+#
+saveRDS(densitydependence, "sensitivity_densitydependence_results.rds")

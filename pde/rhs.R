@@ -93,7 +93,6 @@ rhs_logistic = function(times, x, params){
 		lambdapB <- rhoB * betaBm %*% (Ib + Ic) / Nall
 
 		Nb <- N
-		#S + b1 * It + b2 * Ib + b3 * R + b4 * Ic + b5 * Rc
 			
 		birth <- c(b %*% Nb)
 		recruitment <- c(birth * ( 1 - (1/max(b)) * (Nall/K)), rep(0, times = n.ages - 1))
@@ -148,7 +147,6 @@ rhs_ricker = function(times, x, params){
 		lambdapB <- rhoB * betaBm %*% (Ib + Ic) / Nall
 
 		Nb <- N
-		#S + b1 * It + b2 * Ib + b3 * R + b4 * Ic + b5 * Rc
 			
 		birth <- c(b %*% Nb)
 		recruitment <- c(birth * exp(- Nall / K) , rep(0, times = n.ages - 1))

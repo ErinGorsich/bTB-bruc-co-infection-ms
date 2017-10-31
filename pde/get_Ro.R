@@ -16,10 +16,6 @@ Ro_bTB_single = function(params, x0){
 	Vmat[row(Vmat) - col(Vmat) == 1] <- ageflux
 	Vinv <- solve(Vmat)
 	vals <- eigen(Fmat %*% Vinv)$values
-	
-	#Vmat <- diag(x = params$muT)
-	#Vinv <- solve(Vmat)
-	#vals <- eigen(Fmat %*% Vinv)$values
 	return(max(Re(vals)))
 }
 
@@ -36,8 +32,10 @@ Ro_brucellosis_single = function(params, x0){
 	S.fd <- S/sum(S)
 	ageflux <- params$aging[1,1]
 
-	Fmat <- params$betaB* matrix(rep(S.fd, each = N), nrow = N, byrow = T)
-	Fmat[which(ages >= 2 & ages <=5), ] <- exp(0.885) * Fmat[which(ages >= 2 & ages <=5), ]
+	Fmat <- params$betaB * matrix(
+	    rep(S.fd, each = N), nrow = N, byrow = T)
+	Fmat[which(ages >= 2 & ages <=5), ] <- exp(0.885) * Fmat[
+	    which(ages >= 2 & ages <=5), ]
 	
 	Vmat <- diag(x = params$muB + params$gamma - ageflux)
 	Vmat[row(Vmat) - col(Vmat) == 1] <- ageflux
@@ -48,7 +46,7 @@ Ro_brucellosis_single = function(params, x0){
 
 
 ###############################################
-# Ro of bTB in the absence of brucellosis, with age structure (and age sp. FOI, brucellosis)
+# Ro of bTB in the absence of brucellosis (and age sp. FOI, brucellosis)
 ###############################################
 Ro_bTB_co = function(params, xB){
 	###################################
@@ -69,15 +67,20 @@ Ro_bTB_co = function(params, xB){
 	
 	#  age specific FOI (vector)
 	params$betaB <- rep(params$betaB, length.out = N)
-	params$betaB[which(ages >= 2 & ages <=5)] <- exp(0.885) * params$betaB[which(ages >= 2 & ages <=5)] 
+	params$betaB[which(ages >= 2 & ages <=5)] <- exp(0.885) * params$betaB[
+	    which(ages >= 2 & ages <=5)] 
 
 	# Calculate next generation matrix, 1:60 columns, 1:60 rows
-	Fmat = rbind(params$betaT * matrix(rep(S, each = 3*N), nrow = N, byrow = T),
-		params$rhoT * params$betaT * matrix(rep(Ib, each = 3*N), nrow = N, byrow = T),
-		params$rhoT * params$betaT * matrix(rep(R, each = 3*N), nrow = N, byrow = T))
+	Fmat = rbind(params$betaT * matrix(
+	    rep(S, each = 3*N), nrow = N, byrow = T),
+		params$rhoT * params$betaT * matrix(
+		    rep(Ib, each = 3*N), nrow = N, byrow = T),
+		params$rhoT * params$betaT * matrix(
+		    rep(R, each = 3*N), nrow = N, byrow = T))
 	
 	# rows 1:N, cols 1:3*N
-	diag <- (params$rhoB * params$betaB * Iball / Tot) + params$muT - ageflux
+	diag <- (params$rhoB * params$betaB * Iball / Tot) + 
+	    params$muT - ageflux
 	M1 <- diag(x = diag)
 	M1[row(M1) - col(M1) == 1] <- ageflux
 	Vmat1 = cbind(M1, 		

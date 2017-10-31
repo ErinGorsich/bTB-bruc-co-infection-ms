@@ -2,14 +2,14 @@
 # indicies as well
 
 get_EE = function(params, x0, method){
-	###################################
+    ###################################
 	# Input: x = c(S = final, 1*20 S vector at params)
 	# method = "logistic", "ricker", "beverton-holt"
 	# Output: Ro
 	###################################
 	# stable age in disease free conditions now read in
 	###################################
-	binsize <- N/agemax #number of delta age bins to get one age bin...
+	binsize <- N / agemax #number of delta age bins to get one age bin...
 	
 	# run single infection EE, bTB
 	###################################
@@ -18,13 +18,16 @@ get_EE = function(params, x0, method){
 	x_singleTB[(N+1) +  4*binsize] <- 1
 	if (method == "ricker"){
 		sol <- as.data.frame(ode.1D(x_singleTB, times, 
-			rhs_ricker, params, nspec = 6, dimens = N,method = "ode45"))}
+			rhs_ricker, params, nspec = 6, dimens = N, 
+			method = "ode45"))}
 	if (method == "logistic"){
-		sol <- as.data.frame(ode.1D(x_singleTB, times, rhs_logistic, 
-			params, nspec = 6, dimens = N, method = "ode45"))}
+		sol <- as.data.frame(ode.1D(x_singleTB, times, 
+		    rhs_logistic, params, nspec = 6, dimens = N,
+		    method = "ode45"))}
 	if (method == "beverton-holt"){
-		sol <- as.data.frame(ode.1D(x_singleTB, times, rhs, 
-			nspec = 6, dimens = N, params, method = "ode45"))}
+		sol <- as.data.frame(ode.1D(x_singleTB, times, 
+		    rhs, params, nspec = 6, dimens = N, 
+		    method = "ode45"))}
 	S <-sum(sol[length(sol[,1]) , s.index+1])
 	It <- sum(sol[length(sol[,1]) , it.index +1])
 	Ic <- sum(sol[length(sol[,1]) , ic.index +1])
@@ -70,14 +73,14 @@ get_EE = function(params, x0, method){
 	x_endB[min(it.index) + 1  +  4*binsize] <- 1
 
 	if (method == "ricker"){
-		sol <- as.data.frame(ode.1D(x_endB, times, rhs_ricker, params,  
-			nspec = 6, dimens = N, method = "ode45"))}
+		sol <- as.data.frame(ode.1D(x_endB, times, rhs_ricker, 
+		    params, nspec = 6, dimens = N, method = "ode45"))}
 	if (method == "logistic"){
-		sol <- as.data.frame(ode.1D(x_endB, times, rhs_logistic, params,
-			nspec = 6, dimens = N, method = "ode45"))}
+		sol <- as.data.frame(ode.1D(x_endB, times, rhs_logistic, 
+		    params, nspec = 6, dimens = N, method = "ode45"))}
 	if (method == "beverton-holt"){
-		sol <- as.data.frame(ode.1D(x_endB, times, rhs, params, 
-			nspec = 6, dimens = N, method = "ode45"))}	
+		sol <- as.data.frame(ode.1D(x_endB, times, rhs, 
+		    params, nspec = 6, dimens = N, method = "ode45"))}	
 	
 	S <-sum(sol[length(sol[,1]) , s.index+1])
 	It <- sum(sol[length(sol[,1]) , it.index +1])

@@ -22,9 +22,9 @@ library("RColorBrewer")
 library("doParallel")
 library("foreach")
 library("deSolve")
-set.seed(5)
 
 setwd("~/GitHub/bTB-bruc-co-infection-ms/pde")
+#setwd("~/Erin/pde")
 
 # parameters
 source('fixed_parameters.R', chdir = TRUE)
@@ -41,21 +41,28 @@ ages <- seq(1, agemax + 1, by = agestep)[-(N)]
 N == length(ages)
 
 # generate parameters with correct agebins
-f.params <- gen_fixed_params(agemax, agestep, p = p, recovery = FALSE)
-f.params.recov <- gen_fixed_params(agemax, agestep, p = p, recovery = TRUE)
+f.params <- gen_fixed_params(agemax, agestep,
+    p = p, recovery = FALSE)
+f.params.recov <- gen_fixed_params(agemax, agestep, 
+    p = p, recovery = TRUE)
 
 # Functions for plotting (and define indecies based on ages, N): 
 source('plotting_functions.R', chdir = TRUE)
 
 # Starting agestructure (Jolles 2007; Caron et al. 2001)
 juv <- rep(0.137 / length(ages[ages < 2]), length(ages[ages < 2]))
-sa <- rep(0.368 / length(ages[ages >= 2 & ages < 6]), length(ages[ages >= 2 & ages < 6]))
-a <- rep(0.185 / length(ages[ages >= 6 & ages < 9]), length(ages[ages >= 6 & ages < 9]))
-ma <- rep(0.235 / length(ages[ages >= 9 & ages < 14]), length(ages[ages >= 9 & ages < 14]))
+sa <- rep(0.368 / length(ages[ages >= 2 & ages < 6]), 
+    length(ages[ages >= 2 & ages < 6]))
+a <- rep(0.185 / length(ages[ages >= 6 & ages < 9]), 
+    length(ages[ages >= 6 & ages < 9]))
+ma <- rep(0.235 / length(ages[ages >= 9 & ages < 14]), 
+    length(ages[ages >= 9 & ages < 14]))
 sen <- rep(0.075 / length(ages[ages >= 14 ]), length(ages[ages >= 14]))
 
 relage <- c(juv, sa, a, ma, sen); length(relage) == N									
-plot.relage <- c(0.137, rep(0.368/4, 4), rep(0.185/3, 3), rep(0.235/5, 5), rep(0.075/7, 7)) 	
+plot.relage <- c(0.137, rep(0.368/4, 4), rep(0.185/3, 3), 
+    rep(0.235/5, 5), rep(0.075/7, 7))
+
 # Define x0, parameter for getEE function, disease free values
 #############################################################
 S0 <- 400 * relage; It0 <- 0 * relage; Ib0 <- 0 * relage
@@ -92,7 +99,7 @@ xtest <- x0
 
 
 # MCMC Ro calculations
-# WARNING Ro reads in x0 frame global environment
+# Ro reads in x0 frame global environment
 #############################################################
 n = 1000
 set.seed(1)
@@ -125,6 +132,7 @@ Ro_brucellosis_co(params, xT) # 1.483981
 
 # Generate 1000 samples
 cl <- makeCluster(6)
+# cl <- makeCluster(10) # work computer
 registerDoParallel(cl)
 d <- foreach(icount(n), .combine = rbind) %dopar% {
 	params <- c(f.params, list(gamma = 1/2, betaB = 0.5764065, 
@@ -164,6 +172,7 @@ set.seed(1)
 
 # Generate 1000 samples
 cl <- makeCluster(6)
+# cl <- makeCluster(10) # work computer
 registerDoParallel(cl)
 d2 <- foreach(icount(n), .combine = rbind, .packages = "deSolve") %dopar% {
 	params <- c(f.params, list(gamma = 1/2, betaB = 0.5764065, 
@@ -212,7 +221,7 @@ epiTB <- data.frame(
 	bTB_inS = NA, bTB_inB = NA, bruc_inS = NA, bruc_inTB = NA)
 
 # Data frame to hold results of changing bTB effects on bruc
-epiB <- data.frame(
+epiBR <- data.frame(
 	rhoB= rep(rhoB_test, length(rhoB_test)), 
 	mort = rep(mort_test, each = length(rhoB_test)),
 	bTBprev = NA, brucprev = NA, finalN = NA, 
@@ -226,7 +235,7 @@ xB.test[(min(it.index)+50):(min(it.index)+53)] <- 1
 
 cl <- makeCluster(6)
 registerDoParallel(cl)
-epiT <- foreach(d = iter(epiTB, by = 'row'), .combine = rbind, .packages = "deSolve") %dopar% {
+epiT <- foreach(d = iter(epiTB, by = "row"), .combine = rbind, .packages = "deSolve") %dopar% {
 	params.test <- c(f.params, list(gamma = 1/2, betaB = 0.5764065, 
 		betaT = 1.3305462/1000, rhoT = d$rhoT, rhoB = 2.1))
 	params.test$muC <- d$mort * params.test$muS
@@ -239,14 +248,12 @@ epiT <- foreach(d = iter(epiTB, by = 'row'), .combine = rbind, .packages = "deSo
 		rhoT = params.test$rhoT,
 		mort = params.test$muC[1]/ params.test$muS[1],
 		bTBprev = temp$prevTB,
-		brucprev = temp$prevB, 	
-		finalN = sum(sol[length(sol), c(2:length(colnames(sol)))]),
+		brucprev = temp$prevB,	
+		finalN = sum(sol[length(sol[,1]), c(2:length(colnames(sol)))]),
 		bTB_inS = temp$prevTinS ,
 		bTB_inB = temp$prevTinB,
 		bruc_inS = temp$prevBinS ,
-		bruc_inTB = temp$prevBinT,
-	)
-	rm(params.test, sol, temp)
+		bruc_inTB = temp$prevBinT)
 }
 stopCluster(cl)
 
@@ -262,31 +269,30 @@ xT.test[(min(ib.index)+50):(min(ib.index)+53)] <- 1
 
 cl <- makeCluster(6)
 registerDoParallel(cl)
-epiBR <- foreach(i = l:length(epiB[,1]), .combine = rbind, .packages = "deSolve") %dopar% {
+
+epiB <- foreach(d = iter(epiBR, by = "row"), .combine = rbind, .packages = "deSolve") %dopar% {
 	params.test <- c(f.params, list(gamma = 1/2, betaB = 0.5764065, 
-		betaT = 1.3305462/1000, rhoT = 1, rhoB = epiB$rhoB[i]))
-	params.test$muC <- epiB$mort[i] * params.test$muS
-	params.test$muRC <- epiB$mort[i] * params.test$muS
+		betaT = 1.3305462/1000, rhoT = 1, rhoB = d$rhoB))
+	params.test$muC <- d$mort * params.test$muS
+	params.test$muRC <- d$mort * params.test$muS
 		
-	sol <- as.data.frame(ode.1D(xT.test, times, rhs, params.test, nspec = 6, dimens = N, ))
+	sol <- as.data.frame(ode.1D(xT.test, times, rhs, params.test,  nspec = 6, dimens = N))
 	temp <- get_prevalence(sol)
 
 	data <- data.frame(
 		rhoB = params.test$rhoB,
-		mort = params.test$muC[1]/params.test$muS[1],
+		mort = params.test$muC[1]/ params.test$muS[1],
 		bTBprev = temp$prevTB,
 		brucprev = temp$prevB, 	
-		finalN = sum(sol[length(sol), c(2:length(colnames(sol)))]),
-		bTB_inS = temp$prevTinS ,
+		finalN = sum(sol[length(sol[,1]), c(2:length(colnames(sol)))]),
+		bTB_inS = temp$prevTinS,
 		bTB_inB = temp$prevTinB,
-		bruc_inS = temp$prevBinS,
-		bruc_inTB = temp$prevBinT
-	)
-	rm(params.test, sol, temp)
+		bruc_inS = temp$prevBinS, 
+		bruc_inTB = temp$prevBinT)
 }
 stopCluster(cl)
 
-write.csv(epiBR, "epiB.csv")
+write.csv(epiB, "epiB.csv")
 
 ################################################
 # NOT RUN
