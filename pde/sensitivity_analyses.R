@@ -189,8 +189,8 @@ saveRDS(densitydependence, "sensitivity_densitydependence_results.rds")
 # 3) LHS Sensitivity
 ##########################################################
 ##########################################################
-rm(list = ls())
 source('get_Ro.R', chdir = TRUE)
+source('get_EE.R', chdir = TRUE)
 
 # draw 100 lhs samples from 13 parameters (13 rows, 100 columns)
 ##########################################################
@@ -212,69 +212,62 @@ df <- data.frame(
 	pchange_muT = qunif(X[10, ], min = 2.82/2, max = 2.82*2), 
 	pchange_muC = qunif(X[11, ], min = 8.58/2, max = 8.58),
 	pchange_muR = qunif(X[12, ], min = 3.02/2, max = 3.02*2), 
-	pchange_muRC = qunif(X[13, ], min = 8.58/2, max = 8.58), 
-	# outputs of interest
-	RoTB = NA, RoTBco = NA, change_RoTB = NA, 
-	RoB = NA, RoBco = NA, change_RoB = NA, 
-	prevTB = NA, prevTBco = NA, 	change_prevTB = NA, 
-	prevB = NA, prevBco = NA, 	change_prevB = NA)
+	pchange_muRC = qunif(X[13, ], min = 8.58/2, max = 8.58))
 
+cl <- makeCluster(6)
+# cl <- makeCluster(10)
+registerDoParallel(cl)
+lhs <- foreach(d = iter(df, by = "row"), .combine = rbind, .packages = "deSolve") %dopar% {
+	params <- c(f.params, list(gamma = 1/2, betaB = 0.5764065, 
+		betaT = 1.3305462/1000, rhoT = d$rhoT, rhoB = 2.1))
 
+	# update parameters to those specified in LHS sample
+	params$muB <- params$muS * d$pchange_muB
+	params$muT <- params$muS * d$pchange_muT
+	params$muC <- params$muS * d$pchange_muC
+	params$muR <- params$muS * d$pchange_muR
+	params$muRC <- params$muS * d$pchange_muRC
+	params$K <- d$K
+	params$theta <- d$theta
+	params$rhoT <- d$rhoT
+	params$rhoB <- d$rhoB
+	params$epsilon <- d$epsilon
+	params$betaT <- d$betaT
+	params$betaB <- d$betaB
+	params$gamma <- d$gamma
 
-		
-# run base model with no disease
-##########################################################
-times <- seq(0, 300, 1)  
-sol <- as.data.frame(ode(x0, times, rhs, params))
-stable_age <- unname(unlist( sol[1000, c(2:21)]/sum(sol[500, c(2:21)]) ))
+	val <- get_EE_lhs(params, x0, method = "beverton-holt")
 
-##########################################################
-pb <- txtProgressBar(min = 0, max = length(df[,1]), style = 3, char = "=")
-for (i in 1:length(df[ ,1])){
-	if(i %% 5 == 0){
-		setTxtProgressBar(pb, i)
-	}
-	params <- c(fixed.params, list(gamma=1/2, betaB = 0.6087396,
-		betaT = 1.2974554/1000, rhoT = 1, rhoB = 2.1, theta= 4, K = 433))
-	params$muB <- params$muS * df$pchange_muB[i]
-	params$muT <- params$muS * df$pchange_muT[i]
-	params$muC <- params$muS * df$pchange_muC[i]
-	params$muR <- params$muS * df$pchange_muR[i]
-	params$muRC <- params$muS * df$pchange_muRC[i]
-	params$K <- df$K[i]
-	params$theta <- df$theta[i]
-	params$rhoT <- df$rhoT[i]
-	params$rhoB <- df$rhoB[i]
-	params$epsilon <- df$epsilon[i]
-	params$betaT <- df$betaT[i]
-	params$betaB <- df$betaB[i]
-	params$gamma <- df$gamma[i]
+	# set xB and xT (endemic conditions when only )
+	xB <- val$xB
+	xT <- val$xT
+	
+	RoTB <- Ro_bTB_single(params, x0)
+	RoTBco <- Ro_bTB_co(params, xB)
+	RoB <- Ro_brucellosis_single(params, x0)
+	RoBco <- Ro_brucellosis_co(params, xT)
 
-	# check no mortality rates > 1
-	params$muB[params$muB > 1] <- 1
-	params$muT[params$muT > 1] <- 1
-	params$muC[params$muC > 1] <- 1
-	params$muR[params$muR > 1] <- 1
-	params$muRC[params$muRC > 1] <- 1
-
-	# fill in solutions for Ro
-	df$RoTB[i] <- Ro_bTB_single_age(params)
-	df$RoTBco[i] <- Ro_bTB_co_age(params)
-	df$RoB[i] <- Ro_brucellosis_single_age(params)
-	df$RoBco[i] <- Ro_brucellosis_co_age(params)
-
-	# fill in solutions for endemic prevalence
-	val <- getEE(params, method = "beverton-holt")
-	df$prevTB[i] <- val[1]
-	df$prevTBco[i] <- val[2]
-	df$change_prevTB[i] <- df$prevTBco[i] - df$prevTB[i]
-	df$prevB[i] <- val[3]
-	df$prevBco[i] <- val[4]
-	df$change_prevB[i] <- df$prevBco[i] - df$prevB[i]
-	rm(val); rm(params)
+	# fill in solutions
+	data <- data.frame(
+		RoTB = RoTB,
+		RoTBco = RoTBco,
+		change_RoTB = RoTBco - RoTB,
+		RoB = RoB,
+		RoBco = RoBco,
+		change_RoB = RoBco - RoB,
+		prevTB = val$EE[1],
+		prevTBco = val$EE[2],
+		change_prevTB = val$EE[2] - val$EE[1],
+		prevB = val$EE[3],
+		prevBco = val$EE[4],
+		change_prevB = val$EE[4] - val$EE[3])
 }
+stopCluster(cl)
 
-saveRDS(df, "~/GitHub/bTB-bruc-co-infection-ms/LHS_sensitivity_results.rds")
+summary(lhs)
+sensitivity <- as.data.frame(cbind(df, lhs))
+
+saveRDS(sensitivity, "LHS_sensitivity_results.rds")
 
 bonferroni.alpha <- 0.05/13
 
@@ -304,5 +297,5 @@ dfEE <- data.frame(
 	cihigh = c(pt[ , 5], pb[ , 5])
 )
 
-write.csv(dfRo, "~/GitHub/bTB-bruc-co-infection-ms/Ro_sensitivity.rds")
-write.csv(dfEE, "~/GitHub/bTB-bruc-co-infection-ms/EE_sensitivity.rds")
+write.csv(dfRo, "Ro_sensitivity.rds")
+write.csv(dfEE, "EE_sensitivity.rds")

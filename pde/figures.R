@@ -614,96 +614,33 @@ print(phist, vp = define_region(1, 3))
 print(phistEE, vp = define_region(2, 3))
 
 
-
-#######################################################
-#######################################################
-# Figure 3b- co-infection patterns
-#######################################################
-#######################################################
-setwd("~/GitHub/bTB-bruc-co-infection-ms")
-df<- readRDS("coinfection_pattern_results.rds")
-f2 <- data.frame(Evaluation = c("Model", "Model", "Data", "Data"), 
-	Infection = c("Single infection", "Co-infection", "Single infection", "Co-infection"), 
-	BrucellosisPrevalence = c(df$prevBinS, df$prevBinT, 0.3035, 0.4524), 
-	TBPrevalence = c(df$prevTinS, df$prevTinB, 0.227, 0.3585), 
-	CILowB = c(NA, NA, 0.2654405, 0.3657982), 
-	CIHighB = c(NA, NA, 0.3451408, 0.5405985), 
-	CILowTB = c(NA, NA, 0.1781895, 0.2857143), 
-	CIHighTB = c(NA, NA, 0.2783505, 0.4313725))
-df2 <- reshape(f2, varying = c("BrucellosisPrevalence", "TBPrevalence"), 
-	v.names = "Prevalence", timevar = "Name", times = c("brucellosis", "bTB"), 
-	direction = "long")
-df2$color <- c(1,2,0, 0, 3, 4, 0, 0)
-df2$Infection <- relevel(df2$Infection, "Single infection")
-df2$CILow <- c(NA, NA, 0.26544, 0.365798, NA, NA, 0.1781895, 0.2857)
-df2$CIHigh <- c(NA, NA, 0.3451408, 0.540598, NA, NA, 0.27835, 0.43137)
-df3 <- df2[df2$Evaluation == "Model",]
-df3$color <- c(rgb(97, 139, 14, maxColorValue= 255))
-df3$Name <- as.factor(df3$Name)
-df3$Name <- relevel(df3$Name, "bTB")
-
-limits <- aes(ymax = df2$CIHigh[df2$Evaluation == "Data"], ymin= df2$CILow[df2$Evaluation == "Data"])
-p1 <- 
-ggplot(df3, aes(x = Name, y = Prevalence, fill = Infection)) + #, colour = Name
-	geom_bar(position = position_dodge(), stat = "identity", colour = "black") +
-	ylim(0, 0.8) + xlab("") +
-	theme_bw() +  scale_fill_manual(values=c("gray83", "gray47")) + 
-	theme(axis.line.x = element_line(colour= "black"),
-  		axis.line.y = element_line(colour= "black"),
-  		axis.title.x = element_text(size=16, vjust=-0.15),
-        axis.title.y = element_text(size=16, vjust= 0.8),
-        axis.text.x = element_text(size=14, vjust=-0.05),
-        axis.text.y = element_text(size=14),
-        panel.border = element_blank(), 
-		legend.position=c(0.8, 0.9),  
-        legend.background= element_rect(fill="white", colour="white"),
-        legend.key= element_blank(),
-        legend.title= element_blank(),
-        legend.text = element_text(size=12))  + 
-	geom_point(data = df2[df2$Evaluation == "Data",], colour = "black", 
-		position = position_dodge(width = 0.9), size = 3)  +
-	geom_errorbar(limits, position = position_dodge(width = 0.9), width= 0.2)      
-# turn off dots in legend.  Add model/data to legend
-
-p1
-
-
 #######################################################
 #######################################################
 # Figure 3a- time sequence
 #######################################################
 #######################################################
-source('~/GitHub/bTB-bruc-co-infection-ms/fixed_parameters_norecovery_agematrix.R', chdir = TRUE)
-source('~/GitHub/bTB-bruc-co-infection-ms/rhs_age.R', chdir = TRUE)
-s_index <- 1:20
-it_index <- 21:40
-ib_index <- 41:60
-ic_index <- 61:80
-r_index <- 81:100
-rc_index <- 101:120
-juveniles <- 1:3
-subadult<- 4
-adult <- 5:14
-mature <- 15:20
+#source('~/GitHub/bTB-bruc-co-infection-ms/fixed_parameters_norecovery_agematrix.R', chdir = TRUE)
+#source('~/GitHub/bTB-bruc-co-infection-ms/rhs_age.R', chdir = TRUE)
+
 
 # Age structure information, used to calculate mortality rates in susceptibles. 
-relageall = c(0.137, rep(0.368/4, 4), rep(0.185/4, 4),  # Jolles 2007, set max age at 20
-	rep(0.235/6, 6), rep(0.075/5, 5))					# Also in Caron et al. from 2001 KNP	
-relage = relageall
+#relageall = c(0.137, rep(0.368/4, 4), rep(0.185/4, 4),  # Jolles 2007, set max age at 20
+#	rep(0.235/6, 6), rep(0.075/5, 5))					# Also in Caron et al. from 2001 KNP	
+#relage = relageall
 # Get stable age structure without dz
-S0 = 400*relage; It0 = 0*relage; Ib0 = 0*relage; 
-Ic0 = 0*relage; R0 = 0 * relage; Rc0 = 0 * relage
-x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)
-times <- seq(0, 500, 1)
-params <- c(fixed.params.olddz, list(gamma=1/2, betaB = 1.004592,   
+#S0 = 400*relage; It0 = 0*relage; Ib0 = 0*relage; 
+#Ic0 = 0*relage; R0 = 0 * relage; Rc0 = 0 * relage
+#x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)
+#times <- seq(0, 500, 1)
+#params <- c(fixed.params.olddz, list(gamma=1/2, betaB = 1.004592,   
 	betaT = 12.833531/10000, rhoT = 1, rhoB = 2.1, theta= 4, K = 433))  
-sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))
-stable_age <- unname(unlist( sol[500, c(2:21)]/sum(sol[500, c(2:21)]) ))
+#sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))
+#stable_age <- unname(unlist( sol[500, c(2:21)]/sum(sol[500, c(2:21)]) ))
 # Add Brucellosis, get endemic age structure
-S0 = 400* stable_age; It0 = 0 * stable_age; Ib0 = 20* stable_age; 
-Ic0 = 0* stable_age; R0 = 30 * stable_age; Rc0 = 0 * stable_age
-x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)
-times <- seq(0, 500, 1)
+#S0 = 400* stable_age; It0 = 0 * stable_age; Ib0 = 20* stable_age; 
+#Ic0 = 0* stable_age; R0 = 30 * stable_age; Rc0 = 0 * stable_age
+#x0 = c(S0, It0, Ib0, Ic0, R0, Rc0)
+#times <- seq(0, 500, 1)
 sol <- as.data.frame(ode(x0, times, rhs_age_matrix, params))
 endemic_agestructure <- unname(unlist( sol[500, c(2:121)] ))
 # Introduce bTB
@@ -749,8 +686,8 @@ multiplot(p, p1, cols = 2)
 # Figure 4- Levelplots, varying mort and rho for both pathogens
 #######################################################
 #######################################################
-epiT <- read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/draft2/post-labmeeting/epiT.csv")
-epiB <- read.csv("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/draft2/post-labmeeting/epiB.csv")
+epiT <- read.csv("~/GitHub/bTB-bruc-co-infection-ms/pde/epiT.csv")
+epiB <- read.csv("~/GitHub/bTB-bruc-co-infection-ms/pde/epiB.csv")
 #epiB <- epiB[epiB$mort < 10.01,]
 #epiT <- epiT[epiT$mort < 10.01,]
 cols <- brewer.pal(11, "RdBu")
@@ -777,6 +714,8 @@ multiplot(p1, p3, cols= 2)
 df <- data.frame(Difference = c(epiT$bTBplot, epiB$brucplot), 
 	infection = c(rep("BTB", length(epiT[,1])), rep("brucellosis", length(epiB[,1]))), 
 	rho = c(epiT$rhoT, epiB$rhoB), mort = c(epiT$mort, epiB$mort))
+df <- df[df$mort < 14.2, ]
+#df <- df[df$rho < 6, ]
 df2 <- data.frame(rho = c(2.1, 1.2), mort = c(8.5, 8.5), infection = c("brucellosis", "BTB"))  # 5.8 in old
 
 # incid rhoB = 2.1 (1.38 - 3.28)
@@ -801,7 +740,7 @@ p2 <- p + theme_bw() + facet_wrap(~ infection) +
 	legend.key.size = unit(1, "cm") ) + 
 	geom_raster(aes(fill = Difference), interpolate = TRUE) +  # was geom_tile
 	scale_fill_distiller(palette = "RdYlBu", direction = -1, 
-		limits = c(-0.67, 0.67)) +   
+		limits = c(-0.69, 0.69)) +   
 	geom_point(data = df2, size = 2, pch = 8) + 
 	geom_errorbar(data = df2, aes(ymin = rho_sedown, ymax = rho_seup), width = 0.1 ) + 
 	geom_errorbarh(data = df2, aes(xmin = mort_selow, xmax = mort_seup), height = 0.1)	
@@ -810,11 +749,13 @@ p2 <- p + theme_bw() + facet_wrap(~ infection) +
 	#	colour = "black")
 df$Difference2 <- df$Difference - 0.1  # want contours to span -5 to +5 not 0 to 10
 df3 <- data.frame(Difference = c(0.10, -0.10, -0.3, 0.50, 0.30, 0.10, -0.10), 
-	rho = c(7.8, 7.8, 3.8, 7.8, 7.8, 7.8, 1.8), 
-	mort = c(1.9, 4.5, 14.45, 1.39, 4.1, 12, 14.45), 
+	rho = c(7.8, 7.8, 3.5, 7.8, 7.8, 7.8, 1.8), 
+	mort = c(1.9, 4.1, 13.6, 2, 4.6, 12.4, 13.6), 
 	infection = c("BTB", "BTB", "BTB", "brucellosis", "brucellosis", "brucellosis", "brucellosis"))
-p2 <- p2  + geom_contour(data = df, aes(x = mort, y = rho, z = Difference2, weight = ..level..),
-	binwidth = 0.2, color = "black", linetype = 3) +
+p2 <- p2  + 
+	geom_contour(data = df, 
+		aes(x = mort, y = rho, z = Difference2, weight = ..level..),
+		binwidth = 0.2, color = "black", linetype = 3) +
 	geom_text(data = df3, aes(z = NULL, label = Difference)) + facet_wrap(~infection)
 
 tiff("Figure4.tif", width  = 9, height = 5, units = "in", res = 300)	
