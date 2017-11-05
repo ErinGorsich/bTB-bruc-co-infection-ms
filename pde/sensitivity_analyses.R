@@ -8,7 +8,6 @@
 ##########################################################
 # Outline
 # 1) Run with other form of density dependence (logistic, ricker)
-# 2) Do whole process with longer infection duraiton (1/gamma = 3 yr; 4 yr)
 # 2) Latin hypercube, PRCC sensitivity
 ##########################################################
 ##########################################################
@@ -269,6 +268,9 @@ sensitivity <- as.data.frame(cbind(df, lhs))
 
 saveRDS(sensitivity, "LHS_sensitivity_results.rds")
 
+
+# Calculate prcc results
+df <- readRDS("~/GitHub/bTB-bruc-co-infection-ms/pde/LHS_sensitivity_results.rds")
 bonferroni.alpha <- 0.05/13
 
 # Ro TB
@@ -297,5 +299,5 @@ dfEE <- data.frame(
 	cihigh = c(pt[ , 5], pb[ , 5])
 )
 
-write.csv(dfRo, "Ro_sensitivity.rds")
-write.csv(dfEE, "EE_sensitivity.rds")
+write.csv(dfRo, "Ro_sensitivity.csv")
+write.csv(dfEE, "EE_sensitivity.csv")
