@@ -1,0 +1,34 @@
+\begin{thebibliography}{1}
+
+\bibitem{fisher_time-dependent_1999}
+Fisher LD, Lin DY (1999) Time-dependent covariates in the {Cox}
+  proportional-hazards regression model.
+\newblock {\em Annual Review of Public Health} 20(1):145--157.
+
+\bibitem{grambsch_proportional_1994}
+Grambsch PM, Therneau TM (1994) Proportional hazards tests and diagnostics
+  based on weighted residuals.
+\newblock {\em Biometrika} 81:515--526.
+
+\bibitem{fox_cox_2011}
+Fox J, Weisberg S (2011) {\em Cox {Proportional}-{Hazards} {Regression} for
+  {Survival} {Data} in {R}. {An} {R} and {S}-{PLUS} companion to applied
+  regression}.
+\newblock (Sage Publishing), 2 edition.
+
+\bibitem{therneau_package_2014}
+Therneau T (2014) A package for survival analysis in {S}.
+
+\bibitem{winthrop_bovine_1988}
+Winthrop C, et~al. (1988) Bovine brucellosis: {An} investigation of latency in
+  progeny of culture-positive cows.
+\newblock {\em Journal of the American Veterinary Medical Association}
+  192:182--186.
+
+\bibitem{gorsich_context-dependent_2015}
+Gorsich E, Ezenwa VO, Cross P, Bengis R, Jollesa A (2015) Context-dependent
+  survival, fecundity, and predicted population-level consequences of
+  brucellosis in {African} buffalo.
+\newblock {\em Journal of Animal Ecology} 84:999--1009.
+
+\end{thebibliography}

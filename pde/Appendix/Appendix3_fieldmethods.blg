@@ -1,0 +1,46 @@
+This is BibTeX, Version 0.99d (TeX Live 2014)
+Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
+The top-level auxiliary file: Appendix3_fieldmethods.aux
+The style file: pnas-new.bst
+Database file #1: coinfection.bib
+You've used 6 entries,
+            1837 wiz_defined-function locations,
+            516 strings with 5253 characters,
+and the built_in function-call counts, 1446 in all, are:
+= -- 119
+> -- 82
+< -- 0
++ -- 24
+- -- 18
+* -- 129
+:= -- 229
+add.period$ -- 13
+call.type$ -- 6
+change.case$ -- 6
+chr.to.int$ -- 0
+cite$ -- 6
+duplicate$ -- 59
+empty$ -- 129
+format.name$ -- 18
+if$ -- 302
+int.to.chr$ -- 0
+int.to.str$ -- 6
+missing$ -- 6
+newline$ -- 28
+num.names$ -- 6
+pop$ -- 5
+preamble$ -- 1
+purify$ -- 0
+quote$ -- 0
+skip$ -- 36
+stack$ -- 0
+substring$ -- 119
+swap$ -- 12
+text.length$ -- 0
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 0
+warning$ -- 0
+while$ -- 16
+width$ -- 7
+write$ -- 64

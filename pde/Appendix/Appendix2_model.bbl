@@ -1,0 +1,127 @@
+\begin{thebibliography}{10}
+
+\bibitem{gorsich_git}
+Gorsich EE (2017) Btb-brucellosis coinfection.
+\newblock {\em http://github.com/eringorsich/bTB-bruc-co-infection-ms}.
+
+\bibitem{jolles_interactions_2008}
+Jolles AE, Ezenwa VO, Etienne RS, Turner WC, Olff H (2008) Interactions between
+  macroparasites and microparasites drive infection patterns in free-ranging
+  {African} buffalo.
+\newblock {\em Ecology} 89(8):2239--2250.
+\newblock WOS:000258236400018.
+
+\bibitem{samartino_pathogenesis_1993}
+Samartino LE, Enright FM (1993) Pathogenesis of abortion of bovine brucellosis.
+\newblock {\em Comparative immunology, microbiology and infectious diseases}
+  16(2):95--101.
+
+\bibitem{rhyan_pathogenesis_2009}
+Rhyan JC, et~al. (2009) Pathogenesis and epidemiology of brucellosis in
+  {Yellowstone} bison: serologic and culture results from adult females and
+  their progeny.
+\newblock {\em Journal of Wildlife Diseases} 45(3):729--739.
+\newblock WOS:000268355200015.
+
+\bibitem{rhyan_pathology_2001}
+Rhyan JC, et~al. (2001) Pathology of brucellosis in bison from {Yellowstone}
+  {National} {Park}.
+\newblock {\em Journal of Wildlife Diseases} 37(1):101--109.
+
+\bibitem{plommet_brucellose_1973}
+Plommet M, Fensterbank R, Renoux G, Gestin J, Philippon A (1973) Brucellose
+  bovine experimentale {XII}. {Persistance} a l'age adulte de l'infection
+  congenitale de la genisse.
+\newblock {\em Annales de Recherches Veterinaires} 4:419--435.
+
+\bibitem{fensterbank_congenital_1978}
+Fensterbank R (1978) Congenital brucellosis in cattle associated with
+  localisation in a hygroma.
+\newblock {\em The Veterinary record} 103(13):283--284.
+
+\bibitem{hobbs_state-space_2015}
+Hobbs NT, et~al. (2015) State-space modeling to support management of
+  brucellosis in the {Yellowstone} bison population.
+\newblock {\em Ecological Monographs} 85(4):525--556.
+
+\bibitem{thorne_brucellosis_1978}
+Thorne E, Morton J, Blunt F, Dawson H (1978) Brucellosis in {Elk}. 2.
+  {Clinical} effects and means of transmission as determined through artifical
+  infections.
+\newblock {\em Journal of Wildlife Diseases} 14(3):280--291.
+\newblock WOS:A1978FJ59200001.
+
+\bibitem{gorsich_context-dependent_2015}
+Gorsich E, Ezenwa VO, Cross P, Bengis R, Jollesa A (2015) Context-dependent
+  survival, fecundity, and predicted population-level consequences of
+  brucellosis in {African} buffalo.
+\newblock {\em Journal of Animal Ecology} 84:999--1009.
+
+\bibitem{treanor_vaccination_2010}
+Treanor JJ, et~al. (2010) Vaccination strategies for managing brucellosis in
+  {Yellowstone} bison.
+\newblock {\em Vaccine} 28:F64--F72.
+\newblock WOS:000283830600014.
+
+\bibitem{sinclair_resource_1975}
+Sinclair ARE (1975) The {Resource} {Limitation} of {Trophic} {Levels} in
+  {Tropical} {Grassland} {Ecosystems}.
+\newblock {\em Journal of Animal Ecology} 44(2):497--520.
+\newblock ArticleType: research-article / Full publication date: Jun., 1975 /
+  Copyright {\copyright} 1975 British Ecological Society.
+
+\bibitem{getz_hypothesis_1996}
+Getz WM (1996) A {Hypothesis} {Regarding} the {Abruptness} of {Density}
+  {Dependence} and the {Growth} {Rate} of {Populations}.
+\newblock {\em Ecology} 77(7):2014--2026.
+
+\bibitem{jolles_population_2007}
+Jolles AE (2007) Population biology of african buffalo (syncerus caffer) at
+  hluhluwe-imfolozi park, south africa.
+\newblock {\em African Journal of Ecology} 45(3):398--406.
+
+\bibitem{caron_ecological_2003}
+Caron A, Cross PC, Du~Toit JT (2003) Ecological implications of bovine
+  tuberculosis in {African} buffalo herds.
+\newblock {\em Ecological Applications} 13(5):1338--1345.
+\newblock WOS:000186599400013.
+
+\bibitem{cross_assessing_2006}
+Cross PC, Getz WM (2006) Assessing vaccination as a control strategy in an
+  ongoing epidemic: {Bovine} tuberculosis in {African} buffalo.
+\newblock {\em Ecological Modelling} 196(3-4):494--504.
+\newblock WOS:000238994800017.
+
+\bibitem{jolles_hidden_2005}
+Jolles A, Cooper D, Levin S (2005) Hidden effects of chronic tuberculosis in
+  {African} buffalo.
+\newblock {\em Ecology} 86:2258--2264.
+
+\bibitem{ebinger_simulating_2011}
+Ebinger M, Cross P, Wallen R, White PJ, Treanor J (2011) Simulating
+  sterilization, vaccination, and test-and-remove as brucellosis control
+  measures in bison.
+\newblock {\em Ecological Applications} 21(8):2944--2959.
+\newblock WOS:000299166300009.
+
+\bibitem{desolve_package}
+Soetaert K, Petzoldt T, Setzer RW (2010) Solving differential equations in r:
+  Package desolve.
+\newblock {\em Journal of Statistical Software} 33(9):1--25.
+
+\bibitem{van_den_driessche_reproduction_2002}
+van~den Driessche P, Watmough J (2002) Reproduction numbers and sub-threshold
+  endemic equilibria for compartmental models of disease transmission.
+\newblock {\em Mathematical Biosciences} 180(1--2):29--48.
+
+\bibitem{heffernan_perspectives_2005}
+Heffernan JM, Smith RJ, Wahl LM (2005) Perspectives on the basic reproductive
+  ratio.
+\newblock {\em J R Soc Interface} 2:281--93.
+
+\bibitem{marino_methodology_2008}
+Marino S, Hogue IB, Ray CJ, Kirschner DE (2008) A methodology for performing
+  global uncertainty and sensitivity analysis in systems biology.
+\newblock {\em J Theor Biol} 254:178--96.
+
+\end{thebibliography}

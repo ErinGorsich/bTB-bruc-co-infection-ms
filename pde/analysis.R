@@ -32,6 +32,9 @@ source('fixed_parameters.R', chdir = TRUE)
 # rhs function - model structure
 source('rhs.R', chdir = TRUE)
 
+# Functions to calculate EE and Ro
+source('get_Ro.R', chdir = TRUE)
+source('get_EE.R', chdir = TRUE)
 
 # age divisions in rhs function
 agemax <- 20
@@ -39,6 +42,7 @@ agestep <- 0.1
 N <- agemax / agestep
 ages <- seq(1, agemax + 1, by = agestep)[-(N)]
 N == length(ages)
+binsize <- N / agemax 
 
 # generate parameters with correct agebins
 f.params <- gen_fixed_params(agemax, agestep,
@@ -75,14 +79,6 @@ test <- as.data.frame(ode.1D(x0, times, rhs, params,
 	nspec = 6, dimens = N, method = "ode45"))
 x0 <- unname(unlist(test[length(test[,1]), c(2:(length(colnames(test))))])) 
 
-#############################################################
-#############################################################
-#2) Analyses plotting Ro and EE using MC simulation from stats
-#############################################################
-#############################################################
-# Functions to calculate EE and Ro
-source('get_Ro.R', chdir = TRUE)
-source('get_EE.R', chdir = TRUE)
 
 # At ML parameters, find Ro and EE alone and with both pathogens
 #############################################################
@@ -94,16 +90,14 @@ params <- c(f.params, list(gamma = 1/2, betaB = 0.5764065,
 # 21.072 BRUC alone
 # 31.493 BRUC with co-infection
 
+# Ro values
+Ro_bTB_single(params, x0)  # 3.340
+Ro_brucellosis_single(params, x0)  # 1.072238
+Ro_bTB_co(params, xB) # 1.95
+Ro_brucellosis_co(params, xT)  # 1.48
+
 # make sure get ok age-prev
 xtest <- x0
-
-
-# MCMC Ro calculations
-# Ro reads in x0 frame global environment
-#############################################################
-n = 1000
-set.seed(1)
-binsize <- N/agemax
 
 # set xB
 xstart <- x0
@@ -124,6 +118,20 @@ test <- as.data.frame(ode.1D(xstart, times, rhs, params,
 	nspec = 6, dimens = N, method = "ode45"))
 xT <- unname(unlist(test[length(test[,1]), c(2:(length(colnames(test))))])) 
 plot_raw_numbers(test)
+
+
+#############################################################
+#############################################################
+#2) Analyses plotting Ro and EE using MC simulation from stats
+#############################################################
+#############################################################
+
+# MCMC Ro calculations
+# Ro reads in x0 frame global environment
+#############################################################
+n = 1000
+set.seed(1)
+binsize <- N/agemax
 
 Ro_bTB_single(params, x0)  # 4.025996
 Ro_brucellosis_single(params, x0) #3.3862
@@ -204,6 +212,7 @@ saveRDS(d2, file = "EE_confidence_interval_simulation_results.rds")
 #############################################################
 #############################################################
 #3) Analyses varying mortality and transmission rates
+# Note need to set up xB and xT
 #############################################################
 #############################################################
 
@@ -243,6 +252,7 @@ epiT <- foreach(d = iter(epiTB, by = "row"), .combine = rbind, .packages = "deSo
 		
 	sol <- as.data.frame(ode.1D(xB.test, times, rhs, params.test, nspec = 6, dimens = N))
 	temp <- get_prevalence(sol)
+	val <- get_EE(params, x0, "beverton-holt")
 
 	data <- data.frame(
 		rhoT = params.test$rhoT,
@@ -253,13 +263,42 @@ epiT <- foreach(d = iter(epiTB, by = "row"), .combine = rbind, .packages = "deSo
 		bTB_inS = temp$prevTinS ,
 		bTB_inB = temp$prevTinB,
 		bruc_inS = temp$prevBinS ,
-		bruc_inTB = temp$prevBinT)
+		bruc_inTB = temp$prevBinT,
+		EE_bTB_single = val[1],  
+		EE_bTB_co = val[2], 
+		EE_brucellosis_single = val[3],
+		EE_brucellosis_co = val[4]	
+		)
 }
 stopCluster(cl)
 
 summary(epiT)
-
 write.csv(epiT, "epiT.csv")
+
+
+cl <- makeCluster(6)
+registerDoParallel(cl)
+epiTp <- foreach(d = iter(epiTB, by = "row"), .combine = rbind, .packages = "deSolve") %dopar% {
+	params.test <- c(f.params, list(gamma = 1/2, betaB = 0.5764065, 
+		betaT = 1.3305462/1000, rhoT = d$rhoT, rhoB = 2.1))
+	params.test$muC <- d$mort * params.test$muS
+	params.test$muRC <- d$mort * params.test$muS
+		
+	val <- get_EE(params, x0, "beverton-holt")
+
+	data <- data.frame(
+		rhoT = params.test$rhoT,
+		mort = params.test$muC[1]/ params.test$muS[1],
+		EE_bTB_single = val[1],  
+		EE_bTB_co = val[2], 
+		EE_brucellosis_single = val[3],
+		EE_brucellosis_co = val[4]	
+	)
+}
+stopCluster(cl)
+
+summary(epiTp)
+write.csv(epiTp, "epiTp.csv")
 
 
 # For Brucellosis analyses set x0 as endemic prevalence BTB
@@ -278,6 +317,7 @@ epiB <- foreach(d = iter(epiBR, by = "row"), .combine = rbind, .packages = "deSo
 		
 	sol <- as.data.frame(ode.1D(xT.test, times, rhs, params.test,  nspec = 6, dimens = N))
 	temp <- get_prevalence(sol)
+	val <- get_EE(params, x0, "beverton-holt")
 
 	data <- data.frame(
 		rhoB = params.test$rhoB,
@@ -288,11 +328,44 @@ epiB <- foreach(d = iter(epiBR, by = "row"), .combine = rbind, .packages = "deSo
 		bTB_inS = temp$prevTinS,
 		bTB_inB = temp$prevTinB,
 		bruc_inS = temp$prevBinS, 
-		bruc_inTB = temp$prevBinT)
+		bruc_inTB = temp$prevBinT
+		EE_bTB_single = val[1],  
+		EE_bTB_co = val[2], 
+		EE_brucellosis_single = val[3],
+		EE_brucellosis_co = val[4]
+		)
 }
 stopCluster(cl)
 
 write.csv(epiB, "epiB.csv")
+
+
+cl <- makeCluster(6)
+registerDoParallel(cl)
+
+epiBp <- foreach(d = iter(epiBR, by = "row"), .combine = rbind, .packages = "deSolve") %dopar% {
+	params.test <- c(f.params, list(gamma = 1/2, betaB = 0.5764065, 
+		betaT = 1.3305462/1000, rhoT = 1, rhoB = d$rhoB))
+	params.test$muC <- d$mort * params.test$muS
+	params.test$muRC <- d$mort * params.test$muS
+		
+	val <- get_EE(params, x0, "beverton-holt")
+
+	data <- data.frame(
+		rhoB = params.test$rhoB,
+		mort = params.test$muC[1]/ params.test$muS[1],
+		EE_bTB_single = val[1],  
+		EE_bTB_co = val[2], 
+		EE_brucellosis_single = val[3],
+		EE_brucellosis_co = val[4]
+		)
+}
+stopCluster(cl)
+
+write.csv(epiB, "epiB.csv")
+
+
+
 
 ################################################
 # NOT RUN

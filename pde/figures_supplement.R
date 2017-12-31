@@ -286,6 +286,12 @@ df <- df[df$model != "logistic",]
 df <- df[!is.na(df$sdE),]
 df$infectionmodel <- paste(df$infection, df$model, sep = "_")
 
+df$singleco <- as.character(df$singleco)
+df$singleco[df$singleco == "single"] <- "one infection"
+df$singleco[df$singleco == "co-infection"] <- "both infections"
+df$singleco <- as.factor(df$singleco)
+df$singleco <- relevel(as.factor(df$singleco), "one infection")
+
 brucellosis <- df[df$infection  == "brucellosis",]
 tb <- df[df$infection == "BTB",]
 
@@ -298,6 +304,7 @@ pB <- ggplot(brucellosis, aes(x = model, y = E, shape = singleco, colour = singl
 	ylim(0, 0.8) +
 	xlab("") +
 	ylab("Brucellosis prevalence") +
+	labs(shape = "Populations with") +
 	theme_bw() +
 	scale_colour_manual(values = c("chartreuse4","chartreuse4"), guide = F) +
 	scale_shape_manual(values = c(19, 17)) +
@@ -308,11 +315,11 @@ pB <- ggplot(brucellosis, aes(x = model, y = E, shape = singleco, colour = singl
         axis.text.x = element_text(size=16, vjust=-0.05, margin = margin(t = 7)),
         axis.text.y = element_text(size=14, margin = margin(r = 4)),
         panel.border = element_blank(), 
-		legend.position= c(0.85, 0.9),  
+		legend.position= c(0.8, 0.9),  
 		legend.text = element_text(size = 14),
         legend.background= element_rect(fill="white", colour="white"),
         legend.key= element_blank(),
-        legend.title= element_blank())
+        legend.title= element_text(size = 14))
 
 pT <- ggplot(tb, aes(x = model, y = E, shape = singleco, colour = singleco)) +
 	geom_point(aes(x = model, y = meanE), size = 3,
@@ -340,7 +347,7 @@ pT <- ggplot(tb, aes(x = model, y = E, shape = singleco, colour = singleco)) +
 
 source('~/GitHub/bTB-bruc-co-infection-ms/pde/multiplot.R', chdir = TRUE)
 multiplot(pT,  pB, cols = 2)
-
+# 800*400
 
 #######################################################
 #######################################################

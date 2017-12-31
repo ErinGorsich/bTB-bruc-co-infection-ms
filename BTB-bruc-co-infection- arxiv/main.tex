@@ -1,0 +1,242 @@
+\documentclass[10pt,letterpaper]{article}
+\usepackage[top=0.85in,footskip=0.75in,marginparwidth=2in]{geometry}
+%left=2.75in
+
+% use Unicode characters - try changing the option if you run into troubles with special characters (e.g. umlauts)
+\usepackage[utf8]{inputenc}
+
+% clean citations
+\usepackage{cite}
+
+% hyperref makes references clicky. use \url{www.example.com} or \href{www.example.com}{description} to add a clicky url
+\usepackage{nameref,hyperref}
+
+% line numbers
+\usepackage[right]{lineno}
+
+% improves typesetting in LaTeX
+\usepackage{microtype}
+\DisableLigatures[f]{encoding = *, family = * }
+
+% text layout - change as needed
+\raggedright
+\setlength{\parindent}{0.5cm}
+\textwidth 5.25in 
+\textheight 8.75in
+
+% Remove % for double line spacing
+%\usepackage{setspace} 
+%\doublespacing
+
+% use adjustwidth environment to exceed text width (see examples in text)
+\usepackage{changepage}
+
+% adjust caption style
+\usepackage[aboveskip=1pt,labelfont=bf,labelsep=period,singlelinecheck=off]{caption}
+
+% remove brackets from references
+\makeatletter
+\renewcommand{\@biblabel}[1]{\quad#1.}
+\makeatother
+
+% headrule, footrule and page numbers
+\usepackage{lastpage,fancyhdr,graphicx}
+\usepackage{epstopdf}
+\pagestyle{myheadings}
+\pagestyle{fancy}
+\fancyhf{}
+\rfoot{\thepage/\pageref{LastPage}}
+\renewcommand{\footrule}{\hrule height 2pt \vspace{2mm}}
+\fancyheadoffset[L]{2.25in}
+\fancyfootoffset[L]{2.25in}
+
+% use \textcolor{color}{text} for colored text (e.g. highlight to-do areas)
+\usepackage{color}
+
+% define custom colors (this one is for figure captions)
+\definecolor{Gray}{gray}{.25}
+
+% this is required to include graphics
+\usepackage{graphicx}
+
+% use if you want to put caption to the side of the figure - see example in text
+\usepackage{sidecap}
+
+% use for have text wrap around figures
+\usepackage{wrapfig}
+\usepackage[pscoord]{eso-pic}
+\usepackage[fulladjust]{marginnote}
+\reversemarginpar
+
+% document begins here
+\begin{document}
+\vspace*{0.35in}
+
+% title goes here:
+\begin{flushleft}
+{\huge%\Large
+\textbf\newline{Interactions between chronic diseases: asymmetric outcomes of co-infection at individual and population scales}}
+\newline
+% authors go here:
+\\
+Erin E. Gorsich\textsuperscript{1,2,*},
+Rampal S. Etienne\textsuperscript{3},
+Jan Medlock\textsuperscript{1},
+Brianna R. Beechler\textsuperscript{1},
+Johannie M. Spaan\textsuperscript{2},
+Robert S. Spaan\textsuperscript{4},
+Vanessa O. Ezenwa\textsuperscript{5}, 
+Anna E. Jolles\textsuperscript{1} \\
+\bigskip
+1 Department of Biomedical Sciences, 105 Dryden Hall, Oregon State University, Corvallis OR 97331 \\
+2 Department of Integrative Biology, Cordley Hall, Oregon State University, Corvallis, OR, 97331 \\
+3 Groningen Institute fo Evolutionary Life Sciences, University of Groningen, P.O. Box 1103, 9700 CC Groningen, The Netherlands \\
+4 Department of Fisheries and Wildlife, 104 Nash Hall, Oregon State University, Corvallis, OR 97331
+5 Odum School of Ecology and Department of Infectious Diseases, College of Veterinary Medicine, University of Georgia, Athens, GA, 30602
+\bigskip
+* eringorsich@gmail.com
+\end{flushleft}
+
+\section*{Abstract}
+Co-infecting parasites and pathogens remain a leading challenge for global public health due to their consequences for individual-level infection risk and disease progression. 
+However, a clear understanding of the population-level consequences of co-infection is lacking. 
+Here, we constructed a model that includes three individual-level effects of co-infection: mortality, fecundity, and transmission. 
+We used the model to investigate how these individual-level consequences of co-infection scale up to produce population-level infection patterns.
+To parameterize this model, we conducted a four-year cohort study in African buffalo to estimate the individual-level effects of co-infection with two bacterial pathogens, bovine tuberculosis (BTB) and brucellosis, across a range of demographic and environmental contexts.
+At the individual-level, our empirical results identified BTB as a risk factor for acquiring brucellosis, but we found no association between brucellosis and the risk of acquiring BTB. 
+Both infections were associated with reductions in survival and neither infection was associated with reductions in fecundity. 
+Results of the model reproduce co-infection patterns in the data and predict opposite impacts of co-infection at individual and population scales: whereas BTB facilitated brucellosis infection at the individual-level, our model predicts the presence of brucellosis to have a strong negative impact on BTB at the population-level.
+In modeled populations where brucellosis is present, the endemic prevalence and basic reproduction number ($R_o$) of BTB were lower than in populations without brucellosis. 
+Therefore, these results provide a data-driven example of competition between co-infecting pathogens that occurs when one pathogen facilitates secondary infections at the individual level.
+
+\section*{Significance Statement}
+Infection with multiple parasite species is common and the majority of co-infections involve at least one long-lasting infection. 
+Our data-driven model of chronic co-infection dynamics shows that accurate prediction at the population-level requires quantifying both the individual-level transmission and mortality consequences of co-infection. 
+The infections characterized in this study compete at the population-level. Competition occurs because one pathogen facilitates both the transmission and progression of the second pathogen. 
+This mechanism of competition is unique compared to previously described mechanisms and occurs without of cross-immunity, resource competition within the host, or a period of convalescence.
+We recommend assessing the generality of this mechanism, which could have important consequences for other chronic, immunosuppressive pathogens such as HIV or TB.
+
+% now start line numbers
+\linenumbers
+
+% the * after section prevents numbering
+\section*{Introduction}
+Over one sixth of the global human population is estimated to be affected by co-infection (concurrent infection by multiple pathogens; \cite{griffiths_nature_2011}). 
+Their ubiquity includes over 270 pathogen taxa and many important chronic infections, such as hepatitis-C, HIV, TB, and schistosomiasis \cite{griffiths_nature_2011, gandhi_extensively_2006, alter_epidemiology_2006}. 
+Mounting evidence suggests that co-infecting pathogens can interact within the host to influence the individual-level clinical outcomes of infection \cite{beechler_enemies_2015, graham_malaria-filaria_2005}. 
+These interactions may also influence the spread of infections at the population-level \cite{abu-raddad_dual_2006, ezenwa_opposite_2015}. 
+Understanding the effects of co-infection at both levels may, therefore, be fundamental to the success of integrated treatment and control programs that target multiple infections \cite{abdool_karim_integration_2011, hotez_incorporating_2006}.
+
+
+One challenge to predicting the epidemiological consequences of co-infection is that the mechanisms of parasite interaction — and their resulting changes to susceptibility or disease progression — occur within the host, while patterns relevant for disease control occur within a population \cite{viney_chapter_2013}. 
+Bridging these individual and population scales requires synthesizing multiple, individual-level processes across natural demographic and environmental variation. 
+For example, co-infecting pathogens may be one of the best predictors of individual-level infection risk for a second pathogen \cite{lello_relative_2013, telfer_species_2010}, resulting in increased or decreased transmission. 
+Co-infecting pathogens may also moderate the individual-level survival and fecundity costs of infection \cite{beechler_enemies_2015, pedersen_interaction_2008}. 
+Yet, the population-level consequences of co-infection are influenced by the net effects of these potentially non-linear individual-level processes \cite{martcheva_role_2006, vasco_tracking_2007}.
+
+
+At the population-level, theoretical studies have highlighted the range of dynamics generated by co-infecting pathogens \cite{abu-raddad_impact_2004, abu-raddad_dual_2006, cummings_dynamic_2005}. Even for unrelated pathogens, co-infection can dramatically modify infection dynamics through ecological mechanisms such as convalescence and disease induced mortality \cite{huang_dynamical_2005, huang_age-structured_2006, rohani_population_1998, rohani_ecological_2003, vasco_tracking_2007}. This theoretical work builds on a detailed database of childhood infections, thereby providing a data-driven understanding of co-infection dynamics for acute, immunizing infections. In contrast, data and theory on the effects of co-infection with long-lasting infections are limited  (but see, \cite{lloyd-smith_hiv-1/parasite_2008}). Chronic co-infections are of particular interest in this context, because they are responsible for the majority of co-infections \cite{griffiths_nature_2011} and have the potential to dramatically alter infection patterns \cite{martcheva_role_2006}. Their protracted presence in the host brings increased complexity to pathogen interactions, challenging model development and evaluation. Detailed longitudinal sampling or experimental studies are required to unravel their precise mechanisms and potentially asymmetric outcomes of interaction \cite{lloyd-smith_hiv-1/parasite_2008}. Few datasets simultaneously estimate the individual-level transmission, survival, and fecundity consequences of co-infection. To address this gap, we provide a data-driven investigation of co-infection dynamics for chronic pathogens.
+
+We focused our research on two chronic bacterial infections, bovine tuberculosis (BTB) and brucellosis, in a wild population of African buffalo (/textit{Syncerus caffer}) to ask, how do the individual-level consequences of co-infection scale up to produce population-level infection patterns? This system allows us to simultaneously monitor both individual and population levels of the infection process \cite{beechler_enemies_2015, ezenwa_opposite_2015} in a natural reservoir host \cite{gomo_survey_2012, michel_mycobacterium_2010}. Furthermore, BTB and brucellosis have well-characterized and asymmetric effects on the within-host environment. BTB is a directly-transmitted, life-long respiratory infection that dramatically modifies host immunity \cite{waters_tuberculosis_2011}. African buffalo infected with BTB have reduced innate immune function and increased inflammatory responses \cite{beechler_enemies_2015}. Conversely, brucellosis is a persistent infection of the reproductive system. It persists within phagocytirc cells \cite{roop_survival_2009}, and infection invokes a less severe immune response compared to BTB \cite{Ko_molecular_2003}. These differences and our ability to observe the natural history of both infections make BTB and brucellosis an ideal system to explore disease dynamics across scales.
+
+Our approach combines a novel mathematical model of the co-infection dynamics of BTB and brucellosis and a 4-year cohort study of 151 buffalo (Fig \ref{fig:fig1}). For this model, all parameters describing the consequence of co-infection were estimated from field data; they include the individual-level consequences of co-infection on mortality, fecundity, and infection risk. We quantified these parameters by tracking the individual infection profiles of each buffalo, which were monitored at approximately six-month intervals and resulted in over 4386 animal-months of observation time from two capture sites. We show that the model accurately reproduces observed co-infection patterns and use the model to predict the reciprocal effects of brucellosis and BTB on each other’s dynamics. In addition, we assess the relative importance of each individual-level process on co-infection dynamics.
+
+\begin{figure*} [hb] %[tbhp]
+\centering
+\includegraphics[width=14cm]{Figure1.pdf}
+\caption{Conceptual diagram of data collection, model, and evaluation. (center) Schematic representation of the disease model defined in SI Appendix 2. Hosts are represented as Susceptible ($S$), infected with TB only ($I_T$), infected with brucellosis only ($I_B$), co-infected with both infections ($I_C$), persistently infected with brucellosis only but no longer infectious ($R_B$), and persistently infected with brucellosis and co-infected with BTB ($R_C$). (left) A detailed cohort study informs model parameterization, including the mortality, transmission, and fecundity consequences of co-infection as well as the (right) transmission parameters for both infections. The prevalence plot illustrates that the model accurately reproduces the observed co-infection patterns in the data.  Bars represent model results and dots represent the data.}
+\label{fig:fig1}
+\end{figure*}
+
+
+\section*{Results}
+
+\subsection*{Individual-level consequences of co-infection: model parameterization} 
+
+BTB and brucellosis were associated with additive increases in mortality (Fig \ref{fig:fig2}a; SI Appendix 1 Table S1). Approximate annual mortality rates in the data were 0.056 (10 mortalities/175.75 animal years) in uninfected buffalo, 0.108 (6 mortalities/55.5 animal years) in buffalo with BTB alone, 0.144 in buffalo with brucellosis alone (13 mortalities/ 90.5 animal years), and 0.21 (9 mortalities/43.8 animal years) in co-infected buffalo. After accounting for environmental and demographic covariates with a Cox proportional hazards regression model, BTB was associated with a 2.82 (95\% CI 1.43- 5.58) fold increase in mortality, and infection with brucellosis was associated with a 3.02 (95\% CI 1.52-6.01) fold increase in mortality compared to uninfected buffalo. Co-infected buffalo were associated with an 8.58 (95\% CI 3.20-22.71) fold increase in mortality compared to uninfected buffalo (Fig \ref{fig:fig2}a). Mortality rates were also influenced by buffalo age and capture site, but the effect of co-infection remained consistent across all ages and in both sites (SI Appendix 1). Neither infection was associated with reductions in fecundity (described in detail in SI Appendix 1, Fig S1). Uninfected buffalo were observed with a calf 68\% (11/16) of the time compared to 37\% (6/16), 29\% (7/24), and 57\% (4/7) in BTB positive, brucellosis positive, and co-infected adult buffalo.
+
+The consequences of co-infection on infection risk were asymmetric (Fig \ref{fig:fig2}b; SI Appendix 1, Table S2). Approximate brucellosis incidence rates were 0.05 (18 infections/340 animal years) in uninfected buffalo compared to 0.08 (8 infections/104 animal years) in buffalo with BTB. Approximate BTB incidence rates were 0.08 (27 infection/ 340 animal years) in uninfected buffalo and 0.07 (9 infections/ 138 animal years) in buffalo with brucellosis. After accounting for demographic covariates in a Cox proportional hazards regression model, brucellosis infection risk was 2.09 (95\% CI 0.89 – 4.91) times higher in buffalo with BTB compared to susceptible buffalo. BTB infection risk was similar in uninfected buffalo and buffalo with brucellosis. The effect BTB on brucellosis infection risk varied by capture-site, with the effect of BTB varying from no change at one site to a 4.32 (95\% CI 1.51 – 12.37) fold increase in risk at the other site (interaction term for BTB$\times$site: p-value = 0.045; SI Appendix 1, Table S2). Brucellosis infection risk also varied with buffalo age. Early reproductive-aged buffalo were associated with increased infection risk. Our model parameterization, therefore, represents increased brucellosis transmission in early reproductive-aged buffalo and the average effect of BTB on brucellosis infection risk accross sites. Talbes S3 and S4 in SI Appendix 2 provides a summary of the consequences of co-infection on brucellosis transmission, BTB transmission, mortality, and fecundity quantified in our data analyses.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=.9\linewidth]{Figure2.pdf}
+\caption{Parameter estimation: Cox proportional hazards analysis of the cohort study. (a) Predicted mortality estimates for uninfected, infected, and co-infected adult buffalo. (b) Predicted estimates and standard error for the proportional increase in infection risk in buffalo with the second infection compared to susceptible buffalo. Brucellosis infection risk was 2.09 times higher in animals with BTB compared to susceptible animals but BTB infection risk was similar in buffalo with and without brucellosis. The dashed line indicates no change in infection risk.}
+\label{fig:fig2}
+\end{figure}
+
+\subsection*{Population-level consequences of co-infection: basic reproduction number and prevalence}
+
+We built a disease dynamic model to translate the individual-level effects quantified above into predicted population-level effects of co-infection (Fig \ref{fig:fig1}; SI Appendix 2). We estimated parameter values for the transmission rate of BTB and brucellosis by minimizing the sum of squared errors between BTB and brucellosis infection prevalence in our data and in an age-matched sample from the model. BTB prevalence in the data was 27\% and brucellosis prevalence was 34\%. The resulting transmission parameters (BTB $1.331 \times 10^{-3}$, brucellosis $5.764 \times 10^{-1}$) accurately predict the positive association between BTB and brucellosis observed in the data (Fig \ref{fig:fig1}) and allow us to predict equilibrium infection levels and the basic reproduction number in modeled populations with and without co-infection. The basic reproduction number, $R_{o,i}$ (i = T, B for infection with BTB or brucellosis) is defined as the average number of secondary cases generated by a single infection in a susceptible population. The presence of brucellosis infection results in large reductions in $R_{o,T}$, with a predicted $R_{o,T}$ = 3.4 in populations where brucellosis is absent and $R_{o,T}$= 1.5 in populations where brucellosis is present. The predicted equilibrium BTB prevalence was also lower in populations where both pathogens occur, with a BTB prevalence of 65.8\% in populations where brucellosis is absent compared to 27.9\% when both pathogens co-occur. Conversely, the presence or absence of BTB has only minor effects on the $R_o$ and equilibrium prevalence of brucellosis. To represent uncertainty in the individual-level consequences of co-infection, we used Monte Carlo sampling of the parameters quantified in our statistical analyses (Fig \ref{fig:fig2}; SI Appendix 2).  Figure \ref{fig:fig3} displays the effect of co-infection when uncertainty in input parameters is considered. In this range of parameter values (parameter space), 96\% of model trajectories predicted a lower BTB prevalence in populations with co-infection. In the remaining 4\%, brucellosis did not persist in populations with or without co-infection due to high mortality rates and low facilitation rates (Fig S4, SI Appendix 2).
+
+To generalize these results, we explored the population-level consequence of co-infection over a range of parameter values (\ref{fig:fig4}). By manipulating the transmission and mortality consequences of co-infection, we explored infection levels in other environmental contexts where the individual effects of co-infection may be reduced or exacerbated. The resulting prevalence surfaces suggest that, co-infecting pathogens will have a negative effect on prevalence if co-infected individuals have elevated mortality and reduced or similar susceptibility. Co-infecting pathogens are predicted to have a positive effect if co-infected individuals have increased susceptibility and minimal changes in mortality. In contrast, BTB and brucellosis are predicted to have drastically different responses to co-infection for parameter values where co-infection modifies both processes. BTB prevalence was lower in populations with brucellosis for most parameter values while the effect of BTB on brucellosis was more variable. This difference is due to BTB’s long infection duration because the cumulative effect of facilitation increases with infection duration.
+
+At the parameter values quantified in our empirical dataset, these results illustrate that the lower BTB prevalence in populations where brucellosis co-occurs is driven two mechanisms: (1) BTB increases the transmission rate of brucellosis but not vice versa and (2) co-infection results in increased mortality. As a result, at the individual-level, buffalo infected with BTB are more likely to become infected with brucellosis and die than their uninfected counterparts. The resulting reductions in infection duration mean that the prevalence of brucellosis is predicted to reduce BTB infection-levels at the population-level. These results are robust to several important changes in the model structure, including alternative forms of density dependence and a range of model parameters (see sensitivity analyses in SI Appendix 2).  Model dynamics in all formulations are qualitatively similar, although there is some variation in overall magnitude of change with co-infection.
+
+
+\begin{figure}[hb]%[tbhp]
+\centering
+\includegraphics[width=.8\linewidth]{Figure3_lowres.pdf}
+\caption{Model predictions: reciprocal consequences of co-infection for the basic reproduction number ($R_o$) and endemic prevalence. (a) The estimated $R_o$ for BTB was lower in populations where brucellosis co-occurs while the estimated $R_o$ for brucellosis was similar in populations with and without BTB. (b) The estimated endemic prevalence of BTB was lower in populations where brucellosis co-occurs while the estimated endemic prevalence of brucellosis was similar in populations with and without BTB.  Uncertainty was incorporated into model predictions using Monte Carlo sampling of parameters describing the individual-level consequences of co-infection (SI Appendix 3). Dots and lines represent the mean and standard error of model predictions. (c) Histograms of the difference in $R_o$ and (d) endemic prevalence show the negative consequence of co-infection for BTB and neutral consequences of co-infection for brucellosis at the population-level. Change is calculated for each parameter combination as the predicted value in populations with co-infection subtracted by the predicted value in populations with a single pathogen. Purple bars and lines represent BTB; green lines represent brucellosis. }
+\label{fig:fig3}
+\end{figure}
+
+\begin{figure}%[tbhp]
+\centering
+\includegraphics[width=.99\linewidth]{Figure4_lowres.pdf}
+\caption{The difference between predicted prevalence values in populations with and without co-infection for BTB prevalence (left panel) and brucellosis prevalence (right panel). Reds indicate that infection with the second pathogen increased in the presence of the focal pathogen; blues indicate that infection with the second pathogen decreased in the presence of the focal pathogen; yellows indicate no change. Contour lines indicate changes in prevalence by 20\%. Stars and error bars indicate mean and standard error parameter values estimated in the data. Proportional increases in mortality are measured as the increase compared to the rate in susceptible individuals. Proportional increases in transmission represent the increase in the transmission rate for the focal pathogen in the presence of the co-infecting pathogen.}
+\label{fig:fig4}
+\end{figure}
+
+
+\section*{Discussion}
+Our study provides a mechanistic understanding of how chronic co-infections mediate each other’s dynamics. Model dynamics show that co-infection can increase or decrease the prevalence of a second pathogen depending on the net effect of co-infection on transmission and infection duration, via mortality. When co-infection modifies only transmission or only mortality, the prevalence of the second pathogen predictively increases or decreases. Previous work has quantified the disease dynamic consequences of changes in transmission through a range of mechanisms: cross immunity, antibody-mediated enhancement, immunosuppression, and convalescence \cite{abu-raddad_impact_2004, rohani_population_1998, ferguson_effect_1999, bhattacharyya_cross-immunity_2015}. Here, we show that transmission and mortality should be considered concurrently, following theoretical predictions \cite{martcheva_role_2006, lloyd-smith_hiv-1/parasite_2008, fenton_dances_2013}. When a co-infecting pathogen modifies both processes, non-linear responses mediated through the co-infecting pathogen can have a large impact on population-level disease dynamics.
+
+By exploring the co-infection dynamics of BTB and brucellosis, we also provide a data-driven example of competition between pathogens in a natural population. Here, the mechanism driving competition is different from previously described examples that focus on cross-immunity \cite{bhattacharyya_cross-immunity_2015}, resource competition within the host \cite{graham_ecological_2008}, or ecological competition by convalescence \cite{rohani_population_1998, rohani_ecological_2003}. Specifically, the mechanism of parasite interaction in these examples occurs when one infection reduces the transmission of the second pathogen, typically by removing individuals from the susceptible pool during co-infection. By contrast, BTB facilitates the transmission of brucellosis at the individual-scale (Fig \ref{fig:fig2}). Because co-infection is associated with elevated mortality, co-infected individuals are also removed from the population at a faster rate. Competition, therefore, occurs at the population-level: BTB is predicted to have a lower prevalence and lower $R_{o,T}$ in populations where brucellosis occurs compared to populations without brucellosis.
+
+The model structure presented in this study was informed by our empirical data. As a result, it incorporates realistic age-specific transmission and mortality rates as well as data-driven estimates of the consequences of co-infection. However, additional detail could be added to our model. Specifically, we do not know the consequences of co-infection on recovery or infectiousness, two processes likely to influence persistent infections \cite{huang_dynamical_2005, lloyd-smith_hiv-1/parasite_2008}. We also do not consider genetic variation within our buffalo population that may mediate susceptibility to both pathogens. However, our model’s ability to re-create co-infection patterns with the mechanisms characterized is encouraging. Furthermore, our empirical results account for natural variation in demographic and environmental conditions and model-predictions including this variation remain informative. Thus, our results suggest the importance of co-infection in generating population-level association patterns relative to environmental or genetic drivers of infection.
+
+Given the ubiquity and documented individual-level impacts of chronic co-infections on the host, these results illuminate two core challenges in the design and application of integrated control strategies. First, it remains unclear how commonly competition between co-infecting pathogens is occurring. Understanding which pathogens may be competing in co-infected host populations is crucial to estimating the costs and benefits of disease control interventions. For example, in the presence of pathogen competition, removing one pathogen may unintentionally lead to a resurgence of or increases in prevalence of a competing pathogen. Our results suggest that competition at the population-level can occur between unrelated pathogens and in the absence of competition for shared resources within the host. Competition appears to be strongest when pathogens have asymmetric effects on transmission. Similar asymmetries in transmission occur in HIV-malaria \cite{abu-raddad_dual_2006} and HIV-HCV co-infections \cite{urbanus_hepatitis_2009}, suggesting a role for this mechanism in other systems. Second, knowledge on which chronic pathogens are most likely to be influenced by co-infection remains largely theoretical (excluding notable progress with HIV- co-infection \cite{abu-raddad_dual_2006, lloyd-smith_hiv-1/parasite_2008}). Here, the immunosuppressive pathogen, BTB \cite{beechler_innate_2012, beechler_enemies_2015}, was strongly influenced by co-infection at the population-level, and our analyses show that BTB prevalence should typically decline in the presence of another chronic pathogen, provided that co-infected hosts suffer greater mortality. This raises the question of whether there are traits of chronic pathogens (e.g. immunosuppressive effects) that make them more likely to be influenced by co-infection. Studies addressing these questions are urgently needed to target both research and treatment on the pathogens most likely to be influenced by co-infection. Such a research agenda will require additional synthesis of theoretical and empirical work: theoretical studies are needed to characterize how population-level infection dynamics will response to changes in transmission and mortality for different types of pathogens and empirical studies are needed to quantify when and how these parameters change through pathogen interactions. In combination, this work can provide clarity about the consequences of co-infections, and their control, at both the individual and population scales.
+
+
+\section*{Materials and Methods}
+\subsection*{Model Development}
+We developed an age-structured continuous time disease dynamic model to explore the consequences of co-infection on BTB and brucellosis infection (Fig \ref{fig:fig1}).
+Animals are represented with six groups: susceptible to both infections (S), infected with BTB only (IT), infected with brucellosis and infectious (IB), co-infected with both pathogens (IC), persistently infected with brucellosis but no longer infectious (RB), or persistently infected with brucellosis and co-infected with BTB (RC). We modeled BTB as a lifelong infection with density dependent transmission \cite{jolles_interactions_2008}. 
+Transmission of brucellosis was assumed to be frequency dependent because transmission occurs through ingestion of the bacteria shed in association with aborted fetuses, reproductive tissues, or discharges during birthing \cite{samartino_pathogenesis_1993}. 
+We did not consider vertical transmission because serological evidence suggests that it is rare in African buffalo \cite{gorsich_context-dependent_2015} and experimental evidence for vertical transmission varies by host species (cattle \cite{fensterbank_congenital_1978}, bison \cite{plommet_brucellose_1973}, elk \cite{thorne_brucellosis_1978}). Buffalo populations experience density dependent recruitment \cite{sinclair_resource_1975}, represented with a generalized Beverton and Holt equation \cite{getz_hypothesis_1996}.
+This 2 parameter representation of density dependence gives a stable age structure and relatively constant population size (\cite{cross_assessing_2006}; SI Appendix 2, Fig S3). A full description of the model is provided in SI Appendix 2.
+
+
+The individual-level consequences of co-infection can be summarized by 4 individual-level processes: (1) the effects of prior infection with brucellosis on the rate of acquiring BTB infection (2) the effects of prior infection with BTB on the rate of acquiring brucellosis infection, (3) the effects of co-infection on mortality rate, and (4) the effects of co-infection on birth rates. 
+To investigate the consequences of these four individual level processes on disease dynamics, we quantified the mean values of these rates in susceptible, singly infected, and co-infected buffalo. 
+Transmission rates, mortality rates, and the proportional reductions in fecundity with infection may be age dependent, but recovery and recrudescence are assumed to be independent of age.
+
+\subsection*{Individual-level data and parameter estimation}
+We conducted a longitudinal study of 151 female buffalo to estimate the consequences of BTB and brucellosis infection. Buffalo were captured at two locations in the south-eastern section of KNP, radio collared for re-identification, and re-captured biannually at approximately 6 month intervals until June-October of 2012.  During each capture, we recorded brucellosis infection status, BTB infection status, age, and the animals’ reproductive status. Brucellosis testing was conducted with an ELISA antibody test and BTB testing was conducted with a gamma-interferon assay  \cite{gorsich_evaluation_2015, michel_approaches_2011}. Detailed methodological descriptions of our capture and disease testing protocols are provided in SI Appendix 3.
+
+
+We assessed the effects of co-infection on mean mortality rates and the mean rate animals acquired infection by analyzing our longitudinal time-to-even data using semi-parametric Cox models where an individual’s covariates representing infection change over time. Specifically, we fit three regression models to predict three events: the time-to-mortality in uninfected, BTB+, Brucellosis +, and co-infected individuals; the time-to-infection with brucellosis in buffalo with and without BTB; and the time-to-infection with BTB in buffalo with and without brucellosis. In all analyses, we include age and initial capture site as time-independent, categorical variables and infection status as a time-dependent explanatory variable. We also evaluate whether the association between brucellosis and BTB varied by age or site by including interactions terms between BTB and each environmental variable. The supplemental information includes a detailed quantification of our re-capture rates, justifies the use of the Cox model, and outlines our model selection procedure. 
+
+\subsection*{Model evaluation and inference}
+Parameter values for the transmission rate of BTB and brucellosis were estimated by fitting the model to prevalence estimates in the study population. Our data do not represent a random sample because buffalo aged over the course of the study, with a median age of 3.4 years in buffalo initially captured in June-October 2008. We, therefore,  calculate prevalence after randomly sampling one time point for each individual.  We estimate prevalence in the study population as the mean prevalence in 1000 replicate samples. Model estimates of prevalence were calculated numerically using the deSolve package \cite{desolve_package}. The transmission rates of both pathogens were estimated by numerically minimizing the sum-of-squared errors between the mean prevalence estimates for BTB and brucellosis and an age-matched estimate of prevalence from the model. We used the Nelder-Mead algorithm implemented with the optim function in R to minimized this function. We evaluated our model by comparing its ability to recreate co-infection patterns in the data (Fig \ref{fig:fig1}). We calculated Ro numerically using the next generation method \cite{van_den_driessche_reproduction_2002}, reviewed in \cite{heffernan_perspectives_2005}. We calculated endemic infection levels of both pathogens in populations with and without the co-infecting pathogen.
+
+\section*{Supporting Information}
+Extended methods are provided in the SI Appendix. \\
+\noindent{}Appendix 1: Additional information statistical analysis \\
+\noindent{}Appendix 2: Additional information on model development and analysis \\
+\noindent{}Appendix 3: Additional information on field methods and diagnostic testing \\
+
+%\clearpage
+
+\section*{Acknowledgments}
+We thank South African National Parks (SANParks) for their permission to conduct this study in Kruger. We thank P. Buss, M. Hofmeyr and the entire SANPark’s Veterinary Wildlife Services Department for animal capture and logistical support. We thank the Webb lab group for comments on the manuscript and technical support. Animal protocols for this study were approved by the University of Georgia (UGA) and Oregon State University (OSU) Institutional Animal Care and Use Committees (UGA AUP A2010 10-190-Y3-A5; OSU AUP 3822 and 4325). This study was supported by a National Science Foundation Ecology of Infectious Diseases Grant to A. Jolles and V. Ezenwa (EF-0723918/DEB-1102493, EF-0723928) and a NSF-GRFP and NSF-DDIG award to E. Gorsich (DEB-121094).
+\nolinenumbers
+
+%This is where your bibliography is generated. Make sure that your .bib file is actually called library.bib
+\bibliography{main}
+
+%This defines the bibliographies style. Search online for a list of available styles.
+\bibliographystyle{pnas-new}
+
+\end{document}
+
