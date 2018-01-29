@@ -272,12 +272,13 @@ saveRDS(sensitivity, "LHS_sensitivity_results.rds")
 # Calculate prcc results
 df <- readRDS("~/GitHub/bTB-bruc-co-infection-ms/pde/LHS_sensitivity_results.rds")
 bonferroni.alpha <- 0.05/13
+alpha <- 0.05
 
 # Ro TB
-prcc_RoTB <- pcc(df[ , 1:13], df[ ,15], nboot = 1000, rank = TRUE, conf = 1- bonferroni.alpha)
-prcc_RoB <- pcc(df[ , 1:13], df[ ,18], nboot = 1000, rank = TRUE, conf = 1- bonferroni.alpha)
-prcc_EETB <- pcc(df[ , 1:13], df[ ,21], nboot = 1000, rank = TRUE, conf = 1- bonferroni.alpha)
-prcc_EEB <- pcc(df[ , 1:13], df[ ,24], nboot = 1000, rank = TRUE, conf = 1- bonferroni.alpha)
+prcc_RoTB <- pcc(df[ , 1:13], df[ ,15], nboot = 1000, rank = TRUE, conf = 1- alpha)
+prcc_RoB <- pcc(df[ , 1:13], df[ ,18], nboot = 1000, rank = TRUE, conf = 1- alpha)
+prcc_EETB <- pcc(df[ , 1:13], df[ ,21], nboot = 1000, rank = TRUE, conf = 1- alpha)
+prcc_EEB <- pcc(df[ , 1:13], df[ ,24], nboot = 1000, rank = TRUE, conf = 1- alpha)
 
 pt <- print(prcc_RoTB)
 pb <- print(prcc_RoB)

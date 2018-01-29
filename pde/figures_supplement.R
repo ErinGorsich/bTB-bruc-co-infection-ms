@@ -354,7 +354,7 @@ multiplot(pT,  pB, cols = 2)
 # Figure C - 6 in supplement- sensitivity
 #######################################################
 #######################################################
-#######################################################
+
 df <- read.csv("~/GitHub/bTB-bruc-co-infection-ms/pde/Ro_sensitivity.csv")
 df$infection <- as.character(df$infection)
 df$infection[df$infection == "TB"] <- "BTB"
