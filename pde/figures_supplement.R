@@ -5,7 +5,7 @@
 # Erin Gorsich
 #######################################################
 #######################################################
-setwd("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/draft2/post-labmeeting/post-labmeeting2/Vanessa&Rampalcomments/draft_with_pde/figures")
+setwd("~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/draft2/post-labmeeting/post-labmeeting2/Vanessa&Rampalcomments/draft_with_pde/submitted/revision")
 source('~/GitHub/bTB-bruc-co-infection-ms/multiplot.R', chdir = TRUE)
 library(ggplot2)
 library(tidyr)
@@ -101,7 +101,8 @@ points(reprojected.df, pch = 21, col = "red", add = TRUE, cex = 0.2)
 newdf<-data.frame(
 	Calf=c(11/16, 7/24, 6/16, 4/7, 5/35, 3/17, 3/14, 3/14), 
 	Agecategory = c(rep("Adult (age > 4)", 4), rep("Sub-adult (age = 4)", 4)),
-	Infection = c("uninfected", "brucellosis", "BTB", "co-infected", "uninfected", "brucellosis", "BTB", "co-infected"),
+	Infection = c("uninfected", "brucellosis", "bTB", "co-infected", 
+	    "uninfected", "brucellosis", "bTB", "co-infected"),
 	N = c(25, 33, 23, 14, 26, 8, 7, 7))
 newdf$color <- as.factor(seq(1,8))
 newdf$se<- sqrt(newdf$Calf * (1 - newdf$Calf) / newdf$N)
@@ -241,18 +242,30 @@ df <- data.frame(E = c(d$EE_bTB_single, d$EE_bTB_co,
 	d$rEE_brucellosis_single, d$rEE_brucellosis_co, 
 	d$lEE_bTB_single, d$lEE_bTB_co, 
 	d$lEE_brucellosis_single, d$lEE_brucellosis_co),
-	meanE = c(rep(mean(d$EE_bTB_single),n), 
-		rep(mean(d$EE_bTB_co),n),
-		rep(mean(d$EE_brucellosis_single),n), 
-		rep(mean(d$EE_brucellosis_co),n),
-		rep(mean(d$rEE_bTB_single),n), 
-		rep(mean(d$rEE_bTB_co),n),
-		rep(mean(d$rEE_brucellosis_single),n), 
-		rep(mean(d$rEE_brucellosis_co),n), 
-		rep(mean(d$lEE_bTB_single),n), 
-		rep(mean(d$lEE_bTB_co),n),
-		rep(mean(d$lEE_brucellosis_single),n), 
-		rep(mean(d$lEE_brucellosis_co),n)),
+	# meanE = c(rep(mean(d$EE_bTB_single),n), 
+	#     rep(mean(d$EE_bTB_co),n),
+	#     rep(mean(d$EE_brucellosis_single),n), 
+	#     rep(mean(d$EE_brucellosis_co),n),
+	#     rep(mean(d$rEE_bTB_single),n), 
+	#     rep(mean(d$rEE_bTB_co),n),
+	#     rep(mean(d$rEE_brucellosis_single),n), 
+	#     rep(mean(d$rEE_brucellosis_co),n), 
+	#     rep(mean(d$lEE_bTB_single),n), 
+	#     rep(mean(d$lEE_bTB_co),n),
+	#     rep(mean(d$lEE_brucellosis_single),n), 
+	#     rep(mean(d$lEE_brucellosis_co),n)),
+	meanE = c(rep(median(d$EE_bTB_single),n), 
+		rep(median(d$EE_bTB_co),n),
+		rep(median(d$EE_brucellosis_single),n), 
+		rep(median(d$EE_brucellosis_co),n),
+		rep(median(d$rEE_bTB_single),n), 
+		rep(median(d$rEE_bTB_co),n),
+		rep(median(d$rEE_brucellosis_single),n), 
+		rep(median(d$rEE_brucellosis_co),n), 
+		rep(median(d$lEE_bTB_single),n), 
+		rep(median(d$lEE_bTB_co),n),
+		rep(median(d$lEE_brucellosis_single),n), 
+		rep(median(d$lEE_brucellosis_co),n)),
 	sdE = c(rep(sd(d$EE_bTB_single),n), 
 		rep(sd(d$EE_bTB_co),n),
 		rep(sd(d$EE_brucellosis_single),n), 
@@ -265,9 +278,9 @@ df <- data.frame(E = c(d$EE_bTB_single, d$EE_bTB_co,
 		rep(sd(d$lEE_bTB_co),n),
 		rep(sd(d$lEE_brucellosis_single),n), 
 		rep(sd(d$lEE_brucellosis_co),n)),
-	infection = c(rep("BTB", 2*n), rep("brucellosis", 2*n),
-		rep("BTB", 2*n), rep("brucellosis", 2*n), 
-		rep("BTB", 2*n), rep("brucellosis", 2*n)), 
+	infection = c(rep("bTB", 2*n), rep("brucellosis", 2*n),
+		rep("bTB", 2*n), rep("brucellosis", 2*n), 
+		rep("bTB", 2*n), rep("brucellosis", 2*n)), 
 	model = rep(c("Beverton & Holt", "Ricker", "Logistic" ), each = 4*n),
 	singleco = rep(c("single", "co-infection", "single","co-infection",
 		"single", "co-infection", "single","co-infection",
@@ -293,7 +306,7 @@ df$singleco <- as.factor(df$singleco)
 df$singleco <- relevel(as.factor(df$singleco), "one infection")
 
 brucellosis <- df[df$infection  == "brucellosis",]
-tb <- df[df$infection == "BTB",]
+tb <- df[df$infection == "bTB",]
 
 # Dot and error plots for Endemic Prevalence
 pB <- ggplot(brucellosis, aes(x = model, y = E, shape = singleco, colour = singleco)) +
@@ -328,7 +341,7 @@ pT <- ggplot(tb, aes(x = model, y = E, shape = singleco, colour = singleco)) +
 		width = 0, position= position_dodge(width = 0.5)) +
 	ylim(0, 0.8) +
 	xlab("") +
-	ylab("BTB prevalence") +
+	ylab("bTB prevalence") +
 	theme_bw() +
 	scale_colour_manual(values = c("slateblue3","slateblue3"), guide = FALSE) +
 	scale_shape_manual(values = c(19, 17),  guide = FALSE) +
@@ -357,9 +370,9 @@ multiplot(pT,  pB, cols = 2)
 
 df <- read.csv("~/GitHub/bTB-bruc-co-infection-ms/pde/Ro_sensitivity.csv")
 df$infection <- as.character(df$infection)
-df$infection[df$infection == "TB"] <- "BTB"
+df$infection[df$infection == "TB"] <- "bTB"
 df$infection <- as.factor(df$infection)
-df$infection <- relevel(df$infection, "BTB")
+df$infection <- relevel(df$infection, "bTB")
 df$order <- rep(c(5, 4, 3, 6, 7, 8, 2, 1, 10, 9, 12, 11, 13), 2)  # order by table 1
 df$order <- as.factor(df$order)
 
@@ -401,9 +414,9 @@ pB <- ggplot(df, aes(x = order, y = Ro, shape = infection, colour = infection)) 
 
 df <- read.csv("~/GitHub/bTB-bruc-co-infection-ms/pde/EE_sensitivity.csv")
 df$infection <- as.character(df$infection)
-df$infection[df$infection == "TB"] <- "BTB"
+df$infection[df$infection == "TB"] <- "bTB"
 df$infection <- as.factor(df$infection)
-df$infection <- relevel(df$infection, "BTB")
+df$infection <- relevel(df$infection, "bTB")
 df$order <- rep(c(5, 4, 3, 6, 7, 8, 2, 1, 10, 9, 12, 11, 13), 2)  # order by table 1
 df$order <- as.factor(df$order)
 
@@ -416,7 +429,7 @@ pB <- ggplot(df, aes(x = order, y = EE, shape = infection, colour = infection)) 
 	geom_hline(yintercept = 0, color = 'red', size = 0.5) +
 	ylim(-1, 1) +
 	xlab("") +
-	ylab("PRCC, Endemic prevalence") +
+	ylab("PRCC, prevalence") +
 	theme_bw() +
 	scale_x_discrete("", labels = c("K",
 		expression(theta), expression(beta[T]), expression(beta[B]),  
@@ -441,4 +454,3 @@ pB <- ggplot(df, aes(x = order, y = EE, shape = infection, colour = infection)) 
         legend.background= element_rect(fill="white", colour="white"),
         legend.key= element_blank(),
         legend.title= element_blank())
-

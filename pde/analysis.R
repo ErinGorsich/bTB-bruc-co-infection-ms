@@ -405,9 +405,3 @@ for (i in 1:length(epib[,1])){
 	setTxtProgressBar(pb, i)
 }
 write.csv(epib, "~/Documents/postdoc_buffology/Last-Thesis-Chapter!!!!!!/draft2/post-labmeeting/epib_rhoT1.csv")
-
-
-
-# Brucellosis analyses
-#############################################################
-

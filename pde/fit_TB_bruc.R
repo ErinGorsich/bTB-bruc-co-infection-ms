@@ -101,6 +101,20 @@ counts<- hist(data$age_sel/12, plot = FALSE)$counts  # youngest = 1.4 so aged 1-
 agestructure<- counts/sum(counts)
 agestructure_yr = c(agestructure, 0, 0, 0, 0, 0)
 
+# Aside, check true prevlaence calculation
+table(data$bruc); table(data$tb)
+valtb <- NA; valbruc <- NA
+for (i in 1:1000){
+    d <- ddply(data, .(id), function(id){
+        id[sample(nrow(id), size = 1), ]})
+    valtb[i] <- length(d$tb[d$tb == 1])/ length(d$tb)
+    valbruc[i] <- length(d$bruc[d$bruc == "positive"])/ length(d$bruc)
+    rm(d)
+}
+# note same mean and median
+summary(valtb)
+summary(valbruc)
+
 # put in terms of aging features: 
 data_agestructure <- agestructure_yr
 #binsize <- 1 / agestep
@@ -111,6 +125,8 @@ S0 <- 400 * stable_age; It0 <- 0 * stable_age; Ib0 <- 10 * stable_age
 Ic0 <- 0 * stable_age; R0 <- 0 * stable_age; Rc0 <- 0 * stable_age
 x0 <- c(S0, It0, Ib0, Ic0, R0, Rc0)
 sol <- as.data.frame(ode.1D(x0, times, rhs, params, nspec = 6, dimens = N, method = "ode45"))
+
+xBsol <- tail(sol, 100)
 
 # Bruc prev to introduct BTB to in the optimizer
 xB <- unname(unlist( sol[length(sol[,1]), c(2:length(colnames(sol)))] )) # 27% bruc prev
@@ -198,6 +214,7 @@ x0[[min(it.index) + 5*binsize]] <- 1
 x0[[min(it.index) + 5*binsize + 1]] <- 1
 sol <- as.data.frame(ode.1D(x0, times, rhs, params, 
 	nspec = 6, dimens = N, method = "ode45"))
+xTsol <- sol
 get_structured_prevalence(sol)
 plot_raw_numbers(sol)
 
@@ -207,3 +224,101 @@ plot_raw_numbers(sol)
 # BRUC prev without TB: 21.072
 # BRUC prev in populations with co: 31.072
 #######################################
+
+# Supplemental figure required during review
+# a) = pannel for all the boxes
+# b) = overall bTB prevlaence
+xBsol.temp <- xBsol # last 50 rows of model with bTB alone
+xTsol.temp <- xTsol # full run, adding one TB infection to xBsol
+xBsol.temp$time <- seq(1, 100, 1)
+xTsol.temp$time <- xTsol$time + 100
+sol <- rbind(xBsol.temp, xTsol.temp)
+
+get_structure_prevalence_time = function(sol){
+    # function that returns sol with two additional columns for structured prev
+    sol$s.TBprev <- NA; sol$s.brucprev <- NA
+    
+    for (i in 1:length(sol[,1])){
+        # Bin ages back into yearly bins to match data: b = bined by age
+        binsize <- 1/agestep
+        S <- sol[i, s.index+1]
+        It <- sol[i, it.index +1]
+        Ib <- sol[i, ib.index +1]
+        Ic <- sol[i, ic.index +1]
+        R <- sol[i, r.index +1]
+        Rc <- sol[i, rc.index +1]
+        
+        Sb <- sum(S[1:binsize]); Itb <- sum(It[1:binsize])
+        Ibb <- sum(Ib[1:binsize]); Icb <- sum(Ic[1:binsize])
+        Rb <- sum(R[1:binsize]); Rcb <- sum(Rc[1:binsize])
+        
+        for (j in 1:19){
+            minbin <- j * binsize + 1 # 1, 11, 21, 31, ...
+            maxbin <- (j+1) * binsize # 10, 20, 30...
+            Sb <- c(Sb, sum(S[minbin:maxbin]))
+            Itb <- c(Itb, sum(It[minbin:maxbin]))
+            Ibb <- c(Ibb, sum(Ib[minbin:maxbin]))
+            Icb <- c(Icb, sum(Ic[minbin:maxbin]))
+            Rb <- c(Rb, sum(R[minbin:maxbin]))
+            Rcb <- c(Rcb, sum(Rc[minbin:maxbin]))
+        }
+        S <- sum(Sb * data_agestructure)
+        It <- sum(Itb * data_agestructure)
+        Ib <- sum(Ibb * data_agestructure)
+        Ic <- sum(Icb * data_agestructure)
+        R <- sum(Rb * data_agestructure)
+        Rc <- sum(Rcb * data_agestructure)
+        N <- sum(S + It + Ib + Ic + R + Rc)
+        sol$s.TBprev[i] <- (It + Ic + Rc) / N 
+        sol$s.brucprev[i] <- (Ib + Ic + R + Rc) / N
+    }
+    return(sol)
+}
+
+sol.str <- get_structure_prevalence_time(sol)
+
+tiff("SuppFigure_review_modeldynamics.tiff", width  = 9, height = 5, units = "in", res = 300)	
+par(mfrow = c(1, 2), mar = c(4, 5, 2, 1), mgp = c(2.5, 0.8, 0))
+plot(NA,
+     type= 'l', xlim = c(0, 500), ylim = c(0, 800), ylab = "Number of animals", 
+     xlab = "Time (in years)", las = 1, bty = "l", 
+     cex.lab = 1.2, cex.axis = 1.2)
+rect(xleft = 85, xright = 115, ytop = 800, ybottom = 0, density = 100, 
+    col = rgb(190, 190, 190, alpha=120, maxColorValue=255), border = NA)
+lines(sol$time, apply(sol[s.index+1], 1, sum), col= "black", lwd = 2)
+lines(sol$time, apply(sol[it.index+1], 1, sum), col= "red", lwd = 2)
+lines(sol$time, apply(sol[ib.index+1], 1, sum), col= "blue", lwd = 2)
+lines(sol$time, apply(sol[ic.index+1], 1, sum), col= "green", lwd = 2)
+lines(sol$time, apply(sol[r.index+1], 1, sum), col = "orange", lwd = 2)
+lines(sol$time, apply(sol[rc.index+1], 1, sum), col = "pink", lwd = 2)
+legend("topright", #legend = c("S", "It", "Ib", "Ic", "R", "Rc"),
+       legend = expression(S, I[T], I[B], I[C], R, R[C]),
+       col = c("black", "red", "blue", "green", "orange", "pink"), 
+       bty="n", lty = 1, cex = 0.9)
+
+# and again with prevalence!
+sol$TBprev <- apply(sol[c(it.index + 1, ic.index + 1, rc.index + 1)], 1, sum) / 
+    apply(sol[c(2:(N*6+1) )], 1, sum)
+sol$Brucprev <- apply(
+    sol[c(ib.index + 1, ic.index + 1, r.index+1, rc.index+1)], 1, sum) / 
+    apply(sol[c(2:(N*6+1) )], 1, sum)
+plot(NA, 
+    xlim = c(0, 500), ylim = c(0, 1), ylab = "Prevalence", 
+     xlab = "Time (in years)", las = 1, bty = "l", 
+     cex.lab = 1.2, cex.axis = 1.2)
+rect(xleft = 85, xright = 115, ytop = 800, ybottom = 0, density = 100, 
+     col = rgb(190, 190, 190, alpha=120, maxColorValue=255), border = NA)
+#lines(sol$time, sol$TBprev, col= "red", lwd = 2)
+#lines(sol$time, sol$Brucprev, col= "blue", lwd = 2)
+lines(sol.str$time, sol.str$s.TBprev, col= "red", lwd = 2, lty = 2)
+lines(sol.str$time, sol.str$s.brucprev, col= "blue", lwd = 2, lty = 2)
+points(c(480, 480), c(0.27, 0.34), pch = 19, col = c("red", "blue"), cex = 0.5)
+arrows(c(480, 480), c(0.27 - 0.0189, 0.34 - 0.0161), c(480, 480), 
+       c(0.27 + 0.0189, 0.34 + 0.0161), angle = 90, code = 3, length = 0.1, 
+       col = c("red", "blue"))
+# medain = mean, and SD prevalence... se = sd/sqrt(1000)
+legend("topright",
+       legend = c("bTB", "brucellosis"),
+       col = c("red", "blue"), 
+       bty="n", lty = 1, cex = 0.9)
+dev.off()
