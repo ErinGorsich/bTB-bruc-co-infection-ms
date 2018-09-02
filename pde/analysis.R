@@ -104,7 +104,7 @@ xstart <- x0
 xstart[min(ib.index)+1 + 3*binsize] <- 1
 xstart[min(ib.index)+1 + 3*binsize] <- 1
 params <- c(f.params, list(gamma = 1/2, betaB = 0.5764065, 
-		betaT = 1.3305462/1000, rhoT = 1, rhoB = 2.1))
+	betaT = 1.3305462/1000, rhoT = 1, rhoB = 2.1))
 test <- as.data.frame(ode.1D(xstart, times, rhs, params, 
 	nspec = 6, dimens = N, method = "ode45"))
 xB <- unname(unlist(test[length(test[,1]), c(2:(length(colnames(test))))])) 

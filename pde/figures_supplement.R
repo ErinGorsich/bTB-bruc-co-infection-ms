@@ -327,6 +327,9 @@ pB <- ggplot(brucellosis, aes(x = model, y = E, shape = singleco, colour = singl
         axis.title.y = element_text(size=16, vjust= 0.8, margin = margin(r = 8)),
         axis.text.x = element_text(size=16, vjust=-0.05, margin = margin(t = 7)),
         axis.text.y = element_text(size=14, margin = margin(r = 4)),
+  		panel.background = element_blank(),
+  		panel.grid.major = element_blank(), 
+  		panel.grid.minor = element_blank(),
         panel.border = element_blank(), 
 		legend.position= c(0.8, 0.9),  
 		legend.text = element_text(size = 14),
@@ -351,7 +354,10 @@ pT <- ggplot(tb, aes(x = model, y = E, shape = singleco, colour = singleco)) +
         axis.title.y = element_text(size=16, vjust= 0.8, margin = margin(r = 8)),
         axis.text.x = element_text(size=16, vjust=-0.05, margin = margin(t = 7)),
         axis.text.y = element_text(size=14, margin = margin(r = 4)),
-        panel.border = element_blank())
+  		panel.background = element_blank(),
+  		panel.grid.major = element_blank(), 
+  		panel.grid.minor = element_blank(),
+  		panel.border = element_blank())
 		#legend.position=c(0.85, 0.9),  
 		#legend.text = element_text(size = 10),
         #legend.background= element_rect(fill="white", colour="white"),
@@ -368,7 +374,7 @@ multiplot(pT,  pB, cols = 2)
 #######################################################
 #######################################################
 
-df <- read.csv("~/GitHub/bTB-bruc-co-infection-ms/pde/Ro_sensitivity.csv")
+df <- read.csv("~/GitHub/bTB-bruc-co-infection-ms/Ro_sensitivity.csv")
 df$infection <- as.character(df$infection)
 df$infection[df$infection == "TB"] <- "bTB"
 df$infection <- as.factor(df$infection)
@@ -390,7 +396,7 @@ pB <- ggplot(df, aes(x = order, y = Ro, shape = infection, colour = infection)) 
 	scale_x_discrete("", labels = c("K",
 		expression(theta), expression(beta[T]), expression(beta[B]),  
 		expression(gamma), expression(epsilon), 
-		expression(beta[B]/beta[B]), expression(beta[T]/beta[T]),
+		expression({beta^{"'"}}[B]/beta[B]), expression({beta^{"'"}}[T]/beta[T]),
 		expression(paste(mu[T], "/", mu[S], sep = "")),
 		expression(paste(mu[B], "/", mu[S], sep = "")), 
 		expression(paste(mu[R], "/", mu[S], sep = "")), 
@@ -405,14 +411,17 @@ pB <- ggplot(df, aes(x = order, y = Ro, shape = infection, colour = infection)) 
         axis.text.x = element_text(size=16, vjust=-0.05, margin = margin(t = 7)),
         axis.text.y = element_text(size=14, margin = margin(r = 4)),
         panel.border = element_blank(), 
+  		panel.background = element_blank(),
+  		panel.grid.major = element_blank(), 
+  		#panel.grid.minor = element_blank(),
 		legend.position= c(0.85, 0.9),  
 		legend.text = element_text(size = 14),
         legend.background= element_rect(fill="white", colour="white"),
         legend.key= element_blank(),
         legend.title= element_blank())
+# size = 990*450
 
-
-df <- read.csv("~/GitHub/bTB-bruc-co-infection-ms/pde/EE_sensitivity.csv")
+df <- read.csv("~/GitHub/bTB-bruc-co-infection-ms/EE_sensitivity.csv")
 df$infection <- as.character(df$infection)
 df$infection[df$infection == "TB"] <- "bTB"
 df$infection <- as.factor(df$infection)
@@ -434,7 +443,7 @@ pB <- ggplot(df, aes(x = order, y = EE, shape = infection, colour = infection)) 
 	scale_x_discrete("", labels = c("K",
 		expression(theta), expression(beta[T]), expression(beta[B]),  
 		expression(gamma), expression(epsilon), 
-		expression(beta[B]/beta[B]), expression(beta[T]/beta[T]),
+		expression({beta^{"'"}}[B]/beta[B]), expression({beta^{"'"}}[T]/beta[T]),
 		expression(paste(mu[T], "/", mu[S], sep = "")),
 		expression(paste(mu[B], "/", mu[S], sep = "")), 
 		expression(paste(mu[R], "/", mu[S], sep = "")), 
@@ -448,9 +457,59 @@ pB <- ggplot(df, aes(x = order, y = EE, shape = infection, colour = infection)) 
         axis.title.y = element_text(size=16, vjust= 0.8, margin = margin(r = 8)),
         axis.text.x = element_text(size=16, vjust=-0.05, margin = margin(t = 7)),
         axis.text.y = element_text(size=14, margin = margin(r = 4)),
-        panel.border = element_blank(), 
+  		panel.border = element_blank(), 
+  		panel.background = element_blank(),
+  		panel.grid.major = element_blank(), 
+  		#panel.grid.minor = element_blank(),
 		legend.position= c(0.85, 0.9),  
 		legend.text = element_text(size = 14),
         legend.background= element_rect(fill="white", colour="white"),
         legend.key= element_blank(),
         legend.title= element_blank())
+
+#######################################################
+#######################################################
+# Figure S9 -  herd-specific pervalence
+#######################################################
+#######################################################
+df <- data.frame(
+    Prevalence = c(0.27, 0.27, 0.28, 0.34, 0.33, 0.35),
+    upper = c(0.311, 0.33, 0.32, 0.38, 0.41, 0.37), 
+    lower = c(0.238, 0.2, 0.23, 0.31, 0.3, 0.3),
+    infection = c("bTB", "bTB", "bTB", "brucellosis", "brucellosis",
+        "brucellosis"), 
+    location = c("Overall", "LS", "CB", "Overall", "LS", "CB"))
+df$infection <-relevel(df$infection, "bTB")
+df$location <- relevel(df$location, "Overall")
+
+pB <- ggplot(df, aes(x = location, y = Prevalence, colour = infection)) +
+    geom_point(size = 3, shape = 15,
+        position= position_dodge(width = 0.5)) +
+    geom_errorbar(aes(x = location, ymin = lower, ymax = upper),
+        width = 0, position= position_dodge(width = 0.5)) +
+    ylim(0, 0.6) +
+    xlab("") +
+    ylab("Prevalence") +
+    #labs(shape = "Populations with") +
+    theme_bw() +
+    scale_colour_manual(values = c("slateblue3","chartreuse4")) +
+    theme(axis.line.x = element_line(colour= "black"),
+          axis.line.y = element_line(colour= "black"),
+          axis.title.x = element_text(size=16, vjust=-0.15),
+          axis.title.y = element_text(size=16, vjust= 0.8, margin = margin(r = 8)),
+          axis.text.x = element_text(size=16, vjust=-0.05, margin = margin(t = 7)),
+          axis.text.y = element_text(size=14, margin = margin(r = 4)),
+          panel.background = element_blank(),
+          panel.grid.major = element_blank(), 
+          panel.grid.minor = element_blank(),
+          panel.border = element_blank(), 
+          legend.position= c(0.8, 0.9),  
+          legend.text = element_text(size = 14),
+          legend.background= element_rect(fill="white", colour="white"),
+          legend.key= element_blank(),
+          legend.title= element_blank())
+
+
+
+
+

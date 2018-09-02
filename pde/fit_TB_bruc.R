@@ -11,6 +11,7 @@
 # 2) Set-up features of aging
 # 3) Define true prevalence and objective functions
 # 4) Fit 
+# 5+) Supplemental figures required during review
 #############################################################
 #############################################################
 #############################################################
@@ -104,16 +105,27 @@ agestructure_yr = c(agestructure, 0, 0, 0, 0, 0)
 # Aside, check true prevlaence calculation
 table(data$bruc); table(data$tb)
 valtb <- NA; valbruc <- NA
+valtbLS <- NA; valtbCB <- NA; valbLS <- NA; valbCB <- NA
 for (i in 1:1000){
     d <- ddply(data, .(id), function(id){
         id[sample(nrow(id), size = 1), ]})
+    dLS <- d[d$herdorig == "LS", ]
+    dCB <- d[d$herdorig == "CB", ]
     valtb[i] <- length(d$tb[d$tb == 1])/ length(d$tb)
     valbruc[i] <- length(d$bruc[d$bruc == "positive"])/ length(d$bruc)
+    valtbLS[i] <- length(dLS$tb[dLS$tb == 1])/ length(dLS$tb)
+    valtbCB[i] <- length(dCB$tb[dCB$tb == 1])/ length(dCB$tb)
+    valbLS[i] <- length(dLS$bruc[dLS$bruc == "positive"])/ length(dLS$bruc)
+    valbCB[i] <- length(dCB$bruc[dCB$bruc == "positive"])/ length(dCB$bruc)
     rm(d)
 }
 # note same mean and median
-summary(valtb)
-summary(valbruc)
+summary(valtb) # 0.2053  0.2583  0.2715  0.2733  0.2848  0.3245 
+summary(valbruc) # 0.2914  0.3311  0.3444  0.3448  0.3576  0.3907 
+summary(valtbLS) # 0.1571  0.2429  0.2714  0.2669  0.2857  0.3571
+summary(valtbCB) # 0.2099  0.2593  0.2840  0.2795  0.2963  0.3580 
+summary(valbLS) # 0.2857  0.3429  0.3571  0.3573  0.3714  0.4571 
+summary(valbCB) # 0.2716  0.3210  0.3333  0.3339  0.3457  0.3951 
 
 # put in terms of aging features: 
 data_agestructure <- agestructure_yr
@@ -197,12 +209,13 @@ par.r <- optim(c(1.025, 0.00094*1000), objective_recov); par.r
 
 # Plot best fit, no recovery
 params <- c(f.params, list(gamma = 1/2, betaB = 0.5764065, 
-		betaT = 1.3305462/1000, rhoT = 1, rhoB = 2.1))
+	betaT = 1.3305462/1000, rhoT = 1, rhoB = 2.1))
 x0 <- xB
 x0[[min(it.index) + 5*binsize]] <- 5
 x0[[min(it.index) + 5*binsize + 1]] <- 5
 sol <- as.data.frame(ode.1D(x0, times, rhs, params, 
 	nspec = 6, dimens = N, method = "ode45"))
+xTsol <- sol
 get_structured_prevalence(sol)
 plot_raw_numbers(sol)
 
@@ -214,7 +227,6 @@ x0[[min(it.index) + 5*binsize]] <- 1
 x0[[min(it.index) + 5*binsize + 1]] <- 1
 sol <- as.data.frame(ode.1D(x0, times, rhs, params, 
 	nspec = 6, dimens = N, method = "ode45"))
-xTsol <- sol
 get_structured_prevalence(sol)
 plot_raw_numbers(sol)
 
@@ -225,13 +237,18 @@ plot_raw_numbers(sol)
 # BRUC prev in populations with co: 31.072
 #######################################
 
+
+#############################################################
+#############################################################
 # Supplemental figure required during review
+#############################################################
+#############################################################
 # a) = pannel for all the boxes
 # b) = overall bTB prevlaence
-xBsol.temp <- xBsol # last 50 rows of model with bTB alone
+xBsol.temp <- xBsol # last 100 rows of model with bTB alone
 xTsol.temp <- xTsol # full run, adding one TB infection to xBsol
-xBsol.temp$time <- seq(1, 100, 1)
-xTsol.temp$time <- xTsol$time + 100
+xBsol.temp$time <- seq(400, 500, 1)
+xTsol.temp$time <- xTsol$time + 500
 sol <- rbind(xBsol.temp, xTsol.temp)
 
 get_structure_prevalence_time = function(sol){
@@ -280,10 +297,10 @@ sol.str <- get_structure_prevalence_time(sol)
 tiff("SuppFigure_review_modeldynamics.tiff", width  = 9, height = 5, units = "in", res = 300)	
 par(mfrow = c(1, 2), mar = c(4, 5, 2, 1), mgp = c(2.5, 0.8, 0))
 plot(NA,
-     type= 'l', xlim = c(0, 500), ylim = c(0, 800), ylab = "Number of animals", 
+     type= 'l', xlim = c(400, 900), ylim = c(0, 800), ylab = "Number of animals", 
      xlab = "Time (in years)", las = 1, bty = "l", 
      cex.lab = 1.2, cex.axis = 1.2)
-rect(xleft = 85, xright = 115, ytop = 800, ybottom = 0, density = 100, 
+rect(xleft = 485, xright = 515, ytop = 800, ybottom = 0, density = 100, 
     col = rgb(190, 190, 190, alpha=120, maxColorValue=255), border = NA)
 lines(sol$time, apply(sol[s.index+1], 1, sum), col= "black", lwd = 2)
 lines(sol$time, apply(sol[it.index+1], 1, sum), col= "red", lwd = 2)
@@ -292,7 +309,7 @@ lines(sol$time, apply(sol[ic.index+1], 1, sum), col= "green", lwd = 2)
 lines(sol$time, apply(sol[r.index+1], 1, sum), col = "orange", lwd = 2)
 lines(sol$time, apply(sol[rc.index+1], 1, sum), col = "pink", lwd = 2)
 legend("topright", #legend = c("S", "It", "Ib", "Ic", "R", "Rc"),
-       legend = expression(S, I[T], I[B], I[C], R, R[C]),
+       legend = expression(S, I[T], I[B], I[C], R[B], R[C]),
        col = c("black", "red", "blue", "green", "orange", "pink"), 
        bty="n", lty = 1, cex = 0.9)
 
@@ -303,17 +320,17 @@ sol$Brucprev <- apply(
     sol[c(ib.index + 1, ic.index + 1, r.index+1, rc.index+1)], 1, sum) / 
     apply(sol[c(2:(N*6+1) )], 1, sum)
 plot(NA, 
-    xlim = c(0, 500), ylim = c(0, 1), ylab = "Prevalence", 
+    xlim = c(400, 900), ylim = c(0, 1), ylab = "Prevalence", 
      xlab = "Time (in years)", las = 1, bty = "l", 
      cex.lab = 1.2, cex.axis = 1.2)
-rect(xleft = 85, xright = 115, ytop = 800, ybottom = 0, density = 100, 
+rect(xleft = 485, xright = 515, ytop = 800, ybottom = 0, density = 100, 
      col = rgb(190, 190, 190, alpha=120, maxColorValue=255), border = NA)
 #lines(sol$time, sol$TBprev, col= "red", lwd = 2)
 #lines(sol$time, sol$Brucprev, col= "blue", lwd = 2)
 lines(sol.str$time, sol.str$s.TBprev, col= "red", lwd = 2, lty = 2)
 lines(sol.str$time, sol.str$s.brucprev, col= "blue", lwd = 2, lty = 2)
-points(c(480, 480), c(0.27, 0.34), pch = 19, col = c("red", "blue"), cex = 0.5)
-arrows(c(480, 480), c(0.27 - 0.0189, 0.34 - 0.0161), c(480, 480), 
+points(c(880, 880), c(0.27, 0.34), pch = 19, col = c("red", "blue"), cex = 0.5)
+arrows(c(880, 880), c(0.27 - 0.0189, 0.34 - 0.0161), c(880, 880), 
        c(0.27 + 0.0189, 0.34 + 0.0161), angle = 90, code = 3, length = 0.1, 
        col = c("red", "blue"))
 # medain = mean, and SD prevalence... se = sd/sqrt(1000)
@@ -322,3 +339,188 @@ legend("topright",
        col = c("red", "blue"), 
        bty="n", lty = 1, cex = 0.9)
 dev.off()
+
+#############################################################
+###############################################################
+# Repeat for second review to show initial conditions are ok
+###############################################################
+#############################################################
+par(mfrow = c(1, 2), mar = c(4, 5, 2, 1), mgp = c(2.5, 0.8, 0))
+plot(NA,
+     type= 'l', xlim = c(400, 900), ylim = c(0, 800), ylab = "Number of animals", 
+     xlab = "Time (in years)", las = 1, bty = "l", 
+     cex.lab = 1.2, cex.axis = 1.2)
+rect(xleft = 485, xright = 515, ytop = 800, ybottom = 0, density = 100, 
+     col = rgb(190, 190, 190, alpha=120, maxColorValue=255), border = NA)
+lines(sol$time, apply(sol[s.index+1], 1, sum), col= "black", lwd = 2)
+lines(sol$time, apply(sol[it.index+1], 1, sum), col= "red", lwd = 2)
+lines(sol$time, apply(sol[ib.index+1], 1, sum), col= "blue", lwd = 2)
+lines(sol$time, apply(sol[ic.index+1], 1, sum), col= "green", lwd = 2)
+lines(sol$time, apply(sol[r.index+1], 1, sum), col = "orange", lwd = 2)
+lines(sol$time, apply(sol[rc.index+1], 1, sum), col = "pink", lwd = 2)
+
+###############################################################
+S0 <- 400 * stable_age; It0 <- 0 * stable_age; Ib0 <- 0 * stable_age
+Ic0 <- 0 * stable_age; R0 <- 0 * stable_age; Rc0 <- 0 * stable_age
+x0 <- c(S0, It0, Ib0, Ic0, R0, Rc0)
+sol_nodz <- as.data.frame(ode.1D(x0, times, rhs, params, nspec = 6, 
+    dimens = N, method = "ode45"))
+x_solnodz <- tail(sol_nodz, 100)
+
+# Bruc prev to introduce BTB to in the optimizer
+x0 <- unname(unlist( sol_nodz[length(sol_nodz[,1]), c(2:length(colnames(sol_nodz)))] ))
+x0[[min(it.index) + 5*binsize]] <- 1
+x0[[min(ib.index) + 5*binsize]] <- 1
+x_soldz <- as.data.frame(ode.1D(x0, times, rhs, params, nspec = 6, 
+    dimens = N, method = "ode45"))
+
+# put into one dataframe
+sol.temp <- x_solnodz # last 100 rows of model with bTB alone
+dzsol.temp <- x_soldz # full run, adding one TB infection to xBsol
+sol.temp$time <- seq(400, 500, 1)
+dzsol.temp$time <- x_soldz$time + 500
+sol2 <- rbind(sol.temp, dzsol.temp)
+
+plot(NA,
+     type= 'l', xlim = c(400, 900), ylim = c(0, 800), ylab = "Number of animals", 
+     xlab = "Time (in years)", las = 1, bty = "l", 
+     cex.lab = 1.2, cex.axis = 1.2)
+rect(xleft = 485, xright = 515, ytop = 800, ybottom = 0, density = 100, 
+     col = rgb(190, 190, 190, alpha=120, maxColorValue=255), border = NA)
+lines(sol2$time, apply(sol2[s.index+1], 1, sum), col= "black", lwd = 2)
+lines(sol2$time, apply(sol2[it.index+1], 1, sum), col= "red", lwd = 2)
+lines(sol2$time, apply(sol2[ib.index+1], 1, sum), col= "blue", lwd = 2)
+lines(sol2$time, apply(sol2[ic.index+1], 1, sum), col= "green", lwd = 2)
+lines(sol2$time, apply(sol2[r.index+1], 1, sum), col = "orange", lwd = 2)
+lines(sol2$time, apply(sol2[rc.index+1], 1, sum), col = "pink", lwd = 2)
+legend("topright", #legend = c("S", "It", "Ib", "Ic", "R", "Rc"),
+       legend = expression(S, I[T], I[B], I[C], R[B], R[C]),
+       col = c("black", "red", "blue", "green", "orange", "pink"), 
+       bty="n", lty = 1, cex = 0.9)
+
+
+
+#############################################################
+#############################################################
+# Herd specific parameters for second review
+#############################################################
+#############################################################
+objectiveLS = function(params.est){
+    # params.est = 2 long = c(betaB, betaT)
+    params <- c(f.params, list(gamma = 1/2, betaB = params.est[1], 
+        betaT = params.est[2]/1000, rhoT = 1, rhoB = 4.3))
+    
+    # seed from endemic brucellosis conditions, 10 bTB positive buffalo
+    x0 = xB
+    x0[[min(it.index) + 5*binsize]] <- 5
+    x0[[min(it.index) + 5*binsize + 1]] <- 5
+    sol <- as.data.frame(ode.1D(x0, times, rhs, params, 
+                                nspec = 6, dimens = N, method = "ode45"))
+    df <- get_structured_prevalence(sol)
+    error <- sqrt(((prevTBobs - df$prevTB)^2 + (prevBobs - df$prevB)^2))
+    return (error)
+}
+objectiveCB = function(params.est){
+    # params.est = 2 long = c(betaB, betaT)
+    params <- c(f.params, list(gamma = 1/2, betaB = params.est[1], 
+        betaT = params.est[2]/1000, rhoT = 1, rhoB = 1))
+    
+    # seed from endemic brucellosis conditions, 10 bTB positive buffalo
+    x0 = xB
+    x0[[min(it.index) + 5*binsize]] <- 5
+    x0[[min(it.index) + 5*binsize + 1]] <- 5
+    sol <- as.data.frame(ode.1D(x0, times, rhs, params, 
+        nspec = 6, dimens = N, method = "ode45"))
+    df <- get_structured_prevalence(sol)
+    error <- sqrt(((prevTBobs - df$prevTB)^2 + (prevBobs - df$prevB)^2))
+    return (error)
+}
+
+parLS <- optim(c(1.025, 0.00094*1000), objectiveLS); parLS
+# [1] 0.4679974 1.5361980
+parCB <- optim(c(1.025, 0.00094*1000), objectiveCB); parCB
+#[1] 0.6891628 1.1673952
+
+# plot fit overall
+params <- c(f.params, list(gamma = 1/2, betaB = 0.5764065, 
+    betaT = 1.3305462/1000, rhoT = 1, rhoB = 2.1))
+x0 <- xB
+x0[[min(it.index) + 5*binsize]] <- 5
+x0[[min(it.index) + 5*binsize + 1]] <- 5
+sol <- as.data.frame(ode.1D(x0, times, rhs, params, 
+    nspec = 6, dimens = N, method = "ode45"))
+get_structured_prevalence(sol)
+plot_raw_numbers(sol)
+
+# plot fit LS
+params <- c(f.params, list(gamma = 1/2, betaB = 0.4679974, 
+    betaT = 1.5361980/1000, rhoT = 1, rhoB = 4.3))
+x0 <- xB
+x0[[min(it.index) + 5*binsize]] <- 5
+x0[[min(it.index) + 5*binsize + 1]] <- 5
+LS <- as.data.frame(ode.1D(x0, times, rhs, params, 
+    nspec = 6, dimens = N, method = "ode45"))
+get_structured_prevalence(LS)
+plot_raw_numbers(LS)
+
+# plot fit CB
+params <- c(f.params, list(gamma = 1/2, betaB = 0.6891628, 
+    betaT = 1.1673952/1000, rhoT = 1, rhoB = 1))
+x0 <- xB
+x0[[min(it.index) + 5*binsize]] <- 5
+x0[[min(it.index) + 5*binsize + 1]] <- 5
+CB <- as.data.frame(ode.1D(x0, times, rhs, params, 
+    nspec = 6, dimens = N, method = "ode45"))
+get_structured_prevalence(CB)
+plot_raw_numbers(CB)
+
+
+# LS TB only
+params <- c(f.params, list(gamma = 1/2, betaB = 0.4679974, 
+    betaT = 1.5361980/1000, rhoT = 1, rhoB = 4.3))
+S0 <- 400 * stable_age; It0 <- 0 * stable_age; Ib0 <- 0 * stable_age
+Ic0 <- 0 * stable_age; R0 <- 0 * stable_age; Rc0 <- 0 * stable_age
+x0 <- c(S0, It0, Ib0, Ic0, R0, Rc0)
+x0[[min(it.index) + 5*binsize]] <- 5
+x0[[min(it.index) + 5*binsize + 1]] <- 5
+t <- as.data.frame(ode.1D(x0, times, rhs, params, 
+    nspec = 6, dimens = N, method = "ode45"))
+get_structured_prevalence(t)
+
+# LS B only
+params <- c(f.params, list(gamma = 1/2, betaB = 0.4679974, 
+    betaT = 1.5361980/1000, rhoT = 1, rhoB = 4.3))
+S0 <- 400 * stable_age; It0 <- 0 * stable_age; Ib0 <- 1 * stable_age
+Ic0 <- 0 * stable_age; R0 <- 0 * stable_age; Rc0 <- 0 * stable_age
+x0 <- c(S0, It0, Ib0, Ic0, R0, Rc0)
+x0[[min(ib.index) + 5*binsize]] <- 5
+x0[[min(ib.index) + 5*binsize + 1]] <- 5
+t <- as.data.frame(ode.1D(x0, times, rhs, params, 
+    nspec = 6, dimens = N, method = "ode45"))
+get_structured_prevalence(t)
+
+# CB TB only
+params <- c(f.params, list(gamma = 1/2, betaB = 0.6891628, 
+    betaT = 1.1673952/1000, rhoT = 1, rhoB = 1))
+S0 <- 400 * stable_age; It0 <- 0 * stable_age; Ib0 <- 0 * stable_age
+Ic0 <- 0 * stable_age; R0 <- 0 * stable_age; Rc0 <- 0 * stable_age
+x0 <- c(S0, It0, Ib0, Ic0, R0, Rc0)
+x0[[min(it.index) + 5*binsize]] <- 5
+x0[[min(it.index) + 5*binsize + 1]] <- 5
+t <- as.data.frame(ode.1D(x0, times, rhs, params, 
+                          nspec = 6, dimens = N, method = "ode45"))
+get_structured_prevalence(t)
+
+# CB B only
+params <- c(f.params, list(gamma = 1/2, betaB = 0.6891628, 
+    betaT = 1.1673952/1000, rhoT = 1, rhoB = 1))
+S0 <- 400 * stable_age; It0 <- 0 * stable_age; Ib0 <- 0 * stable_age
+Ic0 <- 0 * stable_age; R0 <- 0 * stable_age; Rc0 <- 0 * stable_age
+x0 <- c(S0, It0, Ib0, Ic0, R0, Rc0)
+x0[[min(ib.index) + 5*binsize]] <- 5
+x0[[min(ib.index) + 5*binsize + 1]] <- 5
+t <- as.data.frame(ode.1D(x0, times, rhs, params, 
+                          nspec = 6, dimens = N, method = "ode45"))
+get_structured_prevalence(t)
+
+
